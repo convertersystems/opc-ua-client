@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata minClientVersion="3.4.3">
+    <id>Workstation.UaClient</id>
+    <version>1.0.0</version>
+    <authors>Andrew Cullen</authors>
+    <owners>Converter Systems LLC</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>A communications library for OPC UA.</summary>
+    <description>
+      NEW! Supports both Universal Windows Platform (UWP) and WPF.    
+      Building an HMI using Visual Studio 2015? With this library 'Workstation.UaClient', your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
+      Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
+      * Browse OPC UA servers directly from the Visual Studio IDE.
+      * Drag and drop the variable, method, and event nodes onto your view model.
+      * Add XAML bindings to connect your UI elements to live data and events.
+    </description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright ©  2016 Converter Systems LLC.</copyright>
+    <tags>opc ua</tags>
+    <dependencies>
+      <group targetFramework="netstandard1.4">
+        <dependency id="MetroLog" version="1.0.1" />
+        <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
+        <dependency id="System.Collections" version="4.0.11" />
+        <dependency id="System.Collections.Concurrent" version="4.0.12" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.11" />
+        <dependency id="System.Globalization" version="4.0.11" />
+        <dependency id="System.IO" version="4.1.0" />
+        <dependency id="System.Linq" version="4.1.0" />
+        <dependency id="System.Net.Primitives" version="4.0.11" />
+        <dependency id="System.Net.Sockets" version="4.1.0" />
+        <dependency id="System.ObjectModel" version="4.0.12" />
+        <dependency id="System.Reflection" version="4.1.0" />
+        <dependency id="System.Reflection.Extensions" version="4.0.1" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.1" />
+        <dependency id="System.Runtime" version="4.1.0" />
+        <dependency id="System.Runtime.Extensions" version="4.1.0" />
+        <dependency id="System.Runtime.Handles" version="4.0.1" />
+        <dependency id="System.Runtime.InteropServices" version="4.1.0" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="4.2.0" />
+        <dependency id="System.Security.Cryptography.Encoding" version="4.0.0" />
+        <dependency id="System.Security.Cryptography.Primitives" version="4.0.0" />
+        <dependency id="System.Security.Cryptography.X509Certificates" version="4.1.0" />
+        <dependency id="System.Text.Encoding" version="4.0.11" />
+        <dependency id="System.Text.Encoding.Extensions" version="4.0.11" />
+        <dependency id="System.Threading" version="4.0.11" />
+        <dependency id="System.Threading.Tasks" version="4.0.11" />
+        <dependency id="System.Threading.Tasks.Dataflow" version="4.6.0" />
+        <dependency id="System.Xml.XDocument" version="4.0.11" />
+      </group>
+      <group targetFramework="net46">
+        <dependency id="MetroLog" version="1.0.1" />
+        <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
+        <dependency id="System.Collections" version="4.0.11" />
+        <dependency id="System.Collections.Concurrent" version="4.0.12" />
+        <dependency id="System.Diagnostics.Debug" version="4.0.11" />
+        <dependency id="System.Globalization" version="4.0.11" />
+        <dependency id="System.IO" version="4.1.0" />
+        <dependency id="System.Linq" version="4.1.0" />
+        <dependency id="System.Net.Primitives" version="4.0.11" />
+        <dependency id="System.Net.Sockets" version="4.1.0" />
+        <dependency id="System.ObjectModel" version="4.0.12" />
+        <dependency id="System.Reflection" version="4.1.0" />
+        <dependency id="System.Reflection.Extensions" version="4.0.1" />
+        <dependency id="System.Resources.ResourceManager" version="4.0.1" />
+        <dependency id="System.Runtime" version="4.1.0" />
+        <dependency id="System.Runtime.Extensions" version="4.1.0" />
+        <dependency id="System.Runtime.Handles" version="4.0.1" />
+        <dependency id="System.Runtime.InteropServices" version="4.1.0" />
+        <dependency id="System.Security.Cryptography.Algorithms" version="4.2.0" />
+        <dependency id="System.Security.Cryptography.Encoding" version="4.0.0" />
+        <dependency id="System.Security.Cryptography.Primitives" version="4.0.0" />
+        <dependency id="System.Security.Cryptography.X509Certificates" version="4.1.0" />
+        <dependency id="System.Text.Encoding" version="4.0.11" />
+        <dependency id="System.Text.Encoding.Extensions" version="4.0.11" />
+        <dependency id="System.Threading" version="4.0.11" />
+        <dependency id="System.Threading.Tasks" version="4.0.11" />
+        <dependency id="System.Threading.Tasks.Dataflow" version="4.6.0" />
+        <dependency id="System.Xml.XDocument" version="4.0.11" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\release\Workstation.UaClient.dll" target="lib\netstandard1.4" />
+    <file src="bin\release\Workstation.UaClient.dll" target="lib\net46" />
+  </files>
+</package>
