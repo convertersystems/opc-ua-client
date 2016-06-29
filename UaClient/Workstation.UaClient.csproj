@@ -16,7 +16,7 @@
     <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
-    <NuSpecTfm>netstandard1.4;net4.6</NuSpecTfm>
+    <NuSpecTfm>netstandard1.4;.NETFramework4.6</NuSpecTfm>
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
@@ -261,11 +261,14 @@
       <LastGenOutput>Types.generated.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="nuget\nuget.exe" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild" Condition=" '$(Configuration)' == 'Release'">
-    <Exec Command="nuget pack Workstation.UaClient.nuspec -Prop Configuration=Release  -Symbols -OutputDirectory .\bin\Release">
+    <Exec Command=".\nuget\nuget.exe pack Workstation.UaClient.nuspec -Prop Configuration=Release  -Symbols -OutputDirectory .\bin\Release">
     </Exec>
   </Target>
 </Project>

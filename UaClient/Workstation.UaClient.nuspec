@@ -1,10 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-  <metadata minClientVersion="3.4.3">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata minClientVersion="3.4">
     <id>Workstation.UaClient</id>
     <version>1.0.0</version>
+    <title>Workstation.UaClient</title>
     <authors>Andrew Cullen</authors>
     <owners>Converter Systems LLC</owners>
+    <projectUrl>https://github.com/convertersystems/workstation-uaclient</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>A communications library for OPC UA.</summary>
     <description>
@@ -19,7 +21,7 @@
     <copyright>Copyright ©  2016 Converter Systems LLC.</copyright>
     <tags>opc ua</tags>
     <dependencies>
-      <group targetFramework="netstandard1.4">
+      <group targetFramework="net46">
         <dependency id="MetroLog" version="1.0.1" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
         <dependency id="System.Collections" version="4.0.11" />
@@ -49,7 +51,7 @@
         <dependency id="System.Threading.Tasks.Dataflow" version="4.6.0" />
         <dependency id="System.Xml.XDocument" version="4.0.11" />
       </group>
-      <group targetFramework="net46">
+      <group targetFramework="netstandard1.4">
         <dependency id="MetroLog" version="1.0.1" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
         <dependency id="System.Collections" version="4.0.11" />

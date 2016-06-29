@@ -111,9 +111,6 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
-      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {
-        "type": "package"
-      },
       "runtime.native.System/4.0.0": {
         "type": "package",
         "dependencies": {
@@ -1014,19 +1011,6 @@
         "NETStandard.Library.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt"
-      ]
-    },
-    "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {
-      "sha512": "4glYZM9mf2HMxUvyZD01f1Kkgk4wygEHPB2m0WhVMlrCPfMhNiO+CNi4U6xZhKoJ5H+JL0AR+IgfPcUmd6Md9w==",
-      "type": "package",
-      "files": [
-        "NuSpec.ReferenceGenerator.2.0.0-beta-bld14.nupkg.sha512",
-        "NuSpec.ReferenceGenerator.nuspec",
-        "build/netstandard1.0/NuSpec.ReferenceGenerator.targets",
-        "build/portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10/NuSpec.ReferenceGenerator.targets",
-        "tools/RefGen.exe",
-        "tools/RefGen.exe.config",
-        "tools/RefGen.pdb"
       ]
     },
     "runtime.native.System/4.0.0": {
@@ -3796,7 +3780,6 @@
     "": [
       "MetroLog >= 1.0.1",
       "NETStandard.Library >= 1.6.0",
-      "NuSpec.ReferenceGenerator >= 2.0.0-beta-bld14",
       "StyleCop.Analyzers >= 1.0.0",
       "System.Threading.Tasks.Dataflow >= 4.6.0"
     ],
