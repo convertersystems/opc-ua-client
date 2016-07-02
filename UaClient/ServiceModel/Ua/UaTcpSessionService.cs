@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -19,14 +18,13 @@ namespace Workstation.ServiceModel.Ua
         private const double DefaultPublishingInterval = 1000f;
         private const uint DefaultKeepaliveCount = 10;
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSessionService>();
+        internal static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSessionService>();
         private readonly CancellationTokenSource cancellationTokenSource;
         private Task stateMachineTask;
         private string discoveryUrl;
         private UaTcpSessionChannel innerChannel;
         private SemaphoreSlim semaphore;
         private bool disposed;
-        private List<SubscriptionRef> subscriptionRefs = new List<SubscriptionRef>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSessionService"/> class.
@@ -58,6 +56,7 @@ namespace Workstation.ServiceModel.Ua
             this.LocalSendBufferSize = UaTcpTransportChannel.DefaultBufferSize;
             this.LocalMaxMessageSize = 0;
             this.LocalMaxChunkCount = 0;
+            this.Subscriptions = new SubscriptionCollection(this);
             this.cancellationTokenSource = new CancellationTokenSource();
             this.semaphore = new SemaphoreSlim(1);
             this.stateMachineTask = this.StateMachine(this.cancellationTokenSource.Token);
@@ -93,6 +92,7 @@ namespace Workstation.ServiceModel.Ua
             this.LocalSendBufferSize = UaTcpTransportChannel.DefaultBufferSize;
             this.LocalMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize;
             this.LocalMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount;
+            this.Subscriptions = new SubscriptionCollection(this);
             this.cancellationTokenSource = new CancellationTokenSource();
             this.semaphore = new SemaphoreSlim(1);
             this.stateMachineTask = this.StateMachine(this.cancellationTokenSource.Token);
@@ -161,6 +161,8 @@ namespace Workstation.ServiceModel.Ua
             get { return this.innerChannel?.State ?? CommunicationState.Closed; }
         }
 
+        public SubscriptionCollection Subscriptions { get; private set; }
+
         /// <summary>
         /// Sends a service request.
         /// </summary>
@@ -210,43 +212,6 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Subscribes to notifications from the server.
-        /// </summary>
-        /// <param name="subscription">A subscription.</param>
-        /// <returns>A task.</returns>
-        public async Task SubscribeAsync(ISubscription subscription)
-        {
-            var subscriptionRef = new SubscriptionRef(subscription);
-            if (!this.subscriptionRefs.Contains(subscriptionRef))
-            {
-                this.subscriptionRefs.Add(subscriptionRef);
-                if (this.State == CommunicationState.Opened)
-                {
-                    try
-                    {
-                        await this.CreateSubscriptionAsync(subscription);
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warn($"Error creating subscription on server. {ex.Message}");
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Unsubscribes to notifications from the server.
-        /// </summary>
-        /// <param name="subscription">A subscription.</param>
-        /// <returns>A task.</returns>
-        public Task UnsubscribeAsync(ISubscription subscription)
-        {
-            var subscriptionRef = new SubscriptionRef(subscription);
-            this.subscriptionRefs.Remove(subscriptionRef);
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
         /// Publish PublishResponse to subscribers.
         /// </summary>
         /// <param name="response">A publish response.</param>
@@ -256,32 +221,9 @@ namespace Workstation.ServiceModel.Ua
             // is garbage collected, and deletes the corresponding subscription from the server.
             var handled = false;
 
-            List<SubscriptionRef> garbage = null;
-
-            foreach (var subscriptionRef in this.subscriptionRefs)
+            foreach (var subscription in this.Subscriptions)
             {
-                ISubscription subscription;
-                if (subscriptionRef.TryGetTarget(out subscription))
-                {
-                    handled |= subscription.OnPublishResponse(response);
-                }
-                else
-                {
-                    if (garbage == null)
-                    {
-                        garbage = new List<SubscriptionRef>();
-                    }
-
-                    garbage.Add(subscriptionRef);
-                }
-            }
-
-            if (garbage != null)
-            {
-                foreach (var subscriptionRef in garbage)
-                {
-                    this.subscriptionRefs.Remove(subscriptionRef);
-                }
+                handled |= subscription.OnPublishResponse(response);
             }
 
             // If event was not handled,
@@ -314,7 +256,7 @@ namespace Workstation.ServiceModel.Ua
 
                     // Opened.
                     reconnectDelay = 1000;
-                    await this.CreateSubscriptionsAsync(cancellationToken);
+                    await this.CreateSubscriptionsOnServerAsync(cancellationToken);
                     using (var localCts = CancellationTokenSource.CreateLinkedTokenSource(new[] { cancellationToken }))
                     {
                         var tasks = new[]
@@ -342,7 +284,7 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-         /// <summary>
+        /// <summary>
         /// Opens the session with the remote endpoint.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token.</param>
@@ -414,36 +356,11 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="cancellationToken">>A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task CreateSubscriptionsAsync(CancellationToken cancellationToken = default(CancellationToken))
+        internal async Task CreateSubscriptionsOnServerAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            var snap = this.subscriptionRefs.ToList();
-
-            List<SubscriptionRef> garbage = null;
-
-            foreach (var subscriptionRef in snap)
+            foreach (var subscription in this.Subscriptions)
             {
-                ISubscription subscription;
-                if (subscriptionRef.TryGetTarget(out subscription))
-                {
-                    await this.CreateSubscriptionAsync(subscription, cancellationToken);
-                }
-                else
-                {
-                    if (garbage == null)
-                    {
-                        garbage = new List<SubscriptionRef>();
-                    }
-
-                    garbage.Add(subscriptionRef);
-                }
-            }
-
-            if (garbage != null)
-            {
-                foreach (var subscriptionRef in garbage)
-                {
-                    this.subscriptionRefs.Remove(subscriptionRef);
-                }
+                await this.CreateSubscriptionOnServerAsync(subscription, cancellationToken);
             }
         }
 
@@ -453,7 +370,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="subscription">A subscription.</param>
         /// <param name="cancellationToken">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task CreateSubscriptionAsync(ISubscription subscription, CancellationToken cancellationToken = default(CancellationToken))
+        internal async Task CreateSubscriptionOnServerAsync(ISubscription subscription, CancellationToken cancellationToken = default(CancellationToken))
         {
             // create the subscription.
             var subscriptionRequest = new CreateSubscriptionRequest
@@ -594,38 +511,6 @@ namespace Workstation.ServiceModel.Ua
                 {
                     this.innerChannel.Closing -= onClosing;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Holds a weak reference to a subscription.
-        /// </summary>
-        private sealed class SubscriptionRef
-            : WeakReference
-        {
-            private int hashCode;
-
-            public SubscriptionRef(ISubscription subscription)
-                : base(subscription)
-            {
-                this.hashCode = subscription.GetHashCode();
-            }
-
-            public bool TryGetTarget(out ISubscription subscription)
-            {
-                subscription = this.Target as ISubscription;
-                return subscription != null;
-            }
-
-            public override bool Equals(object o)
-            {
-                var sr = o as SubscriptionRef;
-                return sr != null && sr.GetHashCode() == this.hashCode && (sr == this || (this.IsAlive && sr.Target == this.Target));
-            }
-
-            public override int GetHashCode()
-            {
-                return this.hashCode;
             }
         }
     }

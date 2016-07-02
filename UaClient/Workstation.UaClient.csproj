@@ -110,7 +110,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile />
+    <DocumentationFile>bin\Release\Workstation.UaClient.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
@@ -144,6 +144,7 @@
     <Compile Include="ServiceModel\Ua\BinaryEncodingIdAttribute.cs" />
     <Compile Include="ServiceModel\Ua\ISubscription.cs" />
     <Compile Include="ServiceModel\Ua\Subscription.cs" />
+    <Compile Include="ServiceModel\Ua\SubscriptionCollection.cs" />
     <Compile Include="ServiceModel\Ua\VariantExtensions.cs" />
     <Compile Include="ServiceModel\Ua\X509CertificateExtensions.cs" />
     <Compile Include="X509Certificates\CertificateGenerator.cs" />
