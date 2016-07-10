@@ -15,7 +15,7 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public static class X509CertificateExtensions
     {
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger(typeof(X509CertificateExtensions));
+        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<X509Certificate>();
 
         /// <summary>
         /// Searches the stores for certificate with subject name matching the host and path extracted from the applicationUri.

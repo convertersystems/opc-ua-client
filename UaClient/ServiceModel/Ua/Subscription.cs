@@ -20,21 +20,14 @@ namespace Workstation.ServiceModel.Ua
         private const uint DefaultKeepaliveCount = 10;
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private const uint DiagnosticsHint = (uint)DiagnosticFlags.None;
-        protected static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<Subscription>();
-        private bool isPublishing = false;
+        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<Subscription>();
+        private volatile bool isPublishing = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscription"/> class.
         /// </summary>
-        /// <param name="session">A session.</param>
-        public Subscription(UaTcpSessionService session)
+        public Subscription()
         {
-            if (session == null)
-            {
-                throw new ArgumentNullException(nameof(session));
-            }
-
-            this.Session = session;
             this.PublishingInterval = DefaultPublishingInterval;
             this.KeepAliveCount = DefaultKeepaliveCount;
             this.LifetimeCount = 0; // use session lifetime
@@ -42,8 +35,9 @@ namespace Workstation.ServiceModel.Ua
             this.PublishingEnabled = true;
             this.MonitoredItems = new MonitoredItemCollection();
             this.PropertyChanged += this.OnPropertyChanged;
-            var typeInfo = this.GetType().GetTypeInfo();
 
+            // fill MonitoredItems collection
+            var typeInfo = this.GetType().GetTypeInfo();
             foreach (var propertyInfo in typeInfo.DeclaredProperties)
             {
                 var itemAttribute = propertyInfo.GetCustomAttribute<MonitoredItemAttribute>();
@@ -52,7 +46,16 @@ namespace Workstation.ServiceModel.Ua
                     continue;
                 }
 
-                var item = new MonitoredItem { Property = propertyInfo, NodeId = !string.IsNullOrEmpty(itemAttribute.NodeId) ? NodeId.Parse(itemAttribute.NodeId) : null, IndexRange = itemAttribute.IndexRange, AttributeId = itemAttribute.AttributeId, SamplingInterval = itemAttribute.SamplingInterval, QueueSize = itemAttribute.QueueSize, DiscardOldest = itemAttribute.DiscardOldest };
+                var item = new MonitoredItem
+                {
+                    NodeId = !string.IsNullOrEmpty(itemAttribute.NodeId) ? NodeId.Parse(itemAttribute.NodeId) : null,
+                    IndexRange = itemAttribute.IndexRange,
+                    AttributeId = itemAttribute.AttributeId,
+                    SamplingInterval = itemAttribute.SamplingInterval,
+                    QueueSize = itemAttribute.QueueSize,
+                    DiscardOldest = itemAttribute.DiscardOldest,
+                    Property = propertyInfo,
+                };
                 if (itemAttribute.AttributeId == AttributeIds.Value && (itemAttribute.DataChangeTrigger != DataChangeTrigger.StatusValue || itemAttribute.DeadbandType != DeadbandType.None))
                 {
                     item.Filter = new DataChangeFilter() { Trigger = itemAttribute.DataChangeTrigger, DeadbandType = (uint)itemAttribute.DeadbandType, DeadbandValue = itemAttribute.DeadbandValue };
@@ -104,14 +107,14 @@ namespace Workstation.ServiceModel.Ua
         public MonitoredItemCollection MonitoredItems { get; set; }
 
         /// <summary>
+        /// Gets or sets the session with the server.
+        /// </summary>
+        public ISessionClient Session { get; set; }
+
+        /// <summary>
         /// Gets or sets the identifier assigned by the server.
         /// </summary>
         public uint Id { get; set; }
-
-        /// <summary>
-        /// Gets the UaTcpSessionService.
-        /// </summary>
-        public UaTcpSessionService Session { get; private set; }
 
         /// <summary>
         /// Receive PublishResponse message.
@@ -140,14 +143,9 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItem item;
                         foreach (var min in dcn.MonitoredItems)
                         {
-                            try
+                            if (this.MonitoredItems.TryGetValueByClientId(min.ClientHandle, out item))
                             {
-                                item = this.MonitoredItems[min.ClientHandle];
                                 item.Publish(this, min.Value);
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Warn($"Error publishing value for ClientId {min.ClientHandle}. {ex.Message}");
                             }
                         }
 
@@ -161,14 +159,9 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItem item;
                         foreach (var efl in enl.Events)
                         {
-                            try
+                            if (this.MonitoredItems.TryGetValueByClientId(efl.ClientHandle, out item))
                             {
-                                item = this.MonitoredItems[efl.ClientHandle];
                                 item.Publish(this, efl.EventFields);
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Warn($"Error publishing event for ClientId {efl.ClientHandle}. {ex.Message}");
                             }
                         }
                     }
@@ -212,7 +205,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             MonitoredItem item;
-            if (this.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
+            if (this.Session != null && this.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
             {
                 var pi = item.Property;
                 if (pi != null && pi.CanRead)

@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Workstation.ServiceModel.Ua.Channels;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.ServiceModel.Ua
 {

@@ -913,6 +913,7 @@
     "MetroLog/1.0.1": {
       "sha512": "9+i0lIT+OAf9FQOrnSbyxG5RbBtRUthIQAn73c9Y1z0v+2dPCKn9oTPTt8njHPMzy5lRoT9MDQRkYSqJ7aVqgA==",
       "type": "package",
+      "path": "MetroLog/1.0.1",
       "files": [
         "MetroLog.1.0.1.nupkg.sha512",
         "MetroLog.nuspec",
@@ -3784,5 +3785,7 @@
       "System.Threading.Tasks.Dataflow >= 4.6.0"
     ],
     ".NETStandard,Version=v1.4": []
-  }
+  },
+  "tools": {},
+  "projectFileToolGroups": {}
 }

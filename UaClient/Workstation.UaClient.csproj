@@ -134,6 +134,7 @@
     <Compile Include="ServiceModel\Ua\AcknowledgeableCondition.cs" />
     <Compile Include="ServiceModel\Ua\AnonymousIdentity.cs" />
     <Compile Include="ServiceModel\Ua\ArraySegmentExtensions.cs" />
+    <Compile Include="ServiceModel\Ua\AsyncAutoResetEvent.cs" />
     <Compile Include="ServiceModel\Ua\AttributeIds.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

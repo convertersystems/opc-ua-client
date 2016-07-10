@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Workstation.ServiceModel.Ua
 {
     public interface ISubscription
@@ -39,6 +42,11 @@ namespace Workstation.ServiceModel.Ua
         /// Gets or sets the collection of items to monitor.
         /// </summary>
         MonitoredItemCollection MonitoredItems { get; set; }
+
+        /// <summary>
+        /// Gets or sets the session with the server.
+        /// </summary>
+        ISessionClient Session { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier assigned by the server.

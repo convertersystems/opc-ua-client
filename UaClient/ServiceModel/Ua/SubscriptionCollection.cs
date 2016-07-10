@@ -4,28 +4,33 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Collections.Specialized;
 
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
-    /// A collection of subscriptions.
+    /// A collection of ISubscription. Holds only weak references to the members.
     /// </summary>
-    public class SubscriptionCollection : ICollection<ISubscription>
+    public class SubscriptionCollection : ICollection<ISubscription>, INotifyCollectionChanged
     {
-        private UaTcpSessionService service;
         private List<SubscriptionRef> subscriptionRefs = new List<SubscriptionRef>();
+        private UaTcpSessionService service;
 
         public SubscriptionCollection(UaTcpSessionService service)
         {
             this.service = service;
         }
 
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
         public int Count
         {
             get
             {
-                return this.subscriptionRefs.Count;
+                lock (this.subscriptionRefs)
+                {
+                    return this.subscriptionRefs.Count;
+                }
             }
         }
 
@@ -39,31 +44,33 @@ namespace Workstation.ServiceModel.Ua
 
         public void Add(ISubscription item)
         {
-            var subscriptionRef = new SubscriptionRef(item);
-            this.subscriptionRefs.Add(subscriptionRef);
-            if (this.service != null && this.service.State == CommunicationState.Opened)
+            item.Session = this.service;
+            item.Id = 0;
+            lock (this.subscriptionRefs)
             {
-                this.service.CreateSubscriptionOnServerAsync(item)
-                    .ContinueWith(
-                    t =>
-                    {
-                        foreach (var ex in t.Exception.InnerExceptions)
-                        {
-                            UaTcpSessionService.Log.Warn($"Error subscribing {this.GetType().Name}. {ex.Message}");
-                        }
-                    }, TaskContinuationOptions.OnlyOnFaulted);
+                this.subscriptionRefs.Add(new SubscriptionRef(item));
             }
+
+            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new[] { item }));
         }
 
         public void Clear()
         {
-            this.subscriptionRefs.Clear();
+            lock (this.subscriptionRefs)
+            {
+                this.subscriptionRefs.Clear();
+            }
+
+            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public bool Contains(ISubscription item)
         {
             var subscriptionRef = new SubscriptionRef(item);
-            return this.subscriptionRefs.Contains(subscriptionRef);
+            lock (this.subscriptionRefs)
+            {
+                return this.subscriptionRefs.Contains(subscriptionRef);
+            }
         }
 
         public void CopyTo(ISubscription[] array, int arrayIndex)
@@ -78,8 +85,23 @@ namespace Workstation.ServiceModel.Ua
 
         public bool Remove(ISubscription item)
         {
-            var subscriptionRef = new SubscriptionRef(item);
-            return this.subscriptionRefs.Remove(subscriptionRef);
+            bool flag;
+            lock (this.subscriptionRefs)
+            {
+                flag = this.subscriptionRefs.Remove(new SubscriptionRef(item));
+            }
+
+            if (flag)
+            {
+                this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, new[] { item }));
+            }
+
+            return flag;
+        }
+
+        protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
+        {
+            this.CollectionChanged?.Invoke(this, e);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -102,25 +124,13 @@ namespace Workstation.ServiceModel.Ua
                 this.current = default(ISubscription);
             }
 
-            public ISubscription Current
-            {
-                get
-                {
-                    return this.current;
-                }
-            }
+            public ISubscription Current => this.current;
 
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return this.Current;
-                }
-            }
+            object IEnumerator.Current => this.Current;
 
             public void Dispose()
             {
-                if (this.readIndex != this.writeIndex)
+                if (this.readIndex > this.writeIndex)
                 {
                     this.list.RemoveRange(this.writeIndex, this.readIndex - this.writeIndex);
                     this.readIndex = this.writeIndex = this.list.Count;

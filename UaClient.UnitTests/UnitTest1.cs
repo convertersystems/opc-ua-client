@@ -242,5 +242,80 @@ namespace Workstation.UaClient.UnitTests
             await client2.CloseAsync();
         }
 
+        /// <summary>
+        /// Tests connecting to endpoint and creating subscriptions.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [TestMethod]
+        public async Task TestSubscription()
+        {
+            // get or add application certificate.
+            var localCertificate = this.localDescription.GetCertificate();
+            if (localCertificate == null)
+            {
+                throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+            }
+
+            // discover available endpoints of server.
+            var getEndpointsRequest = new GetEndpointsRequest
+            {
+                EndpointUrl = this.endpointUrl,
+                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
+            };
+            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+            var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
+
+            IUserIdentity selectedUserIdentity = new UserNameIdentity("root", "secret");
+
+            var session = new UaTcpSessionService(
+                this.localDescription,
+                localCertificate,
+                selectedUserIdentity,
+                selectedEndpoint);
+            Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
+            Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
+            Console.WriteLine($"SecurityMode: '{session.RemoteEndpoint.SecurityMode}'.");
+
+            var sub = new MySubscription(session)
+            {
+                PublishingInterval = 1000,
+                KeepAliveCount = 20,
+                PublishingEnabled = true
+            };
+
+
+
+            Console.WriteLine($"Created subscription.");
+
+            await Task.Delay(5000);
+
+            Assert.IsTrue(sub.ServerServerStatusCurrentTime != DateTime.MinValue);
+
+            session.Dispose();
+
+        }
+
+        private class MySubscription : Subscription
+        {
+            public MySubscription(UaTcpSessionService service)
+                : base(service)
+            {
+                service.Subscriptions.Add(this);
+            }
+
+            /// <summary>
+            /// Gets the value of ServerServerStatusCurrentTime.
+            /// </summary>
+            [MonitoredItem(nodeId: "i=2258")]
+            public DateTime ServerServerStatusCurrentTime
+            {
+                get { return this.serverServerStatusCurrentTime; }
+                private set { this.SetProperty(ref this.serverServerStatusCurrentTime, value); }
+            }
+
+            private DateTime serverServerStatusCurrentTime;
+
+        }
     }
 }

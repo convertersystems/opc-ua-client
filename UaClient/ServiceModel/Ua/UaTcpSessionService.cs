@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -18,13 +19,14 @@ namespace Workstation.ServiceModel.Ua
         private const double DefaultPublishingInterval = 1000f;
         private const uint DefaultKeepaliveCount = 10;
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
-        internal static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSessionService>();
-        private readonly CancellationTokenSource cancellationTokenSource;
+        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSessionService>();
+
+        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
+        private bool disposed = false;
         private Task stateMachineTask;
         private string discoveryUrl;
         private UaTcpSessionChannel innerChannel;
-        private SemaphoreSlim semaphore;
-        private bool disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSessionService"/> class.
@@ -49,16 +51,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.RemoteEndpoint = remoteEndpoint;
-            this.SessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout;
-            this.TimeoutHint = UaTcpSecureChannel.DefaultTimeoutHint;
-            this.DiagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint;
-            this.LocalReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize;
-            this.LocalSendBufferSize = UaTcpTransportChannel.DefaultBufferSize;
-            this.LocalMaxMessageSize = 0;
-            this.LocalMaxChunkCount = 0;
             this.Subscriptions = new SubscriptionCollection(this);
-            this.cancellationTokenSource = new CancellationTokenSource();
-            this.semaphore = new SemaphoreSlim(1);
             this.stateMachineTask = this.StateMachine(this.cancellationTokenSource.Token);
         }
 
@@ -85,16 +78,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.discoveryUrl = discoveryUrl;
-            this.SessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout;
-            this.TimeoutHint = UaTcpSecureChannel.DefaultTimeoutHint;
-            this.DiagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint;
-            this.LocalReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize;
-            this.LocalSendBufferSize = UaTcpTransportChannel.DefaultBufferSize;
-            this.LocalMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize;
-            this.LocalMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount;
             this.Subscriptions = new SubscriptionCollection(this);
-            this.cancellationTokenSource = new CancellationTokenSource();
-            this.semaphore = new SemaphoreSlim(1);
             this.stateMachineTask = this.StateMachine(this.cancellationTokenSource.Token);
         }
 
@@ -121,47 +105,47 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets or sets the requested number of milliseconds that a session may be unused before being closed by the server.
         /// </summary>
-        public double SessionTimeout { get; set; }
+        public double SessionTimeout { get; set; } = UaTcpSessionChannel.DefaultSessionTimeout;
 
         /// <summary>
         /// Gets or sets the default number of milliseconds that may elapse before an operation is cancelled by the service.
         /// </summary>
-        public uint TimeoutHint { get; set; }
+        public uint TimeoutHint { get; set; } = UaTcpSecureChannel.DefaultTimeoutHint;
 
         /// <summary>
         /// Gets or sets the default diagnostics flags to be requested by the service.
         /// </summary>
-        public uint DiagnosticsHint { get; set; }
+        public uint DiagnosticsHint { get; set; } = UaTcpSecureChannel.DefaultDiagnosticsHint;
 
         /// <summary>
         /// Gets or sets the size of the receive buffer.
         /// </summary>
-        public uint LocalReceiveBufferSize { get; set; }
+        public uint LocalReceiveBufferSize { get; set; } = UaTcpTransportChannel.DefaultBufferSize;
 
         /// <summary>
         /// Gets or sets the size of the send buffer.
         /// </summary>
-        public uint LocalSendBufferSize { get; set; }
+        public uint LocalSendBufferSize { get; set; } = UaTcpTransportChannel.DefaultBufferSize;
 
         /// <summary>
         /// Gets or sets the maximum total size of a message.
         /// </summary>
-        public uint LocalMaxMessageSize { get; set; }
+        public uint LocalMaxMessageSize { get; set; } = UaTcpTransportChannel.DefaultMaxMessageSize;
 
         /// <summary>
         /// Gets or sets the maximum number of message chunks.
         /// </summary>
-        public uint LocalMaxChunkCount { get; set; }
+        public uint LocalMaxChunkCount { get; set; } = UaTcpTransportChannel.DefaultMaxChunkCount;
 
         /// <summary>
         /// Gets the state of communication channel.
         /// </summary>
-        public CommunicationState State
-        {
-            get { return this.innerChannel?.State ?? CommunicationState.Closed; }
-        }
+        public CommunicationState State => this.innerChannel?.State ?? CommunicationState.Closed;
 
-        public SubscriptionCollection Subscriptions { get; private set; }
+        /// <summary>
+        /// Gets the collection of subscriptions.
+        /// </summary>
+        public SubscriptionCollection Subscriptions { get; }
 
         /// <summary>
         /// Sends a service request.
@@ -205,36 +189,9 @@ namespace Workstation.ServiceModel.Ua
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn($"Error disposing UaTcpSessionService with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'. {ex.Message}");
+                        Log.Warn($"Error disposing UaTcpSessionService. {ex.Message}");
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Publish PublishResponse to subscribers.
-        /// </summary>
-        /// <param name="response">A publish response.</param>
-        internal void OnPublishResponse(PublishResponse response)
-        {
-            // Views and view models may be abandoned at any time. This code detects when a subscription
-            // is garbage collected, and deletes the corresponding subscription from the server.
-            var handled = false;
-
-            foreach (var subscription in this.Subscriptions)
-            {
-                handled |= subscription.OnPublishResponse(response);
-            }
-
-            // If event was not handled,
-            if (!handled)
-            {
-                // subscription was garbage collected. So delete from server.
-                var request = new DeleteSubscriptionsRequest
-                {
-                    SubscriptionIds = new uint[] { response.SubscriptionId }
-                };
-                var task = this.DeleteSubscriptionsAsync(request);
             }
         }
 
@@ -256,11 +213,11 @@ namespace Workstation.ServiceModel.Ua
 
                     // Opened.
                     reconnectDelay = 1000;
-                    await this.CreateSubscriptionsOnServerAsync(cancellationToken);
                     using (var localCts = CancellationTokenSource.CreateLinkedTokenSource(new[] { cancellationToken }))
                     {
                         var tasks = new[]
                         {
+                            this.CreateNewSubscriptionsAsync(localCts.Token),
                             this.PublishAsync(localCts.Token),
                             this.PublishAsync(localCts.Token),
                             this.PublishAsync(localCts.Token),
@@ -268,16 +225,17 @@ namespace Workstation.ServiceModel.Ua
                         };
                         await Task.WhenAny(tasks);
                         localCts.Cancel();
+                        await Task.WhenAll(tasks);
                     }
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Trace("PublishAsync cancelled, returning.");
+                    Log.Trace("StateMachine canceled, returning.");
                     return;
                 }
                 catch (Exception)
                 {
-                    Log.Trace("PublishAsync cancelled, retrying.");
+                    Log.Trace("StateMachine exception, retrying.");
                     await Task.Delay(reconnectDelay, cancellationToken);
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
@@ -352,74 +310,6 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Creates the subscriptions on the server.
-        /// </summary>
-        /// <param name="cancellationToken">>A cancellation token.</param>
-        /// <returns>A task.</returns>
-        internal async Task CreateSubscriptionsOnServerAsync(CancellationToken cancellationToken = default(CancellationToken))
-        {
-            foreach (var subscription in this.Subscriptions)
-            {
-                await this.CreateSubscriptionOnServerAsync(subscription, cancellationToken);
-            }
-        }
-
-        /// <summary>
-        /// Creates a subscription on the server.
-        /// </summary>
-        /// <param name="subscription">A subscription.</param>
-        /// <param name="cancellationToken">A cancellation token.</param>
-        /// <returns>A task.</returns>
-        internal async Task CreateSubscriptionOnServerAsync(ISubscription subscription, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            // create the subscription.
-            var subscriptionRequest = new CreateSubscriptionRequest
-            {
-                RequestedPublishingInterval = subscription.PublishingInterval,
-                RequestedMaxKeepAliveCount = subscription.KeepAliveCount,
-                RequestedLifetimeCount = subscription.LifetimeCount > 0 ? subscription.LifetimeCount : (uint)(this.SessionTimeout / subscription.PublishingInterval),
-                PublishingEnabled = false, // initially
-                Priority = subscription.Priority
-            };
-            var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest);
-            var id = subscription.Id = subscriptionResponse.SubscriptionId;
-
-            if (subscription.MonitoredItems.Count > 0)
-            {
-                // add the items.
-                var items = subscription.MonitoredItems.ToList();
-                var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = m.NodeId, AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
-                var itemsRequest = new CreateMonitoredItemsRequest
-                {
-                    SubscriptionId = id,
-                    ItemsToCreate = requests,
-                };
-                var itemsResponse = await this.CreateMonitoredItemsAsync(itemsRequest);
-                for (int i = 0; i < itemsResponse.Results.Length; i++)
-                {
-                    var item = items[i];
-                    var result = itemsResponse.Results[i];
-                    item.ServerId = result.MonitoredItemId;
-                    if (StatusCode.IsBad(result.StatusCode))
-                    {
-                        Log.Warn($"Error response from MonitoredItemCreateRequest for {item.NodeId}. {result.StatusCode}");
-                    }
-                }
-            }
-
-            // start publishing.
-            if (subscription.PublishingEnabled)
-            {
-                var modeRequest = new SetPublishingModeRequest
-                {
-                    SubscriptionIds = new[] { id },
-                    PublishingEnabled = true,
-                };
-                var modeResponse = await this.SetPublishingModeAsync(modeRequest);
-            }
-        }
-
-        /// <summary>
         /// Closes the session with the remote endpoint.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token.</param>
@@ -431,13 +321,11 @@ namespace Workstation.ServiceModel.Ua
             {
                 try
                 {
-                    Log.Info($"Closing UaTcpSessionChannel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'.");
                     await this.innerChannel.CloseAsync(cancellationToken);
-                    Log.Info($"Success closing UaTcpSessionChannel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'.");
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn($"Error closing UaTcpSessionChannel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'. {ex.Message}");
+                    Log.Warn($"Error closing UaTcpSessionChannel. {ex.Message}");
                 }
             }
             finally
@@ -464,7 +352,25 @@ namespace Workstation.ServiceModel.Ua
                 {
                     var publishResponse = await this.PublishAsync(publishRequest);
 
-                    this.OnPublishResponse(publishResponse);
+                    // Views and view models may be abandoned at any time. This code detects when a subscription
+                    // is garbage collected, and deletes the corresponding subscription from the server.
+                    var handled = false;
+
+                    foreach (var subscription in this.Subscriptions)
+                    {
+                        handled |= subscription.OnPublishResponse(publishResponse);
+                    }
+
+                    // If event was not handled,
+                    if (!handled)
+                    {
+                        // subscription was garbage collected. So delete from server.
+                        var request = new DeleteSubscriptionsRequest
+                        {
+                            SubscriptionIds = new uint[] { publishResponse.SubscriptionId }
+                        };
+                        await this.DeleteSubscriptionsAsync(request);
+                    }
 
                     publishRequest = new PublishRequest
                     {
@@ -490,10 +396,7 @@ namespace Workstation.ServiceModel.Ua
         private async Task WhenChannelClosingAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             var tcs = new TaskCompletionSource<bool>();
-            EventHandler onClosing = (s, e) =>
-            {
-                tcs.TrySetResult(true);
-            };
+            var onClosing = new EventHandler((s, e) => tcs.TrySetResult(true));
 
             using (cancellationToken.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), tcs, false))
             {
@@ -511,6 +414,92 @@ namespace Workstation.ServiceModel.Ua
                 {
                     this.innerChannel.Closing -= onClosing;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Creates new subscriptions on the server.
+        /// </summary>
+        /// <param name="cancellationToken">A cancellation token. </param>
+        /// <returns>A task.</returns>
+        private async Task CreateNewSubscriptionsAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var subscriptionsChanged = new AsyncAutoResetEvent();
+            var handler = new NotifyCollectionChangedEventHandler((s, e) => subscriptionsChanged.Set());
+            this.Subscriptions.CollectionChanged += handler;
+
+            try
+            {
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    foreach (var subscription in this.Subscriptions)
+                    {
+                        if (subscription.Id == 0)
+                        {
+                            try
+                            {
+                                // create the subscription.
+                                var subscriptionRequest = new CreateSubscriptionRequest
+                                {
+                                    RequestedPublishingInterval = subscription.PublishingInterval,
+                                    RequestedMaxKeepAliveCount = subscription.KeepAliveCount,
+                                    RequestedLifetimeCount = subscription.LifetimeCount > 0 ? subscription.LifetimeCount : (uint)(this.SessionTimeout / subscription.PublishingInterval),
+                                    PublishingEnabled = false, // initially
+                                    Priority = subscription.Priority
+                                };
+                                var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest);
+                                var id = subscription.Id = subscriptionResponse.SubscriptionId;
+
+                                // add the items.
+                                if (subscription.MonitoredItems.Count > 0)
+                                {
+                                    var items = subscription.MonitoredItems.ToList();
+                                    var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = m.NodeId, AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
+                                    var itemsRequest = new CreateMonitoredItemsRequest
+                                    {
+                                        SubscriptionId = id,
+                                        ItemsToCreate = requests,
+                                    };
+                                    var itemsResponse = await this.CreateMonitoredItemsAsync(itemsRequest);
+                                    for (int i = 0; i < itemsResponse.Results.Length; i++)
+                                    {
+                                        var item = items[i];
+                                        var result = itemsResponse.Results[i];
+                                        item.ServerId = result.MonitoredItemId;
+                                        if (StatusCode.IsBad(result.StatusCode))
+                                        {
+                                            Log.Warn($"Error response from MonitoredItemCreateRequest for {item.NodeId}. {result.StatusCode}");
+                                        }
+                                    }
+                                }
+
+                                // start publishing.
+                                if (subscription.PublishingEnabled)
+                                {
+                                    var modeRequest = new SetPublishingModeRequest
+                                    {
+                                        SubscriptionIds = new[] { id },
+                                        PublishingEnabled = true,
+                                    };
+                                    var modeResponse = await this.SetPublishingModeAsync(modeRequest);
+                                }
+                            }
+                            catch (ServiceResultException ex)
+                            {
+                                Log.Warn($"Error creating subscription '{subscription.GetType().Name}'. {ex.Message}");
+                            }
+                        }
+                    }
+
+                    await subscriptionsChanged.WaitAsync().WithCancellation(cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            finally
+            {
+                this.Subscriptions.CollectionChanged -= handler;
             }
         }
     }
