@@ -14,3 +14,33 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 - Subscription - A base class for your view models. Works with UaTcpSessionClient to automatically create and delete subscriptions on the server. Delivers data change and event notifications to properties. Implements INotifyPropertyChanged.
 - MonitoredItemAttribute - An attribute for properties that indicates the property will receive data change or event notifications from the server.
 
+```
+    public class PLC1Service : UaTcpSessionClient
+    {
+        public PLC1Service(AppDescription description)
+            : base(description, description.GetCertificate(), null, "opc.tcp://localhost:26543")
+        {
+        }
+    }
+    
+    public class MyViewModel : Subscription
+    {
+        public MyViewModel(PLC1Service session)
+            : base(session)
+        {
+        }
+
+        /// <summary>
+        /// Gets the value of ServerServerStatusCurrentTime.
+        /// </summary>
+        [MonitoredItem(nodeId: "i=2258")]
+        public DateTime ServerServerStatusCurrentTime
+        {
+            get { return this.serverServerStatusCurrentTime; }
+            private set { this.SetProperty(ref this.serverServerStatusCurrentTime, value); }
+        }
+
+        private DateTime serverServerStatusCurrentTime;
+
+    }
+```
