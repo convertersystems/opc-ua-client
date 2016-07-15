@@ -1,6 +1,8 @@
 ![robot][1]
 
 # Workstation.UaClient
+*New!* Install package 'Workstation.UaClient' from Nuget and you'll always have the latest version.
+
 *New!* Supports Universal Windows Platform (UWP) and Windows Presentation Framework (WPF) applications.
 
 Build a free HMI using OPC Unified Architecture and Visual Studio. With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
