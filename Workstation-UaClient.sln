@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workstation.UaClient", "UaClient\Workstation.UaClient.csproj", "{DF105A52-E17D-40C4-9D36-CCF9BFB508D0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workstation.UaClient.UnitTests", "UaClient.UnitTests\Workstation.UaClient.UnitTests.csproj", "{8994DA00-5CE1-461F-963C-43F7CFC6864E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A8EFACC3-6790-4CB0-8067-BE7574C94F09}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+		robot6.jpg = robot6.jpg
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

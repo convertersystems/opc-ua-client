@@ -1,3 +1,5 @@
+![robot][1]
+
 # Workstation.UaClient
 *New!* Supports Universal Windows (UWP) and Windows Presentation Framework (WPF) applications.
 
@@ -14,3 +16,4 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 - Subscription - A base class for your view models. Works with SessionService to automatically create and delete subscriptions on the server. Delivers data change and event notifications to properties. Implements INotifyPropertyChanged.
 - MonitoredItemAttribute - An attribute for properties that indicates the property will receive data change or event notifications from the server.
 
+[1]: robot6.jpg  
