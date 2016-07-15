@@ -1,64 +1,62 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace Workstation.ServiceModel.Ua
 {
     public interface ISubscription
     {
         /// <summary>
-        /// Gets or sets the publishing interval.
+        /// Gets the publishing interval.
         /// </summary>
-        double PublishingInterval { get; set; }
+        double PublishingInterval { get; }
 
         /// <summary>
-        /// Gets or sets the number of PublishingIntervals before the server should return an empty Publish response.
+        /// Gets the number of PublishingIntervals before the server should return an empty Publish response.
         /// </summary>
-        uint KeepAliveCount { get; set; }
+        uint KeepAliveCount { get; }
 
         /// <summary>
-        /// Gets or sets the number of PublishingIntervals before the server should delete the subscription.
+        /// Gets the number of PublishingIntervals before the server should delete the subscription.
         /// </summary>
-        uint LifetimeCount { get; set; }
+        uint LifetimeCount { get; }
 
         /// <summary>
-        /// Gets or sets the maximum number of notifications per publish request.
+        /// Gets the maximum number of notifications per publish request.
         /// </summary>
-        uint MaxNotificationsPerPublish { get; set; }
+        uint MaxNotificationsPerPublish { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether publishing is enabled.
+        /// Gets the priority assigned to subscription.
         /// </summary>
-        bool PublishingEnabled { get; set; }
+        byte Priority { get; }
 
         /// <summary>
-        /// Gets or sets the priority assigned to subscription.
+        /// Gets the collection of items to monitor.
         /// </summary>
-        byte Priority { get; set; }
+        ReadOnlyCollection<MonitoredItem> MonitoredItems { get; }
 
         /// <summary>
-        /// Gets or sets the collection of items to monitor.
+        /// Gets the session with the server.
         /// </summary>
-        MonitoredItemCollection MonitoredItems { get; set; }
+        UaTcpSessionClient Session { get; }
 
         /// <summary>
-        /// Gets or sets the session with the server.
+        /// Gets the identifier assigned by the server.
         /// </summary>
-        ISessionClient Session { get; set; }
+        uint Id { get; }
 
         /// <summary>
-        /// Gets or sets the identifier assigned by the server.
+        /// Receive StateChanged message.
         /// </summary>
-        uint Id { get; set; }
+        /// <param name="state">The session's CommunicationState.</param>
+        void OnStateChanged(CommunicationState state);
 
         /// <summary>
         /// Receive PublishResponse message.
         /// </summary>
         /// <param name="response">The publish response.</param>
-        /// <returns>True, if event was handled, else false.</returns>
-        bool OnPublishResponse(PublishResponse response);
-
+        void OnPublishResponse(PublishResponse response);
     }
 }

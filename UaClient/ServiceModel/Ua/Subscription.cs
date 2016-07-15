@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Workstation.ServiceModel.Ua
@@ -14,26 +14,37 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A collection of items to be monitored by the OPC UA server.
     /// </summary>
-    public class Subscription : ISubscription, INotifyPropertyChanged
+    public class Subscription : ISubscription, INotifyPropertyChanged, IDisposable
     {
-        private const double DefaultPublishingInterval = 1000f;
-        private const uint DefaultKeepaliveCount = 10;
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private const uint DiagnosticsHint = (uint)DiagnosticFlags.None;
         private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<Subscription>();
         private volatile bool isPublishing = false;
+        private MonitoredItemCollection items = new MonitoredItemCollection();
+        private IDisposable token;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscription"/> class.
         /// </summary>
-        public Subscription()
+        /// <param name="session">The session client.</param>
+        /// <param name="publishingInterval">The publishing interval in milliseconds.</param>
+        /// <param name="keepAliveCount">The number of PublishingIntervals before the server should return an empty Publish response.</param>
+        /// <param name="lifetimeCount">The number of PublishingIntervals before the server should delete the subscription. Set '0' to use session's lifetime.</param>
+        /// <param name="maxNotificationsPerPublish">The maximum number of notifications per publish request. Set '0' to use no limit.</param>
+        /// <param name="priority">The priority assigned to subscription.</param>
+        public Subscription(UaTcpSessionClient session, double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, uint maxNotificationsPerPublish = 0, byte priority = 0)
         {
-            this.PublishingInterval = DefaultPublishingInterval;
-            this.KeepAliveCount = DefaultKeepaliveCount;
-            this.LifetimeCount = 0; // use session lifetime
-            this.MaxNotificationsPerPublish = 0; // no limit
-            this.PublishingEnabled = true;
-            this.MonitoredItems = new MonitoredItemCollection();
+            if (session == null)
+            {
+                throw new ArgumentNullException(nameof(session));
+            }
+
+            this.Session = session;
+            this.PublishingInterval = publishingInterval;
+            this.KeepAliveCount = keepAliveCount;
+            this.LifetimeCount = lifetimeCount;
+            this.MaxNotificationsPerPublish = maxNotificationsPerPublish;
+            this.MonitoredItems = new ReadOnlyCollection<MonitoredItem>(this.items);
             this.PropertyChanged += this.OnPropertyChanged;
 
             // fill MonitoredItems collection
@@ -65,67 +76,144 @@ namespace Workstation.ServiceModel.Ua
                     item.Filter = new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(propertyInfo.PropertyType) };
                 }
 
-                this.MonitoredItems.Add(item);
+                this.items.Add(item);
             }
+
+            // subscribe to data change and event notifications.
+            this.token = session.Subscribe(this);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets or sets the publishing interval.
+        /// Gets the publishing interval.
         /// </summary>
-        public double PublishingInterval { get; set; }
+        public double PublishingInterval { get; }
 
         /// <summary>
-        /// Gets or sets the number of PublishingIntervals before the server should return an empty Publish response.
+        /// Gets the number of PublishingIntervals before the server should return an empty Publish response.
         /// </summary>
-        public uint KeepAliveCount { get; set; }
+        public uint KeepAliveCount { get; }
 
         /// <summary>
-        /// Gets or sets the number of PublishingIntervals before the server should delete the subscription.
+        /// Gets the number of PublishingIntervals before the server should delete the subscription.
         /// </summary>
-        public uint LifetimeCount { get; set; }
+        public uint LifetimeCount { get; }
 
         /// <summary>
-        /// Gets or sets the maximum number of notifications per publish request.
+        /// Gets the maximum number of notifications per publish request.
         /// </summary>
-        public uint MaxNotificationsPerPublish { get; set; }
+        public uint MaxNotificationsPerPublish { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether whether publishing is enabled.
+        /// Gets the priority assigned to subscription.
         /// </summary>
-        public bool PublishingEnabled { get; set; }
+        public byte Priority { get; }
 
         /// <summary>
-        /// Gets or sets the priority assigned to subscription.
+        /// Gets the collection of items to monitor.
         /// </summary>
-        public byte Priority { get; set; }
+        public ReadOnlyCollection<MonitoredItem> MonitoredItems { get; }
 
         /// <summary>
-        /// Gets or sets the collection of items to monitor.
+        /// Gets the session with the server.
         /// </summary>
-        public MonitoredItemCollection MonitoredItems { get; set; }
+        public UaTcpSessionClient Session { get; }
 
         /// <summary>
-        /// Gets or sets the session with the server.
+        /// Gets the identifier assigned by the server.
         /// </summary>
-        public ISessionClient Session { get; set; }
+        public uint Id { get; private set; }
 
         /// <summary>
-        /// Gets or sets the identifier assigned by the server.
+        /// Disposes the subscription.
         /// </summary>
-        public uint Id { get; set; }
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.token?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Receive StateChanged message.
+        /// </summary>
+        /// <param name="state">The service's CommunicationState.</param>
+        public void OnStateChanged(CommunicationState state)
+        {
+            if (state == CommunicationState.Opened)
+            {
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        // create the subscription.
+                        var subscriptionRequest = new CreateSubscriptionRequest
+                        {
+                            RequestedPublishingInterval = this.PublishingInterval,
+                            RequestedMaxKeepAliveCount = this.KeepAliveCount,
+                            RequestedLifetimeCount = this.LifetimeCount > 0 ? this.LifetimeCount : (uint)(this.Session.SessionTimeout / this.PublishingInterval),
+                            PublishingEnabled = false, // initially
+                            Priority = this.Priority
+                        };
+                        var subscriptionResponse = await this.Session.CreateSubscriptionAsync(subscriptionRequest);
+                        var id = this.Id = subscriptionResponse.SubscriptionId;
+
+                        // add the items.
+                        if (this.MonitoredItems.Count > 0)
+                        {
+                            var items = this.MonitoredItems.ToList();
+                            var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = m.NodeId, AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
+                            var itemsRequest = new CreateMonitoredItemsRequest
+                            {
+                                SubscriptionId = id,
+                                ItemsToCreate = requests,
+                            };
+                            var itemsResponse = await this.Session.CreateMonitoredItemsAsync(itemsRequest);
+                            for (int i = 0; i < itemsResponse.Results.Length; i++)
+                            {
+                                var item = items[i];
+                                var result = itemsResponse.Results[i];
+                                item.ServerId = result.MonitoredItemId;
+                                if (StatusCode.IsBad(result.StatusCode))
+                                {
+                                    Log.Warn($"Error response from MonitoredItemCreateRequest for {item.NodeId}. {result.StatusCode}");
+                                }
+                            }
+                        }
+
+                        // start publishing.
+                        var modeRequest = new SetPublishingModeRequest
+                        {
+                            SubscriptionIds = new[] { id },
+                            PublishingEnabled = true,
+                        };
+                        var modeResponse = await this.Session.SetPublishingModeAsync(modeRequest);
+                    }
+                    catch (ServiceResultException ex)
+                    {
+                        Log.Warn($"Error creating subscription '{this.GetType().Name}'. {ex.Message}");
+                    }
+                });
+            }
+        }
 
         /// <summary>
         /// Receive PublishResponse message.
         /// </summary>
         /// <param name="response">The publish response.</param>
-        /// <returns>True, if event was handled, else false.</returns>
-        public bool OnPublishResponse(PublishResponse response)
+        public void OnPublishResponse(PublishResponse response)
         {
             if (response.SubscriptionId != this.Id)
             {
-                return false;
+                return;
             }
 
             try
@@ -143,7 +231,7 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItem item;
                         foreach (var min in dcn.MonitoredItems)
                         {
-                            if (this.MonitoredItems.TryGetValueByClientId(min.ClientHandle, out item))
+                            if (this.items.TryGetValueByClientId(min.ClientHandle, out item))
                             {
                                 item.Publish(this, min.Value);
                             }
@@ -159,19 +247,18 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItem item;
                         foreach (var efl in enl.Events)
                         {
-                            if (this.MonitoredItems.TryGetValueByClientId(efl.ClientHandle, out item))
+                            if (this.items.TryGetValueByClientId(efl.ClientHandle, out item))
                             {
                                 item.Publish(this, efl.EventFields);
                             }
                         }
                     }
                 }
-
-                return true;
             }
             finally
             {
                 this.isPublishing = false;
+                response.MoreNotifications = true; // set flag indicates message handled.
             }
         }
 
@@ -205,7 +292,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             MonitoredItem item;
-            if (this.Session != null && this.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
+            if (this.Session != null && this.items.TryGetValueByName(e.PropertyName, out item))
             {
                 var pi = item.Property;
                 if (pi != null && pi.CanRead)

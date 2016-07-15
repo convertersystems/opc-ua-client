@@ -145,7 +145,7 @@
     <Compile Include="ServiceModel\Ua\BinaryEncodingIdAttribute.cs" />
     <Compile Include="ServiceModel\Ua\ISubscription.cs" />
     <Compile Include="ServiceModel\Ua\Subscription.cs" />
-    <Compile Include="ServiceModel\Ua\SubscriptionCollection.cs" />
+    <Compile Include="ServiceModel\Ua\UaTcpSessionClient.cs" />
     <Compile Include="ServiceModel\Ua\VariantExtensions.cs" />
     <Compile Include="ServiceModel\Ua\X509CertificateExtensions.cs" />
     <Compile Include="X509Certificates\CertificateGenerator.cs" />
@@ -180,7 +180,6 @@
     <Compile Include="ServiceModel\Ua\IEncoder.cs" />
     <Compile Include="ServiceModel\Ua\IServiceRequest.cs" />
     <Compile Include="ServiceModel\Ua\IServiceResponse.cs" />
-    <Compile Include="ServiceModel\Ua\ISessionClient.cs" />
     <Compile Include="ServiceModel\Ua\IssuedIdentity.cs" />
     <Compile Include="ServiceModel\Ua\IUserIdentity.cs" />
     <Compile Include="ServiceModel\Ua\LocalizedText.cs" />
@@ -217,8 +216,6 @@
       <DependentUpon>Types.tt</DependentUpon>
     </Compile>
     <Compile Include="ServiceModel\Ua\UaTcpDiscoveryClient.cs" />
-    <Compile Include="ServiceModel\Ua\UaTcpSessionClient.cs" />
-    <Compile Include="ServiceModel\Ua\UaTcpSessionService.cs" />
     <Compile Include="ServiceModel\Ua\UserNameIdentity.cs" />
     <Compile Include="ServiceModel\Ua\Variant.cs" />
     <Compile Include="ServiceModel\Ua\ViewServiceSet.cs" />

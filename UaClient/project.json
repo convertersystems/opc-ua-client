@@ -3,12 +3,14 @@
   "dependencies": {
     "MetroLog": "1.0.1",
     "NETStandard.Library": "1.6.0",
+    "NuSpec.ReferenceGenerator": "2.0.0-beta-bld14",
+    "Prism.Core": "6.1.0",
     "StyleCop.Analyzers": "1.0.0",
     "System.Threading.Tasks.Dataflow": "4.6.0"
   },
   "frameworks": {
     "netstandard1.4": {
-      "imports": "dotnet"
+      "imports": "portable-net45+wpa81+wp8+win8"
     }
   }
 }

@@ -3,10 +3,10 @@
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Workstation.ServiceModel.Ua;
+using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.UaClient.UnitTests
 {
@@ -83,24 +83,24 @@ namespace Workstation.UaClient.UnitTests
                             break;
                     }
 
-                    var client = new UaTcpSessionClient(
+                    var channel = new UaTcpSessionChannel(
                         this.localDescription,
                         localCertificate,
                         selectedUserIdentity,
                         selectedEndpoint);
-                    Console.WriteLine($"Creating session with endpoint '{client.RemoteEndpoint.EndpointUrl}'.");
-                    Console.WriteLine($"SecurityPolicy: '{client.RemoteEndpoint.SecurityPolicyUri}'.");
-                    Console.WriteLine($"SecurityMode: '{client.RemoteEndpoint.SecurityMode}'.");
-                    Console.WriteLine($"UserIdentityToken: '{client.UserIdentity}'.");
+                    Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                    Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+                    Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+                    Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
                     try
                     {
-                        await client.OpenAsync();
-                        Console.WriteLine($"Closing session '{client.SessionId}'.");
-                        await client.CloseAsync();
+                        await channel.OpenAsync();
+                        Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                        await channel.CloseAsync();
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error opening session '{client.SessionId}'. {ex.Message}");
+                        Console.WriteLine($"Error opening session '{channel.SessionId}'. {ex.Message}");
                     }
                 }
             }
@@ -148,7 +148,7 @@ namespace Workstation.UaClient.UnitTests
                     break;
             }
 
-            var client = new UaTcpSessionClient(
+            var channel = new UaTcpSessionChannel(
                 this.localDescription,
                 localCertificate,
                 selectedUserIdentity,
@@ -156,21 +156,21 @@ namespace Workstation.UaClient.UnitTests
             {
                 SessionTimeout = 10000
             };
-            Console.WriteLine($"Creating session with endpoint '{client.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{client.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{client.RemoteEndpoint.SecurityMode}'.");
-            await client.OpenAsync();
-            Console.WriteLine($"Activated session '{client.SessionId}'.");
+            Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            await channel.OpenAsync();
+            Console.WriteLine($"Activated session '{channel.SessionId}'.");
 
             // server should close session due to inactivity
             await Task.Delay(20000);
 
             // should throw exception
             var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus_CurrentTime), AttributeId = AttributeIds.Value } } };
-            await client.ReadAsync(readRequest);
+            await channel.ReadAsync(readRequest);
 
-            Console.WriteLine($"Closing session '{client.SessionId}'.");
-            await client.CloseAsync();
+            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            await channel.CloseAsync();
         }
 
         /// <summary>
@@ -199,47 +199,47 @@ namespace Workstation.UaClient.UnitTests
 
             IUserIdentity selectedUserIdentity = new UserNameIdentity("root", "secret");
 
-            var client = new UaTcpSessionClient(
+            var channel = new UaTcpSessionChannel(
                 this.localDescription,
                 localCertificate,
                 selectedUserIdentity,
                 selectedEndpoint);
-            Console.WriteLine($"Creating session with endpoint '{client.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{client.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{client.RemoteEndpoint.SecurityMode}'.");
-            await client.OpenAsync();
-            Console.WriteLine($"Activated session '{client.SessionId}'.");
+            Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            await channel.OpenAsync();
+            Console.WriteLine($"Activated session '{channel.SessionId}'.");
             var req = new CreateSubscriptionRequest
             {
                 RequestedPublishingInterval = 1000,
                 RequestedMaxKeepAliveCount = 20,
                 PublishingEnabled = true
             };
-            var res = await client.CreateSubscriptionAsync(req);
+            var res = await channel.CreateSubscriptionAsync(req);
             Console.WriteLine($"Created subscription '{res.SubscriptionId}'.");
 
-            Console.WriteLine($"Aborting session '{client.SessionId}'.");
-            await client.AbortAsync();
+            Console.WriteLine($"Aborting session '{channel.SessionId}'.");
+            await channel.AbortAsync();
 
-            var client2 = new UaTcpSessionClient(
+            var channel2 = new UaTcpSessionChannel(
                 this.localDescription,
                 localCertificate,
                 selectedUserIdentity,
                 selectedEndpoint);
-            await client2.OpenAsync();
-            Console.WriteLine($"Activated session '{client2.SessionId}'.");
+            await channel2.OpenAsync();
+            Console.WriteLine($"Activated session '{channel2.SessionId}'.");
 
             var req2 = new TransferSubscriptionsRequest
             {
                 SubscriptionIds = new[] { res.SubscriptionId }
             };
-            var res2 = await client2.TransferSubscriptionsAsync(req2);
+            var res2 = await channel2.TransferSubscriptionsAsync(req2);
             Console.WriteLine($"Transferred subscription result '{res2.Results[0].StatusCode}'.");
 
             Assert.IsTrue(StatusCode.IsGood(res2.Results[0].StatusCode));
 
-            Console.WriteLine($"Closing session '{client2.SessionId}'.");
-            await client2.CloseAsync();
+            Console.WriteLine($"Closing session '{channel2.SessionId}'.");
+            await channel2.CloseAsync();
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Workstation.UaClient.UnitTests
 
             IUserIdentity selectedUserIdentity = new UserNameIdentity("root", "secret");
 
-            var session = new UaTcpSessionService(
+            var session = new UaTcpSessionClient(
                 this.localDescription,
                 localCertificate,
                 selectedUserIdentity,
@@ -277,14 +277,7 @@ namespace Workstation.UaClient.UnitTests
             Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
             Console.WriteLine($"SecurityMode: '{session.RemoteEndpoint.SecurityMode}'.");
 
-            var sub = new MySubscription(session)
-            {
-                PublishingInterval = 1000,
-                KeepAliveCount = 20,
-                PublishingEnabled = true
-            };
-
-
+            var sub = new MySubscription(session);
 
             Console.WriteLine($"Created subscription.");
 
@@ -298,10 +291,9 @@ namespace Workstation.UaClient.UnitTests
 
         private class MySubscription : Subscription
         {
-            public MySubscription(UaTcpSessionService service)
-                : base(service)
+            public MySubscription(UaTcpSessionClient session)
+                : base(session)
             {
-                service.Subscriptions.Add(this);
             }
 
             /// <summary>

@@ -14,7 +14,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// A channel that opens a session.
     /// </summary>
-    public class UaTcpSessionChannel : UaTcpSecureChannel
+    public class UaTcpSessionChannel : UaTcpSecureChannel, IRequestChannel
     {
         public const int DefaultSessionTimeout = 120 * 1000; // 2 minutes
         public const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";

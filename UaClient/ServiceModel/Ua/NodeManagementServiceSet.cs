@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -11,65 +12,65 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Adds one or more Nodes into the AddressSpace hierarchy.
         /// </summary>
-        /// <param name="client">A instance of <see cref="ISessionClient"/>.</param>
+        /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="AddNodesRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="AddNodesResponse"/>.</returns>
-        public static async Task<AddNodesResponse> AddNodesAsync(this ISessionClient client, AddNodesRequest request)
+        public static async Task<AddNodesResponse> AddNodesAsync(this IRequestChannel channel, AddNodesRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException("request");
             }
 
-            return (AddNodesResponse)await client.RequestAsync(request).ConfigureAwait(false);
+            return (AddNodesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Adds one or more References to one or more Nodes.
         /// </summary>
-        /// <param name="client">A instance of <see cref="ISessionClient"/>.</param>
+        /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="AddReferencesRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="AddReferencesResponse"/>.</returns>
-        public static async Task<AddReferencesResponse> AddReferencesAsync(this ISessionClient client, AddReferencesRequest request)
+        public static async Task<AddReferencesResponse> AddReferencesAsync(this IRequestChannel channel, AddReferencesRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException("request");
             }
 
-            return (AddReferencesResponse)await client.RequestAsync(request).ConfigureAwait(false);
+            return (AddReferencesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Deletes one or more Nodes from the AddressSpace.
         /// </summary>
-        /// <param name="client">A instance of <see cref="ISessionClient"/>.</param>
+        /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="DeleteNodesRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="DeleteNodesResponse"/>.</returns>
-        public static async Task<DeleteNodesResponse> DeleteNodesAsync(this ISessionClient client, DeleteNodesRequest request)
+        public static async Task<DeleteNodesResponse> DeleteNodesAsync(this IRequestChannel channel, DeleteNodesRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException("request");
             }
 
-            return (DeleteNodesResponse)await client.RequestAsync(request).ConfigureAwait(false);
+            return (DeleteNodesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Deletes one or more References of a Node.
         /// </summary>
-        /// <param name="client">A instance of <see cref="ISessionClient"/>.</param>
+        /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="DeleteReferencesRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="DeleteReferencesResponse"/>.</returns>
-        public static async Task<DeleteReferencesResponse> DeleteReferencesAsync(this ISessionClient client, DeleteReferencesRequest request)
+        public static async Task<DeleteReferencesResponse> DeleteReferencesAsync(this IRequestChannel channel, DeleteReferencesRequest request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException("request");
             }
 
-            return (DeleteReferencesResponse)await client.RequestAsync(request).ConfigureAwait(false);
+            return (DeleteReferencesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
         }
     }
 }

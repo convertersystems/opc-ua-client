@@ -79,6 +79,15 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
+      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
+      "Prism.Core/6.1.0": {
+        "compile": {
+          "lib/net45/Prism.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Prism.dll": {}
+        }
+      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -681,6 +690,15 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
+      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
+      "Prism.Core/6.1.0": {
+        "compile": {
+          "lib/net45/Prism.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Prism.dll": {}
+        }
+      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -1233,6 +1251,15 @@
           "System.Threading.Timer": "4.0.1",
           "System.Xml.ReaderWriter": "4.0.11",
           "System.Xml.XDocument": "4.0.11"
+        }
+      },
+      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
+      "Prism.Core/6.1.0": {
+        "compile": {
+          "lib/net45/Prism.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Prism.dll": {}
         }
       },
       "StyleCop.Analyzers/1.0.0": {},
@@ -1789,6 +1816,15 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
+      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
+      "Prism.Core/6.1.0": {
+        "compile": {
+          "lib/net45/Prism.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Prism.dll": {}
+        }
+      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -2341,6 +2377,15 @@
           "System.Threading.Timer": "4.0.1",
           "System.Xml.ReaderWriter": "4.0.11",
           "System.Xml.XDocument": "4.0.11"
+        }
+      },
+      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
+      "Prism.Core/6.1.0": {
+        "compile": {
+          "lib/net45/Prism.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Prism.dll": {}
         }
       },
       "StyleCop.Analyzers/1.0.0": {},
@@ -2911,6 +2956,45 @@
         "NETStandard.Library.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt"
+      ]
+    },
+    "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {
+      "sha512": "4glYZM9mf2HMxUvyZD01f1Kkgk4wygEHPB2m0WhVMlrCPfMhNiO+CNi4U6xZhKoJ5H+JL0AR+IgfPcUmd6Md9w==",
+      "type": "package",
+      "path": "NuSpec.ReferenceGenerator/2.0.0-beta-bld14",
+      "files": [
+        "NuSpec.ReferenceGenerator.2.0.0-beta-bld14.nupkg.sha512",
+        "NuSpec.ReferenceGenerator.nuspec",
+        "build/netstandard1.0/NuSpec.ReferenceGenerator.targets",
+        "build/portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10/NuSpec.ReferenceGenerator.targets",
+        "tools/RefGen.exe",
+        "tools/RefGen.exe.config",
+        "tools/RefGen.pdb"
+      ]
+    },
+    "Prism.Core/6.1.0": {
+      "sha512": "JDUhYt+w3cawTVgLR1Hsbf59sytjsyFIdTmrbJKkKtHW7CCWAHFM9DGesWSU7cmUgbHm7MYZx5hQA+xiBTQeVg==",
+      "type": "package",
+      "path": "Prism.Core/6.1.0",
+      "files": [
+        "Prism.Core.6.1.0.nupkg.sha512",
+        "Prism.Core.nuspec",
+        "lib/MonoAndroid10/Prism.dll",
+        "lib/MonoAndroid10/Prism.xml",
+        "lib/MonoTouch10/Prism.dll",
+        "lib/MonoTouch10/Prism.xml",
+        "lib/Xamarin.iOS10/Prism.dll",
+        "lib/Xamarin.iOS10/Prism.xml",
+        "lib/net45/Prism.dll",
+        "lib/net45/Prism.xml",
+        "lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10/Prism.dll",
+        "lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10/Prism.xml",
+        "lib/wp8/Prism.dll",
+        "lib/wp8/Prism.xml",
+        "lib/wp81/Prism.dll",
+        "lib/wp81/Prism.xml",
+        "lib/wpa81/Prism.dll",
+        "lib/wpa81/Prism.xml"
       ]
     },
     "StyleCop.Analyzers/1.0.0": {

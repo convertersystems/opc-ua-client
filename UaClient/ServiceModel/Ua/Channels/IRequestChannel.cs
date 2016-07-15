@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
-    public interface IRequestChannel : ICommunicationObject
+    public interface IRequestChannel
     {
         /// <summary>Gets the remote address to which the request channel sends messages. </summary>
         /// <returns>The <see cref="T:ConverterSystems.ServiceModel.Ua.EndpointDescription" /> to which the request channel sends messages. </returns>
