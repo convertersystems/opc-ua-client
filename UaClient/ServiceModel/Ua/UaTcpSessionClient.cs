@@ -3,10 +3,13 @@
 
 using Prism.Events;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.ServiceModel.Ua
@@ -21,15 +24,19 @@ namespace Workstation.ServiceModel.Ua
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSessionClient>();
 
-        private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource clientCts = new CancellationTokenSource();
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
-        private readonly PubSubEvent<PublishResponse> publishEvent = new PubSubEvent<PublishResponse>();
-        private readonly PubSubEvent<CommunicationState> stateChangedEvent = new PubSubEvent<CommunicationState>();
+        private readonly EventAggregator eventAggregator = new EventAggregator();
+        private readonly BufferBlock<ServiceTask> pendingRequests;
+        private PubSubEvent<PublishResponse> publishEvent;
+        private PubSubEvent<CommunicationState> stateChangedEvent;
         private bool disposed = false;
         private Task stateMachineTask;
         private string discoveryUrl;
         private UaTcpSessionChannel innerChannel;
+        private IDisposable linkToken;
         private uint id;
+        private CommunicationState state;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
@@ -38,7 +45,25 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
         /// <param name="userIdentity">The user identity or null if anonymous. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.</param>
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
-        public UaTcpSessionClient(ApplicationDescription localDescription, X509Certificate2 localCertificate, IUserIdentity userIdentity, EndpointDescription remoteEndpoint)
+        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
+        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
+        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
+        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
+        /// <param name="localSendBufferSize">The size of the send buffer.</param>
+        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
+        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        public UaTcpSessionClient(
+            ApplicationDescription localDescription,
+            X509Certificate2 localCertificate,
+            IUserIdentity userIdentity,
+            EndpointDescription remoteEndpoint,
+            double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
+            uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
+            uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
+            uint localReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localSendBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
+            uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
         {
             if (localDescription == null)
             {
@@ -54,7 +79,17 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.RemoteEndpoint = remoteEndpoint;
-            this.stateMachineTask = this.StateMachine(this.cancellationTokenSource.Token);
+            this.SessionTimeout = sessionTimeout;
+            this.TimeoutHint = timeoutHint;
+            this.DiagnosticsHint = diagnosticsHint;
+            this.LocalReceiveBufferSize = localReceiveBufferSize;
+            this.LocalSendBufferSize = localSendBufferSize;
+            this.LocalMaxMessageSize = localMaxMessageSize;
+            this.LocalMaxChunkCount = localMaxChunkCount;
+            this.pendingRequests = new BufferBlock<ServiceTask>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+            this.publishEvent = this.eventAggregator.GetEvent<PubSubEvent<PublishResponse>>();
+            this.stateChangedEvent = this.eventAggregator.GetEvent<PubSubEvent<CommunicationState>>();
+            this.stateMachineTask = this.StateMachine(this.clientCts.Token);
         }
 
         /// <summary>
@@ -64,7 +99,25 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
         /// <param name="userIdentity">The user identity or null if anonymous. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.</param>
         /// <param name="discoveryUrl">The url of the remote application</param>
-        public UaTcpSessionClient(ApplicationDescription localDescription, X509Certificate2 localCertificate, IUserIdentity userIdentity, string discoveryUrl)
+        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
+        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
+        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
+        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
+        /// <param name="localSendBufferSize">The size of the send buffer.</param>
+        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
+        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        public UaTcpSessionClient(
+            ApplicationDescription localDescription,
+            X509Certificate2 localCertificate,
+            IUserIdentity userIdentity,
+            string discoveryUrl,
+            double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
+            uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
+            uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
+            uint localReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localSendBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
+            uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
         {
             if (localDescription == null)
             {
@@ -80,7 +133,17 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.discoveryUrl = discoveryUrl;
-            this.stateMachineTask = this.StateMachine(this.cancellationTokenSource.Token);
+            this.SessionTimeout = sessionTimeout;
+            this.TimeoutHint = timeoutHint;
+            this.DiagnosticsHint = diagnosticsHint;
+            this.LocalReceiveBufferSize = localReceiveBufferSize;
+            this.LocalSendBufferSize = localSendBufferSize;
+            this.LocalMaxMessageSize = localMaxMessageSize;
+            this.LocalMaxChunkCount = localMaxChunkCount;
+            this.pendingRequests = new BufferBlock<ServiceTask>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+            this.publishEvent = this.eventAggregator.GetEvent<PubSubEvent<PublishResponse>>();
+            this.stateChangedEvent = this.eventAggregator.GetEvent<PubSubEvent<CommunicationState>>();
+            this.stateMachineTask = this.StateMachine(this.clientCts.Token);
         }
 
         /// <summary>
@@ -104,44 +167,78 @@ namespace Workstation.ServiceModel.Ua
         public EndpointDescription RemoteEndpoint { get; private set; }
 
         /// <summary>
-        /// Gets or sets the requested number of milliseconds that a session may be unused before being closed by the server.
+        /// Gets the requested number of milliseconds that a session may be unused before being closed by the server.
         /// </summary>
-        public double SessionTimeout { get; set; } = UaTcpSessionChannel.DefaultSessionTimeout;
+        public double SessionTimeout { get; }
 
         /// <summary>
-        /// Gets or sets the default number of milliseconds that may elapse before an operation is cancelled by the service.
+        /// Gets the default number of milliseconds that may elapse before an operation is cancelled by the service.
         /// </summary>
-        public uint TimeoutHint { get; set; } = UaTcpSecureChannel.DefaultTimeoutHint;
+        public uint TimeoutHint { get; }
 
         /// <summary>
-        /// Gets or sets the default diagnostics flags to be requested by the service.
+        /// Gets the default diagnostics flags to be requested by the service.
         /// </summary>
-        public uint DiagnosticsHint { get; set; } = UaTcpSecureChannel.DefaultDiagnosticsHint;
+        public uint DiagnosticsHint { get; }
 
         /// <summary>
-        /// Gets or sets the size of the receive buffer.
+        /// Gets the size of the receive buffer.
         /// </summary>
-        public uint LocalReceiveBufferSize { get; set; } = UaTcpTransportChannel.DefaultBufferSize;
+        public uint LocalReceiveBufferSize { get; }
 
         /// <summary>
-        /// Gets or sets the size of the send buffer.
+        /// Gets the size of the send buffer.
         /// </summary>
-        public uint LocalSendBufferSize { get; set; } = UaTcpTransportChannel.DefaultBufferSize;
+        public uint LocalSendBufferSize { get; }
 
         /// <summary>
-        /// Gets or sets the maximum total size of a message.
+        /// Gets the maximum total size of a message.
         /// </summary>
-        public uint LocalMaxMessageSize { get; set; } = UaTcpTransportChannel.DefaultMaxMessageSize;
+        public uint LocalMaxMessageSize { get; }
 
         /// <summary>
-        /// Gets or sets the maximum number of message chunks.
+        /// Gets the maximum number of message chunks.
         /// </summary>
-        public uint LocalMaxChunkCount { get; set; } = UaTcpTransportChannel.DefaultMaxChunkCount;
+        public uint LocalMaxChunkCount { get; }
+
+        /// <summary>
+        /// Gets the NamespaceUris.
+        /// </summary>
+        public ReadOnlyCollection<string> NamespaceUris
+        {
+            get
+            {
+                return new ReadOnlyCollection<string>(this.innerChannel != null ? this.innerChannel.NamespaceUris : new List<string>());
+            }
+        }
+
+        /// <summary>
+        /// Gets the ServerUris.
+        /// </summary>
+        public ReadOnlyCollection<string> ServerUris
+        {
+            get
+            {
+                return new ReadOnlyCollection<string>(this.innerChannel != null ? this.innerChannel.ServerUris : new List<string>());
+            }
+        }
 
         /// <summary>
         /// Gets the state of communication channel.
         /// </summary>
-        public CommunicationState State => this.innerChannel?.State ?? CommunicationState.Closed;
+        public CommunicationState State
+        {
+            get { return this.state; }
+
+            private set
+            {
+                if (this.state != value)
+                {
+                    this.state = value;
+                    this.stateChangedEvent.Publish(value);
+                }
+            }
+        }
 
         /// <summary>
         /// Subscribes to data change and event notifications from the server.
@@ -165,15 +262,20 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="request">An <see cref="IServiceRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns an <see cref="IServiceResponse"/>.</returns>
-        public Task<IServiceResponse> RequestAsync(IServiceRequest request)
+        public async Task<IServiceResponse> RequestAsync(IServiceRequest request)
         {
-            var channel = this.innerChannel;
-            if (channel == null || channel.State != CommunicationState.Opened)
+            this.UpdateTimestamp(request);
+            var task = new ServiceTask(request);
+            using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader.TimeoutHint))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.clientCts.Token))
+            using (var registration = linkedCts.Token.Register(this.CancelTask, task, false))
             {
-                throw new ServiceResultException(StatusCodes.BadServerNotConnected);
+                if (this.pendingRequests.Post(task))
+                {
+                    return await task.Task.ConfigureAwait(false);
+                }
+                throw new ServiceResultException(StatusCodes.BadSecureChannelClosed);
             }
-
-            return channel.RequestAsync(request);
         }
 
         /// <summary>
@@ -193,41 +295,32 @@ namespace Workstation.ServiceModel.Ua
             if (disposing & !this.disposed)
             {
                 this.disposed = true;
-                this.cancellationTokenSource.Cancel();
-                if (!(this.State == CommunicationState.Closed || this.State == CommunicationState.Faulted))
-                {
-                    try
-                    {
-                        Task.Run(() => this.CloseAsync()).GetAwaiter().GetResult();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Warn($"Error disposing UaTcpSessionService. {ex.Message}");
-                    }
-                }
+                this.pendingRequests.Complete();
+                this.clientCts.Cancel();
             }
         }
 
         /// <summary>
         /// The state machine manages the state of the communications channel.
         /// </summary>
-        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task StateMachine(CancellationToken cancellationToken = default(CancellationToken))
+        private async Task StateMachine(CancellationToken token = default(CancellationToken))
         {
             int reconnectDelay = 1000;
 
-            while (!cancellationToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
                     // Opening.
-                    await this.OpenAsync(cancellationToken);
+                    this.State = CommunicationState.Opening;
+                    await this.OpenAsync(token).ConfigureAwait(false);
+                    reconnectDelay = 1000;
 
                     // Opened.
-                    reconnectDelay = 1000;
-                    this.stateChangedEvent.Publish(CommunicationState.Opened);
-                    using (var localCts = CancellationTokenSource.CreateLinkedTokenSource(new[] { cancellationToken }))
+                    this.State = CommunicationState.Opened;
+                    using (var localCts = CancellationTokenSource.CreateLinkedTokenSource(new[] { token }))
                     {
                         var tasks = new[]
                         {
@@ -236,35 +329,38 @@ namespace Workstation.ServiceModel.Ua
                             this.PublishAsync(localCts.Token),
                             this.WhenChannelClosingAsync(localCts.Token),
                         };
-                        await Task.WhenAny(tasks);
+                        await Task.WhenAny(tasks).ConfigureAwait(false);
                         localCts.Cancel();
-                        await Task.WhenAll(tasks);
+                        await Task.WhenAll(tasks).ConfigureAwait(false);
                     }
-
-                    // Closing
                 }
                 catch (OperationCanceledException)
                 {
-                    Log.Trace("StateMachine canceled, returning.");
-                    return;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-                    Log.Trace("StateMachine exception, retrying.");
-                    await Task.Delay(reconnectDelay, cancellationToken);
+                    Log.Warn($"StateMachine exception. {ex.Message}");
+                    await Task.Delay(reconnectDelay, token).ConfigureAwait(false);
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
             }
+
+            // Closing
+            this.State = CommunicationState.Closing;
+            await this.CloseAsync();
+
+            // Closed
+            this.State = CommunicationState.Closed;
         }
 
         /// <summary>
         /// Opens a session with the remote endpoint.
         /// </summary>
-        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task OpenAsync(CancellationToken cancellationToken = default(CancellationToken))
+        private async Task OpenAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
                 if (this.RemoteEndpoint == null)
@@ -279,7 +375,7 @@ namespace Workstation.ServiceModel.Ua
                             EndpointUrl = this.discoveryUrl,
                             ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
                         };
-                        var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+                        var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest).ConfigureAwait(false);
                         if (getEndpointsResponse.Endpoints == null || getEndpointsResponse.Endpoints.Length == 0)
                         {
                             throw new InvalidOperationException($"'{this.discoveryUrl}' returned no endpoints.");
@@ -295,24 +391,27 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 // throw here to exit state machine.
-                cancellationToken.ThrowIfCancellationRequested();
+                token.ThrowIfCancellationRequested();
                 try
                 {
+                    this.linkToken?.Dispose();
                     Log.Info($"Opening UaTcpSessionChannel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
-                    this.innerChannel = new UaTcpSessionChannel(this.LocalDescription, this.LocalCertificate, this.UserIdentity, this.RemoteEndpoint)
-                    {
-                        SessionTimeout = this.SessionTimeout,
-                        TimeoutHint = this.TimeoutHint,
-                        DiagnosticsHint = this.DiagnosticsHint,
-                        LocalSendBufferSize = this.LocalSendBufferSize,
-                        LocalReceiveBufferSize = this.LocalReceiveBufferSize,
-                        LocalMaxMessageSize = this.LocalMaxMessageSize,
-                        LocalMaxChunkCount = this.LocalMaxChunkCount,
-                    };
+                    this.innerChannel = new UaTcpSessionChannel(
+                        this.LocalDescription,
+                        this.LocalCertificate,
+                        this.UserIdentity,
+                        this.RemoteEndpoint,
+                        this.SessionTimeout,
+                        this.TimeoutHint,
+                        this.DiagnosticsHint,
+                        this.LocalReceiveBufferSize,
+                        this.LocalSendBufferSize,
+                        this.LocalMaxMessageSize,
+                        this.LocalMaxChunkCount);
+                    await this.innerChannel.OpenAsync(token).ConfigureAwait(false);
+                    this.linkToken = this.pendingRequests.LinkTo(this.innerChannel);
 
-                    await this.innerChannel.OpenAsync(cancellationToken);
-
-                    // create the internal subscription.
+                    // create an internal subscription.
                     this.publishEvent.Subscribe(this.OnPublishResponse, ThreadOption.PublisherThread, false);
                     var subscriptionRequest = new CreateSubscriptionRequest
                     {
@@ -322,7 +421,7 @@ namespace Workstation.ServiceModel.Ua
                         PublishingEnabled = true,
                         Priority = 0
                     };
-                    var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest);
+                    var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
                     this.id = subscriptionResponse.SubscriptionId;
                 }
                 catch (Exception ex)
@@ -340,16 +439,16 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Closes the session with the remote endpoint.
         /// </summary>
-        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task CloseAsync(CancellationToken cancellationToken = default(CancellationToken))
+        private async Task CloseAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
                 try
                 {
-                    await this.innerChannel.CloseAsync(cancellationToken);
+                    await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
@@ -365,36 +464,36 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Sends publish requests to the server.
         /// </summary>
-        /// <param name="cancellationToken">A cancellation token.</param>
+        /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task PublishAsync(CancellationToken cancellationToken = default(CancellationToken))
+        internal async Task PublishAsync(CancellationToken token = default(CancellationToken))
         {
             var publishRequest = new PublishRequest
             {
                 RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.DiagnosticsHint },
                 SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
             };
-            while (!cancellationToken.IsCancellationRequested)
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
-                    var publishResponse = await this.PublishAsync(publishRequest);
+                    var publishResponse = await this.PublishAsync(publishRequest).ConfigureAwait(false);
 
                     // Views and view models may be abandoned at any time. This code detects when a subscription
                     // is garbage collected, and deletes the corresponding subscription from the server.
-                    publishResponse.MoreNotifications = false; // reset flag indicates message unhandled.
+                    publishResponse.MoreNotifications = true; // set flag indicates message unhandled.
 
                     this.publishEvent.Publish(publishResponse);
 
                     // If event was not handled,
-                    if (!publishResponse.MoreNotifications)
+                    if (publishResponse.MoreNotifications)
                     {
                         // subscription was garbage collected. So delete from server.
                         var request = new DeleteSubscriptionsRequest
                         {
                             SubscriptionIds = new uint[] { publishResponse.SubscriptionId }
                         };
-                        await this.DeleteSubscriptionsAsync(request);
+                        await this.DeleteSubscriptionsAsync(request).ConfigureAwait(false);
                     }
 
                     publishRequest = new PublishRequest
@@ -405,10 +504,13 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (ServiceResultException ex)
                 {
-                    Log.Warn($"Error publishing subscription. {ex.Message}");
+                    if (!token.IsCancellationRequested)
+                    {
+                        Log.Warn($"Error publishing subscription. {ex.Message}");
 
-                    // short delay, then retry.
-                    await Task.Delay((int)DefaultPublishingInterval);
+                        // short delay, then retry.
+                        await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
+                    }
                 }
             }
         }
@@ -416,30 +518,11 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Waits until the communication channel is closing, closed or faulted.
         /// </summary>
-        /// <param name="cancellationToken">A cancellation token. </param>
+        /// <param name="token">A cancellation token. </param>
         /// <returns>A task.</returns>
-        private async Task WhenChannelClosingAsync(CancellationToken cancellationToken = default(CancellationToken))
+        private Task WhenChannelClosingAsync(CancellationToken token = default(CancellationToken))
         {
-            var onClosing = new TaskCompletionSource<bool>();
-            var handler = new EventHandler((s, e) => onClosing.TrySetResult(true));
-
-            using (cancellationToken.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), onClosing, false))
-            {
-                this.innerChannel.Closing += handler;
-                try
-                {
-                    if (this.State == CommunicationState.Closing || this.State == CommunicationState.Closed || this.State == CommunicationState.Faulted)
-                    {
-                        return;
-                    }
-
-                    await onClosing.Task;
-                }
-                finally
-                {
-                    this.innerChannel.Closing -= handler;
-                }
-            }
+            return this.innerChannel.Completion.WithCancellation(token);
         }
 
         /// <summary>
@@ -459,7 +542,35 @@ namespace Workstation.ServiceModel.Ua
             }
             finally
             {
-                response.MoreNotifications = true; // set flag indicates message handled.
+                response.MoreNotifications = false; // reset flag indicates message handled.
+            }
+        }
+
+        /// <summary>
+        /// Validates the request's header and updates the timestamp.
+        /// </summary>
+        /// <param name="request">The service request</param>
+        private void UpdateTimestamp(IServiceRequest request)
+        {
+            if (request.RequestHeader == null)
+            {
+                request.RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint };
+            }
+
+            request.RequestHeader.Timestamp = DateTime.UtcNow;
+        }
+
+        /// <summary>
+        /// Cancels the ServiceTask
+        /// </summary>
+        /// <param name="o">the ServiceTask.</param>
+        private void CancelTask(object o)
+        {
+            var task = (ServiceTask)o;
+            if (task.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
+            {
+                var request = (IServiceRequest)task.Task.AsyncState;
+                Log.Trace($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
             }
         }
     }

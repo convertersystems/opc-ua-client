@@ -31,7 +31,7 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Wraps a task with one that will complete as cancelled based on a cancellation token,
+        /// Wraps a task with one that may complete as cancelled based on a cancellation token,
         /// allowing someone to await a task but be able to break out early by cancelling the token.
         /// </summary>
         /// <typeparam name="T">The type of value returned by the task.</typeparam>
@@ -43,17 +43,17 @@ namespace Workstation.ServiceModel.Ua
             var tcs = new TaskCompletionSource<bool>();
             using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
             {
-                if (task != await Task.WhenAny(task, tcs.Task))
+                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                 {
                     throw new OperationCanceledException(cancellationToken);
                 }
             }
 
-            return await task;
+            return await task.ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Wraps a task with one that will complete as cancelled based on a cancellation token,
+        /// Wraps a task with one that may complete as cancelled based on a cancellation token,
         /// allowing someone to await a task but be able to break out early by cancelling the token.
         /// </summary>
         /// <param name="task">The task to wrap.</param>
@@ -64,13 +64,52 @@ namespace Workstation.ServiceModel.Ua
             var tcs = new TaskCompletionSource<bool>();
             using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
             {
-                if (task != await Task.WhenAny(task, tcs.Task))
+                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                 {
                     throw new OperationCanceledException(cancellationToken);
                 }
             }
 
-            await task;
+            await task.ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Wraps a task with one that may complete as faulted based on a timeout,
+        /// allowing someone to await a task but be able to break out early by a timeout.
+        /// </summary>
+        /// <typeparam name="T">The type of value returned by the task.</typeparam>
+        /// <param name="task">The task to wrap.</param>
+        /// <param name="millisecondsTimeout">The number of milliseconds to.</param>
+        /// <returns>The wrapping task.</returns>
+        public static async Task<T> WithTimeoutAfter<T>(this Task<T> task, int millisecondsTimeout)
+        {
+            if (task == await Task.WhenAny(task, Task.Delay(millisecondsTimeout)).ConfigureAwait(false))
+            {
+                return await task.ConfigureAwait(false);
+            }
+            else
+            {
+                throw new TimeoutException();
+            }
+        }
+
+        /// <summary>
+        /// Wraps a task with one that may complete as faulted based on a timeout,
+        /// allowing someone to await a task but be able to break out early by a timeout.
+        /// </summary>
+        /// <param name="task">The task to wrap.</param>
+        /// <param name="millisecondsTimeout">The number of milliseconds to.</param>
+        /// <returns>The wrapping task.</returns>
+        public static async Task WithTimeoutAfter(this Task task, int millisecondsTimeout)
+        {
+            if (task == await Task.WhenAny(task, Task.Delay(millisecondsTimeout)).ConfigureAwait(false))
+            {
+                await task.ConfigureAwait(false);
+            }
+            else
+            {
+                throw new TimeoutException();
+            }
         }
     }
 }

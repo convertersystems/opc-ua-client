@@ -22,7 +22,6 @@ namespace Workstation.UaClient.UnitTests
 
         // private string endpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
         // private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        // private string endpointUrl = "opc.tcp://localhost:51212"; // the endpoint of the Workstation.TestServer.
         private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
 
         /// <summary>
@@ -88,6 +87,7 @@ namespace Workstation.UaClient.UnitTests
                         localCertificate,
                         selectedUserIdentity,
                         selectedEndpoint);
+
                     Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                     Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
                     Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
@@ -152,10 +152,9 @@ namespace Workstation.UaClient.UnitTests
                 this.localDescription,
                 localCertificate,
                 selectedUserIdentity,
-                selectedEndpoint)
-            {
-                SessionTimeout = 10000
-            };
+                selectedEndpoint,
+                sessionTimeout: 10000);
+
             Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
             Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
             Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
@@ -204,6 +203,7 @@ namespace Workstation.UaClient.UnitTests
                 localCertificate,
                 selectedUserIdentity,
                 selectedEndpoint);
+
             Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
             Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
             Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
@@ -226,6 +226,7 @@ namespace Workstation.UaClient.UnitTests
                 localCertificate,
                 selectedUserIdentity,
                 selectedEndpoint);
+
             await channel2.OpenAsync();
             Console.WriteLine($"Activated session '{channel2.SessionId}'.");
 
@@ -273,6 +274,7 @@ namespace Workstation.UaClient.UnitTests
                 localCertificate,
                 selectedUserIdentity,
                 selectedEndpoint);
+
             Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
             Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
             Console.WriteLine($"SecurityMode: '{session.RemoteEndpoint.SecurityMode}'.");

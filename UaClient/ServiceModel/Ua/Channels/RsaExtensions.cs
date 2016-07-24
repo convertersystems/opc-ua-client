@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.IO;
 using System;
 using System.IO;
 using System.Security.Cryptography;
@@ -41,7 +42,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             int cipherTextSize = blockCount * cipherTextBlockSize;
 
             // setup source
-            var source = SerializableBytes.CreateWritableStream();
+            var source = RecyclableMemoryStreamManager.Default.GetStream();
             var writer = new BinaryWriter(source);
             try
             {
@@ -130,7 +131,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             try
             {
                 // setup target
-                var target = SerializableBytes.CreateWritableStream();
+                var target = RecyclableMemoryStreamManager.Default.GetStream();
                 var reader = new BinaryReader(target);
                 try
                 {

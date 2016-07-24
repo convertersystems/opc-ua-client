@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.IO;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,10 +18,11 @@ using System.Xml.Linq;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
+
     /// <summary>
     /// A channel that opens a secure channel.
     /// </summary>
-    public class UaTcpSecureChannel : UaTcpTransportChannel
+    public class UaTcpSecureChannel : UaTcpTransportChannel, ITargetBlock<ServiceTask>
     {
         public const uint DefaultTimeoutHint = 15 * 1000; // 15 seconds
         public const uint DefaultDiagnosticsHint = (uint)DiagnosticFlags.None;
@@ -37,9 +39,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSecureChannel>();
 
         private readonly CancellationTokenSource channelCts;
-        private readonly Action<object> cancelRequest;
-        private readonly BufferBlock<TaskCompletionSource<IServiceResponse>> pendingRequests;
-        private readonly ConcurrentDictionary<uint, TaskCompletionSource<IServiceResponse>> pendingCompletions;
+        private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim receivingSemaphore = new SemaphoreSlim(1, 1);
+        private readonly ActionBlock<ServiceTask> pendingRequests;
+        private readonly ConcurrentDictionary<uint, ServiceTask> pendingCompletions;
         private int handle;
         private int sequenceNumber;
         private uint currentClientTokenId;
@@ -56,9 +59,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private byte[] currentServerInitializationVector;
         private byte[] encryptionBuffer;
         private DateTime tokenRenewalTime;
-        private SemaphoreSlim sendingSemaphore;
-        private SemaphoreSlim receivingSemaphore;
-        private Task sendRequestsTask;
         private Task receiveResponsesTask;
         private int asymLocalKeySize;
         private int asymRemoteKeySize;
@@ -128,8 +128,23 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="localDescription">The local description.</param>
         /// <param name="localCertificate">The local certificate</param>
         /// <param name="remoteEndpoint">The remote endpoint</param>
-        public UaTcpSecureChannel(ApplicationDescription localDescription, X509Certificate2 localCertificate, EndpointDescription remoteEndpoint)
-            : base(remoteEndpoint)
+        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
+        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
+        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
+        /// <param name="localSendBufferSize">The size of the send buffer.</param>
+        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
+        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        public UaTcpSecureChannel(
+            ApplicationDescription localDescription,
+            X509Certificate2 localCertificate,
+            EndpointDescription remoteEndpoint,
+            uint timeoutHint = DefaultTimeoutHint,
+            uint diagnosticsHint = DefaultDiagnosticsHint,
+            uint localReceiveBufferSize = DefaultBufferSize,
+            uint localSendBufferSize = DefaultBufferSize,
+            uint localMaxMessageSize = DefaultMaxMessageSize,
+            uint localMaxChunkCount = DefaultMaxChunkCount)
+            : base(remoteEndpoint, localReceiveBufferSize, localSendBufferSize, localMaxMessageSize, localMaxChunkCount)
         {
             if (localDescription == null)
             {
@@ -138,17 +153,14 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.LocalDescription = localDescription;
             this.LocalCertificate = localCertificate;
-            this.TimeoutHint = DefaultTimeoutHint;
-            this.DiagnosticsHint = DefaultDiagnosticsHint;
+            this.TimeoutHint = timeoutHint;
+            this.DiagnosticsHint = diagnosticsHint;
             this.AuthenticationToken = null;
             this.NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
             this.ServerUris = new List<string>();
             this.channelCts = new CancellationTokenSource();
-            this.cancelRequest = new Action<object>(this.CancelRequest);
-            this.pendingRequests = new BufferBlock<TaskCompletionSource<IServiceResponse>>();
-            this.pendingCompletions = new ConcurrentDictionary<uint, TaskCompletionSource<IServiceResponse>>();
-            this.sendingSemaphore = new SemaphoreSlim(1, 1);
-            this.receivingSemaphore = new SemaphoreSlim(1, 1);
+            this.pendingRequests = new ActionBlock<ServiceTask>(t => this.RequestAction(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
+            this.pendingCompletions = new ConcurrentDictionary<uint, ServiceTask>();
             this.tokenRenewalTime = DateTime.MaxValue;
         }
 
@@ -168,19 +180,21 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected RSA RemotePublicKey { get; set; }
 
-        public uint TimeoutHint { get; set; }
+        public uint TimeoutHint { get; }
 
-        public uint DiagnosticsHint { get; set; }
+        public uint DiagnosticsHint { get; }
 
         public uint ChannelId { get; protected set; }
 
         public uint TokenId { get; protected set; }
 
-        public NodeId AuthenticationToken { get; set; }
+        public NodeId AuthenticationToken { get; protected set; }
 
         public List<string> NamespaceUris { get; protected set; }
 
         public List<string> ServerUris { get; protected set; }
+
+        public Task Completion => this.pendingRequests.Completion;
 
         public static void RegisterEncodables(Assembly assembly)
         {
@@ -217,14 +231,17 @@ namespace Workstation.ServiceModel.Ua.Channels
         public virtual async Task<IServiceResponse> RequestAsync(IServiceRequest request)
         {
             this.ThrowIfClosedOrNotOpening();
-            this.UpdateHeader(request);
-            var tcs = new TaskCompletionSource<IServiceResponse>(request);
+            this.TimestampHeader(request);
+            var task = new ServiceTask(request);
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader.TimeoutHint))
             using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.channelCts.Token))
-            using (var registration = linkedCts.Token.Register(this.cancelRequest, tcs, false))
+            using (var registration = linkedCts.Token.Register(this.CancelRequest, task, false))
             {
-                this.pendingRequests.Post(tcs);
-                return await tcs.Task.ConfigureAwait(false);
+                if (this.pendingRequests.Post(task))
+                {
+                    return await task.Task.ConfigureAwait(false);
+                }
+                throw new ServiceResultException(StatusCodes.BadSecureChannelClosed);
             }
         }
 
@@ -484,18 +501,19 @@ namespace Workstation.ServiceModel.Ua.Channels
                 throw new ServiceResultException(StatusCodes.BadSecurityModeRejected);
             }
 
-            this.sendRequestsTask = Task.Run(() => this.SendRequestsAsync(this.channelCts.Token));
-            this.receiveResponsesTask = Task.Run(() => this.ReceiveResponsesAsync(this.channelCts.Token));
-
             var openSecureChannelRequest = new OpenSecureChannelRequest
             {
+                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
                 ClientProtocolVersion = ProtocolVersion,
                 RequestType = SecurityTokenRequestType.Issue,
                 SecurityMode = this.RemoteEndpoint.SecurityMode,
                 ClientNonce = this.symIsSigned ? this.GetNextNonce() : null,
                 RequestedLifetime = TokenRequestedLifetime
             };
-            var openSecureChannelResponse = (OpenSecureChannelResponse)await this.RequestAsync(openSecureChannelRequest).ConfigureAwait(false);
+
+            await this.SendRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
+            var openSecureChannelResponse = (OpenSecureChannelResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
+
             if (openSecureChannelResponse.ServerProtocolVersion < ProtocolVersion)
             {
                 throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
@@ -532,32 +550,35 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        protected override async Task OnOpenedAsync(CancellationToken token)
+        {
+            await base.OnOpenedAsync(token).ConfigureAwait(false);
+            this.receiveResponsesTask = this.ReceiveResponsesAsync(this.channelCts.Token);
+        }
+
+        protected override async Task OnClosingAsync(CancellationToken token)
+        {
+            this.channelCts.Cancel();
+            await base.OnClosingAsync(token).ConfigureAwait(false);
+        }
+
         protected override async Task OnCloseAsync(CancellationToken token)
         {
-            token.ThrowIfCancellationRequested();
-            var closeSecureChannelRequest = new CloseSecureChannelRequest();
-            await this.RequestAsync(closeSecureChannelRequest).ConfigureAwait(false);
-
-            try
+            var closeSecureChannelRequest = new CloseSecureChannelRequest
             {
-                await Task.WhenAll(this.sendRequestsTask, this.receiveResponsesTask).WithCancellation(token).ConfigureAwait(false);
-            }
-            catch (TimeoutException)
-            {
-            }
+                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
+            };
+            await this.SendRequestAsync(closeSecureChannelRequest).ConfigureAwait(false);
 
-            this.channelCts.Cancel();
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
-        protected override Task OnAbortAsync(CancellationToken token)
+        protected override async Task OnClosedAsync(CancellationToken token)
         {
-            this.channelCts.Cancel();
-            return base.OnCloseAsync(token);
-        }
-
-        protected override Task OnClosedAsync(CancellationToken token)
-        {
+            if (this.receiveResponsesTask != null && !this.receiveResponsesTask.IsCompleted)
+            {
+                await Task.WhenAny(this.receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
+            }
             this.channelCts.Dispose();
             this.symSigner?.Dispose();
             this.symVerifier?.Dispose();
@@ -565,7 +586,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.symDecryptor?.Dispose();
             this.RemotePublicKey?.Dispose();
             this.LocalPrivateKey?.Dispose();
-            return base.OnClosedAsync(token);
+            await base.OnClosedAsync(token);
         }
 
         private static byte[] CalculatePSHA(byte[] secret, byte[] seed, int sizeBytes, HashAlgorithmName hashName)
@@ -608,43 +629,36 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        private async Task SendRequestsAsync(CancellationToken token = default(CancellationToken))
+        private async Task RequestAction(ServiceTask task)
         {
-            while (!token.IsCancellationRequested)
+            var token = this.channelCts.Token;
+            try
             {
-                try
+                if (!task.Task.IsCompleted)
                 {
-                    var tcs = await this.pendingRequests.ReceiveAsync(token).ConfigureAwait(false);
-                    var task = tcs.Task;
-                    var request = (IServiceRequest)task.AsyncState;
-                    if (!task.IsCanceled)
-                    {
-                        this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, tcs);
-                        await this.SendRequestAsync(request, token).ConfigureAwait(false);
-                    }
-
-                    if (request is CloseSecureChannelRequest)
-                    {
-                        return; // end of the line
-                    }
+                    var request = task.Request;
+                    await this.SendRequestAsync(request, token).ConfigureAwait(false);
+                    this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, task);
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                if (!token.IsCancellationRequested)
                 {
-                    if (!token.IsCancellationRequested)
-                    {
-                        await this.FaultAsync(ex).ConfigureAwait(false);
-                        await this.AbortAsync().ConfigureAwait(false);
-                    }
+                    await this.FaultAsync(ex).ConfigureAwait(false);
+                    await this.AbortAsync().ConfigureAwait(false);
                 }
             }
         }
 
-        private async Task SendRequestAsync(IServiceRequest request, CancellationToken token = default(CancellationToken))
+        protected async Task SendRequestAsync(IServiceRequest request, CancellationToken token = default(CancellationToken))
         {
             await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
                 this.ThrowIfClosedOrNotOpening();
+                request.RequestHeader.RequestHandle = this.GetNextHandle();
+                request.RequestHeader.AuthenticationToken = this.AuthenticationToken;
                 Log.Trace($"Sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
                 if (request is OpenSecureChannelRequest)
                 {
@@ -653,13 +667,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 else if (request is CloseSecureChannelRequest)
                 {
                     await this.SendCloseSecureChannelRequestAsync((CloseSecureChannelRequest)request, token).ConfigureAwait(false);
-
-                    // in this case, the endpoint does not actually send a response
-                    TaskCompletionSource<IServiceResponse> tcs;
-                    if (this.pendingCompletions.TryRemove(request.RequestHeader.RequestHandle, out tcs))
-                    {
-                        tcs.TrySetResult(new CloseSecureChannelResponse());
-                    }
                 }
                 else
                 {
@@ -679,7 +686,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = SerializableBytes.CreateWritableStream();
+            var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendOpenSecureChannelRequestAsync");
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
@@ -840,13 +847,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             finally
             {
-                bodyEncoder.Dispose();
+                bodyEncoder.Dispose(); // also disposes stream.
             }
         }
 
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = SerializableBytes.CreateWritableStream();
+            var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendCloseSecureChannelRequestAsync");
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
@@ -1007,13 +1014,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             finally
             {
-                bodyEncoder.Dispose();
+                bodyEncoder.Dispose(); // also disposes stream.
             }
         }
 
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
-            var bodyStream = SerializableBytes.CreateWritableStream();
+            var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendServiceRequestAsync");
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
@@ -1180,7 +1187,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             finally
             {
-                bodyEncoder.Dispose();
+                bodyEncoder.Dispose(); // also disposes stream.
             }
         }
 
@@ -1203,27 +1210,25 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
 
                     var header = response.ResponseHeader;
-                    TaskCompletionSource<IServiceResponse> tcs;
+                    ServiceTask tcs;
                     if (this.pendingCompletions.TryRemove(header.RequestHandle, out tcs))
                     {
                         if (StatusCode.IsBad(header.ServiceResult))
                         {
                             var ex = new ServiceResultException(new ServiceResult(header.ServiceResult, header.ServiceDiagnostics, header.StringTable));
-                            Log.Warn($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Code: {header.ServiceResult} - {ex.Message}");
                             tcs.TrySetException(ex);
                         }
                         else
                         {
-                            Log.Trace($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle}");
                             tcs.TrySetResult(response);
                         }
                     }
 
                     // check if time to renew token
-                    if (this.State == CommunicationState.Opened && DateTime.UtcNow > this.tokenRenewalTime)
+                    if (DateTime.UtcNow > this.tokenRenewalTime)
                     {
                         this.tokenRenewalTime = this.tokenRenewalTime.AddMilliseconds(60000);
-                        var task = Task.Run(() => this.OnRenewAsync(token));
+                        Task.Run(() => this.OnRenewAsync(token).ConfigureAwait(false));
                     }
                 }
                 catch (Exception ex)
@@ -1237,7 +1242,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        private async Task<IServiceResponse> ReceiveResponseAsync(CancellationToken token = default(CancellationToken))
+        protected async Task<IServiceResponse> ReceiveResponseAsync(CancellationToken token = default(CancellationToken))
         {
             await this.receivingSemaphore.WaitAsync(token).ConfigureAwait(false);
             try
@@ -1251,7 +1256,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 int bodySize;
                 int paddingSize;
 
-                var bodyStream = SerializableBytes.CreateWritableStream();
+                var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("ReceiveResponseAsync");
                 var bodyDecoder = new BinaryDecoder(bodyStream, this);
                 try
                 {
@@ -1456,7 +1461,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         }
                         finally
                         {
-                            decoder.Dispose();
+                            decoder.Dispose(); // also disposes stream.
                         }
                     }
                     while (!isFinal);
@@ -1488,6 +1493,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     // set properties from message stream
                     response.Decode(bodyDecoder);
+
+                    Log.Trace($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
+
                     return response;
                 }
                 finally
@@ -1547,7 +1555,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        private void UpdateHeader(IServiceRequest request)
+        private void TimestampHeader(IServiceRequest request)
         {
             if (request.RequestHeader == null)
             {
@@ -1555,8 +1563,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             request.RequestHeader.Timestamp = DateTime.UtcNow;
-            request.RequestHeader.RequestHandle = this.GetNextHandle();
-            request.RequestHeader.AuthenticationToken = this.AuthenticationToken;
         }
 
         private uint GetNextHandle()
@@ -1607,13 +1613,27 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private void CancelRequest(object o)
         {
-            var tcs = (TaskCompletionSource<IServiceResponse>)o;
-            if (tcs.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
+            var task = (ServiceTask)o;
+            if (task.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
-                var request = (IServiceRequest)tcs.Task.AsyncState;
-                this.pendingCompletions.TryRemove(request.RequestHeader.RequestHandle, out tcs);
+                var request = task.Request;
                 Log.Trace($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
             }
+        }
+
+        public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, ServiceTask messageValue, ISourceBlock<ServiceTask> source, bool consumeToAccept)
+        {
+            return ((ITargetBlock<ServiceTask>)this.pendingRequests).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
+        }
+
+        public void Complete()
+        {
+            this.pendingRequests.Complete();
+        }
+
+        public void Fault(Exception exception)
+        {
+            ((ITargetBlock<ServiceTask>)this.pendingRequests).Fault(exception);
         }
     }
 }

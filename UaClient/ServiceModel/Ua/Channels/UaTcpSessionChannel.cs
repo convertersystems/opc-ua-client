@@ -30,20 +30,38 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
         /// <param name="userIdentity">The user identity or null if anonymous. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.</param>
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
-        public UaTcpSessionChannel(ApplicationDescription localDescription, X509Certificate2 localCertificate, IUserIdentity userIdentity, EndpointDescription remoteEndpoint)
-            : base(localDescription, localCertificate, remoteEndpoint)
+        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
+        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
+        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
+        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
+        /// <param name="localSendBufferSize">The size of the send buffer.</param>
+        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
+        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            X509Certificate2 localCertificate,
+            IUserIdentity userIdentity,
+            EndpointDescription remoteEndpoint,
+            double sessionTimeout = DefaultSessionTimeout,
+            uint timeoutHint = DefaultTimeoutHint,
+            uint diagnosticsHint = DefaultDiagnosticsHint,
+            uint localReceiveBufferSize = DefaultBufferSize,
+            uint localSendBufferSize = DefaultBufferSize,
+            uint localMaxMessageSize = DefaultMaxMessageSize,
+            uint localMaxChunkCount = DefaultMaxChunkCount)
+            : base(localDescription, localCertificate, remoteEndpoint, timeoutHint, diagnosticsHint, localReceiveBufferSize, localSendBufferSize, localMaxMessageSize, localMaxChunkCount)
         {
             this.UserIdentity = userIdentity;
-            this.SessionTimeout = DefaultSessionTimeout;
+            this.SessionTimeout = sessionTimeout;
         }
 
         public IUserIdentity UserIdentity { get; }
 
-        public double SessionTimeout { get; set; }
+        public double SessionTimeout { get; }
 
-        public NodeId SessionId { get; set; }
+        public NodeId SessionId { get; private set; }
 
-        public byte[] RemoteNonce { get; set; }
+        public byte[] RemoteNonce { get; private set; }
 
         protected override async Task OnOpenAsync(CancellationToken token)
         {
@@ -67,7 +85,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                     RequestedSessionTimeout = this.SessionTimeout,
                     MaxResponseMessageSize = this.RemoteMaxMessageSize
                 };
-                var createSessionResponse = (CreateSessionResponse)await this.RequestAsync(createSessionRequest).ConfigureAwait(false);
+
+                await this.SendRequestAsync(createSessionRequest, token).ConfigureAwait(false);
+                var createSessionResponse = (CreateSessionResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
                 this.SessionId = createSessionResponse.SessionId;
                 this.AuthenticationToken = createSessionResponse.AuthenticationToken;
                 this.RemoteNonce = createSessionResponse.ServerNonce;
@@ -318,24 +338,11 @@ namespace Workstation.ServiceModel.Ua.Channels
                 UserIdentityToken = identityToken,
                 UserTokenSignature = tokenSignature
             };
-            var activateSessionResponse = (ActivateSessionResponse)await this.RequestAsync(activateSessionRequest).ConfigureAwait(false);
+            await this.SendRequestAsync(activateSessionRequest, token).ConfigureAwait(false);
+            var activateSessionResponse = (ActivateSessionResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
             this.RemoteNonce = activateSessionResponse.ServerNonce;
-            await this.FetchNamespaceTablesAsync().ConfigureAwait(false);
-        }
 
-        protected override async Task OnCloseAsync(CancellationToken token)
-        {
-            token.ThrowIfCancellationRequested();
-            var closeSessionRequest = new CloseSessionRequest
-            {
-                DeleteSubscriptions = true
-            };
-            await this.RequestAsync(closeSessionRequest).ConfigureAwait(false);
-            await base.OnCloseAsync(token).ConfigureAwait(false);
-        }
-
-        private async Task FetchNamespaceTablesAsync()
-        {
+            // fetch namespace array, etc.
             var readValueIds = new ReadValueId[]
             {
                 new ReadValueId
@@ -351,9 +358,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             };
             var readRequest = new ReadRequest
             {
+                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
                 NodesToRead = readValueIds
             };
-            var readResponse = (ReadResponse)await this.RequestAsync(readRequest).ConfigureAwait(false);
+
+            await this.SendRequestAsync(readRequest, token).ConfigureAwait(false);
+            var readResponse = (ReadResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
             if (readResponse.Results.Length == 2)
             {
                 if (StatusCode.IsGood(readResponse.Results[0].StatusCode))
@@ -368,6 +378,17 @@ namespace Workstation.ServiceModel.Ua.Channels
                     this.ServerUris.AddRange(readResponse.Results[1].GetValueOrDefault<string[]>());
                 }
             }
+        }
+
+        protected override async Task OnCloseAsync(CancellationToken token)
+        {
+            var closeSessionRequest = new CloseSessionRequest
+            {
+                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
+                DeleteSubscriptions = true
+            };
+            await this.SendRequestAsync(closeSessionRequest).ConfigureAwait(false);
+            await base.OnCloseAsync(token).ConfigureAwait(false);
         }
     }
 }

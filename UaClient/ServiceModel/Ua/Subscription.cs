@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Workstation.ServiceModel.Ua
@@ -19,6 +20,8 @@ namespace Workstation.ServiceModel.Ua
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private const uint DiagnosticsHint = (uint)DiagnosticFlags.None;
         private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<Subscription>();
+        private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current;
+        private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private volatile bool isPublishing = false;
         private MonitoredItemCollection items = new MonitoredItemCollection();
         private IDisposable token;
@@ -159,11 +162,11 @@ namespace Workstation.ServiceModel.Ua
                         {
                             RequestedPublishingInterval = this.PublishingInterval,
                             RequestedMaxKeepAliveCount = this.KeepAliveCount,
-                            RequestedLifetimeCount = this.LifetimeCount > 0 ? this.LifetimeCount : (uint)(this.Session.SessionTimeout / this.PublishingInterval),
-                            PublishingEnabled = false, // initially
+                            RequestedLifetimeCount = Math.Max(this.LifetimeCount, 3 * this.KeepAliveCount),
+                            PublishingEnabled = true,
                             Priority = this.Priority
                         };
-                        var subscriptionResponse = await this.Session.CreateSubscriptionAsync(subscriptionRequest);
+                        var subscriptionResponse = await this.Session.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
                         var id = this.Id = subscriptionResponse.SubscriptionId;
 
                         // add the items.
@@ -176,7 +179,7 @@ namespace Workstation.ServiceModel.Ua
                                 SubscriptionId = id,
                                 ItemsToCreate = requests,
                             };
-                            var itemsResponse = await this.Session.CreateMonitoredItemsAsync(itemsRequest);
+                            var itemsResponse = await this.Session.CreateMonitoredItemsAsync(itemsRequest).ConfigureAwait(false);
                             for (int i = 0; i < itemsResponse.Results.Length; i++)
                             {
                                 var item = items[i];
@@ -188,14 +191,6 @@ namespace Workstation.ServiceModel.Ua
                                 }
                             }
                         }
-
-                        // start publishing.
-                        var modeRequest = new SetPublishingModeRequest
-                        {
-                            SubscriptionIds = new[] { id },
-                            PublishingEnabled = true,
-                        };
-                        var modeResponse = await this.Session.SetPublishingModeAsync(modeRequest);
                     }
                     catch (ServiceResultException ex)
                     {
@@ -218,7 +213,28 @@ namespace Workstation.ServiceModel.Ua
 
             try
             {
-                this.isPublishing = true;
+                if (this.synchronizationContext != null)
+                {
+                    this.synchronizationContext.Post(this.ProcessNotifications, response);
+                }
+                else
+                {
+                    this.ProcessNotifications(response);
+                }
+            }
+            finally
+            {
+                response.MoreNotifications = false; // reset flag indicates message handled.
+            }
+        }
+
+        private void ProcessNotifications(object state)
+        {
+            this.isPublishing = true;
+
+            try
+            {
+                var response = (PublishResponse)state;
 
                 // loop thru all the notifications
                 var nd = response.NotificationMessage.NotificationData;
@@ -258,7 +274,6 @@ namespace Workstation.ServiceModel.Ua
             finally
             {
                 this.isPublishing = false;
-                response.MoreNotifications = true; // set flag indicates message handled.
             }
         }
 

@@ -143,6 +143,10 @@
     <Compile Include="ServiceModel\Ua\AttributeServiceSet.cs" />
     <Compile Include="ServiceModel\Ua\BaseEvent.cs" />
     <Compile Include="ServiceModel\Ua\BinaryEncodingIdAttribute.cs" />
+    <Compile Include="ServiceModel\Ua\Channels\Events.cs" />
+    <Compile Include="ServiceModel\Ua\Channels\RecyclableMemoryStream.cs" />
+    <Compile Include="ServiceModel\Ua\Channels\RecyclableMemoryStreamManager.cs" />
+    <Compile Include="ServiceModel\Ua\Channels\ServiceTask.cs" />
     <Compile Include="ServiceModel\Ua\ISubscription.cs" />
     <Compile Include="ServiceModel\Ua\Subscription.cs" />
     <Compile Include="ServiceModel\Ua\UaTcpSessionClient.cs" />
@@ -153,12 +157,7 @@
     <Compile Include="ServiceModel\Ua\Channels\BinaryEncoder.cs" />
     <Compile Include="ServiceModel\Ua\Channels\CommunicationObject.cs" />
     <Compile Include="ServiceModel\Ua\Channels\IRequestChannel.cs" />
-    <Compile Include="ServiceModel\Ua\Channels\ObjectPool{T}.cs" />
-    <Compile Include="ServiceModel\Ua\Channels\PooledObject{T}.cs" />
     <Compile Include="ServiceModel\Ua\Channels\RsaExtensions.cs" />
-    <Compile Include="ServiceModel\Ua\Channels\SerializableBytes.cs" />
-    <Compile Include="ServiceModel\Ua\Channels\SharedPoolExtensions.cs" />
-    <Compile Include="ServiceModel\Ua\Channels\SharedPools.cs" />
     <Compile Include="ServiceModel\Ua\Channels\UaTcpMessageTypes.cs" />
     <Compile Include="ServiceModel\Ua\Channels\UaTcpSecureChannel.cs" />
     <Compile Include="ServiceModel\Ua\Channels\UaTcpSessionChannel.cs" />

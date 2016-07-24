@@ -19,6 +19,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const int DefaultMaxChunkCount = 4 * 1024;
 
         private const int MinBufferSize = 8 * 1024;
+        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpTransportChannel>();
         private byte[] sendBuffer;
         private byte[] receiveBuffer;
         private Stream outstream;
@@ -28,8 +29,17 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpTransportChannel"/> class.
         /// </summary>
-        /// <param name="remoteEndpoint">the remoteEndpoint.</param>
-        public UaTcpTransportChannel(EndpointDescription remoteEndpoint)
+        /// <param name="remoteEndpoint">The remote endpoint.</param>
+        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
+        /// <param name="localSendBufferSize">The size of the send buffer.</param>
+        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
+        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        public UaTcpTransportChannel(
+            EndpointDescription remoteEndpoint,
+            uint localReceiveBufferSize = DefaultBufferSize,
+            uint localSendBufferSize = DefaultBufferSize,
+            uint localMaxMessageSize = DefaultMaxMessageSize,
+            uint localMaxChunkCount = DefaultMaxChunkCount)
         {
             if (remoteEndpoint == null)
             {
@@ -37,21 +47,21 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.RemoteEndpoint = remoteEndpoint;
-            this.LocalReceiveBufferSize = DefaultBufferSize;
-            this.LocalSendBufferSize = DefaultBufferSize;
-            this.LocalMaxMessageSize = DefaultMaxMessageSize;
-            this.LocalMaxChunkCount = DefaultMaxChunkCount;
+            this.LocalReceiveBufferSize = localReceiveBufferSize;
+            this.LocalSendBufferSize = localSendBufferSize;
+            this.LocalMaxMessageSize = localMaxMessageSize;
+            this.LocalMaxChunkCount = localMaxChunkCount;
         }
 
         public EndpointDescription RemoteEndpoint { get; }
 
-        public uint LocalReceiveBufferSize { get; set; }
+        public uint LocalReceiveBufferSize { get; }
 
-        public uint LocalSendBufferSize { get; set; }
+        public uint LocalSendBufferSize { get; }
 
-        public uint LocalMaxMessageSize { get; set; }
+        public uint LocalMaxMessageSize { get; }
 
-        public uint LocalMaxChunkCount { get; set; }
+        public uint LocalMaxChunkCount { get; }
 
         public uint RemoteReceiveBufferSize { get; protected set; }
 
@@ -65,6 +75,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             this.ThrowIfClosedOrNotOpening();
             await this.outstream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
+            // Log.Trace($"SendAsync {count} bytes.");
         }
 
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
@@ -76,7 +87,18 @@ namespace Workstation.ServiceModel.Ua.Channels
             count = 8;
             while (count > 0)
             {
-                num = await this.instream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                try
+                {
+                    num = await this.instream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                }
+                catch (ObjectDisposedException)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        return 0;
+                    }
+                    throw;
+                }
                 if (num == 0)
                 {
                     return 0;
@@ -95,7 +117,18 @@ namespace Workstation.ServiceModel.Ua.Channels
             count = (int)len - 8;
             while (count > 0)
             {
-                num = await this.instream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                try
+                {
+                    num = await this.instream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                }
+                catch (ObjectDisposedException)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        return 0;
+                    }
+                    throw;
+                }
                 if (num == 0)
                 {
                     return 0;
@@ -105,6 +138,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 count -= num;
             }
 
+            // Log.Trace($"ReceiveAsync {offset - initialOffset} bytes.");
             return offset - initialOffset;
         }
 
@@ -184,6 +218,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 decoder.Dispose();
             }
+        }
+
+        protected override Task OnOpenedAsync(CancellationToken token)
+        {
+            return base.OnOpenedAsync(token);
         }
 
         protected override Task OnCloseAsync(CancellationToken token)

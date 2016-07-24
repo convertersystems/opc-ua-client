@@ -11,7 +11,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// Provides a common base implementation for the basic state machine common to all communication-oriented objects in the system.
     /// </summary>
-    public abstract class CommunicationObject : ICommunicationObject
+    public abstract class CommunicationObject : ICommunicationObject, IDisposable
     {
         private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<CommunicationObject>();
         private bool aborted;
@@ -26,6 +26,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private object eventSender;
         private SemaphoreSlim semaphore;
         private Lazy<ConcurrentQueue<Exception>> exceptions;
+        private bool disposed = false;
 
         public CommunicationObject()
         {
@@ -494,6 +495,20 @@ namespace Workstation.ServiceModel.Ua.Channels
                 case CommunicationState.Faulted:
                     throw new InvalidOperationException($"{this.GetType().Name} closed or faulted.");
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing && !this.disposed)
+            {
+                this.disposed = true;
+                Task.Run(() => this.CloseAsync()).Wait(2000);
+            }
+        }
+
+        public void Dispose()
+        {
+            this.Dispose(true);
         }
     }
 }
