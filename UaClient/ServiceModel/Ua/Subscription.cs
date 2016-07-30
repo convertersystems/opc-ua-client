@@ -4,6 +4,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -19,7 +20,6 @@ namespace Workstation.ServiceModel.Ua
     {
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private const uint DiagnosticsHint = (uint)DiagnosticFlags.None;
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<Subscription>();
         private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private volatile bool isPublishing = false;
@@ -187,14 +187,14 @@ namespace Workstation.ServiceModel.Ua
                                 item.ServerId = result.MonitoredItemId;
                                 if (StatusCode.IsBad(result.StatusCode))
                                 {
-                                    Log.Warn($"Error response from MonitoredItemCreateRequest for {item.NodeId}. {result.StatusCode}");
+                                    Trace.TraceWarning($"Subscription error response from MonitoredItemCreateRequest for {item.NodeId}. {result.StatusCode}");
                                 }
                             }
                         }
                     }
                     catch (ServiceResultException ex)
                     {
-                        Log.Warn($"Error creating subscription '{this.GetType().Name}'. {ex.Message}");
+                        Trace.TraceWarning($"Subscription error creating subscription '{this.GetType().Name}'. {ex.Message}");
                     }
                 });
             }
@@ -319,7 +319,7 @@ namespace Workstation.ServiceModel.Ua
                             {
                                 foreach (var ex in t.Exception.InnerExceptions)
                                 {
-                                    Log.Warn($"Error writing value for NodeId {item.NodeId}. {ex.Message}");
+                                    Trace.TraceWarning($"Subscription error writing value for NodeId {item.NodeId}. {ex.Message}");
                                 }
                             }, TaskContinuationOptions.OnlyOnFaulted);
                 }

@@ -3,15 +3,6 @@
   "version": 2,
   "targets": {
     ".NETStandard,Version=v1.4": {
-      "MetroLog/1.0.1": {
-        "type": "package",
-        "compile": {
-          "lib/portable-net45+wp8+win8+wpa81/MetroLog.dll": {}
-        },
-        "runtime": {
-          "lib/portable-net45+wp8+win8+wpa81/MetroLog.dll": {}
-        }
-      },
       "Microsoft.NETCore.Platforms/1.0.1": {
         "type": "package",
         "compile": {
@@ -259,6 +250,33 @@
         },
         "runtime": {
           "lib/portable-net45+win8+wp8+wpa81/_._": {}
+        }
+      },
+      "System.Diagnostics.TraceSource/4.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.0.1",
+          "System.Collections": "4.0.11",
+          "System.Diagnostics.Debug": "4.0.11",
+          "System.Globalization": "4.0.11",
+          "System.Resources.ResourceManager": "4.0.1",
+          "System.Runtime": "4.1.0",
+          "System.Runtime.Extensions": "4.1.0",
+          "System.Threading": "4.0.11",
+          "runtime.native.System": "4.0.0"
+        },
+        "compile": {
+          "ref/netstandard1.3/System.Diagnostics.TraceSource.dll": {}
+        },
+        "runtimeTargets": {
+          "runtimes/unix/lib/netstandard1.3/System.Diagnostics.TraceSource.dll": {
+            "assetType": "runtime",
+            "rid": "unix"
+          },
+          "runtimes/win/lib/netstandard1.3/System.Diagnostics.TraceSource.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
         }
       },
       "System.Diagnostics.Tracing/4.1.0": {
@@ -955,41 +973,6 @@
     }
   },
   "libraries": {
-    "MetroLog/1.0.1": {
-      "sha512": "9+i0lIT+OAf9FQOrnSbyxG5RbBtRUthIQAn73c9Y1z0v+2dPCKn9oTPTt8njHPMzy5lRoT9MDQRkYSqJ7aVqgA==",
-      "type": "package",
-      "path": "MetroLog/1.0.1",
-      "files": [
-        "MetroLog.1.0.1.nupkg.sha512",
-        "MetroLog.nuspec",
-        "content/win8-javascript/MetroLog ReadMe.txt",
-        "content/win8-javascript/typings/MetroLog.WinRT.d.ts",
-        "content/win8-javascript/typings/winrt.d.ts",
-        "lib/MonoAndroid/MetroLog.dll",
-        "lib/MonoAndroid/MetroLog.pdb",
-        "lib/MonoTouch/MetroLog.dll",
-        "lib/MonoTouch/MetroLog.pdb",
-        "lib/Xamarin.iOS/MetroLog.dll",
-        "lib/Xamarin.iOS/MetroLog.pdb",
-        "lib/dotnet/MetroLog.dll",
-        "lib/dotnet/MetroLog.pdb",
-        "lib/net45/MetroLog.dll",
-        "lib/net45/MetroLog.pdb",
-        "lib/portable-net45+wp8+win8+wpa81/MetroLog.dll",
-        "lib/portable-net45+wp8+win8+wpa81/MetroLog.pdb",
-        "lib/win81/MetroLog.WinRT.pdb",
-        "lib/win81/MetroLog.WinRT.pri",
-        "lib/win81/MetroLog.WinRT.winmd",
-        "lib/win81/MetroLog.dll",
-        "lib/win81/MetroLog.pdb",
-        "lib/win81/MetroLog.pri",
-        "lib/wp8/MetroLog.dll",
-        "lib/wp8/MetroLog.pdb",
-        "lib/wpa81/MetroLog.dll",
-        "lib/wpa81/MetroLog.pdb",
-        "lib/wpa81/MetroLog.pri"
-      ]
-    },
     "Microsoft.NETCore.Platforms/1.0.1": {
       "sha512": "2G6OjjJzwBfNOO8myRV/nFrbTw5iA+DEm0N+qUqhrOmaVtn4pC77h38I1jsXGw5VH55+dPfQsqHD0We9sCl9FQ==",
       "type": "package",
@@ -1508,6 +1491,45 @@
         "ref/xamarinmac20/_._",
         "ref/xamarintvos10/_._",
         "ref/xamarinwatchos10/_._"
+      ]
+    },
+    "System.Diagnostics.TraceSource/4.0.0": {
+      "sha512": "6WVCczFZKXwpWpzd/iJkYnsmWTSFFiU24Xx/YdHXBcu+nFI/ehTgeqdJQFbtRPzbrO3KtRNjvkhtj4t5/WwWsA==",
+      "type": "package",
+      "path": "System.Diagnostics.TraceSource/4.0.0",
+      "files": [
+        "System.Diagnostics.TraceSource.4.0.0.nupkg.sha512",
+        "System.Diagnostics.TraceSource.nuspec",
+        "ThirdPartyNotices.txt",
+        "dotnet_library_license.txt",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net46/System.Diagnostics.TraceSource.dll",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net46/System.Diagnostics.TraceSource.dll",
+        "ref/netstandard1.3/System.Diagnostics.TraceSource.dll",
+        "ref/netstandard1.3/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/de/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/es/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/fr/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/it/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/ja/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/ko/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/ru/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/zh-hans/System.Diagnostics.TraceSource.xml",
+        "ref/netstandard1.3/zh-hant/System.Diagnostics.TraceSource.xml",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "ref/xamarintvos10/_._",
+        "ref/xamarinwatchos10/_._",
+        "runtimes/unix/lib/netstandard1.3/System.Diagnostics.TraceSource.dll",
+        "runtimes/win/lib/net46/System.Diagnostics.TraceSource.dll",
+        "runtimes/win/lib/netstandard1.3/System.Diagnostics.TraceSource.dll"
       ]
     },
     "System.Diagnostics.Tracing/4.1.0": {
@@ -3863,11 +3885,11 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "MetroLog >= 1.0.1",
       "NETStandard.Library >= 1.6.0",
       "NuSpec.ReferenceGenerator >= 2.0.0-beta-bld14",
       "Prism.Core >= 6.1.0",
       "StyleCop.Analyzers >= 1.0.0",
+      "System.Diagnostics.TraceSource >= 4.0.0",
       "System.Threading.Tasks.Dataflow >= 4.6.0"
     ],
     ".NETStandard,Version=v1.4": []

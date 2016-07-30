@@ -286,9 +286,7 @@ namespace Workstation.UaClient.UnitTests
             await Task.Delay(5000);
 
             Assert.IsTrue(sub.ServerServerStatusCurrentTime != DateTime.MinValue);
-
             session.Dispose();
-
         }
 
         private class MySubscription : Subscription

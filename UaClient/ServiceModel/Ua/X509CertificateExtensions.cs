@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -15,8 +16,6 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public static class X509CertificateExtensions
     {
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<X509Certificate>();
-
         /// <summary>
         /// Searches the stores for certificate with subject name matching the host and path extracted from the applicationUri.
         /// </summary>
@@ -78,7 +77,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
-                Log.Warn($"Error opening X509Store '{store}'. {ex.Message}");
+                Trace.TraceWarning($"GetCertificate error opening X509Store '{store}'. {ex.Message}");
             }
             finally
             {
@@ -98,7 +97,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
-                Log.Warn($"Error opening X509Store '{store}'. {ex.Message}");
+                Trace.TraceWarning($"GetCertificate error opening X509Store '{store}'. {ex.Message}");
             }
             finally
             {
@@ -109,11 +108,11 @@ namespace Workstation.ServiceModel.Ua
             if (foundCerts.Count > 0)
             {
                 clientCertificate = foundCerts.OrderBy(c => c.NotBefore).Last();
-                Log.Info($"Found certificate '{subjectName}'.");
+                Trace.TraceInformation($"GetCertificate found certificate '{subjectName}'.");
                 return clientCertificate;
             }
 
-            Log.Info($"Creating new certificate '{subjectName}'.");
+            Trace.TraceInformation($"GetCertificate creating new certificate '{subjectName}'.");
             try
             {
                 var pfx = CertificateGenerator.CreateSelfSignCertificatePfx(
@@ -135,7 +134,7 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn($"Error adding certificate to store '{store}'. {ex.Message}");
+                    Trace.TraceWarning($"GetCertificate error adding certificate to store '{store}'. {ex.Message}");
                 }
                 finally
                 {
@@ -144,7 +143,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
-                Log.Warn($"Error creating certificate '{subjectName}'. {ex.Message}");
+                Trace.TraceWarning($"GetCertificate error creating certificate '{subjectName}'. {ex.Message}");
             }
 
             return clientCertificate;

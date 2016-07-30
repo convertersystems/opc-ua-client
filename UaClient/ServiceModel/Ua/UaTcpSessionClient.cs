@@ -5,6 +5,7 @@ using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -22,12 +23,11 @@ namespace Workstation.ServiceModel.Ua
         private const double DefaultPublishingInterval = 1000f;
         private const uint DefaultKeepaliveCount = 10;
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSessionClient>();
 
-        private readonly CancellationTokenSource clientCts = new CancellationTokenSource();
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private readonly EventAggregator eventAggregator = new EventAggregator();
-        private readonly BufferBlock<ServiceTask> pendingRequests;
+        private BufferBlock<ServiceTask> pendingRequests;
+        private CancellationTokenSource clientCts = new CancellationTokenSource();
         private PubSubEvent<PublishResponse> publishEvent;
         private PubSubEvent<CommunicationState> stateChangedEvent;
         private bool disposed = false;
@@ -279,6 +279,29 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
+        /// Suspends the communication channel to the remote endpoint.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation that suspends the communication channel.</returns>
+        public Task SuspendAsync()
+        {
+            this.clientCts?.Cancel();
+            return this.stateMachineTask;
+        }
+
+        /// <summary>
+        /// Resumes the communication channel to the remote endpoint.
+        /// </summary>
+        public void Resume()
+        {
+            if (this.clientCts.IsCancellationRequested)
+            {
+                this.clientCts = new CancellationTokenSource();
+                this.pendingRequests = new BufferBlock<ServiceTask>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+                this.stateMachineTask = this.StateMachine(this.clientCts.Token);
+            }
+        }
+
+        /// <summary>
         /// Closes the communication channel to the remote endpoint.
         /// </summary>
         public void Dispose()
@@ -295,8 +318,8 @@ namespace Workstation.ServiceModel.Ua
             if (disposing & !this.disposed)
             {
                 this.disposed = true;
-                this.pendingRequests.Complete();
-                this.clientCts.Cancel();
+                this.clientCts?.Cancel();
+                this.stateMachineTask.Wait(5000);
             }
         }
 
@@ -337,9 +360,8 @@ namespace Workstation.ServiceModel.Ua
                 catch (OperationCanceledException)
                 {
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Log.Warn($"StateMachine exception. {ex.Message}");
                     await Task.Delay(reconnectDelay, token).ConfigureAwait(false);
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
@@ -369,7 +391,7 @@ namespace Workstation.ServiceModel.Ua
                     // security level.
                     try
                     {
-                        Log.Info($"Discovering endpoints of '{this.discoveryUrl}'.");
+                        Trace.TraceInformation($"UaTcpSessionClient discovering endpoints of '{this.discoveryUrl}'.");
                         var getEndpointsRequest = new GetEndpointsRequest
                         {
                             EndpointUrl = this.discoveryUrl,
@@ -385,7 +407,7 @@ namespace Workstation.ServiceModel.Ua
                     }
                     catch (Exception ex)
                     {
-                        Log.Warn($"Error discovering endpoints of '{this.discoveryUrl}'. {ex.Message}");
+                        Trace.TraceWarning($"UaTcpSessionClient error discovering endpoints of '{this.discoveryUrl}'. {ex.Message}");
                         throw;
                     }
                 }
@@ -395,7 +417,7 @@ namespace Workstation.ServiceModel.Ua
                 try
                 {
                     this.linkToken?.Dispose();
-                    Log.Info($"Opening UaTcpSessionChannel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
+                    Trace.TraceInformation($"UaTcpSessionClient opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
                     this.innerChannel = new UaTcpSessionChannel(
                         this.LocalDescription,
                         this.LocalCertificate,
@@ -426,7 +448,7 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn($"Error opening UaTcpSessionChannel with endpoint '{this.RemoteEndpoint.EndpointUrl}'. {ex.Message}");
+                    Trace.TraceWarning($"UaTcpSessionClient error opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'. {ex.Message}");
                     throw;
                 }
             }
@@ -452,7 +474,7 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (Exception ex)
                 {
-                    Log.Warn($"Error closing UaTcpSessionChannel. {ex.Message}");
+                    Trace.TraceWarning($"UaTcpSessionClient error closing channel. {ex.Message}");
                 }
             }
             finally
@@ -506,7 +528,7 @@ namespace Workstation.ServiceModel.Ua
                 {
                     if (!token.IsCancellationRequested)
                     {
-                        Log.Warn($"Error publishing subscription. {ex.Message}");
+                        Trace.TraceWarning($"UaTcpSessionClient error publishing subscription. {ex.Message}");
 
                         // short delay, then retry.
                         await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
@@ -570,7 +592,7 @@ namespace Workstation.ServiceModel.Ua
             if (task.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
                 var request = (IServiceRequest)task.Task.AsyncState;
-                Log.Trace($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                Trace.TraceInformation($"UaTcpSessionClient canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
             }
         }
     }

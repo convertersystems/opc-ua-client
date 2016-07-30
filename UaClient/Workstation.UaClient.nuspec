@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata minClientVersion="3.4">
     <id>Workstation.UaClient</id>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <title>Workstation.UaClient</title>
     <authors>Andrew Cullen</authors>
     <owners>Converter Systems LLC</owners>
@@ -22,12 +22,12 @@
     <tags>opc ua</tags>
     <dependencies>
       <group targetFramework="net46">
-        <dependency id="MetroLog" version="1.0.1" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
         <dependency id="Prism.Core" version="6.1.0" />
         <dependency id="System.Collections" version="4.0.11" />
         <dependency id="System.Collections.Concurrent" version="4.0.12" />
         <dependency id="System.Diagnostics.Debug" version="4.0.11" />
+        <dependency id="System.Diagnostics.TraceSource" version="4.0.0" />
         <dependency id="System.Diagnostics.Tracing" version="4.1.0" />
         <dependency id="System.Globalization" version="4.0.11" />
         <dependency id="System.IO" version="4.1.0" />
@@ -54,12 +54,12 @@
         <dependency id="System.Xml.XDocument" version="4.0.11" />
       </group>
       <group targetFramework="netstandard1.4">
-        <dependency id="MetroLog" version="1.0.1" />
         <dependency id="Microsoft.Win32.Primitives" version="4.0.1" />
         <dependency id="Prism.Core" version="6.1.0" />
         <dependency id="System.Collections" version="4.0.11" />
         <dependency id="System.Collections.Concurrent" version="4.0.12" />
         <dependency id="System.Diagnostics.Debug" version="4.0.11" />
+        <dependency id="System.Diagnostics.TraceSource" version="4.0.0" />
         <dependency id="System.Diagnostics.Tracing" version="4.1.0" />
         <dependency id="System.Globalization" version="4.0.11" />
         <dependency id="System.IO" version="4.1.0" />

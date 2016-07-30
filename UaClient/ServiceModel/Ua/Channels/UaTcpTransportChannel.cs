@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,12 +21,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const int DefaultMaxChunkCount = 4 * 1024;
 
         private const int MinBufferSize = 8 * 1024;
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpTransportChannel>();
         private byte[] sendBuffer;
         private byte[] receiveBuffer;
-        private Stream outstream;
-        private Stream instream;
-        private System.Net.Sockets.TcpClient tcpClient;
+        private Stream stream;
+        private TcpClient tcpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpTransportChannel"/> class.
@@ -74,8 +74,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
             this.ThrowIfClosedOrNotOpening();
-            await this.outstream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
-            // Log.Trace($"SendAsync {count} bytes.");
+            await this.stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
+            // Trace.TraceInformation($"SendAsync {count} bytes.");
         }
 
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
@@ -89,7 +89,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    num = await this.instream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                    num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -119,7 +119,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    num = await this.instream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                    num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -138,7 +138,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 count -= num;
             }
 
-            // Log.Trace($"ReceiveAsync {offset - initialOffset} bytes.");
+            // Trace.TraceInformation($"ReceiveAsync {offset - initialOffset} bytes.");
             return offset - initialOffset;
         }
 
@@ -148,10 +148,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.sendBuffer = new byte[MinBufferSize];
             this.receiveBuffer = new byte[MinBufferSize];
 
-            this.tcpClient = new System.Net.Sockets.TcpClient { NoDelay = true };
+            this.tcpClient = new TcpClient { NoDelay = true };
             var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl);
             await this.tcpClient.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
-            this.instream = this.outstream = this.tcpClient.GetStream();
+            this.stream = this.tcpClient.GetStream();
 
             // send 'hello'.
             int count;
@@ -209,7 +209,11 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     var statusCode = decoder.ReadUInt32(null);
                     var message = decoder.ReadString(null);
-                    throw new ServiceResultException(statusCode, message);
+                    if (message != null)
+                    {
+                        throw new ServiceResultException(statusCode, message);
+                    }
+                    throw new ServiceResultException(statusCode);
                 }
 
                 throw new InvalidOperationException("UaTcpTransportChannel.OnOpenAsync received unexpected message type.");
@@ -225,20 +229,24 @@ namespace Workstation.ServiceModel.Ua.Channels
             return base.OnOpenedAsync(token);
         }
 
-        protected override Task OnCloseAsync(CancellationToken token)
+        protected async override Task OnCloseAsync(CancellationToken token)
         {
-            return Task.CompletedTask;
+            await Task.Delay(1000);
+            this.stream?.Dispose();
+            await Task.Delay(1000);
         }
 
-        protected override Task OnAbortAsync(CancellationToken token)
+        protected async override Task OnAbortAsync(CancellationToken token)
         {
-            return Task.CompletedTask;
+            await Task.Delay(1000);
+            this.stream?.Dispose();
+            await Task.Delay(1000);
         }
 
-        protected override Task OnClosedAsync(CancellationToken token)
+        protected async override Task OnClosedAsync(CancellationToken token)
         {
             this.tcpClient?.Dispose();
-            return base.OnClosedAsync(token);
+            await base.OnClosedAsync(token);
         }
 
     }

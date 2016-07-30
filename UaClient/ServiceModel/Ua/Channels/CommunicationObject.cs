@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +14,6 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// </summary>
     public abstract class CommunicationObject : ICommunicationObject, IDisposable
     {
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<CommunicationObject>();
         private bool aborted;
         private bool closeCalled;
         private bool onClosingCalled;
@@ -93,7 +93,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (flag2)
                 {
-                    Log.Warn($"{this.GetType().Name}.AbortAsync failed.");
                 }
             }
         }
@@ -160,7 +159,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             if (flag2)
                             {
-                                Log.Warn($"{this.GetType().Name}.CloseAsync failed.");
+                                Trace.TraceWarning($"{this.GetType().Name}.CloseAsync failed.");
                                 await this.AbortAsync(token).ConfigureAwait(false);
                             }
                         }
@@ -212,7 +211,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (flag2)
                 {
-                    Log.Warn($"{this.GetType().Name}.OpenAsync failed.");
                     await this.FaultAsync().ConfigureAwait(false);
                 }
             }
@@ -298,7 +296,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Log.Info($"{this.GetType().Name} closed.");
+            Trace.TraceInformation($"{this.GetType().Name} closed.");
             EventHandler closed = this.Closed;
             if (closed != null)
             {
@@ -329,7 +327,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Log.Info($"{this.GetType().Name} closing.");
+            Trace.TraceInformation($"{this.GetType().Name} closing.");
             EventHandler closing = this.Closing;
             if (closing != null)
             {
@@ -359,7 +357,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Log.Info($"{this.GetType().Name} faulted.");
+            Trace.TraceInformation($"{this.GetType().Name} faulted.");
             EventHandler faulted = this.Faulted;
             if (faulted != null)
             {
@@ -397,7 +395,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Log.Info($"{this.GetType().Name} opened.");
+            Trace.TraceInformation($"{this.GetType().Name} opened.");
             EventHandler opened = this.Opened;
             if (opened != null)
             {
@@ -422,7 +420,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Log.Info($"{this.GetType().Name} opening.");
+            Trace.TraceInformation($"{this.GetType().Name} opening.");
             EventHandler opening = this.Opening;
             if (opening != null)
             {

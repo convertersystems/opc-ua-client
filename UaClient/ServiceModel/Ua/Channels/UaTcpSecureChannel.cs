@@ -36,7 +36,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private static readonly NodeId ReadResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
         private static readonly NodeId PublishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
         private static readonly RandomNumberGenerator Rng = RandomNumberGenerator.Create();
-        private static readonly MetroLog.ILogger Log = MetroLog.LogManagerFactory.DefaultLogManager.GetLogger<UaTcpSecureChannel>();
 
         private readonly CancellationTokenSource channelCts;
         private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
@@ -58,7 +57,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private byte[] currentServerEncryptingKey;
         private byte[] currentServerInitializationVector;
         private byte[] encryptionBuffer;
-        private DateTime tokenRenewalTime;
         private Task receiveResponsesTask;
         private int asymLocalKeySize;
         private int asymRemoteKeySize;
@@ -84,10 +82,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         private SymmetricAlgorithm symEncryptionAlgorithm;
         private HMAC symVerifier;
         private HMAC symSigner;
-        private ICryptoTransform symEncryptor;
-        private ICryptoTransform symDecryptor;
         private RSAEncryptionPadding asymEncryptionPadding;
         private HashAlgorithmName asymSignatureHashAlgorithmName;
+        private DateTime tokenRenewalTime = DateTime.MaxValue;
 
         static UaTcpSecureChannel()
         {
@@ -161,7 +158,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.channelCts = new CancellationTokenSource();
             this.pendingRequests = new ActionBlock<ServiceTask>(t => this.RequestAction(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
             this.pendingCompletions = new ConcurrentDictionary<uint, ServiceTask>();
-            this.tokenRenewalTime = DateTime.MaxValue;
         }
 
         public static Dictionary<ExpandedNodeId, Type> BinaryEncodingIdToTypeDictionary { get; }
@@ -179,6 +175,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected RSA LocalPrivateKey { get; set; }
 
         protected RSA RemotePublicKey { get; set; }
+
+        protected byte[] LocalNonce { get; private set; }
 
         public uint TimeoutHint { get; }
 
@@ -507,7 +505,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 ClientProtocolVersion = ProtocolVersion,
                 RequestType = SecurityTokenRequestType.Issue,
                 SecurityMode = this.RemoteEndpoint.SecurityMode,
-                ClientNonce = this.symIsSigned ? this.GetNextNonce() : null,
+                ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce() : null,
                 RequestedLifetime = TokenRequestedLifetime
             };
 
@@ -519,46 +517,19 @@ namespace Workstation.ServiceModel.Ua.Channels
                 throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
             }
 
-            await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
-            try
-            {
-                this.ChannelId = openSecureChannelResponse.SecurityToken.ChannelId;
-                this.TokenId = openSecureChannelResponse.SecurityToken.TokenId;
-                this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.75 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
-                if (this.symIsSigned)
-                {
-                    var clientNonce = openSecureChannelRequest.ClientNonce;
-                    var serverNonce = openSecureChannelResponse.ServerNonce;
-
-                    // (re)create client security keys for encrypting the next message sent
-                    var clientSecurityKey = CalculatePSHA(serverNonce, clientNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.asymSignatureHashAlgorithmName);
-
-                    Buffer.BlockCopy(clientSecurityKey, 0, this.clientSigningKey, 0, this.symSignatureKeySize);
-                    Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize, this.clientEncryptingKey, 0, this.symEncryptionKeySize);
-                    Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.clientInitializationVector, 0, this.symEncryptionBlockSize);
-
-                    // (re)create server security keys for decrypting the next message received that has a new TokenId
-                    var serverSecurityKey = CalculatePSHA(clientNonce, serverNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.asymSignatureHashAlgorithmName);
-                    Buffer.BlockCopy(serverSecurityKey, 0, this.serverSigningKey, 0, this.symSignatureKeySize);
-                    Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize, this.serverEncryptingKey, 0, this.symEncryptionKeySize);
-                    Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.serverInitializationVector, 0, this.symEncryptionBlockSize);
-                }
-            }
-            finally
-            {
-                this.sendingSemaphore.Release();
-            }
+            // Schedule token renewal.
+            this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
         }
 
         protected override async Task OnOpenedAsync(CancellationToken token)
         {
             await base.OnOpenedAsync(token).ConfigureAwait(false);
-            this.receiveResponsesTask = this.ReceiveResponsesAsync(this.channelCts.Token);
+            this.receiveResponsesTask = this.ReceiveResponsesAsync(token);
         }
 
         protected override async Task OnClosingAsync(CancellationToken token)
         {
-            this.channelCts.Cancel();
+            this.channelCts?.Cancel();
             await base.OnClosingAsync(token).ConfigureAwait(false);
         }
 
@@ -577,13 +548,15 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (this.receiveResponsesTask != null && !this.receiveResponsesTask.IsCompleted)
             {
-                await Task.WhenAny(this.receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
+                var t = await Task.WhenAny(this.receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
+                if (t != this.receiveResponsesTask)
+                {
+                    Trace.TraceWarning("UaTcpSecureChannel timeout while waiting for responses to complete.");
+                }
             }
-            this.channelCts.Dispose();
+            this.channelCts?.Dispose();
             this.symSigner?.Dispose();
             this.symVerifier?.Dispose();
-            this.symEncryptor?.Dispose();
-            this.symDecryptor?.Dispose();
             this.RemotePublicKey?.Dispose();
             this.LocalPrivateKey?.Dispose();
             await base.OnClosedAsync(token);
@@ -657,9 +630,33 @@ namespace Workstation.ServiceModel.Ua.Channels
             try
             {
                 this.ThrowIfClosedOrNotOpening();
+
+                // Check if time to renew security token.
+                if (DateTime.UtcNow > this.tokenRenewalTime)
+                {
+                    this.tokenRenewalTime = this.tokenRenewalTime.AddMilliseconds(60000);
+                    var openSecureChannelRequest = new OpenSecureChannelRequest
+                    {
+                        RequestHeader = new RequestHeader
+                        {
+                            TimeoutHint = this.TimeoutHint,
+                            ReturnDiagnostics = this.DiagnosticsHint,
+                            Timestamp = DateTime.UtcNow,
+                            RequestHandle = this.GetNextHandle(),
+                            AuthenticationToken = this.AuthenticationToken
+                        },
+                        ClientProtocolVersion = ProtocolVersion,
+                        RequestType = SecurityTokenRequestType.Renew,
+                        SecurityMode = this.RemoteEndpoint.SecurityMode,
+                        ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce() : null,
+                        RequestedLifetime = TokenRequestedLifetime
+                    };
+                    await this.SendOpenSecureChannelRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
+                }
+
                 request.RequestHeader.RequestHandle = this.GetNextHandle();
                 request.RequestHeader.AuthenticationToken = this.AuthenticationToken;
-                Log.Trace($"Sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                Trace.TraceInformation($"UaTcpSecureChannel sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
                 if (request is OpenSecureChannelRequest)
                 {
                     await this.SendOpenSecureChannelRequestAsync((OpenSecureChannelRequest)request, token).ConfigureAwait(false);
@@ -675,7 +672,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                Log.Warn($"Error sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
+                Trace.TraceWarning($"UaTcpSecureChannel error sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
                 throw;
             }
             finally
@@ -901,7 +898,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 {
                                     this.currentClientEncryptingKey = this.clientEncryptingKey;
                                     this.currentClientInitializationVector = this.clientInitializationVector;
-                                    this.symEncryptor = this.symEncryptionAlgorithm.CreateEncryptor(this.currentClientEncryptingKey, this.currentClientInitializationVector);
                                 }
                             }
                         }
@@ -1074,7 +1070,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 {
                                     this.currentClientEncryptingKey = this.clientEncryptingKey;
                                     this.currentClientInitializationVector = this.clientInitializationVector;
-                                    this.symEncryptor = this.symEncryptionAlgorithm.CreateEncryptor(this.currentClientEncryptingKey, this.currentClientInitializationVector);
                                 }
                             }
                         }
@@ -1201,7 +1196,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     if (response == null)
                     {
                         // Null response indicates socket closed. This is expected when closing secure channel.
-                        if (this.State == CommunicationState.Closing)
+                        if (this.State == CommunicationState.Closed || this.State == CommunicationState.Closing)
                         {
                             return;
                         }
@@ -1223,16 +1218,22 @@ namespace Workstation.ServiceModel.Ua.Channels
                             tcs.TrySetResult(response);
                         }
                     }
-
-                    // check if time to renew token
-                    if (DateTime.UtcNow > this.tokenRenewalTime)
+                    else
                     {
-                        this.tokenRenewalTime = this.tokenRenewalTime.AddMilliseconds(60000);
-                        Task.Run(() => this.OnRenewAsync(token).ConfigureAwait(false));
+                        Trace.TraceWarning($"UaTcpSecureChannel dropping {response.GetType().Name}.");
                     }
                 }
                 catch (Exception ex)
                 {
+                    if (this.State == CommunicationState.Closed || this.State == CommunicationState.Closing)
+                    {
+                        return;
+                    }
+
+                    if (this.State == CommunicationState.Faulted)
+                    {
+                        return;
+                    }
                     if (!token.IsCancellationRequested)
                     {
                         await this.FaultAsync(ex).ConfigureAwait(false);
@@ -1312,9 +1313,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                                             {
                                                 this.currentServerEncryptingKey = this.serverEncryptingKey;
                                                 this.currentServerInitializationVector = this.serverInitializationVector;
-                                                this.symDecryptor = this.symEncryptionAlgorithm.CreateDecryptor(this.currentServerEncryptingKey, this.currentServerInitializationVector);
                                             }
                                         }
+
+                                        Trace.TraceInformation($"UaTcpSecureChannel installed new security token {tokenId}.");
                                     }
 
                                     plainHeaderSize = decoder.Position;
@@ -1446,9 +1448,13 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 case UaTcpMessageTypes.MSGA:
                                 case UaTcpMessageTypes.OPNA:
                                 case UaTcpMessageTypes.CLOA:
-                                    var code = (StatusCode)decoder.ReadUInt32(null);
+                                    var statusCode = (StatusCode)decoder.ReadUInt32(null);
                                     var message = decoder.ReadString(null);
-                                    throw new ServiceResultException(code, message);
+                                    if (message != null)
+                                    {
+                                        throw new ServiceResultException(statusCode, message);
+                                    }
+                                    throw new ServiceResultException(statusCode);
 
                                 default:
                                     throw new ServiceResultException(StatusCodes.BadUnknownResponse);
@@ -1494,7 +1500,43 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // set properties from message stream
                     response.Decode(bodyDecoder);
 
-                    Log.Trace($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
+                    Trace.TraceInformation($"UaTcpSecureChannel received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
+
+                    // special inline processing for token renewal because we need to
+                    // hold both the sending and receiving semaphores to update the security keys.
+                    var openSecureChannelResponse = response as OpenSecureChannelResponse;
+                    if (openSecureChannelResponse != null)
+                    {
+                        this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
+
+                        await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
+                        try
+                        {
+                            this.ChannelId = openSecureChannelResponse.SecurityToken.ChannelId;
+                            this.TokenId = openSecureChannelResponse.SecurityToken.TokenId;
+                            if (this.symIsSigned)
+                            {
+                                var clientNonce = this.LocalNonce;
+                                var serverNonce = openSecureChannelResponse.ServerNonce;
+
+                                // (re)create client security keys for encrypting the next message sent
+                                var clientSecurityKey = CalculatePSHA(serverNonce, clientNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.asymSignatureHashAlgorithmName);
+                                Buffer.BlockCopy(clientSecurityKey, 0, this.clientSigningKey, 0, this.symSignatureKeySize);
+                                Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize, this.clientEncryptingKey, 0, this.symEncryptionKeySize);
+                                Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.clientInitializationVector, 0, this.symEncryptionBlockSize);
+
+                                // (re)create server security keys for decrypting the next message received that has a new TokenId
+                                var serverSecurityKey = CalculatePSHA(clientNonce, serverNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.asymSignatureHashAlgorithmName);
+                                Buffer.BlockCopy(serverSecurityKey, 0, this.serverSigningKey, 0, this.symSignatureKeySize);
+                                Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize, this.serverEncryptingKey, 0, this.symEncryptionKeySize);
+                                Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.serverInitializationVector, 0, this.symEncryptionBlockSize);
+                            }
+                        }
+                        finally
+                        {
+                            this.sendingSemaphore.Release();
+                        }
+                    }
 
                     return response;
                 }
@@ -1506,52 +1548,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             finally
             {
                 this.receivingSemaphore.Release();
-            }
-        }
-
-        private async Task OnRenewAsync(CancellationToken token)
-        {
-            var openSecureChannelRequest = new OpenSecureChannelRequest
-            {
-                ClientProtocolVersion = ProtocolVersion,
-                RequestType = SecurityTokenRequestType.Renew,
-                SecurityMode = this.RemoteEndpoint.SecurityMode,
-                ClientNonce = this.symIsSigned ? this.GetNextNonce() : null,
-                RequestedLifetime = TokenRequestedLifetime
-            };
-            var openSecureChannelResponse = (OpenSecureChannelResponse)await this.RequestAsync(openSecureChannelRequest).ConfigureAwait(false);
-            if (openSecureChannelResponse.ServerProtocolVersion < ProtocolVersion)
-            {
-                throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
-            }
-
-            await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
-            try
-            {
-                this.ChannelId = openSecureChannelResponse.SecurityToken.ChannelId;
-                this.TokenId = openSecureChannelResponse.SecurityToken.TokenId;
-                this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.75 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
-                if (this.symIsSigned)
-                {
-                    var clientNonce = openSecureChannelRequest.ClientNonce;
-                    var serverNonce = openSecureChannelResponse.ServerNonce;
-
-                    // (re)create client security keys for encrypting the next message sent
-                    var clientSecurityKey = CalculatePSHA(serverNonce, clientNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.asymSignatureHashAlgorithmName);
-                    Buffer.BlockCopy(clientSecurityKey, 0, this.clientSigningKey, 0, this.symSignatureKeySize);
-                    Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize, this.clientEncryptingKey, 0, this.symEncryptionKeySize);
-                    Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.clientInitializationVector, 0, this.symEncryptionBlockSize);
-
-                    // (re)create server security keys for decrypting the next message received that has a new TokenId
-                    var serverSecurityKey = CalculatePSHA(clientNonce, serverNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.asymSignatureHashAlgorithmName);
-                    Buffer.BlockCopy(serverSecurityKey, 0, this.serverSigningKey, 0, this.symSignatureKeySize);
-                    Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize, this.serverEncryptingKey, 0, this.symEncryptionKeySize);
-                    Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.serverInitializationVector, 0, this.symEncryptionBlockSize);
-                }
-            }
-            finally
-            {
-                this.sendingSemaphore.Release();
             }
         }
 
@@ -1617,7 +1613,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             if (task.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
                 var request = task.Request;
-                Log.Trace($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                Trace.TraceInformation($"UaTcpSecureChannel canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
             }
         }
 
