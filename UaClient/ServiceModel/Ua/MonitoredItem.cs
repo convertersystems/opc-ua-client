@@ -13,7 +13,6 @@ namespace Workstation.ServiceModel.Ua
     public class MonitoredItem
     {
         private static long lastClientId;
-        private Action<object, DataValue> publishData;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MonitoredItem"/> class.
@@ -84,18 +83,13 @@ namespace Workstation.ServiceModel.Ua
 
         internal virtual void Publish(object target, DataValue dataValue)
         {
-            if (this.publishData == null)
+            if (this.Property.PropertyType == typeof(DataValue))
             {
-                if (this.Property.PropertyType == typeof(DataValue))
-                {
-                    this.publishData = new Action<object, DataValue>((t, d) => this.Property.SetValue(t, d));
-                    return;
-                }
-
-                this.publishData = new Action<object, DataValue>((t, d) => this.Property.SetValue(t, d.Value));
+                this.Property.SetValue(target, dataValue);
+                return;
             }
 
-            this.publishData(target, dataValue);
+            this.Property.SetValue(target, dataValue.GetValue());
         }
 
         internal virtual void Publish(object target, Variant[] eventFields)

@@ -35,13 +35,8 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="lifetimeCount">The number of PublishingIntervals before the server should delete the subscription. Set '0' to use session's lifetime.</param>
         /// <param name="maxNotificationsPerPublish">The maximum number of notifications per publish request. Set '0' to use no limit.</param>
         /// <param name="priority">The priority assigned to subscription.</param>
-        public Subscription(UaTcpSessionClient session, double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, uint maxNotificationsPerPublish = 0, byte priority = 0)
+        public Subscription(UaTcpSessionClient session = null, double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, uint maxNotificationsPerPublish = 0, byte priority = 0)
         {
-            if (session == null)
-            {
-                throw new ArgumentNullException(nameof(session));
-            }
-
             this.Session = session;
             this.PublishingInterval = publishingInterval;
             this.KeepAliveCount = keepAliveCount;
@@ -83,7 +78,10 @@ namespace Workstation.ServiceModel.Ua
             }
 
             // subscribe to data change and event notifications.
-            this.token = session.Subscribe(this);
+            if (session != null)
+            {
+                this.token = session.Subscribe(this);
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -187,14 +185,14 @@ namespace Workstation.ServiceModel.Ua
                                 item.ServerId = result.MonitoredItemId;
                                 if (StatusCode.IsBad(result.StatusCode))
                                 {
-                                    Trace.TraceWarning($"Subscription error response from MonitoredItemCreateRequest for {item.NodeId}. {result.StatusCode}");
+                                    Trace.TraceError($"Subscription error response from MonitoredItemCreateRequest for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
                                 }
                             }
                         }
                     }
                     catch (ServiceResultException ex)
                     {
-                        Trace.TraceWarning($"Subscription error creating subscription '{this.GetType().Name}'. {ex.Message}");
+                        Trace.TraceError($"Subscription error creating subscription '{this.GetType().Name}'. {ex.Message}");
                     }
                 });
             }
@@ -249,7 +247,14 @@ namespace Workstation.ServiceModel.Ua
                         {
                             if (this.items.TryGetValueByClientId(min.ClientHandle, out item))
                             {
-                                item.Publish(this, min.Value);
+                                try
+                                {
+                                    item.Publish(this, min.Value);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Trace.TraceError($"Subscription error publishing value for NodeId {item.NodeId}. {ex.Message}");
+                                }
                             }
                         }
 
@@ -265,7 +270,14 @@ namespace Workstation.ServiceModel.Ua
                         {
                             if (this.items.TryGetValueByClientId(efl.ClientHandle, out item))
                             {
-                                item.Publish(this, efl.EventFields);
+                                try
+                                {
+                                    item.Publish(this, efl.EventFields);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Trace.TraceError($"Subscription error publishing event for NodeId {item.NodeId}. {ex.Message}");
+                                }
                             }
                         }
                     }
