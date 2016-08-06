@@ -14,7 +14,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// A channel that opens a session.
     /// </summary>
-    public class UaTcpSessionChannel : UaTcpSecureChannel, IRequestChannel
+    public class UaTcpSessionChannel : UaTcpSecureChannel
     {
         public const int DefaultSessionTimeout = 120 * 1000; // 2 minutes
         public const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
@@ -76,7 +76,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 var localCertificateBlob = this.RemoteEndpoint.SecurityMode != MessageSecurityMode.None ? this.LocalCertificate.RawData : null;
                 var createSessionRequest = new CreateSessionRequest
                 {
-                    RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
                     ClientDescription = this.LocalDescription,
                     EndpointUrl = this.RemoteEndpoint.EndpointUrl,
                     SessionName = this.LocalDescription.ApplicationName,
@@ -86,8 +85,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     MaxResponseMessageSize = this.RemoteMaxMessageSize
                 };
 
-                await this.SendRequestAsync(createSessionRequest, token).ConfigureAwait(false);
-                var createSessionResponse = (CreateSessionResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
+                var createSessionResponse = await this.CreateSessionAsync(createSessionRequest).ConfigureAwait(false);
                 this.SessionId = createSessionResponse.SessionId;
                 this.AuthenticationToken = createSessionResponse.AuthenticationToken;
                 this.RemoteNonce = createSessionResponse.ServerNonce;
@@ -332,14 +330,12 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             var activateSessionRequest = new ActivateSessionRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
                 ClientSignature = clientSignature,
                 LocaleIds = new[] { CultureInfo.CurrentUICulture.TwoLetterISOLanguageName },
                 UserIdentityToken = identityToken,
                 UserTokenSignature = tokenSignature
             };
-            await this.SendRequestAsync(activateSessionRequest, token).ConfigureAwait(false);
-            var activateSessionResponse = (ActivateSessionResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
+            var activateSessionResponse = await this.ActivateSessionAsync(activateSessionRequest).ConfigureAwait(false);
             this.RemoteNonce = activateSessionResponse.ServerNonce;
 
             // fetch namespace array, etc.
@@ -358,12 +354,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             };
             var readRequest = new ReadRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
                 NodesToRead = readValueIds
             };
 
-            await this.SendRequestAsync(readRequest, token).ConfigureAwait(false);
-            var readResponse = (ReadResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
+            var readResponse = await this.ReadAsync(readRequest).ConfigureAwait(false);
             if (readResponse.Results.Length == 2)
             {
                 if (StatusCode.IsGood(readResponse.Results[0].StatusCode))
@@ -384,10 +378,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             var closeSessionRequest = new CloseSessionRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
                 DeleteSubscriptions = true
             };
-            await this.SendRequestAsync(closeSessionRequest).ConfigureAwait(false);
+            var closeSessionResponse = await this.CloseSessionAsync(closeSessionRequest).ConfigureAwait(false);
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
     }

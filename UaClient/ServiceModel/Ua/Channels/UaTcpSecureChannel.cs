@@ -22,7 +22,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// A channel that opens a secure channel.
     /// </summary>
-    public class UaTcpSecureChannel : UaTcpTransportChannel, ITargetBlock<ServiceTask>
+    public class UaTcpSecureChannel : UaTcpTransportChannel, IRequestChannel, ITargetBlock<ServiceTask>
     {
         public const uint DefaultTimeoutHint = 15 * 1000; // 15 seconds
         public const uint DefaultDiagnosticsHint = (uint)DiagnosticFlags.None;
@@ -517,24 +517,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                 throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
             }
 
+            this.receiveResponsesTask = this.ReceiveResponsesAsync();
+
             // Schedule token renewal.
             this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
         }
 
-        protected override async Task OnOpenedAsync(CancellationToken token)
-        {
-            await base.OnOpenedAsync(token).ConfigureAwait(false);
-            this.receiveResponsesTask = this.ReceiveResponsesAsync(token);
-        }
-
-        protected override async Task OnClosingAsync(CancellationToken token)
-        {
-            this.channelCts?.Cancel();
-            await base.OnClosingAsync(token).ConfigureAwait(false);
-        }
-
         protected override async Task OnCloseAsync(CancellationToken token)
         {
+            this.channelCts?.Cancel();
             var closeSecureChannelRequest = new CloseSecureChannelRequest
             {
                 RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
@@ -548,10 +539,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (this.receiveResponsesTask != null && !this.receiveResponsesTask.IsCompleted)
             {
+                Trace.TraceInformation("UaTcpSecureChannel waiting for socket to close.");
                 var t = await Task.WhenAny(this.receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
                 if (t != this.receiveResponsesTask)
                 {
-                    Trace.TraceWarning("UaTcpSecureChannel timeout while waiting for responses to complete.");
+                    Trace.TraceWarning("UaTcpSecureChannel timeout while waiting for socket to close.");
                 }
             }
             this.channelCts?.Dispose();
@@ -624,7 +616,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        protected async Task SendRequestAsync(IServiceRequest request, CancellationToken token = default(CancellationToken))
+        private async Task SendRequestAsync(IServiceRequest request, CancellationToken token = default(CancellationToken))
         {
             await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
             try
@@ -1188,11 +1180,11 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private async Task ReceiveResponsesAsync(CancellationToken token = default(CancellationToken))
         {
-            while (!token.IsCancellationRequested)
+            while (true)
             {
                 try
                 {
-                    var response = await this.ReceiveResponseAsync(token).ConfigureAwait(false);
+                    var response = await this.ReceiveResponseAsync().ConfigureAwait(false);
                     if (response == null)
                     {
                         // Null response indicates socket closed. This is expected when closing secure channel.
@@ -1234,11 +1226,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     {
                         return;
                     }
-                    if (!token.IsCancellationRequested)
-                    {
-                        await this.FaultAsync(ex).ConfigureAwait(false);
-                        await this.AbortAsync().ConfigureAwait(false);
-                    }
+                    await this.FaultAsync(ex).ConfigureAwait(false);
+                    await this.AbortAsync().ConfigureAwait(false);
                 }
             }
         }

@@ -149,6 +149,7 @@
     <Compile Include="ServiceModel\Ua\Channels\ServiceTask.cs" />
     <Compile Include="ServiceModel\Ua\ISubscription.cs" />
     <Compile Include="ServiceModel\Ua\Subscription.cs" />
+    <Compile Include="ServiceModel\Ua\SessionServiceSet.cs" />
     <Compile Include="ServiceModel\Ua\UaTcpSessionClient.cs" />
     <Compile Include="ServiceModel\Ua\VariantExtensions.cs" />
     <Compile Include="ServiceModel\Ua\X509CertificateExtensions.cs" />

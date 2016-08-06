@@ -229,18 +229,14 @@ namespace Workstation.ServiceModel.Ua.Channels
             return base.OnOpenedAsync(token);
         }
 
-        protected async override Task OnCloseAsync(CancellationToken token)
+        protected override Task OnCloseAsync(CancellationToken token)
         {
-            await Task.Delay(1000);
-            this.stream?.Dispose();
-            await Task.Delay(1000);
+            return Task.CompletedTask;
         }
 
-        protected async override Task OnAbortAsync(CancellationToken token)
+        protected override Task OnAbortAsync(CancellationToken token)
         {
-            await Task.Delay(1000);
-            this.stream?.Dispose();
-            await Task.Delay(1000);
+            return Task.CompletedTask;
         }
 
         protected async override Task OnClosedAsync(CancellationToken token)
