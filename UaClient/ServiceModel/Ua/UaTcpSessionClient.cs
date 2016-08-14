@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,7 +20,7 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A client for browsing, reading, writing and subscribing to nodes of an OPC UA server.
     /// </summary>
-    public class UaTcpSessionClient : IRequestChannel, IDisposable
+    public class UaTcpSessionClient : IRequestChannel, IEventAggregator, IDisposable
     {
         private const double DefaultPublishingInterval = 1000f;
         private const uint DefaultKeepaliveCount = 10;
@@ -247,14 +249,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A token that unsubscribes when disposed.</returns>
         public IDisposable Subscribe(ISubscription subscription)
         {
-            var token1 = this.publishEvent.Subscribe(subscription.OnPublishResponse, ThreadOption.PublisherThread, false);
-            var token2 = this.stateChangedEvent.Subscribe(subscription.OnStateChanged, ThreadOption.PublisherThread, false);
-            subscription.OnStateChanged(this.State);
-            return new SubscriptionToken(t =>
-                {
-                    token2.Dispose();
-                    token1.Dispose();
-                });
+            return new SubscriptionAdapter(this, subscription);
         }
 
         /// <summary>
@@ -307,6 +302,7 @@ namespace Workstation.ServiceModel.Ua
         public void Dispose()
         {
             this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -594,6 +590,11 @@ namespace Workstation.ServiceModel.Ua
                 var request = (IServiceRequest)task.Task.AsyncState;
                 Trace.TraceInformation($"UaTcpSessionClient canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
             }
+        }
+
+        public TEventType GetEvent<TEventType>() where TEventType : EventBase, new()
+        {
+            return ((IEventAggregator)this.eventAggregator).GetEvent<TEventType>();
         }
     }
 }

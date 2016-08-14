@@ -36,12 +36,25 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
         }
     }
     
-    public class MyViewModel : Subscription
+    public class MyViewModel : ViewModelBase, ISubscription
     {
         public MyViewModel(PLC1Service session)
-            : base(session)
         {
+            this.Session = session;
+            this.PublishingInterval = 1000.0;
+            this.KeepAliveCount = 10;
+            this.LifetimeCount = 0;
+            this.PublishingEnabled = true;
+            this.MonitoredItems = new MonitoredItemCollection(this);
+            this.Session.Subscribe(this);
         }
+
+        public UaTcpSessionClient Session { get; }
+        public double PublishingInterval { get; }
+        public uint KeepAliveCount { get; }
+        public uint LifetimeCount { get; }
+        public bool PublishingEnabled { get; }
+        public MonitoredItemCollection MonitoredItems { get; }
 
         /// <summary>
         /// Gets the value of ServerStatusCurrentTime.
@@ -58,8 +71,12 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     }
 ```
 ### Releases
+v1.3.0 Depreciated Subscription base class in favor of ISubscription interface to allow freedom to choose whatever base class you wish for your view models.
+   
 v1.2.0 Client, Subscription and Channel class constructors have new optional arguments. Corresponding property setters are removed to prevent changes after construction. Fixed some threading issues: Subscription's publish on thread pool, viewmodel's update on dispatcher thread. 
+
 v1.1.0 Simplified Subscription base class to automatically subscribe for data change and event notifications when constructed, re-subscribe if the server reboots, and un-subscribe when garbage collected.   
+
 v1.0.0 First commit. Includes UaTcpSessionChannel for 'opc.tcp' servers. Supports security up to Basic256Sha256. Automatically creates self-signed X509Certificate with 2048bit key.
 
 [1]: robot6.jpg  

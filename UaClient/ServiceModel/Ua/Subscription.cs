@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Prism.Events;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,7 +17,8 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A collection of items to be monitored by the OPC UA server.
     /// </summary>
-    public class Subscription : ISubscription, INotifyPropertyChanged, IDisposable
+    [Obsolete("Use ISubscription and your favorite ViewModeBase class, instead. See https://github.com/convertersystems/workstation-samples")]
+    public class Subscription : INotifyPropertyChanged, IDisposable
     {
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private const uint DiagnosticsHint = (uint)DiagnosticFlags.None;
@@ -24,7 +26,8 @@ namespace Workstation.ServiceModel.Ua
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private volatile bool isPublishing = false;
         private MonitoredItemCollection items = new MonitoredItemCollection();
-        private IDisposable token;
+        private IDisposable token1;
+        private IDisposable token2;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscription"/> class.
@@ -55,32 +58,37 @@ namespace Workstation.ServiceModel.Ua
                     continue;
                 }
 
-                var item = new MonitoredItem
-                {
-                    NodeId = !string.IsNullOrEmpty(itemAttribute.NodeId) ? NodeId.Parse(itemAttribute.NodeId) : null,
-                    IndexRange = itemAttribute.IndexRange,
-                    AttributeId = itemAttribute.AttributeId,
-                    SamplingInterval = itemAttribute.SamplingInterval,
-                    QueueSize = itemAttribute.QueueSize,
-                    DiscardOldest = itemAttribute.DiscardOldest,
-                    Property = propertyInfo,
-                };
+                MonitoringFilter filter = null;
+
                 if (itemAttribute.AttributeId == AttributeIds.Value && (itemAttribute.DataChangeTrigger != DataChangeTrigger.StatusValue || itemAttribute.DeadbandType != DeadbandType.None))
                 {
-                    item.Filter = new DataChangeFilter() { Trigger = itemAttribute.DataChangeTrigger, DeadbandType = (uint)itemAttribute.DeadbandType, DeadbandValue = itemAttribute.DeadbandValue };
+                    filter = new DataChangeFilter() { Trigger = itemAttribute.DataChangeTrigger, DeadbandType = (uint)itemAttribute.DeadbandType, DeadbandValue = itemAttribute.DeadbandValue };
                 }
                 else if (itemAttribute.AttributeId == AttributeIds.EventNotifier)
                 {
-                    item.Filter = new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(propertyInfo.PropertyType) };
+                    filter = new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(propertyInfo.PropertyType) };
                 }
 
+                var item = new MonitoredItem(
+                    property: propertyInfo,
+                    nodeId: NodeId.Parse(itemAttribute.NodeId),
+                    indexRange: itemAttribute.IndexRange,
+                    attributeId: itemAttribute.AttributeId,
+                    samplingInterval: itemAttribute.SamplingInterval,
+                    filter: filter,
+                    queueSize: itemAttribute.QueueSize,
+                    discardOldest: itemAttribute.DiscardOldest);
                 this.items.Add(item);
             }
 
             // subscribe to data change and event notifications.
             if (session != null)
             {
-                this.token = session.Subscribe(this);
+                var publishEvent = session.GetEvent<PubSubEvent<PublishResponse>>();
+                this.token1 = publishEvent.Subscribe(this.OnPublishResponse, ThreadOption.PublisherThread, false);
+                var stateChangedEvent = session.GetEvent<PubSubEvent<CommunicationState>>();
+                this.token2 = stateChangedEvent.Subscribe(this.OnStateChanged, ThreadOption.PublisherThread, false);
+                this.OnStateChanged(session.State);
             }
         }
 
@@ -139,7 +147,8 @@ namespace Workstation.ServiceModel.Ua
         {
             if (disposing)
             {
-                this.token?.Dispose();
+                this.token1?.Dispose();
+                this.token2?.Dispose();
             }
         }
 

@@ -288,6 +288,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             token.ThrowIfCancellationRequested();
             this.sendBuffer = new byte[this.LocalSendBufferSize];
             this.receiveBuffer = new byte[this.LocalReceiveBufferSize];
+
+            this.receiveResponsesTask = this.ReceiveResponsesAsync();
+
             if (this.LocalCertificate != null)
             {
                 this.localCertificateBlob = this.LocalCertificate.RawData;
@@ -501,7 +504,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             var openSecureChannelRequest = new OpenSecureChannelRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
+                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
                 ClientProtocolVersion = ProtocolVersion,
                 RequestType = SecurityTokenRequestType.Issue,
                 SecurityMode = this.RemoteEndpoint.SecurityMode,
@@ -509,15 +512,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                 RequestedLifetime = TokenRequestedLifetime
             };
 
-            await this.SendRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
-            var openSecureChannelResponse = (OpenSecureChannelResponse)await this.ReceiveResponseAsync(token).ConfigureAwait(false);
+            var openSecureChannelResponse = (OpenSecureChannelResponse)await this.RequestAsync(openSecureChannelRequest).ConfigureAwait(false);
 
             if (openSecureChannelResponse.ServerProtocolVersion < ProtocolVersion)
             {
                 throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
             }
-
-            this.receiveResponsesTask = this.ReceiveResponsesAsync();
 
             // Schedule token renewal.
             this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
@@ -528,9 +528,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.channelCts?.Cancel();
             var closeSecureChannelRequest = new CloseSecureChannelRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow },
+                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
             };
-            await this.SendRequestAsync(closeSecureChannelRequest).ConfigureAwait(false);
+            await this.SendRequestAsync(new ServiceTask(closeSecureChannelRequest)).ConfigureAwait(false);
 
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
@@ -601,9 +601,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (!task.Task.IsCompleted)
                 {
-                    var request = task.Request;
-                    await this.SendRequestAsync(request, token).ConfigureAwait(false);
-                    this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, task);
+                    await this.SendRequestAsync(task, token).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -616,9 +614,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        private async Task SendRequestAsync(IServiceRequest request, CancellationToken token = default(CancellationToken))
+        private async Task SendRequestAsync(ServiceTask serviceTask, CancellationToken token = default(CancellationToken))
         {
             await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
+            var request = serviceTask.Request;
             try
             {
                 this.ThrowIfClosedOrNotOpening();
@@ -643,12 +642,16 @@ namespace Workstation.ServiceModel.Ua.Channels
                         ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce() : null,
                         RequestedLifetime = TokenRequestedLifetime
                     };
+                    Trace.TraceInformation($"UaTcpSecureChannel sending {openSecureChannelRequest.GetType().Name} Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
+                    this.pendingCompletions.TryAdd(openSecureChannelRequest.RequestHeader.RequestHandle, new ServiceTask(openSecureChannelRequest));
                     await this.SendOpenSecureChannelRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
                 }
 
                 request.RequestHeader.RequestHandle = this.GetNextHandle();
                 request.RequestHeader.AuthenticationToken = this.AuthenticationToken;
+
                 Trace.TraceInformation($"UaTcpSecureChannel sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, serviceTask);
                 if (request is OpenSecureChannelRequest)
                 {
                     await this.SendOpenSecureChannelRequestAsync((OpenSecureChannelRequest)request, token).ConfigureAwait(false);
@@ -1195,7 +1198,6 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                         throw new ServiceResultException(StatusCodes.BadServerNotConnected);
                     }
-
                     var header = response.ResponseHeader;
                     ServiceTask tcs;
                     if (this.pendingCompletions.TryRemove(header.RequestHandle, out tcs))
@@ -1209,10 +1211,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             tcs.TrySetResult(response);
                         }
-                    }
-                    else
-                    {
-                        Trace.TraceWarning($"UaTcpSecureChannel dropping {response.GetType().Name}.");
                     }
                 }
                 catch (Exception ex)
@@ -1494,7 +1492,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.
                     var openSecureChannelResponse = response as OpenSecureChannelResponse;
-                    if (openSecureChannelResponse != null)
+                    if (openSecureChannelResponse != null && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader.ServiceResult))
                     {
                         this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
 

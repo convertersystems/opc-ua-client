@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 
@@ -17,64 +18,88 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Initializes a new instance of the <see cref="MonitoredItem"/> class.
         /// </summary>
-        public MonitoredItem()
+        /// <param name="property">the property of the model to store the published value.</param>
+        /// <param name="nodeId">the NodeId to monitor.</param>
+        /// <param name="attributeId">the attribute to monitor.</param>
+        /// <param name="indexRange">the range of array indexes to monitor.</param>
+        /// <param name="monitoringMode">the monitoring mode.</param>
+        /// <param name="samplingInterval">the sampling interval.</param>
+        /// <param name="filter">the properties that trigger a data change.</param>
+        /// <param name="queueSize">the length of the queue used by the server to buffer values.</param>
+        /// <param name="discardOldest">a value indicating whether to discard the oldest entries in the queue when it is full.</param>
+        public MonitoredItem(PropertyInfo property, NodeId nodeId, uint attributeId = AttributeIds.Value, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
         {
-            this.AttributeId = AttributeIds.Value;
-            this.MonitoringMode = MonitoringMode.Reporting;
-            this.SamplingInterval = -1;
-            this.QueueSize = 0;
-            this.DiscardOldest = true;
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
+            if (nodeId == null)
+            {
+                throw new ArgumentNullException(nameof(nodeId));
+            }
+
+            this.Property = property;
+            this.NodeId = nodeId;
+            this.AttributeId = attributeId;
+            this.IndexRange = indexRange;
+            this.MonitoringMode = monitoringMode;
+            this.SamplingInterval = samplingInterval;
+            this.Filter = filter;
+            this.QueueSize = queueSize;
+            this.DiscardOldest = discardOldest;
+            this.ClientId = (uint)Interlocked.Increment(ref lastClientId);
         }
 
         /// <summary>
-        /// Gets or sets the property of the model.
+        /// Gets the property of the model to store the published value.
         /// </summary>
-        public PropertyInfo Property { get; set; }
+        public PropertyInfo Property { get; }
 
         /// <summary>
-        /// Gets or sets the NodeId to monitor.
+        /// Gets the NodeId to monitor.
         /// </summary>
-        public NodeId NodeId { get; set; }
+        public NodeId NodeId { get; }
 
         /// <summary>
-        /// Gets or sets the attribute to monitor.
+        /// Gets the attribute to monitor.
         /// </summary>
-        public uint AttributeId { get; set; }
+        public uint AttributeId { get; }
 
         /// <summary>
-        /// Gets or sets the range of array indexes to monitor.
+        /// Gets the range of array indexes to monitor.
         /// </summary>
-        public string IndexRange { get; set; }
+        public string IndexRange { get; }
 
         /// <summary>
-        /// Gets or sets the monitoring mode.
+        /// Gets the monitoring mode.
         /// </summary>
-        public MonitoringMode MonitoringMode { get; set; }
+        public MonitoringMode MonitoringMode { get; }
 
         /// <summary>
-        /// Gets or sets the sampling interval.
+        /// Gets the sampling interval.
         /// </summary>
-        public int SamplingInterval { get; set; }
+        public int SamplingInterval { get; }
 
         /// <summary>
-        /// Gets or sets the filter used by the server to select values to return.
+        /// Gets the filter used by the server to select values to return.
         /// </summary>
-        public MonitoringFilter Filter { get; set; }
+        public MonitoringFilter Filter { get; }
 
         /// <summary>
-        /// Gets or sets the length of the queue used by the server to buffer values.
+        /// Gets the length of the queue used by the server to buffer values.
         /// </summary>
-        public uint QueueSize { get; set; }
+        public uint QueueSize { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to discard the oldest entries in the queue when it is full.
+        /// Gets a value indicating whether to discard the oldest entries in the queue when it is full.
         /// </summary>
-        public bool DiscardOldest { get; set; }
+        public bool DiscardOldest { get; }
 
         /// <summary>
         /// Gets the identifier assigned by the client.
         /// </summary>
-        public uint ClientId { get; } = (uint)Interlocked.Increment(ref lastClientId);
+        public uint ClientId { get; }
 
         /// <summary>
         /// Gets or sets the identifier assigned by the server.

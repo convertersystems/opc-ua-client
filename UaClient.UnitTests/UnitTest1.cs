@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
+using System.ComponentModel;
 
 namespace Workstation.UaClient.UnitTests
 {
@@ -236,11 +237,10 @@ namespace Workstation.UaClient.UnitTests
             };
             var res2 = await channel2.TransferSubscriptionsAsync(req2);
             Console.WriteLine($"Transferred subscription result '{res2.Results[0].StatusCode}'.");
-
-            Assert.IsTrue(StatusCode.IsGood(res2.Results[0].StatusCode));
-
             Console.WriteLine($"Closing session '{channel2.SessionId}'.");
             await channel2.CloseAsync();
+
+            Assert.IsTrue(StatusCode.IsGood(res2.Results[0].StatusCode));
         }
 
         /// <summary>
@@ -284,17 +284,35 @@ namespace Workstation.UaClient.UnitTests
             Console.WriteLine($"Created subscription.");
 
             await Task.Delay(5000);
+            session.Dispose();
 
             Assert.IsTrue(sub.ServerServerStatusCurrentTime != DateTime.MinValue);
-            session.Dispose();
         }
 
-        private class MySubscription : Subscription
+        private class MySubscription : ISubscription
         {
             public MySubscription(UaTcpSessionClient session)
-                : base(session)
             {
+                this.Session = session;
+                this.PublishingInterval = 1000.0;
+                this.KeepAliveCount = 10;
+                this.LifetimeCount = 0;
+                this.PublishingEnabled = true;
+                this.MonitoredItems = new MonitoredItemCollection(this);
+                this.Session.Subscribe(this);
             }
+
+            public UaTcpSessionClient Session { get; }
+
+            public double PublishingInterval { get; }
+
+            public uint KeepAliveCount { get; }
+
+            public uint LifetimeCount { get; }
+
+            public bool PublishingEnabled { get; }
+
+            public MonitoredItemCollection MonitoredItems { get; }
 
             /// <summary>
             /// Gets the value of ServerServerStatusCurrentTime.
@@ -303,11 +321,12 @@ namespace Workstation.UaClient.UnitTests
             public DateTime ServerServerStatusCurrentTime
             {
                 get { return this.serverServerStatusCurrentTime; }
-                private set { this.SetProperty(ref this.serverServerStatusCurrentTime, value); }
+                private set { this.serverServerStatusCurrentTime = value; }
             }
 
             private DateTime serverServerStatusCurrentTime;
 
+            public event PropertyChangedEventHandler PropertyChanged;
         }
     }
 }

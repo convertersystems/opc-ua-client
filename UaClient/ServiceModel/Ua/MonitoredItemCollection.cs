@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Reflection;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -14,6 +15,54 @@ namespace Workstation.ServiceModel.Ua
     {
         private Dictionary<string, MonitoredItem> nameMap = new Dictionary<string, MonitoredItem>();
         private Dictionary<uint, MonitoredItem> clientIdMap = new Dictionary<uint, MonitoredItem>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MonitoredItemCollection"/> class.
+        /// </summary>
+        public MonitoredItemCollection()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MonitoredItemCollection"/> class.
+        /// Attributes found in the given subscription are added to the collection.
+        /// </summary>
+        /// <param name="subscription">the instance that will be inspected for [MonitoredItem] attributes.</param>
+        public MonitoredItemCollection(ISubscription subscription)
+        {
+            var typeInfo = subscription.GetType().GetTypeInfo();
+            foreach (var propertyInfo in typeInfo.DeclaredProperties)
+            {
+                var itemAttribute = propertyInfo.GetCustomAttribute<MonitoredItemAttribute>();
+                if (itemAttribute == null || string.IsNullOrEmpty(itemAttribute.NodeId))
+                {
+                    continue;
+                }
+
+                MonitoringFilter filter = null;
+
+                if (itemAttribute.AttributeId == AttributeIds.Value && (itemAttribute.DataChangeTrigger != DataChangeTrigger.StatusValue || itemAttribute.DeadbandType != DeadbandType.None))
+                {
+                    filter = new DataChangeFilter() { Trigger = itemAttribute.DataChangeTrigger, DeadbandType = (uint)itemAttribute.DeadbandType, DeadbandValue = itemAttribute.DeadbandValue };
+                }
+                else if (itemAttribute.AttributeId == AttributeIds.EventNotifier)
+                {
+                    filter = new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(propertyInfo.PropertyType) };
+                }
+
+                var item = new MonitoredItem(
+                    property: propertyInfo,
+                    nodeId: NodeId.Parse(itemAttribute.NodeId),
+                    indexRange: itemAttribute.IndexRange,
+                    attributeId: itemAttribute.AttributeId,
+                    samplingInterval: itemAttribute.SamplingInterval,
+                    filter: filter,
+                    queueSize: itemAttribute.QueueSize,
+                    discardOldest: itemAttribute.DiscardOldest);
+
+                this.Add(item);
+            }
+        }
 
         /// <summary>Gets the element with the specified name. </summary>
         /// <returns>The element with the specified name. If an element with the specified key is not found, an exception is thrown.</returns>

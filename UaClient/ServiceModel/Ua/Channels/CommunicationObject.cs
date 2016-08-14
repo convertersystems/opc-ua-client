@@ -507,6 +507,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public void Dispose()
         {
             this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
