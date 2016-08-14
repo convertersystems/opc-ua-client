@@ -14,7 +14,7 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 
 ### Main Types
 - UaTcpSessionClient - A client for browsing, reading, writing and subscribing to nodes of your OPC UA server. Connects and reconnects automatically. 100% asynchronous.
-- Subscription - A base class for your view models. Works with UaTcpSessionClient to automatically create and delete subscriptions on the server. Delivers data change and event notifications to properties. Implements INotifyPropertyChanged.
+- ISubscription - An interface for your view models. Permits UaTcpSessionClient to automatically create and delete subscriptions on the server and deliver data change and event notifications to properties.
 - MonitoredItemAttribute - An attribute for properties that indicates the property will receive data change or event notifications from the server.
 
 ```
@@ -67,7 +67,6 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
         }
 
         private DateTime serverStatusCurrentTime;
-
     }
 ```
 ### Releases
