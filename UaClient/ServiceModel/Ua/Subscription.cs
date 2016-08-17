@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Workstation.Collections;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -45,7 +46,7 @@ namespace Workstation.ServiceModel.Ua
             this.KeepAliveCount = keepAliveCount;
             this.LifetimeCount = lifetimeCount;
             this.MaxNotificationsPerPublish = maxNotificationsPerPublish;
-            this.MonitoredItems = new ReadOnlyCollection<MonitoredItem>(this.items);
+            this.MonitoredItems = new ReadOnlyCollection<MonitoredItemBase>(this.items);
             this.PropertyChanged += this.OnPropertyChanged;
 
             // fill MonitoredItems collection
@@ -59,17 +60,75 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 MonitoringFilter filter = null;
-
                 if (itemAttribute.AttributeId == AttributeIds.Value && (itemAttribute.DataChangeTrigger != DataChangeTrigger.StatusValue || itemAttribute.DeadbandType != DeadbandType.None))
                 {
                     filter = new DataChangeFilter() { Trigger = itemAttribute.DataChangeTrigger, DeadbandType = (uint)itemAttribute.DeadbandType, DeadbandValue = itemAttribute.DeadbandValue };
                 }
-                else if (itemAttribute.AttributeId == AttributeIds.EventNotifier)
+
+                var propType = propertyInfo.PropertyType;
+                if (propType == typeof(DataValue))
                 {
-                    filter = new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(propertyInfo.PropertyType) };
+                    this.items.Add(new DataValueMonitoredItem(
+                        property: propertyInfo,
+                        nodeId: NodeId.Parse(itemAttribute.NodeId),
+                        indexRange: itemAttribute.IndexRange,
+                        attributeId: itemAttribute.AttributeId,
+                        samplingInterval: itemAttribute.SamplingInterval,
+                        filter: filter,
+                        queueSize: itemAttribute.QueueSize,
+                        discardOldest: itemAttribute.DiscardOldest));
+                    continue;
                 }
 
-                var item = new MonitoredItem(
+                if (propType == typeof(ObservableQueue<DataValue>))
+                {
+                    this.items.Add(new DataValueQueueMonitoredItem(
+                        property: propertyInfo,
+                        nodeId: NodeId.Parse(itemAttribute.NodeId),
+                        indexRange: itemAttribute.IndexRange,
+                        attributeId: itemAttribute.AttributeId,
+                        samplingInterval: itemAttribute.SamplingInterval,
+                        filter: filter,
+                        queueSize: itemAttribute.QueueSize,
+                        discardOldest: itemAttribute.DiscardOldest));
+                    continue;
+                }
+
+                if (propType == typeof(BaseEvent) || propType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
+                {
+                    this.items.Add(new EventMonitoredItem(
+                        property: propertyInfo,
+                        nodeId: NodeId.Parse(itemAttribute.NodeId),
+                        indexRange: itemAttribute.IndexRange,
+                        attributeId: itemAttribute.AttributeId,
+                        samplingInterval: itemAttribute.SamplingInterval,
+                        filter: new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(propType) },
+                        queueSize: itemAttribute.QueueSize,
+                        discardOldest: itemAttribute.DiscardOldest));
+                    continue;
+                }
+
+                if (propType.IsConstructedGenericType && propType.GetGenericTypeDefinition() == typeof(ObservableQueue<>))
+                {
+                    var elemType = propType.GenericTypeArguments[0];
+                    if (elemType == typeof(BaseEvent) || elemType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
+                    {
+                        this.items.Add((MonitoredItemBase)Activator.CreateInstance(
+                        typeof(EventQueueMonitoredItem<>).MakeGenericType(elemType),
+                        propertyInfo,
+                        NodeId.Parse(itemAttribute.NodeId),
+                        itemAttribute.AttributeId,
+                        itemAttribute.IndexRange,
+                        MonitoringMode.Reporting,
+                        itemAttribute.SamplingInterval,
+                        new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(elemType) },
+                        itemAttribute.QueueSize,
+                        itemAttribute.DiscardOldest));
+                        continue;
+                    }
+                }
+
+                this.items.Add(new ValueMonitoredItem(
                     property: propertyInfo,
                     nodeId: NodeId.Parse(itemAttribute.NodeId),
                     indexRange: itemAttribute.IndexRange,
@@ -77,8 +136,7 @@ namespace Workstation.ServiceModel.Ua
                     samplingInterval: itemAttribute.SamplingInterval,
                     filter: filter,
                     queueSize: itemAttribute.QueueSize,
-                    discardOldest: itemAttribute.DiscardOldest);
-                this.items.Add(item);
+                    discardOldest: itemAttribute.DiscardOldest));
             }
 
             // subscribe to data change and event notifications.
@@ -122,7 +180,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the collection of items to monitor.
         /// </summary>
-        public ReadOnlyCollection<MonitoredItem> MonitoredItems { get; }
+        public ReadOnlyCollection<MonitoredItemBase> MonitoredItems { get; }
 
         /// <summary>
         /// Gets the session with the server.
@@ -251,7 +309,7 @@ namespace Workstation.ServiceModel.Ua
                     var dcn = n as DataChangeNotification;
                     if (dcn != null)
                     {
-                        MonitoredItem item;
+                        MonitoredItemBase item;
                         foreach (var min in dcn.MonitoredItems)
                         {
                             if (this.items.TryGetValueByClientId(min.ClientHandle, out item))
@@ -274,7 +332,7 @@ namespace Workstation.ServiceModel.Ua
                     var enl = n as EventNotificationList;
                     if (enl != null)
                     {
-                        MonitoredItem item;
+                        MonitoredItemBase item;
                         foreach (var efl in enl.Events)
                         {
                             if (this.items.TryGetValueByClientId(efl.ClientHandle, out item))
@@ -327,7 +385,7 @@ namespace Workstation.ServiceModel.Ua
                 return;
             }
 
-            MonitoredItem item;
+            MonitoredItemBase item;
             if (this.Session != null && this.items.TryGetValueByName(e.PropertyName, out item))
             {
                 var pi = item.Property;

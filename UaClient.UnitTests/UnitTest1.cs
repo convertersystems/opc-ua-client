@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
 using System.ComponentModel;
+using Workstation.Collections;
 
 namespace Workstation.UaClient.UnitTests
 {
@@ -286,7 +287,9 @@ namespace Workstation.UaClient.UnitTests
             await Task.Delay(5000);
             session.Dispose();
 
-            Assert.IsTrue(sub.ServerServerStatusCurrentTime != DateTime.MinValue);
+            Assert.IsTrue(sub.CurrentTime != DateTime.MinValue);
+            Assert.IsTrue(sub.CurrentTimeAsDataValue != null);
+            Assert.IsTrue(sub.CurrentTimeQueue.Count > 0);
         }
 
         private class MySubscription : ISubscription
@@ -302,31 +305,50 @@ namespace Workstation.UaClient.UnitTests
                 this.Session.Subscribe(this);
             }
 
-            public UaTcpSessionClient Session { get; }
+            public event PropertyChangedEventHandler PropertyChanged;
 
-            public double PublishingInterval { get; }
+            public UaTcpSessionClient Session { get; set; }
 
-            public uint KeepAliveCount { get; }
+            public double PublishingInterval { get; set; }
 
-            public uint LifetimeCount { get; }
+            public uint KeepAliveCount { get; set; }
 
-            public bool PublishingEnabled { get; }
+            public uint LifetimeCount { get; set; }
 
-            public MonitoredItemCollection MonitoredItems { get; }
+            public bool PublishingEnabled { get; set; }
+
+            public MonitoredItemCollection MonitoredItems { get; set; }
 
             /// <summary>
-            /// Gets the value of ServerServerStatusCurrentTime.
+            /// Gets the value of CurrentTime.
             /// </summary>
             [MonitoredItem(nodeId: "i=2258")]
-            public DateTime ServerServerStatusCurrentTime
+            public DateTime CurrentTime
             {
-                get { return this.serverServerStatusCurrentTime; }
-                private set { this.serverServerStatusCurrentTime = value; }
+                get { return this.currentTime; }
+                private set { this.currentTime = value; }
             }
 
-            private DateTime serverServerStatusCurrentTime;
+            private DateTime currentTime;
 
-            public event PropertyChangedEventHandler PropertyChanged;
+            /// <summary>
+            /// Gets the value of CurrentTimeAsDataValue.
+            /// </summary>
+            [MonitoredItem(nodeId: "i=2258")]
+            public DataValue CurrentTimeAsDataValue
+            {
+                get { return this.currentTimeAsDataValue; }
+                private set { this.currentTimeAsDataValue = value; }
+            }
+
+            private DataValue currentTimeAsDataValue;
+
+            /// <summary>
+            /// Gets the value of CurrentTimeQueue.
+            /// </summary>
+            [MonitoredItem(nodeId: "i=2258")]
+            public ObservableQueue<DataValue> CurrentTimeQueue { get; } = new ObservableQueue<DataValue>(capacity: 16, isFixedSize: true);
+
         }
     }
 }

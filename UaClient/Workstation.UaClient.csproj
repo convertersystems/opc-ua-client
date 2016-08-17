@@ -148,6 +148,7 @@
     <Compile Include="ServiceModel\Ua\Channels\RecyclableMemoryStreamManager.cs" />
     <Compile Include="ServiceModel\Ua\Channels\ServiceTask.cs" />
     <Compile Include="ServiceModel\Ua\ISubscription.cs" />
+    <Compile Include="ServiceModel\Ua\MonitoredItemBase.cs" />
     <Compile Include="ServiceModel\Ua\SessionServiceSet.cs" />
     <Compile Include="ServiceModel\Ua\Subscription.cs" />
     <Compile Include="ServiceModel\Ua\SubscriptionAdapter.cs" />
@@ -185,7 +186,6 @@
     <Compile Include="ServiceModel\Ua\IUserIdentity.cs" />
     <Compile Include="ServiceModel\Ua\LocalizedText.cs" />
     <Compile Include="ServiceModel\Ua\MethodServiceSet.cs" />
-    <Compile Include="ServiceModel\Ua\MonitoredItem.cs" />
     <Compile Include="ServiceModel\Ua\MonitoredItemAttribute.cs" />
     <Compile Include="ServiceModel\Ua\MonitoredItemCollection.cs" />
     <Compile Include="ServiceModel\Ua\MonitoredItemServiceSet.cs" />

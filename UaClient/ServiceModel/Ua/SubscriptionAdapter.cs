@@ -33,6 +33,7 @@ namespace Workstation.ServiceModel.Ua
         {
             this.session = session;
             this.subscription = subscription;
+            this.subscription.Session = session;
             this.subscription.PropertyChanged += this.OnPropertyChanged;
             var publishEvent = this.session.GetEvent<PubSubEvent<PublishResponse>>();
             this.token1 = publishEvent.Subscribe(this.OnPublishResponse, publishEvent.SynchronizationContext != null ? ThreadOption.UIThread : ThreadOption.BackgroundThread, false, this.CanExecutePublishResponse);
@@ -143,7 +144,7 @@ namespace Workstation.ServiceModel.Ua
                     var dcn = n as DataChangeNotification;
                     if (dcn != null)
                     {
-                        MonitoredItem item;
+                        MonitoredItemBase item;
                         foreach (var min in dcn.MonitoredItems)
                         {
                             if (this.subscription.MonitoredItems.TryGetValueByClientId(min.ClientHandle, out item))
@@ -166,7 +167,7 @@ namespace Workstation.ServiceModel.Ua
                     var enl = n as EventNotificationList;
                     if (enl != null)
                     {
-                        MonitoredItem item;
+                        MonitoredItemBase item;
                         foreach (var efl in enl.Events)
                         {
                             if (this.subscription.MonitoredItems.TryGetValueByClientId(efl.ClientHandle, out item))
@@ -221,7 +222,7 @@ namespace Workstation.ServiceModel.Ua
                 return;
             }
 
-            MonitoredItem item;
+            MonitoredItemBase item;
             if (this.subscription.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
             {
                 var pi = item.Property;

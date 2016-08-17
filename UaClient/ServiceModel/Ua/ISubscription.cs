@@ -8,9 +8,9 @@ namespace Workstation.ServiceModel.Ua
     public interface ISubscription : INotifyPropertyChanged
     {
         /// <summary>
-        /// Gets the session with the server.
+        /// Gets or sets the session with the server.
         /// </summary>
-        UaTcpSessionClient Session { get; }
+        UaTcpSessionClient Session { get; set; }
 
         /// <summary>
         /// Gets the publishing interval.

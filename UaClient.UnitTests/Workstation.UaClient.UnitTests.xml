@@ -33,9 +33,19 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous unit test.</returns>
         </member>
-        <member name="P:Workstation.UaClient.UnitTests.UnitTest1.MySubscription.ServerServerStatusCurrentTime">
+        <member name="P:Workstation.UaClient.UnitTests.UnitTest1.MySubscription.CurrentTime">
             <summary>
-            Gets the value of ServerServerStatusCurrentTime.
+            Gets the value of CurrentTime.
+            </summary>
+        </member>
+        <member name="P:Workstation.UaClient.UnitTests.UnitTest1.MySubscription.CurrentTimeAsDataValue">
+            <summary>
+            Gets the value of CurrentTimeAsDataValue.
+            </summary>
+        </member>
+        <member name="P:Workstation.UaClient.UnitTests.UnitTest1.MySubscription.CurrentTimeQueue">
+            <summary>
+            Gets the value of CurrentTimeQueue.
             </summary>
         </member>
     </members>
