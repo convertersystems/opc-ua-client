@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Workstation.Collections;
 
 namespace Workstation.ServiceModel.Ua
@@ -107,11 +108,15 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public uint ServerId { get; set; }
 
-        internal virtual void Publish(object target, DataValue dataValue)
+        public virtual void Publish(object target, DataValue dataValue)
         {
         }
 
-        internal virtual void Publish(object target, Variant[] eventFields)
+        public virtual void Publish(object target, Variant[] eventFields)
+        {
+        }
+
+        public virtual void OnPropertyChanged(object sender, UaTcpSessionClient session)
         {
         }
     }
@@ -127,9 +132,35 @@ namespace Workstation.ServiceModel.Ua
         {
         }
 
-        internal override void Publish(object target, DataValue dataValue)
+        public override void Publish(object target, DataValue dataValue)
         {
             this.Property.SetValue(target, dataValue);
+        }
+
+        public override async void OnPropertyChanged(object sender, UaTcpSessionClient session)
+        {
+            var pi = this.Property;
+            if (pi.CanRead)
+            {
+                try
+                {
+                    var dataValue = (DataValue)pi.GetValue(sender);
+                    var writeRequest = new WriteRequest
+                    {
+                        NodesToWrite = new[] { new WriteValue { NodeId = this.NodeId, AttributeId = this.AttributeId, IndexRange = this.IndexRange, Value = dataValue } }
+                    };
+                    var writeResponse = await session.WriteAsync(writeRequest).ConfigureAwait(false);
+                    var result = writeResponse.Results[0];
+                    if (StatusCode.IsBad(result))
+                    {
+                        Trace.TraceWarning($"Subscription error writing value for NodeId {this.NodeId}. {StatusCodes.GetDefaultMessage(result)}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning($"Subscription error writing value for NodeId {this.NodeId}. {ex.Message}");
+                }
+            }
         }
     }
 
@@ -144,9 +175,35 @@ namespace Workstation.ServiceModel.Ua
         {
         }
 
-        internal override void Publish(object target, DataValue dataValue)
+        public override void Publish(object target, DataValue dataValue)
         {
             this.Property.SetValue(target, dataValue.GetValue());
+        }
+
+        public override async void OnPropertyChanged(object sender, UaTcpSessionClient session)
+        {
+            var pi = this.Property;
+            if (pi.CanRead)
+            {
+                try
+                {
+                    var value = pi.GetValue(sender);
+                    var writeRequest = new WriteRequest
+                    {
+                        NodesToWrite = new[] { new WriteValue { NodeId = this.NodeId, AttributeId = this.AttributeId, IndexRange = this.IndexRange, Value = new DataValue(value) } }
+                    };
+                    var writeResponse = await session.WriteAsync(writeRequest).ConfigureAwait(false);
+                    var result = writeResponse.Results[0];
+                    if (StatusCode.IsBad(result))
+                    {
+                        Trace.TraceWarning($"Subscription error writing value for NodeId {this.NodeId}. {StatusCodes.GetDefaultMessage(result)}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning($"Subscription error writing value for NodeId {this.NodeId}. {ex.Message}");
+                }
+            }
         }
     }
 
@@ -161,7 +218,7 @@ namespace Workstation.ServiceModel.Ua
         {
         }
 
-        internal override void Publish(object target, DataValue dataValue)
+        public override void Publish(object target, DataValue dataValue)
         {
             var queue = (ObservableQueue<DataValue>)this.Property.GetValue(target);
             queue.Enqueue(dataValue);
@@ -179,7 +236,7 @@ namespace Workstation.ServiceModel.Ua
         {
         }
 
-        internal override void Publish(object target, Variant[] eventFields)
+        public override void Publish(object target, Variant[] eventFields)
         {
             var currentEvent = EventHelper.Deserialize(this.Property.PropertyType, eventFields);
             this.Property.SetValue(target, currentEvent);
@@ -198,7 +255,7 @@ namespace Workstation.ServiceModel.Ua
         {
         }
 
-        internal override void Publish(object target, Variant[] eventFields)
+        public override void Publish(object target, Variant[] eventFields)
         {
             var currentEvent = EventHelper.Deserialize<T>(eventFields);
             var queue = (ObservableQueue<T>)this.Property.GetValue(target);

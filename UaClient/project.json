@@ -1,9 +1,10 @@
 ﻿{
   "supports": {},
   "dependencies": {
+    "Microsoft.Extensions.Logging": "1.0.0",
     "NETStandard.Library": "1.6.0",
     "NuSpec.ReferenceGenerator": "2.0.0-beta-bld14",
-    "Prism.Core": "6.1.0",
+    "Prism.Core": "6.2.0",
     "StyleCop.Analyzers": "1.0.0",
     "System.Diagnostics.TraceSource": "4.0.0",
     "System.Threading.Tasks.Dataflow": "4.6.0"

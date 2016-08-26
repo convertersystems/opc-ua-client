@@ -196,7 +196,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="sender">the sender.</param>
         /// <param name="e">the event.</param>
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (this.isPublishing || string.IsNullOrEmpty(e.PropertyName))
             {
@@ -210,35 +210,21 @@ namespace Workstation.ServiceModel.Ua
                     PublishingEnabled = this.subscription.PublishingEnabled,
                     SubscriptionIds = new[] { this.subscriptionId }
                 };
-                this.session.SetPublishingModeAsync(setPublishingModeRequest)
-                        .ContinueWith(
-                            t =>
-                            {
-                                foreach (var ex in t.Exception.InnerExceptions)
-                                {
-                                    Trace.TraceWarning($"Subscription error setting publishing mode for subscription. {ex.Message}");
-                                }
-                            }, TaskContinuationOptions.OnlyOnFaulted);
+                try
+                {
+                    await this.session.SetPublishingModeAsync(setPublishingModeRequest).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceWarning($"Subscription error setting publishing mode for subscription. {ex.Message}");
+                }
                 return;
             }
 
             MonitoredItemBase item;
             if (this.subscription.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
             {
-                var pi = item.Property;
-                if (pi != null && pi.CanRead)
-                {
-                    var value = pi.GetValue(sender);
-                    this.session.WriteAsync(new WriteRequest { NodesToWrite = new[] { new WriteValue { NodeId = item.NodeId, AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value as DataValue ?? new DataValue(value) } } })
-                        .ContinueWith(
-                            t =>
-                            {
-                                foreach (var ex in t.Exception.InnerExceptions)
-                                {
-                                    Trace.TraceWarning($"Subscription error writing value for NodeId {item.NodeId}. {ex.Message}");
-                                }
-                            }, TaskContinuationOptions.OnlyOnFaulted);
-                }
+                item.OnPropertyChanged(sender, this.session);
             }
         }
     }
