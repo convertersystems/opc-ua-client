@@ -17,6 +17,9 @@ namespace Workstation.Collections
         private int capacity;
         private bool isFixedSize;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObservableQueue{T}"/> class.
+        /// </summary>
         public ObservableQueue()
         {
         }

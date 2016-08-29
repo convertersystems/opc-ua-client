@@ -112,8 +112,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <AdditionalFiles Include="stylecop.json" />
     <None Include="project.json" />
+    <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="LICENSE.txt" />

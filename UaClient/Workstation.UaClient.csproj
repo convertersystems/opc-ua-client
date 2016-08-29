@@ -114,13 +114,13 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="project.json" />
-    <AdditionalFiles Include="stylecop.json" />
     <None Include="ServiceModel\Ua\References\AttributeIds.csv" />
     <None Include="ServiceModel\Ua\References\NodeIds.csv" />
     <None Include="ServiceModel\Ua\References\StatusCodes.csv" />
     <None Include="ServiceModel\Ua\References\Types.xsd">
       <SubType>Designer</SubType>
     </None>
+    <AdditionalFiles Include="stylecop.json" />
     <None Include="Workstation.UaClient.nuspec">
       <SubType>Designer</SubType>
     </None>
