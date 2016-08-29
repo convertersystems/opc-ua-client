@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace Workstation.ServiceModel.Ua
@@ -36,5 +37,12 @@ namespace Workstation.ServiceModel.Ua
         /// Gets the collection of items to monitor.
         /// </summary>
         MonitoredItemCollection MonitoredItems { get; }
+
+        /// <summary>
+        /// Sets the service result of a monitored item read or write.
+        /// </summary>
+        /// <param name="propertyName">The property name.</param>
+        /// <param name="errors">The error messages.</param>
+        void SetErrors(string propertyName, IEnumerable<string> errors);
     }
 }

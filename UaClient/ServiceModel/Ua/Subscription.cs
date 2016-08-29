@@ -3,6 +3,7 @@
 
 using Prism.Events;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -19,14 +20,13 @@ namespace Workstation.ServiceModel.Ua
     /// A collection of items to be monitored by the OPC UA server.
     /// </summary>
     [Obsolete("Use ISubscription and your favorite ViewModeBase class, instead. See https://github.com/convertersystems/workstation-samples")]
-    public class Subscription : INotifyPropertyChanged, IDisposable
+    public class Subscription : ISubscription, INotifyPropertyChanged, IDisposable
     {
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private const uint DiagnosticsHint = (uint)DiagnosticFlags.None;
         private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current;
         private readonly CancellationTokenSource cts = new CancellationTokenSource();
         private volatile bool isPublishing = false;
-        private MonitoredItemCollection items = new MonitoredItemCollection();
         private IDisposable token1;
         private IDisposable token2;
 
@@ -46,98 +46,8 @@ namespace Workstation.ServiceModel.Ua
             this.KeepAliveCount = keepAliveCount;
             this.LifetimeCount = lifetimeCount;
             this.MaxNotificationsPerPublish = maxNotificationsPerPublish;
-            this.MonitoredItems = new ReadOnlyCollection<MonitoredItemBase>(this.items);
+            this.MonitoredItems = new MonitoredItemCollection(this);
             this.PropertyChanged += this.OnPropertyChanged;
-
-            // fill MonitoredItems collection
-            var typeInfo = this.GetType().GetTypeInfo();
-            foreach (var propertyInfo in typeInfo.DeclaredProperties)
-            {
-                var itemAttribute = propertyInfo.GetCustomAttribute<MonitoredItemAttribute>();
-                if (itemAttribute == null)
-                {
-                    continue;
-                }
-
-                MonitoringFilter filter = null;
-                if (itemAttribute.AttributeId == AttributeIds.Value && (itemAttribute.DataChangeTrigger != DataChangeTrigger.StatusValue || itemAttribute.DeadbandType != DeadbandType.None))
-                {
-                    filter = new DataChangeFilter() { Trigger = itemAttribute.DataChangeTrigger, DeadbandType = (uint)itemAttribute.DeadbandType, DeadbandValue = itemAttribute.DeadbandValue };
-                }
-
-                var propType = propertyInfo.PropertyType;
-                if (propType == typeof(DataValue))
-                {
-                    this.items.Add(new DataValueMonitoredItem(
-                        property: propertyInfo,
-                        nodeId: NodeId.Parse(itemAttribute.NodeId),
-                        indexRange: itemAttribute.IndexRange,
-                        attributeId: itemAttribute.AttributeId,
-                        samplingInterval: itemAttribute.SamplingInterval,
-                        filter: filter,
-                        queueSize: itemAttribute.QueueSize,
-                        discardOldest: itemAttribute.DiscardOldest));
-                    continue;
-                }
-
-                if (propType == typeof(ObservableQueue<DataValue>))
-                {
-                    this.items.Add(new DataValueQueueMonitoredItem(
-                        property: propertyInfo,
-                        nodeId: NodeId.Parse(itemAttribute.NodeId),
-                        indexRange: itemAttribute.IndexRange,
-                        attributeId: itemAttribute.AttributeId,
-                        samplingInterval: itemAttribute.SamplingInterval,
-                        filter: filter,
-                        queueSize: itemAttribute.QueueSize,
-                        discardOldest: itemAttribute.DiscardOldest));
-                    continue;
-                }
-
-                if (propType == typeof(BaseEvent) || propType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
-                {
-                    this.items.Add(new EventMonitoredItem(
-                        property: propertyInfo,
-                        nodeId: NodeId.Parse(itemAttribute.NodeId),
-                        indexRange: itemAttribute.IndexRange,
-                        attributeId: itemAttribute.AttributeId,
-                        samplingInterval: itemAttribute.SamplingInterval,
-                        filter: new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(propType) },
-                        queueSize: itemAttribute.QueueSize,
-                        discardOldest: itemAttribute.DiscardOldest));
-                    continue;
-                }
-
-                if (propType.IsConstructedGenericType && propType.GetGenericTypeDefinition() == typeof(ObservableQueue<>))
-                {
-                    var elemType = propType.GenericTypeArguments[0];
-                    if (elemType == typeof(BaseEvent) || elemType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
-                    {
-                        this.items.Add((MonitoredItemBase)Activator.CreateInstance(
-                        typeof(EventQueueMonitoredItem<>).MakeGenericType(elemType),
-                        propertyInfo,
-                        NodeId.Parse(itemAttribute.NodeId),
-                        itemAttribute.AttributeId,
-                        itemAttribute.IndexRange,
-                        MonitoringMode.Reporting,
-                        itemAttribute.SamplingInterval,
-                        new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(elemType) },
-                        itemAttribute.QueueSize,
-                        itemAttribute.DiscardOldest));
-                        continue;
-                    }
-                }
-
-                this.items.Add(new ValueMonitoredItem(
-                    property: propertyInfo,
-                    nodeId: NodeId.Parse(itemAttribute.NodeId),
-                    indexRange: itemAttribute.IndexRange,
-                    attributeId: itemAttribute.AttributeId,
-                    samplingInterval: itemAttribute.SamplingInterval,
-                    filter: filter,
-                    queueSize: itemAttribute.QueueSize,
-                    discardOldest: itemAttribute.DiscardOldest));
-            }
 
             // subscribe to data change and event notifications.
             if (session != null)
@@ -177,20 +87,26 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public byte Priority { get; }
 
+        public bool PublishingEnabled { get; }
+
         /// <summary>
         /// Gets the collection of items to monitor.
         /// </summary>
-        public ReadOnlyCollection<MonitoredItemBase> MonitoredItems { get; }
+        public MonitoredItemCollection MonitoredItems { get; }
 
         /// <summary>
-        /// Gets the session with the server.
+        /// Gets or sets the session with the server.
         /// </summary>
-        public UaTcpSessionClient Session { get; }
+        public UaTcpSessionClient Session { get; set; }
 
         /// <summary>
         /// Gets the identifier assigned by the server.
         /// </summary>
         public uint Id { get; private set; }
+
+        public void SetErrors(string propertyName, IEnumerable<string> errors)
+        {
+        }
 
         /// <summary>
         /// Disposes the subscription.
@@ -249,11 +165,7 @@ namespace Workstation.ServiceModel.Ua
                             {
                                 var item = items[i];
                                 var result = itemsResponse.Results[i];
-                                item.ServerId = result.MonitoredItemId;
-                                if (StatusCode.IsBad(result.StatusCode))
-                                {
-                                    Trace.TraceError($"Subscription error response from MonitoredItemCreateRequest for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
-                                }
+                                item.OnCreateResult(result);
                             }
                         }
                     }
@@ -312,11 +224,11 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItemBase item;
                         foreach (var min in dcn.MonitoredItems)
                         {
-                            if (this.items.TryGetValueByClientId(min.ClientHandle, out item))
+                            if (this.MonitoredItems.TryGetValueByClientId(min.ClientHandle, out item))
                             {
                                 try
                                 {
-                                    item.Publish(this, min.Value);
+                                    item.Publish(min.Value);
                                 }
                                 catch (Exception ex)
                                 {
@@ -335,11 +247,11 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItemBase item;
                         foreach (var efl in enl.Events)
                         {
-                            if (this.items.TryGetValueByClientId(efl.ClientHandle, out item))
+                            if (this.MonitoredItems.TryGetValueByClientId(efl.ClientHandle, out item))
                             {
                                 try
                                 {
-                                    item.Publish(this, efl.EventFields);
+                                    item.Publish(efl.EventFields);
                                 }
                                 catch (Exception ex)
                                 {
@@ -386,7 +298,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             MonitoredItemBase item;
-            if (this.Session != null && this.items.TryGetValueByName(e.PropertyName, out item))
+            if (this.Session != null && this.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
             {
                 var pi = item.Property;
                 if (pi != null && pi.CanRead)

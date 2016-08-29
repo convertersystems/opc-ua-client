@@ -9,6 +9,7 @@ using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
 using System.ComponentModel;
 using Workstation.Collections;
+using System.Collections.Generic;
 
 namespace Workstation.UaClient.UnitTests
 {
@@ -319,6 +320,10 @@ namespace Workstation.UaClient.UnitTests
 
             public MonitoredItemCollection MonitoredItems { get; set; }
 
+            public void SetErrors(string propertyName, IEnumerable<string> errors)
+            {
+            }
+
             /// <summary>
             /// Gets the value of CurrentTime.
             /// </summary>
@@ -348,7 +353,6 @@ namespace Workstation.UaClient.UnitTests
             /// </summary>
             [MonitoredItem(nodeId: "i=2258")]
             public ObservableQueue<DataValue> CurrentTimeQueue { get; } = new ObservableQueue<DataValue>(capacity: 16, isFixedSize: true);
-
         }
     }
 }

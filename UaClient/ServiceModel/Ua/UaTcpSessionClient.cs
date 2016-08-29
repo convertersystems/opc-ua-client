@@ -36,7 +36,7 @@ namespace Workstation.ServiceModel.Ua
         private string discoveryUrl;
         private UaTcpSessionChannel innerChannel;
         private IDisposable linkToken;
-        private uint id;
+        private uint subscriptionId;
         private CommunicationState state;
 
         /// <summary>
@@ -439,7 +439,7 @@ namespace Workstation.ServiceModel.Ua
                         Priority = 0
                     };
                     var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
-                    this.id = subscriptionResponse.SubscriptionId;
+                    this.subscriptionId = subscriptionResponse.SubscriptionId;
                 }
                 catch (Exception ex)
                 {
@@ -548,7 +548,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="response">The publish response.</param>
         private void OnPublishResponse(PublishResponse response)
         {
-            if (response.SubscriptionId != this.id)
+            if (response.SubscriptionId != this.subscriptionId)
             {
                 return;
             }
@@ -591,9 +591,15 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public TEventType GetEvent<TEventType>() where TEventType : EventBase, new()
+        /// <summary>
+        /// Gets an instance of an event type.
+        /// </summary>
+        /// <typeparam name="TEventType">The event type.</typeparam>
+        /// <returns>An instance of the event type.</returns>
+        public TEventType GetEvent<TEventType>()
+            where TEventType : EventBase, new()
         {
-            return ((IEventAggregator)this.eventAggregator).GetEvent<TEventType>();
+            return this.eventAggregator.GetEvent<TEventType>();
         }
     }
 }

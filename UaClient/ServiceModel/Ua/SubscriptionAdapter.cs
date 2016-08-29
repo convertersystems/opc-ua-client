@@ -97,11 +97,7 @@ namespace Workstation.ServiceModel.Ua
                         {
                             var item = items[i];
                             var result = itemsResponse.Results[i];
-                            item.ServerId = result.MonitoredItemId;
-                            if (StatusCode.IsBad(result.StatusCode))
-                            {
-                                Trace.TraceError($"Subscription error response from MonitoredItemCreateRequest for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
-                            }
+                            item.OnCreateResult(result);
                         }
                     }
                 }
@@ -151,7 +147,7 @@ namespace Workstation.ServiceModel.Ua
                             {
                                 try
                                 {
-                                    item.Publish(this.subscription, min.Value);
+                                    item.Publish(min.Value);
                                 }
                                 catch (Exception ex)
                                 {
@@ -174,7 +170,7 @@ namespace Workstation.ServiceModel.Ua
                             {
                                 try
                                 {
-                                    item.Publish(this.subscription, efl.EventFields);
+                                    item.Publish(efl.EventFields);
                                 }
                                 catch (Exception ex)
                                 {
@@ -196,7 +192,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="sender">the sender.</param>
         /// <param name="e">the event.</param>
-        private async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (this.isPublishing || string.IsNullOrEmpty(e.PropertyName))
             {
@@ -205,26 +201,29 @@ namespace Workstation.ServiceModel.Ua
 
             if (e.PropertyName == nameof(ISubscription.PublishingEnabled))
             {
-                var setPublishingModeRequest = new SetPublishingModeRequest
+                var request = new SetPublishingModeRequest
                 {
-                    PublishingEnabled = this.subscription.PublishingEnabled,
-                    SubscriptionIds = new[] { this.subscriptionId }
+                    SubscriptionIds = new[] { this.subscriptionId },
+                    PublishingEnabled = this.subscription.PublishingEnabled
                 };
-                try
+                Task.Run(async () =>
                 {
-                    await this.session.SetPublishingModeAsync(setPublishingModeRequest).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceWarning($"Subscription error setting publishing mode for subscription. {ex.Message}");
-                }
+                    try
+                    {
+                        await this.session.SetPublishingModeAsync(request).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceWarning($"Subscription error setting publishing mode for subscription. {ex.Message}");
+                    }
+                });
                 return;
             }
 
             MonitoredItemBase item;
             if (this.subscription.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
             {
-                item.OnPropertyChanged(sender, this.session);
+                item.OnPropertyChanged();
             }
         }
     }

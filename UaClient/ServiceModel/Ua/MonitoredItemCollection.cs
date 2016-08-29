@@ -51,6 +51,7 @@ namespace Workstation.ServiceModel.Ua
                 if (propType == typeof(DataValue))
                 {
                     this.Add(new DataValueMonitoredItem(
+                        target: subscription,
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -65,6 +66,7 @@ namespace Workstation.ServiceModel.Ua
                 if (propType == typeof(ObservableQueue<DataValue>))
                 {
                     this.Add(new DataValueQueueMonitoredItem(
+                        target: subscription,
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -79,6 +81,7 @@ namespace Workstation.ServiceModel.Ua
                 if (propType == typeof(BaseEvent) || propType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
                 {
                     this.Add(new EventMonitoredItem(
+                        target: subscription,
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -97,6 +100,7 @@ namespace Workstation.ServiceModel.Ua
                     {
                         this.Add((MonitoredItemBase)Activator.CreateInstance(
                         typeof(EventQueueMonitoredItem<>).MakeGenericType(elemType),
+                        subscription,
                         propertyInfo,
                         NodeId.Parse(itemAttribute.NodeId),
                         itemAttribute.AttributeId,
@@ -111,6 +115,7 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 this.Add(new ValueMonitoredItem(
+                    target: subscription,
                     property: propertyInfo,
                     nodeId: NodeId.Parse(itemAttribute.NodeId),
                     indexRange: itemAttribute.IndexRange,

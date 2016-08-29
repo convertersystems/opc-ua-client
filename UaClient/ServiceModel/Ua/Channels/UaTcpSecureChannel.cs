@@ -535,6 +535,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
+        protected override Task OnFaulted(CancellationToken token = default(CancellationToken))
+        {
+            this.channelCts?.Cancel();
+            return base.OnFaulted(token);
+        }
+
         protected override async Task OnClosedAsync(CancellationToken token)
         {
             if (this.receiveResponsesTask != null && !this.receiveResponsesTask.IsCompleted)
