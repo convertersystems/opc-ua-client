@@ -1,7 +1,7 @@
 ![robot][1]
 
-# Workstation.UaClient
-*New!* Install package 'Workstation.UaClient' from Nuget and you'll always have the latest version.
+# opc-ua-client
+*New!* Install package 'Workstation.UaClient' from Nuget to get the latest release for your hmi project.
 
 *New!* Supports Universal Windows Platform (UWP) and Windows Presentation Framework (WPF) applications.
 
