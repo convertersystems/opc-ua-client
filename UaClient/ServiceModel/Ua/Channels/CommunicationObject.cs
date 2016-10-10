@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -77,14 +76,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                 await this.OnClosingAsync(token).ConfigureAwait(false);
                 if (!this.onClosingCalled)
                 {
-                    throw new InvalidOperationException($"{this.GetType().Name}.OnClosingAsync did not call await base.OnClosingAsync");
+                    throw new InvalidOperationException($"Channel did not call base.OnClosingAsync");
                 }
 
                 await this.OnAbortAsync(token).ConfigureAwait(false);
                 await this.OnClosedAsync(token).ConfigureAwait(false);
                 if (!this.onClosedCalled)
                 {
-                    throw new InvalidOperationException($"{this.GetType().Name}.OnClosedAsync did not call await base.OnClosedAsync");
+                    throw new InvalidOperationException($"Channelc did not call base.OnClosedAsync");
                 }
 
                 flag2 = false;
@@ -129,7 +128,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     await this.AbortAsync(token).ConfigureAwait(false);
                     if (communicationState == CommunicationState.Faulted)
                     {
-                        throw new InvalidOperationException($"{this.GetType().Name} faulted.");
+                        throw new InvalidOperationException($"Channel faulted.");
                     }
 
                     break;
@@ -142,14 +141,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                             await this.OnClosingAsync(token).ConfigureAwait(false);
                             if (!this.onClosingCalled)
                             {
-                                throw new InvalidOperationException($"{this.GetType().Name}.OnClosingAsync did not call await base.OnClosingAsync");
+                                throw new InvalidOperationException($"Channel did not call base.OnClosingAsync");
                             }
 
                             await this.OnCloseAsync(token).ConfigureAwait(false);
                             await this.OnClosedAsync(token).ConfigureAwait(false);
                             if (!this.onClosedCalled)
                             {
-                                throw new InvalidOperationException($"{this.GetType().Name}.OnClosedAsync did not call await base.OnClosedAsync");
+                                throw new InvalidOperationException($"Channel did not call base.OnClosedAsync");
                             }
 
                             flag2 = false;
@@ -159,7 +158,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             if (flag2)
                             {
-                                Trace.TraceWarning($"{this.GetType().Name}.CloseAsync failed.");
+                                EventSource.Log.Error($"Error closing channel.");
                                 await this.AbortAsync(token).ConfigureAwait(false);
                             }
                         }
@@ -195,14 +194,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                 await this.OnOpeningAsync(token).ConfigureAwait(false);
                 if (!this.onOpeningCalled)
                 {
-                    throw new InvalidOperationException($"{this.GetType().Name}.OnOpeningAsync did not call await base.OnOpeningAsync");
+                    throw new InvalidOperationException($"Channel did not call base.OnOpeningAsync");
                 }
 
                 await this.OnOpenAsync(token).ConfigureAwait(false);
                 await this.OnOpenedAsync(token).ConfigureAwait(false);
                 if (!this.onOpenedCalled)
                 {
-                    throw new InvalidOperationException($"{this.GetType().Name}.OnOpenedAsync did not call await base.OnOpenedAsync");
+                    throw new InvalidOperationException($"Channel did not call base.OnOpenedAsync");
                 }
 
                 flag2 = false;
@@ -296,7 +295,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Trace.TraceInformation($"{this.GetType().Name} closed.");
+            EventSource.Log.Verbose($"Channel closed.");
             EventHandler closed = this.Closed;
             if (closed != null)
             {
@@ -327,7 +326,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Trace.TraceInformation($"{this.GetType().Name} closing.");
+            EventSource.Log.Verbose($"Channel closing.");
             EventHandler closing = this.Closing;
             if (closing != null)
             {
@@ -357,7 +356,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Trace.TraceInformation($"{this.GetType().Name} faulted.");
+            EventSource.Log.Error($"Channel faulted.");
             EventHandler faulted = this.Faulted;
             if (faulted != null)
             {
@@ -395,7 +394,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Trace.TraceInformation($"{this.GetType().Name} opened.");
+            EventSource.Log.Verbose($"Channel opened.");
             EventHandler opened = this.Opened;
             if (opened != null)
             {
@@ -420,7 +419,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            Trace.TraceInformation($"{this.GetType().Name} opening.");
+            EventSource.Log.Verbose($"Channel opening.");
             EventHandler opening = this.Opening;
             if (opening != null)
             {
@@ -468,9 +467,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                 case CommunicationState.Opened:
                 case CommunicationState.Closing:
                 case CommunicationState.Faulted:
-                    throw new InvalidOperationException($"{this.GetType().Name} not modifiable.");
+                    throw new InvalidOperationException($"Channel not modifiable.");
                 case CommunicationState.Closed:
-                    throw new InvalidOperationException($"{this.GetType().Name} disposed.");
+                    throw new InvalidOperationException($"Channel disposed.");
             }
         }
 
@@ -483,7 +482,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             switch (this.State)
             {
                 case CommunicationState.Created:
-                    throw new InvalidOperationException($"{this.GetType().Name} not opened.");
+                    throw new InvalidOperationException($"Channel not opened.");
+
                 case CommunicationState.Opening:
                 case CommunicationState.Opened:
                 case CommunicationState.Closing:
@@ -491,7 +491,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 case CommunicationState.Closed:
                 case CommunicationState.Faulted:
-                    throw new InvalidOperationException($"{this.GetType().Name} closed or faulted.");
+                    throw new InvalidOperationException($"Channel closed or faulted.");
+
             }
         }
 

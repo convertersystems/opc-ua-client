@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
@@ -16,9 +15,9 @@ namespace Workstation.ServiceModel.Ua.Channels
     public class UaTcpTransportChannel : CommunicationObject
     {
         public const uint ProtocolVersion = 0u;
-        public const int DefaultBufferSize = 64 * 1024;
-        public const int DefaultMaxMessageSize = 16 * 1024 * 1024;
-        public const int DefaultMaxChunkCount = 4 * 1024;
+        public const uint DefaultBufferSize = 64 * 1024;
+        public const uint DefaultMaxMessageSize = 16 * 1024 * 1024;
+        public const uint DefaultMaxChunkCount = 4 * 1024;
 
         private const int MinBufferSize = 8 * 1024;
         private byte[] sendBuffer;
@@ -75,7 +74,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             this.ThrowIfClosedOrNotOpening();
             await this.stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
-            // Trace.TraceInformation($"SendAsync {count} bytes.");
         }
 
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
@@ -138,7 +136,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 count -= num;
             }
 
-            // Trace.TraceInformation($"ReceiveAsync {offset - initialOffset} bytes.");
             return offset - initialOffset;
         }
 

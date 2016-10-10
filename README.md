@@ -14,36 +14,40 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 
 ### Main Types
 - UaTcpSessionClient - A client for browsing, reading, writing and subscribing to nodes of your OPC UA server. Connects and reconnects automatically. 100% asynchronous.
-- ISubscription - An interface for your view models. Permits UaTcpSessionClient to automatically create and delete subscriptions on the server and deliver data change and event notifications to properties.
+- SubscriptionAttribute - An attribute for your view models. Permits UaTcpSessionClient to automatically create and delete subscriptions on the server and deliver data change and event notifications to properties.
 - MonitoredItemAttribute - An attribute for properties that indicates the property will receive data change or event notifications from the server.
 
 ```
-    public class AppDescription : ApplicationDescription
+    public partial class App : Application
     {
-        public AppDescription()
+        protected override void OnStartup(StartupEventArgs e)
         {
-            this.ApplicationName = "Workstation.RobotHmi";
-            this.ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:Workstation.RobotHmi";
-            this.ApplicationType = ApplicationType.Client;
-        }
-    }
+            // Prepare for constructing the shared session client.
+            var appDescription = new ApplicationDescription()
+            {
+                ApplicationName = "Workstation.StatusHmi",
+                ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:Workstation.StatusHmi",
+                ApplicationType = ApplicationType.Client
+            };
+            var appCertificate = appDescription.GetCertificate();
+            var endpointUrl = StatusHmi.Properties.Settings.Default.EndpointUrl;
 
-    public class PLC1Service : UaTcpSessionClient
-    {
-        public PLC1Service(AppDescription description)
-            : base(description, description.GetCertificate(), null, "opc.tcp://localhost:26543")
-        {
+            // Create the session client for the app.
+            this.session = new UaTcpSessionClient(appDescription, appCertificate, null, endpointUrl);
+
+            // Create the MainViewModel subscription.
+            var subscription = this.session.CreateSubscription<MainViewModel>();
+
+            // Create and show the MainView.
+            var view = new MainView { DataContext = subscription };
+
+            view.Show();
         }
     }
     
-    public class MyViewModel : ViewModelBase, ISubscription
+    [Subscription(publishingInterval: 500, keepAliveCount: 20)]
+    public class MainViewModel : ViewModelBase
     {
-        public MyViewModel(PLC1Service session)
-        {
-            this.PublishingInterval = 500.0;
-            session?.Subscribe(this);
-        }
-
         /// <summary>
         /// Gets the value of ServerStatusCurrentTime.
         /// </summary>
@@ -58,6 +62,8 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     }
 ```
 ### Releases
+
+v1.4.0 UaTcpSessionClient now calls a asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners. 
 
 v1.3.0 Depreciated Subscription base class in favor of ISubscription interface to allow freedom to choose whatever base class you wish for your view models.
    

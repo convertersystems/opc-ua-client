@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -30,7 +29,7 @@ namespace Workstation.ServiceModel.Ua
         /// Attributes found in the given subscription are added to the collection.
         /// </summary>
         /// <param name="subscription">the instance that will be inspected for [MonitoredItem] attributes.</param>
-        public MonitoredItemCollection(ISubscription subscription)
+        public MonitoredItemCollection(object subscription)
         {
             var typeInfo = subscription.GetType().GetTypeInfo();
             foreach (var propertyInfo in typeInfo.DeclaredProperties)
@@ -51,7 +50,6 @@ namespace Workstation.ServiceModel.Ua
                 if (propType == typeof(DataValue))
                 {
                     this.Add(new DataValueMonitoredItem(
-                        target: subscription,
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -66,7 +64,6 @@ namespace Workstation.ServiceModel.Ua
                 if (propType == typeof(ObservableQueue<DataValue>))
                 {
                     this.Add(new DataValueQueueMonitoredItem(
-                        target: subscription,
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -81,7 +78,6 @@ namespace Workstation.ServiceModel.Ua
                 if (propType == typeof(BaseEvent) || propType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
                 {
                     this.Add(new EventMonitoredItem(
-                        target: subscription,
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -100,7 +96,6 @@ namespace Workstation.ServiceModel.Ua
                     {
                         this.Add((MonitoredItemBase)Activator.CreateInstance(
                         typeof(EventQueueMonitoredItem<>).MakeGenericType(elemType),
-                        subscription,
                         propertyInfo,
                         NodeId.Parse(itemAttribute.NodeId),
                         itemAttribute.AttributeId,
@@ -115,7 +110,6 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 this.Add(new ValueMonitoredItem(
-                    target: subscription,
                     property: propertyInfo,
                     nodeId: NodeId.Parse(itemAttribute.NodeId),
                     indexRange: itemAttribute.IndexRange,

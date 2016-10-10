@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
-    public class ServiceTask : TaskCompletionSource<IServiceResponse>
+    public class ServiceOperation : TaskCompletionSource<IServiceResponse>
     {
-        public ServiceTask(IServiceRequest request)
+        public ServiceOperation(IServiceRequest request)
             : base(request, TaskCreationOptions.RunContinuationsAsynchronously)
         {
         }

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -77,7 +76,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"GetCertificate error opening X509Store '{store}'. {ex.Message}");
+                EventSource.Log.Error($"Error opening X509Store '{store}'. {ex.Message}");
             }
             finally
             {
@@ -97,7 +96,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"GetCertificate error opening X509Store '{store}'. {ex.Message}");
+                EventSource.Log.Error($"Error opening X509Store '{store}'. {ex.Message}");
             }
             finally
             {
@@ -108,11 +107,11 @@ namespace Workstation.ServiceModel.Ua
             if (foundCerts.Count > 0)
             {
                 clientCertificate = foundCerts.OrderBy(c => c.NotBefore).Last();
-                Trace.TraceInformation($"GetCertificate found certificate '{subjectName}'.");
+                EventSource.Log.Informational($"Found certificate '{subjectName}'.");
                 return clientCertificate;
             }
 
-            Trace.TraceInformation($"GetCertificate creating new certificate '{subjectName}'.");
+            EventSource.Log.Informational($"Creating new certificate '{subjectName}'.");
             try
             {
                 var pfx = CertificateGenerator.CreateSelfSignCertificatePfx(
@@ -132,10 +131,6 @@ namespace Workstation.ServiceModel.Ua
                     store.Open(OpenFlags.ReadWrite | OpenFlags.OpenExistingOnly);
                     store.Add(clientCertificate);
                 }
-                catch (Exception ex)
-                {
-                    Trace.TraceWarning($"GetCertificate error adding certificate to store '{store}'. {ex.Message}");
-                }
                 finally
                 {
                     store.Dispose();
@@ -143,7 +138,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"GetCertificate error creating certificate '{subjectName}'. {ex.Message}");
+                EventSource.Log.Error($"Error creating certificate '{subjectName}'. {ex.Message}");
             }
 
             return clientCertificate;

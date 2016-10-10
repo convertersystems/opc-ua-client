@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Extensions.Logging;
-using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
@@ -19,18 +17,17 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A client for browsing, reading, writing and subscribing to nodes of an OPC UA server.
     /// </summary>
-    public class UaTcpSessionClient : IRequestChannel, IEventAggregator, IDisposable
+    public class UaTcpSessionClient : IRequestChannel, IDisposable
     {
         private const double DefaultPublishingInterval = 1000f;
         private const uint DefaultKeepaliveCount = 10;
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
 
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
-        private readonly EventAggregator eventAggregator = new EventAggregator();
-        private BufferBlock<ServiceTask> pendingRequests;
+        private readonly SynchronizationContext syncContext = SynchronizationContext.Current ?? new SynchronizationContext();
+        private BufferBlock<ServiceOperation> pendingRequests;
         private CancellationTokenSource clientCts = new CancellationTokenSource();
-        private PubSubEvent<PublishResponse> publishEvent;
-        private PubSubEvent<CommunicationState> stateChangedEvent;
+        private ObservableCollection<Subscription> subscriptions = new ObservableCollection<Subscription>();
         private bool disposed = false;
         private Task stateMachineTask;
         private string discoveryUrl;
@@ -44,7 +41,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
-        /// <param name="userIdentity">The user identity or null if anonymous. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
         /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
@@ -56,7 +53,7 @@ namespace Workstation.ServiceModel.Ua
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
             X509Certificate2 localCertificate,
-            IUserIdentity userIdentity,
+            Func<UaTcpSessionClient, Task<IUserIdentity>> userIdentityProvider,
             EndpointDescription remoteEndpoint,
             double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
             uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
@@ -73,7 +70,7 @@ namespace Workstation.ServiceModel.Ua
 
             this.LocalDescription = localDescription;
             this.LocalCertificate = localCertificate;
-            this.UserIdentity = userIdentity;
+            this.UserIdentityProvider = userIdentityProvider ?? (sc => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
             if (remoteEndpoint == null)
             {
                 throw new ArgumentNullException(nameof(remoteEndpoint));
@@ -87,10 +84,8 @@ namespace Workstation.ServiceModel.Ua
             this.LocalSendBufferSize = localSendBufferSize;
             this.LocalMaxMessageSize = localMaxMessageSize;
             this.LocalMaxChunkCount = localMaxChunkCount;
-            this.pendingRequests = new BufferBlock<ServiceTask>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-            this.publishEvent = this.eventAggregator.GetEvent<PubSubEvent<PublishResponse>>();
-            this.stateChangedEvent = this.eventAggregator.GetEvent<PubSubEvent<CommunicationState>>();
-            this.stateMachineTask = this.StateMachine(this.clientCts.Token);
+            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
         }
 
         /// <summary>
@@ -98,8 +93,8 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
-        /// <param name="userIdentity">The user identity or null if anonymous. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.</param>
-        /// <param name="discoveryUrl">The url of the remote application</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
         /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
         /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
         /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
@@ -110,8 +105,8 @@ namespace Workstation.ServiceModel.Ua
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
             X509Certificate2 localCertificate,
-            IUserIdentity userIdentity,
-            string discoveryUrl,
+            Func<UaTcpSessionClient, Task<IUserIdentity>> userIdentityProvider,
+            string endpointUrl,
             double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
             uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
             uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
@@ -127,13 +122,13 @@ namespace Workstation.ServiceModel.Ua
 
             this.LocalDescription = localDescription;
             this.LocalCertificate = localCertificate;
-            this.UserIdentity = userIdentity;
-            if (string.IsNullOrEmpty(discoveryUrl))
+            this.UserIdentityProvider = userIdentityProvider ?? (sc => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
+            if (string.IsNullOrEmpty(endpointUrl))
             {
-                throw new ArgumentNullException(nameof(discoveryUrl));
+                throw new ArgumentNullException(nameof(endpointUrl));
             }
 
-            this.discoveryUrl = discoveryUrl;
+            this.discoveryUrl = endpointUrl;
             this.SessionTimeout = sessionTimeout;
             this.TimeoutHint = timeoutHint;
             this.DiagnosticsHint = diagnosticsHint;
@@ -141,10 +136,8 @@ namespace Workstation.ServiceModel.Ua
             this.LocalSendBufferSize = localSendBufferSize;
             this.LocalMaxMessageSize = localMaxMessageSize;
             this.LocalMaxChunkCount = localMaxChunkCount;
-            this.pendingRequests = new BufferBlock<ServiceTask>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-            this.publishEvent = this.eventAggregator.GetEvent<PubSubEvent<PublishResponse>>();
-            this.stateChangedEvent = this.eventAggregator.GetEvent<PubSubEvent<CommunicationState>>();
-            this.stateMachineTask = this.StateMachine(this.clientCts.Token);
+            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
         }
 
         /// <summary>
@@ -158,9 +151,9 @@ namespace Workstation.ServiceModel.Ua
         public X509Certificate2 LocalCertificate { get; }
 
         /// <summary>
-        /// Gets the identity of the user. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.
+        /// Gets an asynchronous function that provides the identity of the user. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.
         /// </summary>
-        public IUserIdentity UserIdentity { get; }
+        public Func<UaTcpSessionClient, Task<IUserIdentity>> UserIdentityProvider { get; }
 
         /// <summary>
         /// Gets the <see cref="EndpointDescription"/> of the remote application.
@@ -236,19 +229,48 @@ namespace Workstation.ServiceModel.Ua
                 if (this.state != value)
                 {
                     this.state = value;
-                    this.stateChangedEvent.Publish(value);
                 }
             }
         }
 
         /// <summary>
-        /// Subscribes to data change and event notifications from the server.
+        /// Gets the <see cref="UaTcpSessionClient"/> attached to this model.
         /// </summary>
-        /// <param name="subscription">The subscription.</param>
-        /// <returns>A token that unsubscribes when disposed.</returns>
-        public IDisposable Subscribe(ISubscription subscription)
+        /// <param name="model">the model.</param>
+        /// <returns>Returns the attached <see cref="UaTcpSessionClient"/> or null.</returns>
+        public static UaTcpSessionClient FromModel(object model)
         {
-            return new SubscriptionAdapter(this, subscription);
+            var subscription = Subscription.FromModel(model);
+            if (subscription != null)
+            {
+                return subscription.Session;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Subscribes for data change and event notifications from the server.
+        /// </summary>
+        /// <param name="model">The model.</param>
+        /// <returns>Returns a disposable token.</returns>
+        public IDisposable Subscribe(object model)
+        {
+            var subscription = new Subscription(this, model);
+            this.subscriptions.Add(subscription);
+            return new Disposer(subscription, this.subscriptions);
+        }
+
+        /// <summary>
+        /// Creates a model and subscribes for data change and event notifications from the server.
+        /// </summary>
+        /// <typeparam name="T">The type of model.</typeparam>
+        /// <returns>Returns the model.</returns>
+        public T CreateSubscription<T>()
+        {
+            var model = Activator.CreateInstance<T>();
+            var subscription = new Subscription(this, model);
+            this.subscriptions.Add(subscription);
+            return model;
         }
 
         /// <summary>
@@ -259,14 +281,14 @@ namespace Workstation.ServiceModel.Ua
         public async Task<IServiceResponse> RequestAsync(IServiceRequest request)
         {
             this.UpdateTimestamp(request);
-            var task = new ServiceTask(request);
+            var operation = new ServiceOperation(request);
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader.TimeoutHint))
             using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.clientCts.Token))
-            using (var registration = linkedCts.Token.Register(this.CancelTask, task, false))
+            using (var registration = linkedCts.Token.Register(this.CancelRequest, operation, false))
             {
-                if (this.pendingRequests.Post(task))
+                if (this.pendingRequests.Post(operation))
                 {
-                    return await task.Task.ConfigureAwait(false);
+                    return await operation.Task.ConfigureAwait(false);
                 }
                 throw new ServiceResultException(StatusCodes.BadSecureChannelClosed);
             }
@@ -290,8 +312,8 @@ namespace Workstation.ServiceModel.Ua
             if (this.clientCts.IsCancellationRequested)
             {
                 this.clientCts = new CancellationTokenSource();
-                this.pendingRequests = new BufferBlock<ServiceTask>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-                this.stateMachineTask = this.StateMachine(this.clientCts.Token);
+                this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+                this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
             }
         }
 
@@ -314,7 +336,13 @@ namespace Workstation.ServiceModel.Ua
             {
                 this.disposed = true;
                 this.clientCts?.Cancel();
-                this.stateMachineTask.Wait(5000);
+                try
+                {
+                    this.stateMachineTask.Wait(5000);
+                }
+                catch (Exception)
+                {
+                }
             }
         }
 
@@ -342,21 +370,24 @@ namespace Workstation.ServiceModel.Ua
                     {
                         var tasks = new[]
                         {
+                            this.AutoCreateSubscriptions(localCts.Token),
                             this.PublishAsync(localCts.Token),
                             this.PublishAsync(localCts.Token),
                             this.PublishAsync(localCts.Token),
                             this.WhenChannelClosingAsync(localCts.Token),
                         };
-                        await Task.WhenAny(tasks).ConfigureAwait(false);
+                        var task = await Task.WhenAny(tasks).ConfigureAwait(false);
                         localCts.Cancel();
                         await Task.WhenAll(tasks).ConfigureAwait(false);
                     }
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException ex)
                 {
+                    EventSource.Log.Error($"State machine canceling. {ex.Message}");
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    EventSource.Log.Error($"State machine retrying. {ex.Message}");
                     await Task.Delay(reconnectDelay, token).ConfigureAwait(false);
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
@@ -386,7 +417,7 @@ namespace Workstation.ServiceModel.Ua
                     // security level.
                     try
                     {
-                        Trace.TraceInformation($"UaTcpSessionClient discovering endpoints of '{this.discoveryUrl}'.");
+                        EventSource.Log.Informational($"Discovering endpoints of '{this.discoveryUrl}'.");
                         var getEndpointsRequest = new GetEndpointsRequest
                         {
                             EndpointUrl = this.discoveryUrl,
@@ -402,21 +433,27 @@ namespace Workstation.ServiceModel.Ua
                     }
                     catch (Exception ex)
                     {
-                        Trace.TraceWarning($"UaTcpSessionClient error discovering endpoints of '{this.discoveryUrl}'. {ex.Message}");
+                        EventSource.Log.Error($"Error discovering endpoints of '{this.discoveryUrl}'. {ex.Message}");
                         throw;
                     }
                 }
 
                 // throw here to exit state machine.
                 token.ThrowIfCancellationRequested();
+
+                // evaluate the user identity provider (may show a dialog).
+                var userIdentity = await this.UserIdentityProvider(this);
+
                 try
                 {
                     this.linkToken?.Dispose();
-                    Trace.TraceInformation($"UaTcpSessionClient opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
+                    this.innerChannel?.Dispose();
+                    EventSource.Log.Informational($"Opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
+
                     this.innerChannel = new UaTcpSessionChannel(
                         this.LocalDescription,
                         this.LocalCertificate,
-                        this.UserIdentity,
+                        userIdentity,
                         this.RemoteEndpoint,
                         this.SessionTimeout,
                         this.TimeoutHint,
@@ -429,7 +466,6 @@ namespace Workstation.ServiceModel.Ua
                     this.linkToken = this.pendingRequests.LinkTo(this.innerChannel);
 
                     // create an internal subscription.
-                    this.publishEvent.Subscribe(this.OnPublishResponse, ThreadOption.PublisherThread, false);
                     var subscriptionRequest = new CreateSubscriptionRequest
                     {
                         RequestedPublishingInterval = DefaultPublishingInterval,
@@ -443,7 +479,7 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceWarning($"UaTcpSessionClient error opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'. {ex.Message}");
+                    EventSource.Log.Error($"Error opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'. {ex.Message}");
                     throw;
                 }
             }
@@ -463,18 +499,114 @@ namespace Workstation.ServiceModel.Ua
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
+                EventSource.Log.Informational($"Closing channel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'.");
                 try
                 {
                     await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceWarning($"UaTcpSessionClient error closing channel. {ex.Message}");
+                    EventSource.Log.Error($"Error closing channel. {ex.Message}");
                 }
             }
             finally
             {
                 this.semaphore.Release();
+            }
+        }
+
+        /// <summary>
+        /// Creates the subscriptions on the server.
+        /// </summary>
+        /// <param name="token">A cancellation token. </param>
+        /// <returns>A task.</returns>
+        private async Task AutoCreateSubscriptions(CancellationToken token = default(CancellationToken))
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            NotifyCollectionChangedEventHandler handler = async (o, e) =>
+            {
+                if (e.Action == NotifyCollectionChangedAction.Add)
+                {
+                    foreach (var subscription in e.NewItems.OfType<Subscription>())
+                    {
+                        var target = subscription.Target;
+                        if (target == null)
+                        {
+                            continue;
+                        }
+
+                        try
+                        {
+                            // create the subscription.
+                            var subscriptionRequest = new CreateSubscriptionRequest
+                            {
+                                RequestedPublishingInterval = subscription.PublishingInterval,
+                                RequestedMaxKeepAliveCount = subscription.KeepAliveCount,
+                                RequestedLifetimeCount = Math.Max(subscription.LifetimeCount, 3 * subscription.KeepAliveCount),
+                                PublishingEnabled = subscription.PublishingEnabled
+                            };
+                            var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
+                            var id = subscription.SubscriptionId = subscriptionResponse.SubscriptionId;
+
+                            // add the items.
+                            if (subscription.MonitoredItems.Count > 0)
+                            {
+                                var items = subscription.MonitoredItems.ToList();
+                                var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = m.NodeId, AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
+                                var itemsRequest = new CreateMonitoredItemsRequest
+                                {
+                                    SubscriptionId = id,
+                                    ItemsToCreate = requests,
+                                };
+                                var itemsResponse = await this.CreateMonitoredItemsAsync(itemsRequest).ConfigureAwait(false);
+                                for (int i = 0; i < itemsResponse.Results.Length; i++)
+                                {
+                                    var item = items[i];
+                                    var result = itemsResponse.Results[i];
+                                    item.OnCreateResult(target, result);
+                                }
+                            }
+                        }
+                        catch (ServiceResultException ex)
+                        {
+                            EventSource.Log.Error($"Error creating subscription. {ex.Message}");
+                            this.innerChannel.Fault(ex);
+                        }
+                    }
+                }
+                else if (e.Action == NotifyCollectionChangedAction.Remove)
+                {
+                    try
+                    {
+                        // delete the subscriptions.
+                        var request = new DeleteSubscriptionsRequest
+                        {
+                            SubscriptionIds = e.OldItems.OfType<Subscription>().Select(s => s.SubscriptionId).ToArray()
+                        };
+                        await this.DeleteSubscriptionsAsync(request).ConfigureAwait(false);
+                    }
+                    catch (ServiceResultException ex)
+                    {
+                        EventSource.Log.Error($"Error deleting subscriptions. {ex.Message}");
+                    }
+                }
+            };
+            using (token.Register(state => ((TaskCompletionSource<bool>)state).TrySetResult(true), tcs, false))
+            {
+                try
+                {
+                    handler.Invoke(this.subscriptions, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, this.subscriptions.ToList()));
+                    this.subscriptions.CollectionChanged += handler;
+                    await tcs.Task;
+                }
+                finally
+                {
+                    this.subscriptions.CollectionChanged -= handler;
+                    foreach (var subscription in this.subscriptions)
+                    {
+                        subscription.SubscriptionId = 0;
+                    }
+                }
             }
         }
 
@@ -496,22 +628,20 @@ namespace Workstation.ServiceModel.Ua
                 {
                     var publishResponse = await this.PublishAsync(publishRequest).ConfigureAwait(false);
 
-                    // Views and view models may be abandoned at any time. This code detects when a subscription
-                    // is garbage collected, and deletes the corresponding subscription from the server.
-                    publishResponse.MoreNotifications = true; // set flag indicates message unhandled.
-
-                    this.publishEvent.Publish(publishResponse);
-
-                    // If event was not handled,
-                    if (publishResponse.MoreNotifications)
-                    {
-                        // subscription was garbage collected. So delete from server.
-                        var request = new DeleteSubscriptionsRequest
+                    this.syncContext.Post(
+                        o =>
                         {
-                            SubscriptionIds = new uint[] { publishResponse.SubscriptionId }
-                        };
-                        await this.DeleteSubscriptionsAsync(request).ConfigureAwait(false);
-                    }
+                            var pr = (PublishResponse)o;
+                            var sub = this.subscriptions.FirstOrDefault(s => s.SubscriptionId == pr.SubscriptionId);
+                            if (sub != null)
+                            {
+                                if (!sub.OnPublishResponse(pr))
+                                {
+                                    // target was garbage collected. So delete subscription from server.
+                                    this.subscriptions.Remove(sub);
+                                }
+                            }
+                        }, publishResponse);
 
                     publishRequest = new PublishRequest
                     {
@@ -523,7 +653,7 @@ namespace Workstation.ServiceModel.Ua
                 {
                     if (!token.IsCancellationRequested)
                     {
-                        Trace.TraceWarning($"UaTcpSessionClient error publishing subscription. {ex.Message}");
+                        EventSource.Log.Error($"Error publishing subscription. {ex.Message}");
 
                         // short delay, then retry.
                         await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
@@ -578,28 +708,34 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Cancels the ServiceTask
+        /// Cancels the Request
         /// </summary>
         /// <param name="o">the ServiceTask.</param>
-        private void CancelTask(object o)
+        private void CancelRequest(object o)
         {
-            var task = (ServiceTask)o;
-            if (task.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
+            var operation = (ServiceOperation)o;
+            if (operation.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
-                var request = (IServiceRequest)task.Task.AsyncState;
-                Trace.TraceInformation($"UaTcpSessionClient canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                EventSource.Log.Verbose($"Canceled {operation.Request.GetType().Name} Handle: {operation.Request.RequestHeader.RequestHandle}");
             }
         }
 
-        /// <summary>
-        /// Gets an instance of an event type.
-        /// </summary>
-        /// <typeparam name="TEventType">The event type.</typeparam>
-        /// <returns>An instance of the event type.</returns>
-        public TEventType GetEvent<TEventType>()
-            where TEventType : EventBase, new()
+        private struct Disposer : IDisposable
         {
-            return this.eventAggregator.GetEvent<TEventType>();
+            private readonly Subscription subscription;
+            private readonly ObservableCollection<Subscription> subscriptions;
+
+            public Disposer(Subscription subscription, ObservableCollection<Subscription> subscriptions)
+            {
+                this.subscription = subscription;
+                this.subscriptions = subscriptions;
+            }
+
+            public void Dispose()
+            {
+                this.subscriptions.Remove(this.subscription);
+                this.subscription.Dispose();
+            }
         }
     }
 }

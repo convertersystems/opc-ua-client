@@ -6,7 +6,7 @@ using System;
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
-    /// Specifies the Subscription that will be created for this class.
+    /// Specifies the Subscription that will be created for this viewmodel.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class SubscriptionAttribute : Attribute
@@ -17,15 +17,13 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="publishingInterval">the publishing interval.</param>
         /// <param name="keepAliveCount">the number of PublishingIntervals before the server should return an empty Publish response.</param>
         /// <param name="lifetimeCount">the number of PublishingIntervals before the server should delete the subscription.</param>
-        /// <param name="maxNotificationsPerPublish">the maximum number of notifications per publish response.</param>
-        /// <param name="priority">the priority assigned to subscription.</param>
-        public SubscriptionAttribute(double publishingInterval = 1000f, uint keepAliveCount = 10u, uint lifetimeCount = 0u, uint maxNotificationsPerPublish = 0u, byte priority = 0)
+        /// <param name="publishingEnabled">whether publishing is enabled.</param>
+        public SubscriptionAttribute(double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, bool publishingEnabled = true)
         {
             this.PublishingInterval = publishingInterval;
             this.KeepAliveCount = keepAliveCount;
             this.LifetimeCount = lifetimeCount;
-            this.MaxNotificationsPerPublish = maxNotificationsPerPublish;
-            this.Priority = priority;
+            this.PublishingEnabled = publishingEnabled;
         }
 
         /// <summary>
@@ -44,13 +42,8 @@ namespace Workstation.ServiceModel.Ua
         public uint LifetimeCount { get; }
 
         /// <summary>
-        /// Gets the maximum number of notifications per publish response.
+        /// Gets a value indicating whether publishing is enabled.
         /// </summary>
-        public uint MaxNotificationsPerPublish { get; }
-
-        /// <summary>
-        /// Gets the priority assigned to subscription.
-        /// </summary>
-        public byte Priority { get; }
+        public bool PublishingEnabled { get; }
     }
 }

@@ -37,7 +37,7 @@ namespace Workstation.ServiceModel.Ua
         {
             get
             {
-                return ((ICommunicationObject)this.innerChannel).State;
+                return this.innerChannel.State;
             }
         }
 
@@ -135,7 +135,7 @@ namespace Workstation.ServiceModel.Ua
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                await ((ICommunicationObject)this.innerChannel).CloseAsync(token).ConfigureAwait(false);
+                await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
             }
             finally
             {
@@ -153,7 +153,7 @@ namespace Workstation.ServiceModel.Ua
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                await ((ICommunicationObject)this.innerChannel).OpenAsync(token).ConfigureAwait(false);
+                await this.innerChannel.OpenAsync(token).ConfigureAwait(false);
             }
             finally
             {
@@ -170,7 +170,13 @@ namespace Workstation.ServiceModel.Ua
         {
             if (disposing)
             {
-                this.CloseAsync().Wait();
+                try
+                {
+                    this.CloseAsync().Wait(5000);
+                }
+                catch (Exception)
+                {
+                }
             }
         }
     }

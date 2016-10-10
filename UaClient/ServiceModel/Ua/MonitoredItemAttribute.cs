@@ -6,7 +6,7 @@ using System;
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
-    /// Specifies the MonitoredItem that will created for this property.
+    /// Specifies the MonitoredItem that will be created for this property.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class MonitoredItemAttribute : Attribute

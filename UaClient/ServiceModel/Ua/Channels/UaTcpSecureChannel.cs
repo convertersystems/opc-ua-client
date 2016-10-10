@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.IO;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using System.Xml.Linq;
+using Microsoft.IO;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
@@ -22,7 +22,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// A channel that opens a secure channel.
     /// </summary>
-    public class UaTcpSecureChannel : UaTcpTransportChannel, IRequestChannel, ITargetBlock<ServiceTask>
+    public class UaTcpSecureChannel : UaTcpTransportChannel, IRequestChannel, ITargetBlock<ServiceOperation>
     {
         public const uint DefaultTimeoutHint = 15 * 1000; // 15 seconds
         public const uint DefaultDiagnosticsHint = (uint)DiagnosticFlags.None;
@@ -40,8 +40,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly CancellationTokenSource channelCts;
         private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim receivingSemaphore = new SemaphoreSlim(1, 1);
-        private readonly ActionBlock<ServiceTask> pendingRequests;
-        private readonly ConcurrentDictionary<uint, ServiceTask> pendingCompletions;
+        internal readonly ActionBlock<ServiceOperation> pendingRequests;
+        private readonly ConcurrentDictionary<uint, ServiceOperation> pendingCompletions;
         private int handle;
         private int sequenceNumber;
         private uint currentClientTokenId;
@@ -156,8 +156,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
             this.ServerUris = new List<string>();
             this.channelCts = new CancellationTokenSource();
-            this.pendingRequests = new ActionBlock<ServiceTask>(t => this.RequestAction(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
-            this.pendingCompletions = new ConcurrentDictionary<uint, ServiceTask>();
+            this.pendingRequests = new ActionBlock<ServiceOperation>(t => this.SendRequestAction(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
+            this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
         }
 
         public static Dictionary<ExpandedNodeId, Type> BinaryEncodingIdToTypeDictionary { get; }
@@ -230,14 +230,14 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             this.ThrowIfClosedOrNotOpening();
             this.TimestampHeader(request);
-            var task = new ServiceTask(request);
+            var operation = new ServiceOperation(request);
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader.TimeoutHint))
             using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.channelCts.Token))
-            using (var registration = linkedCts.Token.Register(this.CancelRequest, task, false))
+            using (var registration = linkedCts.Token.Register(this.CancelRequest, operation, false))
             {
-                if (this.pendingRequests.Post(task))
+                if (this.pendingRequests.Post(operation))
                 {
-                    return await task.Task.ConfigureAwait(false);
+                    return await operation.Task.ConfigureAwait(false);
                 }
                 throw new ServiceResultException(StatusCodes.BadSecureChannelClosed);
             }
@@ -530,7 +530,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
             };
-            await this.SendRequestAsync(new ServiceTask(closeSecureChannelRequest)).ConfigureAwait(false);
+            await this.SendRequestAsync(new ServiceOperation(closeSecureChannelRequest)).ConfigureAwait(false);
 
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
@@ -545,11 +545,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (this.receiveResponsesTask != null && !this.receiveResponsesTask.IsCompleted)
             {
-                Trace.TraceInformation("UaTcpSecureChannel waiting for socket to close.");
+                EventSource.Log.Verbose("Waiting for socket to close.");
                 var t = await Task.WhenAny(this.receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
                 if (t != this.receiveResponsesTask)
                 {
-                    Trace.TraceWarning("UaTcpSecureChannel timeout while waiting for socket to close.");
+                    EventSource.Log.Error("Timeout while waiting for socket to close.");
                 }
             }
             this.channelCts?.Dispose();
@@ -600,14 +600,14 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        private async Task RequestAction(ServiceTask task)
+        private async Task SendRequestAction(ServiceOperation operation)
         {
             var token = this.channelCts.Token;
             try
             {
-                if (!task.Task.IsCompleted)
+                if (!operation.Task.IsCompleted)
                 {
-                    await this.SendRequestAsync(task, token).ConfigureAwait(false);
+                    await this.SendRequestAsync(operation, token).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -620,10 +620,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        private async Task SendRequestAsync(ServiceTask serviceTask, CancellationToken token = default(CancellationToken))
+        private async Task SendRequestAsync(ServiceOperation operation, CancellationToken token = default(CancellationToken))
         {
             await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
-            var request = serviceTask.Request;
+            var request = operation.Request;
             try
             {
                 this.ThrowIfClosedOrNotOpening();
@@ -648,16 +648,16 @@ namespace Workstation.ServiceModel.Ua.Channels
                         ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce() : null,
                         RequestedLifetime = TokenRequestedLifetime
                     };
-                    Trace.TraceInformation($"UaTcpSecureChannel sending {openSecureChannelRequest.GetType().Name} Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
-                    this.pendingCompletions.TryAdd(openSecureChannelRequest.RequestHeader.RequestHandle, new ServiceTask(openSecureChannelRequest));
+                    EventSource.Log.Verbose($"Sending {openSecureChannelRequest.GetType().Name} Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
+                    this.pendingCompletions.TryAdd(openSecureChannelRequest.RequestHeader.RequestHandle, new ServiceOperation(openSecureChannelRequest));
                     await this.SendOpenSecureChannelRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
                 }
 
                 request.RequestHeader.RequestHandle = this.GetNextHandle();
                 request.RequestHeader.AuthenticationToken = this.AuthenticationToken;
 
-                Trace.TraceInformation($"UaTcpSecureChannel sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
-                this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, serviceTask);
+                EventSource.Log.Verbose($"Sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, operation);
                 if (request is OpenSecureChannelRequest)
                 {
                     await this.SendOpenSecureChannelRequestAsync((OpenSecureChannelRequest)request, token).ConfigureAwait(false);
@@ -673,7 +673,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"UaTcpSecureChannel error sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
+                EventSource.Log.Error($"Error sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
                 throw;
             }
             finally
@@ -1205,7 +1205,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         throw new ServiceResultException(StatusCodes.BadServerNotConnected);
                     }
                     var header = response.ResponseHeader;
-                    ServiceTask tcs;
+                    ServiceOperation tcs;
                     if (this.pendingCompletions.TryRemove(header.RequestHandle, out tcs))
                     {
                         if (StatusCode.IsBad(header.ServiceResult))
@@ -1309,7 +1309,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                             }
                                         }
 
-                                        Trace.TraceInformation($"UaTcpSecureChannel installed new security token {tokenId}.");
+                                        EventSource.Log.Verbose($"Installed new security token {tokenId}.");
                                     }
 
                                     plainHeaderSize = decoder.Position;
@@ -1493,7 +1493,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // set properties from message stream
                     response.Decode(bodyDecoder);
 
-                    Trace.TraceInformation($"UaTcpSecureChannel received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
+                    EventSource.Log.Verbose($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
 
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.
@@ -1602,17 +1602,17 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private void CancelRequest(object o)
         {
-            var task = (ServiceTask)o;
-            if (task.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
+            var operation = (ServiceOperation)o;
+            if (operation.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
-                var request = task.Request;
-                Trace.TraceInformation($"UaTcpSecureChannel canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                var request = operation.Request;
+                EventSource.Log.Verbose($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
             }
         }
 
-        public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, ServiceTask messageValue, ISourceBlock<ServiceTask> source, bool consumeToAccept)
+        public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, ServiceOperation messageValue, ISourceBlock<ServiceOperation> source, bool consumeToAccept)
         {
-            return ((ITargetBlock<ServiceTask>)this.pendingRequests).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
+            return ((ITargetBlock<ServiceOperation>)this.pendingRequests).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
         }
 
         public void Complete()
@@ -1622,7 +1622,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public void Fault(Exception exception)
         {
-            ((ITargetBlock<ServiceTask>)this.pendingRequests).Fault(exception);
+            ((IDataflowBlock)this.pendingRequests).Fault(exception);
         }
     }
 }

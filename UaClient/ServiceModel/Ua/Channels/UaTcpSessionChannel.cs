@@ -16,7 +16,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// </summary>
     public class UaTcpSessionChannel : UaTcpSecureChannel
     {
-        public const int DefaultSessionTimeout = 120 * 1000; // 2 minutes
+        public const double DefaultSessionTimeout = 120 * 1000; // 2 minutes
         public const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         // public const string RsaSha256Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
         public const string RsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
@@ -28,7 +28,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
-        /// <param name="userIdentity">The user identity or null if anonymous. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.</param>
+        /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
         /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>

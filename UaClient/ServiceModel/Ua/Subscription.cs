@@ -1,111 +1,146 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Prism.Events;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
-using Workstation.Collections;
 
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
     /// A collection of items to be monitored by the OPC UA server.
     /// </summary>
-    [Obsolete("Use ISubscription and your favorite ViewModeBase class, instead. See https://github.com/convertersystems/workstation-samples")]
-    public class Subscription : ISubscription, INotifyPropertyChanged, IDisposable
+    public class Subscription : IDisposable
     {
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
         private const uint DiagnosticsHint = (uint)DiagnosticFlags.None;
-        private readonly SynchronizationContext synchronizationContext = SynchronizationContext.Current;
-        private readonly CancellationTokenSource cts = new CancellationTokenSource();
+
+        private static ConditionalWeakTable<object, Subscription> attachedSubscriptions = new ConditionalWeakTable<object, Subscription>();
+
         private volatile bool isPublishing = false;
-        private IDisposable token1;
-        private IDisposable token2;
+        private WeakReference subscriptionRef;
+        private UaTcpSessionClient session;
+        private bool publishingEnabled = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscription"/> class.
         /// </summary>
         /// <param name="session">The session client.</param>
-        /// <param name="publishingInterval">The publishing interval in milliseconds.</param>
-        /// <param name="keepAliveCount">The number of PublishingIntervals before the server should return an empty Publish response.</param>
-        /// <param name="lifetimeCount">The number of PublishingIntervals before the server should delete the subscription. Set '0' to use session's lifetime.</param>
-        /// <param name="maxNotificationsPerPublish">The maximum number of notifications per publish request. Set '0' to use no limit.</param>
-        /// <param name="priority">The priority assigned to subscription.</param>
-        public Subscription(UaTcpSessionClient session = null, double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, uint maxNotificationsPerPublish = 0, byte priority = 0)
+        /// <param name="target">The target model.</param>
+        public Subscription(UaTcpSessionClient session, object target)
         {
-            this.Session = session;
-            this.PublishingInterval = publishingInterval;
-            this.KeepAliveCount = keepAliveCount;
-            this.LifetimeCount = lifetimeCount;
-            this.MaxNotificationsPerPublish = maxNotificationsPerPublish;
-            this.MonitoredItems = new MonitoredItemCollection(this);
-            this.PropertyChanged += this.OnPropertyChanged;
+            this.session = session;
+            this.subscriptionRef = new WeakReference(target);
 
-            // subscribe to data change and event notifications.
-            if (session != null)
+            // get values from [Subscription] attribute.
+            var typeInfo = target.GetType().GetTypeInfo();
+            var sa = typeInfo.GetCustomAttribute<SubscriptionAttribute>();
+            if (sa != null)
             {
-                var publishEvent = session.GetEvent<PubSubEvent<PublishResponse>>();
-                this.token1 = publishEvent.Subscribe(this.OnPublishResponse, ThreadOption.PublisherThread, false);
-                var stateChangedEvent = session.GetEvent<PubSubEvent<CommunicationState>>();
-                this.token2 = stateChangedEvent.Subscribe(this.OnStateChanged, ThreadOption.PublisherThread, false);
-                this.OnStateChanged(session.State);
+                this.PublishingInterval = sa.PublishingInterval;
+                this.KeepAliveCount = sa.KeepAliveCount;
+                this.LifetimeCount = sa.LifetimeCount;
+                this.PublishingEnabled = sa.PublishingEnabled;
+                this.MonitoredItems = new MonitoredItemCollection(target);
             }
-        }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+            // register for property change.
+            var inpc = target as INotifyPropertyChanged;
+            if (inpc != null)
+            {
+                inpc.PropertyChanged += this.OnPropertyChanged;
+            }
+
+            // store this in the shared attached subscriptions list
+            attachedSubscriptions.Remove(target);
+            attachedSubscriptions.Add(target, this);
+        }
 
         /// <summary>
         /// Gets the publishing interval.
         /// </summary>
-        public double PublishingInterval { get; }
+        public double PublishingInterval { get; } = 1000f;
 
         /// <summary>
         /// Gets the number of PublishingIntervals before the server should return an empty Publish response.
         /// </summary>
-        public uint KeepAliveCount { get; }
+        public uint KeepAliveCount { get; } = 10u;
 
         /// <summary>
         /// Gets the number of PublishingIntervals before the server should delete the subscription.
         /// </summary>
-        public uint LifetimeCount { get; }
+        public uint LifetimeCount { get; } = 0u;
 
         /// <summary>
-        /// Gets the maximum number of notifications per publish request.
+        /// Gets or sets a value indicating whether publishing is enabled.
         /// </summary>
-        public uint MaxNotificationsPerPublish { get; }
+        public bool PublishingEnabled
+        {
+            get { return this.publishingEnabled; }
 
-        /// <summary>
-        /// Gets the priority assigned to subscription.
-        /// </summary>
-        public byte Priority { get; }
-
-        public bool PublishingEnabled { get; }
+            set
+            {
+                if (this.publishingEnabled != value)
+                {
+                    this.publishingEnabled = value;
+                    if (this.session.State == CommunicationState.Opened && this.SubscriptionId != 0u)
+                    {
+                        var request = new SetPublishingModeRequest
+                        {
+                            SubscriptionIds = new[] { this.SubscriptionId },
+                            PublishingEnabled = value
+                        };
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                await this.session.SetPublishingModeAsync(request).ConfigureAwait(false);
+                            }
+                            catch (Exception ex)
+                            {
+                                EventSource.Log.Error($"Error setting publishing mode for subscription. {ex.Message}");
+                            }
+                        });
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the collection of items to monitor.
         /// </summary>
-        public MonitoredItemCollection MonitoredItems { get; }
+        public MonitoredItemCollection MonitoredItems { get; } = new MonitoredItemCollection();
 
         /// <summary>
-        /// Gets or sets the session with the server.
+        /// Gets the UaTcpSessionClient.
         /// </summary>
-        public UaTcpSessionClient Session { get; set; }
+        public UaTcpSessionClient Session => this.session;
 
         /// <summary>
-        /// Gets the identifier assigned by the server.
+        /// Gets the target.
         /// </summary>
-        public uint Id { get; private set; }
+        public object Target => this.subscriptionRef.Target;
 
-        public void SetErrors(string propertyName, IEnumerable<string> errors)
+        /// <summary>
+        /// Gets the SubscriptionId assigned by the server.
+        /// </summary>
+        public uint SubscriptionId { get; internal set; }
+
+        /// <summary>
+        /// Gets the <see cref="Subscription"/> attached to this model.
+        /// </summary>
+        /// <param name="model">the model.</param>
+        /// <returns>Returns the attached <see cref="Subscription"/> or null.</returns>
+        public static Subscription FromModel(object model)
         {
+            Subscription subscription;
+            if (attachedSubscriptions.TryGetValue(model, out subscription))
+            {
+                return subscription;
+            }
+            return null;
         }
 
         /// <summary>
@@ -121,98 +156,35 @@ namespace Workstation.ServiceModel.Ua
         {
             if (disposing)
             {
-                this.token1?.Dispose();
-                this.token2?.Dispose();
-            }
-        }
-
-        /// <summary>
-        /// Receive StateChanged message.
-        /// </summary>
-        /// <param name="state">The service's CommunicationState.</param>
-        public void OnStateChanged(CommunicationState state)
-        {
-            if (state == CommunicationState.Opened)
-            {
-                Task.Run(async () =>
+                var target = this.Target;
+                if (target != null)
                 {
-                    try
+                    attachedSubscriptions.Remove(target);
+                    var inpc = this.Target as INotifyPropertyChanged;
+                    if (inpc != null)
                     {
-                        // create the subscription.
-                        var subscriptionRequest = new CreateSubscriptionRequest
-                        {
-                            RequestedPublishingInterval = this.PublishingInterval,
-                            RequestedMaxKeepAliveCount = this.KeepAliveCount,
-                            RequestedLifetimeCount = Math.Max(this.LifetimeCount, 3 * this.KeepAliveCount),
-                            PublishingEnabled = true,
-                            Priority = this.Priority
-                        };
-                        var subscriptionResponse = await this.Session.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
-                        var id = this.Id = subscriptionResponse.SubscriptionId;
-
-                        // add the items.
-                        if (this.MonitoredItems.Count > 0)
-                        {
-                            var items = this.MonitoredItems.ToList();
-                            var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = m.NodeId, AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
-                            var itemsRequest = new CreateMonitoredItemsRequest
-                            {
-                                SubscriptionId = id,
-                                ItemsToCreate = requests,
-                            };
-                            var itemsResponse = await this.Session.CreateMonitoredItemsAsync(itemsRequest).ConfigureAwait(false);
-                            for (int i = 0; i < itemsResponse.Results.Length; i++)
-                            {
-                                var item = items[i];
-                                var result = itemsResponse.Results[i];
-                                item.OnCreateResult(result);
-                            }
-                        }
+                        inpc.PropertyChanged -= this.OnPropertyChanged;
                     }
-                    catch (ServiceResultException ex)
-                    {
-                        Trace.TraceError($"Subscription error creating subscription '{this.GetType().Name}'. {ex.Message}");
-                    }
-                });
+                }
             }
         }
 
         /// <summary>
-        /// Receive PublishResponse message.
+        /// Handles PublishResponse message.
         /// </summary>
         /// <param name="response">The publish response.</param>
-        public void OnPublishResponse(PublishResponse response)
+        /// <returns>False if target reference is not alive.</returns>
+        internal bool OnPublishResponse(PublishResponse response)
         {
-            if (response.SubscriptionId != this.Id)
+            var target = this.Target;
+            if (target == null)
             {
-                return;
+                return false;
             }
 
-            try
-            {
-                if (this.synchronizationContext != null)
-                {
-                    this.synchronizationContext.Post(this.ProcessNotifications, response);
-                }
-                else
-                {
-                    this.ProcessNotifications(response);
-                }
-            }
-            finally
-            {
-                response.MoreNotifications = false; // reset flag indicates message handled.
-            }
-        }
-
-        private void ProcessNotifications(object state)
-        {
             this.isPublishing = true;
-
             try
             {
-                var response = (PublishResponse)state;
-
                 // loop thru all the notifications
                 var nd = response.NotificationMessage.NotificationData;
                 foreach (var n in nd)
@@ -228,11 +200,11 @@ namespace Workstation.ServiceModel.Ua
                             {
                                 try
                                 {
-                                    item.Publish(min.Value);
+                                    item.Publish(target, min.Value);
                                 }
                                 catch (Exception ex)
                                 {
-                                    Trace.TraceError($"Subscription error publishing value for NodeId {item.NodeId}. {ex.Message}");
+                                    EventSource.Log.Error($"Error publishing value for NodeId {item.NodeId}. {ex.Message}");
                                 }
                             }
                         }
@@ -251,16 +223,17 @@ namespace Workstation.ServiceModel.Ua
                             {
                                 try
                                 {
-                                    item.Publish(efl.EventFields);
+                                    item.Publish(target, efl.EventFields);
                                 }
                                 catch (Exception ex)
                                 {
-                                    Trace.TraceError($"Subscription error publishing event for NodeId {item.NodeId}. {ex.Message}");
+                                    EventSource.Log.Error($"Error publishing event for NodeId {item.NodeId}. {ex.Message}");
                                 }
                             }
                         }
                     }
                 }
+                return true;
             }
             finally
             {
@@ -268,29 +241,12 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        protected virtual bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
-        {
-            if (Equals(storage, value))
-            {
-                return false;
-            }
-
-            storage = value;
-            this.NotifyPropertyChanged(propertyName);
-            return true;
-        }
-
-        protected virtual void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         /// <summary>
-        /// Handles PropertyChanged event. If the property is associated with a MonitoredItem, then writes the property value to the node of the server.
+        /// Handles PropertyChanged event. If the property is associated with a MonitoredItem, writes the property value to the node of the server.
         /// </summary>
         /// <param name="sender">the sender.</param>
         /// <param name="e">the event.</param>
-        private void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        internal void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (this.isPublishing || string.IsNullOrEmpty(e.PropertyName))
             {
@@ -298,21 +254,31 @@ namespace Workstation.ServiceModel.Ua
             }
 
             MonitoredItemBase item;
-            if (this.Session != null && this.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
+            if (this.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
             {
-                var pi = item.Property;
-                if (pi != null && pi.CanRead)
+                DataValue value;
+                if (item.TryGetValue(sender, out value))
                 {
-                    var value = pi.GetValue(sender);
-                    this.Session.WriteAsync(new WriteRequest { NodesToWrite = new[] { new WriteValue { NodeId = item.NodeId, AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value as DataValue ?? new DataValue(value) } } })
-                        .ContinueWith(
-                            t =>
-                            {
-                                foreach (var ex in t.Exception.InnerExceptions)
-                                {
-                                    Trace.TraceWarning($"Subscription error writing value for NodeId {item.NodeId}. {ex.Message}");
-                                }
-                            }, TaskContinuationOptions.OnlyOnFaulted);
+                    var writeRequest = new WriteRequest
+                    {
+                        NodesToWrite = new[] { new WriteValue { NodeId = item.NodeId, AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value } }
+                    };
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var writeResponse = await this.session.WriteAsync(writeRequest).ConfigureAwait(false);
+                            item.OnWriteResult(sender, writeResponse.Results[0]);
+                        }
+                        catch (ServiceResultException ex)
+                        {
+                            item.OnWriteResult(sender, (uint)ex.HResult);
+                        }
+                        catch (Exception)
+                        {
+                            item.OnWriteResult(sender, StatusCodes.BadServerNotConnected);
+                        }
+                    });
                 }
             }
         }

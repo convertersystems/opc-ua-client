@@ -3,55 +3,6 @@
   "version": 1,
   "targets": {
     ".NETFramework,Version=v4.6.1": {
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.ComponentModel": "4.0.1",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Linq.Expressions": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1"
-        },
-        "compile": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging/1.0.0": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
-          "System.Threading": "4.0.11"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.Collections": "4.0.11",
-          "System.Collections.Concurrent": "4.0.12",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1",
-          "System.Runtime.Extensions": "4.1.0",
-          "System.Runtime.InteropServices": "4.1.0"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        }
-      },
       "Microsoft.NETCore.Platforms/1.0.1": {
         "compile": {
           "lib/netstandard1.0/_._": {}
@@ -120,15 +71,6 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
-      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
-      "Prism.Core/6.2.0": {
-        "compile": {
-          "lib/net45/Prism.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Prism.dll": {}
-        }
-      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -154,17 +96,6 @@
         }
       },
       "System.Collections.Concurrent/4.0.12": {
-        "frameworkAssemblies": [
-          "System"
-        ],
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
-      },
-      "System.ComponentModel/4.0.1": {
         "frameworkAssemblies": [
           "System"
         ],
@@ -214,28 +145,6 @@
         },
         "runtime": {
           "lib/net45/_._": {}
-        }
-      },
-      "System.Diagnostics.TraceSource/4.0.0": {
-        "frameworkAssemblies": [
-          "System",
-          "mscorlib"
-        ],
-        "compile": {
-          "ref/net46/System.Diagnostics.TraceSource.dll": {}
-        },
-        "runtime": {
-          "lib/net46/System.Diagnostics.TraceSource.dll": {}
-        },
-        "runtimeTargets": {
-          "runtimes/unix/lib/netstandard1.3/System.Diagnostics.TraceSource.dll": {
-            "assetType": "runtime",
-            "rid": "unix"
-          },
-          "runtimes/win/lib/net46/System.Diagnostics.TraceSource.dll": {
-            "assetType": "runtime",
-            "rid": "win"
-          }
         }
       },
       "System.Diagnostics.Tracing/4.1.0": {
@@ -688,55 +597,6 @@
       }
     },
     ".NETFramework,Version=v4.6.1/win": {
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.ComponentModel": "4.0.1",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Linq.Expressions": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1"
-        },
-        "compile": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging/1.0.0": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
-          "System.Threading": "4.0.11"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.Collections": "4.0.11",
-          "System.Collections.Concurrent": "4.0.12",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1",
-          "System.Runtime.Extensions": "4.1.0",
-          "System.Runtime.InteropServices": "4.1.0"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        }
-      },
       "Microsoft.NETCore.Platforms/1.0.1": {
         "compile": {
           "lib/netstandard1.0/_._": {}
@@ -805,15 +665,6 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
-      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
-      "Prism.Core/6.2.0": {
-        "compile": {
-          "lib/net45/Prism.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Prism.dll": {}
-        }
-      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -839,17 +690,6 @@
         }
       },
       "System.Collections.Concurrent/4.0.12": {
-        "frameworkAssemblies": [
-          "System"
-        ],
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
-      },
-      "System.ComponentModel/4.0.1": {
         "frameworkAssemblies": [
           "System"
         ],
@@ -899,18 +739,6 @@
         },
         "runtime": {
           "lib/net45/_._": {}
-        }
-      },
-      "System.Diagnostics.TraceSource/4.0.0": {
-        "frameworkAssemblies": [
-          "System",
-          "mscorlib"
-        ],
-        "compile": {
-          "ref/net46/System.Diagnostics.TraceSource.dll": {}
-        },
-        "runtime": {
-          "runtimes/win/lib/net46/System.Diagnostics.TraceSource.dll": {}
         }
       },
       "System.Diagnostics.Tracing/4.1.0": {
@@ -1315,55 +1143,6 @@
       }
     },
     ".NETFramework,Version=v4.6.1/win-arm": {
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.ComponentModel": "4.0.1",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Linq.Expressions": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1"
-        },
-        "compile": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging/1.0.0": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
-          "System.Threading": "4.0.11"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.Collections": "4.0.11",
-          "System.Collections.Concurrent": "4.0.12",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1",
-          "System.Runtime.Extensions": "4.1.0",
-          "System.Runtime.InteropServices": "4.1.0"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        }
-      },
       "Microsoft.NETCore.Platforms/1.0.1": {
         "compile": {
           "lib/netstandard1.0/_._": {}
@@ -1432,15 +1211,6 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
-      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
-      "Prism.Core/6.2.0": {
-        "compile": {
-          "lib/net45/Prism.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Prism.dll": {}
-        }
-      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -1466,17 +1236,6 @@
         }
       },
       "System.Collections.Concurrent/4.0.12": {
-        "frameworkAssemblies": [
-          "System"
-        ],
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
-      },
-      "System.ComponentModel/4.0.1": {
         "frameworkAssemblies": [
           "System"
         ],
@@ -1526,18 +1285,6 @@
         },
         "runtime": {
           "lib/net45/_._": {}
-        }
-      },
-      "System.Diagnostics.TraceSource/4.0.0": {
-        "frameworkAssemblies": [
-          "System",
-          "mscorlib"
-        ],
-        "compile": {
-          "ref/net46/System.Diagnostics.TraceSource.dll": {}
-        },
-        "runtime": {
-          "lib/net46/System.Diagnostics.TraceSource.dll": {}
         }
       },
       "System.Diagnostics.Tracing/4.1.0": {
@@ -1942,55 +1689,6 @@
       }
     },
     ".NETFramework,Version=v4.6.1/win-x64": {
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.ComponentModel": "4.0.1",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Linq.Expressions": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1"
-        },
-        "compile": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging/1.0.0": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
-          "System.Threading": "4.0.11"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.Collections": "4.0.11",
-          "System.Collections.Concurrent": "4.0.12",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1",
-          "System.Runtime.Extensions": "4.1.0",
-          "System.Runtime.InteropServices": "4.1.0"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        }
-      },
       "Microsoft.NETCore.Platforms/1.0.1": {
         "compile": {
           "lib/netstandard1.0/_._": {}
@@ -2059,15 +1757,6 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
-      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
-      "Prism.Core/6.2.0": {
-        "compile": {
-          "lib/net45/Prism.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Prism.dll": {}
-        }
-      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -2093,17 +1782,6 @@
         }
       },
       "System.Collections.Concurrent/4.0.12": {
-        "frameworkAssemblies": [
-          "System"
-        ],
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
-      },
-      "System.ComponentModel/4.0.1": {
         "frameworkAssemblies": [
           "System"
         ],
@@ -2153,18 +1831,6 @@
         },
         "runtime": {
           "lib/net45/_._": {}
-        }
-      },
-      "System.Diagnostics.TraceSource/4.0.0": {
-        "frameworkAssemblies": [
-          "System",
-          "mscorlib"
-        ],
-        "compile": {
-          "ref/net46/System.Diagnostics.TraceSource.dll": {}
-        },
-        "runtime": {
-          "runtimes/win/lib/net46/System.Diagnostics.TraceSource.dll": {}
         }
       },
       "System.Diagnostics.Tracing/4.1.0": {
@@ -2569,55 +2235,6 @@
       }
     },
     ".NETFramework,Version=v4.6.1/win-x86": {
-      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.ComponentModel": "4.0.1",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Linq.Expressions": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1"
-        },
-        "compile": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging/1.0.0": {
-        "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
-          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
-          "System.Threading": "4.0.11"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
-        }
-      },
-      "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
-        "dependencies": {
-          "System.Collections": "4.0.11",
-          "System.Collections.Concurrent": "4.0.12",
-          "System.Diagnostics.Debug": "4.0.11",
-          "System.Globalization": "4.0.11",
-          "System.Linq": "4.1.0",
-          "System.Reflection": "4.1.0",
-          "System.Resources.ResourceManager": "4.0.1",
-          "System.Runtime.Extensions": "4.1.0",
-          "System.Runtime.InteropServices": "4.1.0"
-        },
-        "compile": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
-        }
-      },
       "Microsoft.NETCore.Platforms/1.0.1": {
         "compile": {
           "lib/netstandard1.0/_._": {}
@@ -2686,15 +2303,6 @@
           "System.Xml.XDocument": "4.0.11"
         }
       },
-      "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {},
-      "Prism.Core/6.2.0": {
-        "compile": {
-          "lib/net45/Prism.dll": {}
-        },
-        "runtime": {
-          "lib/net45/Prism.dll": {}
-        }
-      },
       "StyleCop.Analyzers/1.0.0": {},
       "System.AppContext/4.1.0": {
         "frameworkAssemblies": [
@@ -2720,17 +2328,6 @@
         }
       },
       "System.Collections.Concurrent/4.0.12": {
-        "frameworkAssemblies": [
-          "System"
-        ],
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
-      },
-      "System.ComponentModel/4.0.1": {
         "frameworkAssemblies": [
           "System"
         ],
@@ -2780,18 +2377,6 @@
         },
         "runtime": {
           "lib/net45/_._": {}
-        }
-      },
-      "System.Diagnostics.TraceSource/4.0.0": {
-        "frameworkAssemblies": [
-          "System",
-          "mscorlib"
-        ],
-        "compile": {
-          "ref/net46/System.Diagnostics.TraceSource.dll": {}
-        },
-        "runtime": {
-          "runtimes/win/lib/net46/System.Diagnostics.TraceSource.dll": {}
         }
       },
       "System.Diagnostics.Tracing/4.1.0": {
@@ -3197,39 +2782,6 @@
     }
   },
   "libraries": {
-    "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
-      "sha512": "+XwaNo3o9RhLQhUnnOBCaukeRi1X9yYc0Fzye9RlErSflKZdw0VgHtn6rvKo0FTionsW0x8QVULhKH+nkqVjQA==",
-      "type": "package",
-      "path": "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0",
-      "files": [
-        "Microsoft.Extensions.DependencyInjection.Abstractions.1.0.0.nupkg.sha512",
-        "Microsoft.Extensions.DependencyInjection.Abstractions.nuspec",
-        "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
-        "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml"
-      ]
-    },
-    "Microsoft.Extensions.Logging/1.0.0": {
-      "sha512": "0mDuASVrd/nMeBYIJSK+9lT3TSmWxUXP/ipVB1pF1ApMN5fqGCckPTNwmOfT4Z9wPkXGnhbwFTGrxZvbzTWxOg==",
-      "type": "package",
-      "path": "Microsoft.Extensions.Logging/1.0.0",
-      "files": [
-        "Microsoft.Extensions.Logging.1.0.0.nupkg.sha512",
-        "Microsoft.Extensions.Logging.nuspec",
-        "lib/netstandard1.1/Microsoft.Extensions.Logging.dll",
-        "lib/netstandard1.1/Microsoft.Extensions.Logging.xml"
-      ]
-    },
-    "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
-      "sha512": "wHT6oY50q36mAXBRKtFaB7u07WxKC5u2M8fi3PqHOOnHyUo9gD0u1TlCNR8UObHQxKMYwqlgI8TLcErpt29n8A==",
-      "type": "package",
-      "path": "Microsoft.Extensions.Logging.Abstractions/1.0.0",
-      "files": [
-        "Microsoft.Extensions.Logging.Abstractions.1.0.0.nupkg.sha512",
-        "Microsoft.Extensions.Logging.Abstractions.nuspec",
-        "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll",
-        "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.xml"
-      ]
-    },
     "Microsoft.NETCore.Platforms/1.0.1": {
       "sha512": "2G6OjjJzwBfNOO8myRV/nFrbTw5iA+DEm0N+qUqhrOmaVtn4pC77h38I1jsXGw5VH55+dPfQsqHD0We9sCl9FQ==",
       "type": "package",
@@ -3285,45 +2837,6 @@
         "NETStandard.Library.nuspec",
         "ThirdPartyNotices.txt",
         "dotnet_library_license.txt"
-      ]
-    },
-    "NuSpec.ReferenceGenerator/2.0.0-beta-bld14": {
-      "sha512": "4glYZM9mf2HMxUvyZD01f1Kkgk4wygEHPB2m0WhVMlrCPfMhNiO+CNi4U6xZhKoJ5H+JL0AR+IgfPcUmd6Md9w==",
-      "type": "package",
-      "path": "NuSpec.ReferenceGenerator/2.0.0-beta-bld14",
-      "files": [
-        "NuSpec.ReferenceGenerator.2.0.0-beta-bld14.nupkg.sha512",
-        "NuSpec.ReferenceGenerator.nuspec",
-        "build/netstandard1.0/NuSpec.ReferenceGenerator.targets",
-        "build/portable-net45+win+wpa81+wp80+MonoAndroid10+xamarinios10+MonoTouch10/NuSpec.ReferenceGenerator.targets",
-        "tools/RefGen.exe",
-        "tools/RefGen.exe.config",
-        "tools/RefGen.pdb"
-      ]
-    },
-    "Prism.Core/6.2.0": {
-      "sha512": "jWJRmjvR/bJqVyLr3T9hKToyV6X0Q2DONtyfa8ZjHJwlkD/SF3YJM+z8xSdqQl8uPfLOmgBG6Xm4lPk69P5o0g==",
-      "type": "package",
-      "path": "Prism.Core/6.2.0",
-      "files": [
-        "Prism.Core.6.2.0.nupkg.sha512",
-        "Prism.Core.nuspec",
-        "lib/MonoAndroid10/Prism.dll",
-        "lib/MonoAndroid10/Prism.xml",
-        "lib/MonoTouch10/Prism.dll",
-        "lib/MonoTouch10/Prism.xml",
-        "lib/Xamarin.iOS10/Prism.dll",
-        "lib/Xamarin.iOS10/Prism.xml",
-        "lib/net45/Prism.dll",
-        "lib/net45/Prism.xml",
-        "lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10/Prism.dll",
-        "lib/portable-win+net45+wp80+win81+wpa81+MonoAndroid10+MonoTouch10+Xamarin.iOS10/Prism.xml",
-        "lib/wp8/Prism.dll",
-        "lib/wp8/Prism.xml",
-        "lib/wp81/Prism.dll",
-        "lib/wp81/Prism.xml",
-        "lib/wpa81/Prism.dll",
-        "lib/wpa81/Prism.xml"
       ]
     },
     "StyleCop.Analyzers/1.0.0": {
@@ -3521,63 +3034,6 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "System.ComponentModel/4.0.1": {
-      "sha512": "oBZFnm7seFiVfugsIyOvQCWobNZs7FzqDV/B7tx20Ep/l3UUFCPDkdTnCNaJZTU27zjeODmy2C/cP60u3D4c9w==",
-      "type": "package",
-      "path": "System.ComponentModel/4.0.1",
-      "files": [
-        "System.ComponentModel.4.0.1.nupkg.sha512",
-        "System.ComponentModel.nuspec",
-        "ThirdPartyNotices.txt",
-        "dotnet_library_license.txt",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net45/_._",
-        "lib/netcore50/System.ComponentModel.dll",
-        "lib/netstandard1.3/System.ComponentModel.dll",
-        "lib/portable-net45+win8+wp8+wpa81/_._",
-        "lib/win8/_._",
-        "lib/wp80/_._",
-        "lib/wpa81/_._",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "lib/xamarintvos10/_._",
-        "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net45/_._",
-        "ref/netcore50/System.ComponentModel.dll",
-        "ref/netcore50/System.ComponentModel.xml",
-        "ref/netcore50/de/System.ComponentModel.xml",
-        "ref/netcore50/es/System.ComponentModel.xml",
-        "ref/netcore50/fr/System.ComponentModel.xml",
-        "ref/netcore50/it/System.ComponentModel.xml",
-        "ref/netcore50/ja/System.ComponentModel.xml",
-        "ref/netcore50/ko/System.ComponentModel.xml",
-        "ref/netcore50/ru/System.ComponentModel.xml",
-        "ref/netcore50/zh-hans/System.ComponentModel.xml",
-        "ref/netcore50/zh-hant/System.ComponentModel.xml",
-        "ref/netstandard1.0/System.ComponentModel.dll",
-        "ref/netstandard1.0/System.ComponentModel.xml",
-        "ref/netstandard1.0/de/System.ComponentModel.xml",
-        "ref/netstandard1.0/es/System.ComponentModel.xml",
-        "ref/netstandard1.0/fr/System.ComponentModel.xml",
-        "ref/netstandard1.0/it/System.ComponentModel.xml",
-        "ref/netstandard1.0/ja/System.ComponentModel.xml",
-        "ref/netstandard1.0/ko/System.ComponentModel.xml",
-        "ref/netstandard1.0/ru/System.ComponentModel.xml",
-        "ref/netstandard1.0/zh-hans/System.ComponentModel.xml",
-        "ref/netstandard1.0/zh-hant/System.ComponentModel.xml",
-        "ref/portable-net45+win8+wp8+wpa81/_._",
-        "ref/win8/_._",
-        "ref/wp80/_._",
-        "ref/wpa81/_._",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._"
-      ]
-    },
     "System.Console/4.0.0": {
       "sha512": "qSKUSOIiYA/a0g5XXdxFcUFmv1hNICBD7QZ0QhGYVipPIhvpiydY8VZqr1thmCXvmn8aipMg64zuanB4eotK9A==",
       "type": "package",
@@ -3748,45 +3204,6 @@
         "ref/xamarinmac20/_._",
         "ref/xamarintvos10/_._",
         "ref/xamarinwatchos10/_._"
-      ]
-    },
-    "System.Diagnostics.TraceSource/4.0.0": {
-      "sha512": "6WVCczFZKXwpWpzd/iJkYnsmWTSFFiU24Xx/YdHXBcu+nFI/ehTgeqdJQFbtRPzbrO3KtRNjvkhtj4t5/WwWsA==",
-      "type": "package",
-      "path": "System.Diagnostics.TraceSource/4.0.0",
-      "files": [
-        "System.Diagnostics.TraceSource.4.0.0.nupkg.sha512",
-        "System.Diagnostics.TraceSource.nuspec",
-        "ThirdPartyNotices.txt",
-        "dotnet_library_license.txt",
-        "lib/MonoAndroid10/_._",
-        "lib/MonoTouch10/_._",
-        "lib/net46/System.Diagnostics.TraceSource.dll",
-        "lib/xamarinios10/_._",
-        "lib/xamarinmac20/_._",
-        "lib/xamarintvos10/_._",
-        "lib/xamarinwatchos10/_._",
-        "ref/MonoAndroid10/_._",
-        "ref/MonoTouch10/_._",
-        "ref/net46/System.Diagnostics.TraceSource.dll",
-        "ref/netstandard1.3/System.Diagnostics.TraceSource.dll",
-        "ref/netstandard1.3/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/de/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/es/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/fr/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/it/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/ja/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/ko/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/ru/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/zh-hans/System.Diagnostics.TraceSource.xml",
-        "ref/netstandard1.3/zh-hant/System.Diagnostics.TraceSource.xml",
-        "ref/xamarinios10/_._",
-        "ref/xamarinmac20/_._",
-        "ref/xamarintvos10/_._",
-        "ref/xamarinwatchos10/_._",
-        "runtimes/unix/lib/netstandard1.3/System.Diagnostics.TraceSource.dll",
-        "runtimes/win/lib/net46/System.Diagnostics.TraceSource.dll",
-        "runtimes/win/lib/netstandard1.3/System.Diagnostics.TraceSource.dll"
       ]
     },
     "System.Diagnostics.Tracing/4.1.0": {

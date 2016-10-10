@@ -10,6 +10,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
+using System.Diagnostics.Tracing;
 
 namespace Workstation.UaClient.UnitTests
 {
@@ -48,62 +49,67 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task ConnnectToAllEndpoints()
         {
-            // get or add application certificate.
-            var localCertificate = this.localDescription.GetCertificate();
-            if (localCertificate == null)
+            using (var eventlistener = new ConsoleEventListener())
             {
-                throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
-            }
+                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
 
-            // discover available endpoints of server.
-            var getEndpointsRequest = new GetEndpointsRequest
-            {
-                EndpointUrl = this.endpointUrl,
-                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
-            };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
-
-            // for each endpoint and user identity type, try creating a session and reading a few nodes.
-            foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel))
-            {
-                foreach (var selectedTokenPolicy in selectedEndpoint.UserIdentityTokens)
+                // get or add application certificate.
+                var localCertificate = this.localDescription.GetCertificate();
+                if (localCertificate == null)
                 {
-                    IUserIdentity selectedUserIdentity;
-                    switch (selectedTokenPolicy.TokenType)
+                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+                }
+
+                // discover available endpoints of server.
+                var getEndpointsRequest = new GetEndpointsRequest
+                {
+                    EndpointUrl = this.endpointUrl,
+                    ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
+                };
+                Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+                var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+
+                // for each endpoint and user identity type, try creating a session and reading a few nodes.
+                foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel))
+                {
+                    foreach (var selectedTokenPolicy in selectedEndpoint.UserIdentityTokens)
                     {
-                        case UserTokenType.UserName:
-                            selectedUserIdentity = new UserNameIdentity("root", "secret");
-                            break;
+                        IUserIdentity selectedUserIdentity;
+                        switch (selectedTokenPolicy.TokenType)
+                        {
+                            case UserTokenType.UserName:
+                                selectedUserIdentity = new UserNameIdentity("root", "secret");
+                                break;
 
-                        case UserTokenType.Certificate:
-                            selectedUserIdentity = new X509Identity(localCertificate);
-                            break;
+                            case UserTokenType.Certificate:
+                                selectedUserIdentity = new X509Identity(localCertificate);
+                                break;
 
-                        default:
-                            selectedUserIdentity = new AnonymousIdentity();
-                            break;
-                    }
+                            default:
+                                selectedUserIdentity = new AnonymousIdentity();
+                                break;
+                        }
 
-                    var channel = new UaTcpSessionChannel(
-                        this.localDescription,
-                        localCertificate,
-                        selectedUserIdentity,
-                        selectedEndpoint);
+                        var channel = new UaTcpSessionChannel(
+                            this.localDescription,
+                            localCertificate,
+                            selectedUserIdentity,
+                            selectedEndpoint);
 
-                    Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-                    Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-                    Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-                    Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
-                    try
-                    {
-                        await channel.OpenAsync();
-                        Console.WriteLine($"Closing session '{channel.SessionId}'.");
-                        await channel.CloseAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error opening session '{channel.SessionId}'. {ex.Message}");
+                        Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                        Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+                        Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+                        Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
+                        try
+                        {
+                            await channel.OpenAsync();
+                            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                            await channel.CloseAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error opening session '{channel.SessionId}'. {ex.Message}");
+                        }
                     }
                 }
             }
@@ -117,62 +123,67 @@ namespace Workstation.UaClient.UnitTests
         [ExpectedException(typeof(ServiceResultException), "The session id is not valid.")]
         public async Task SessionTimeoutCausesFault()
         {
-            // get or add application certificate.
-            var localCertificate = this.localDescription.GetCertificate();
-            if (localCertificate == null)
+            using (var eventlistener = new ConsoleEventListener())
             {
-                throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
+
+                // get or add application certificate.
+                var localCertificate = this.localDescription.GetCertificate();
+                if (localCertificate == null)
+                {
+                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+                }
+
+                // discover available endpoints of server.
+                var getEndpointsRequest = new GetEndpointsRequest
+                {
+                    EndpointUrl = this.endpointUrl,
+                    ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
+                };
+                Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+                var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+                var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
+
+                var selectedTokenType = selectedEndpoint.UserIdentityTokens[0].TokenType;
+                IUserIdentity selectedUserIdentity;
+                switch (selectedTokenType)
+                {
+                    case UserTokenType.UserName:
+                        selectedUserIdentity = new UserNameIdentity("root", "secret");
+                        break;
+
+                    case UserTokenType.Certificate:
+                        selectedUserIdentity = new X509Identity(localCertificate);
+                        break;
+
+                    default:
+                        selectedUserIdentity = new AnonymousIdentity();
+                        break;
+                }
+
+                var channel = new UaTcpSessionChannel(
+                    this.localDescription,
+                    localCertificate,
+                    selectedUserIdentity,
+                    selectedEndpoint,
+                    sessionTimeout: 10000);
+
+                Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+                Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+                await channel.OpenAsync();
+                Console.WriteLine($"Activated session '{channel.SessionId}'.");
+
+                // server should close session due to inactivity
+                await Task.Delay(20000);
+
+                // should throw exception
+                var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus_CurrentTime), AttributeId = AttributeIds.Value } } };
+                await channel.ReadAsync(readRequest);
+
+                Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                await channel.CloseAsync();
             }
-
-            // discover available endpoints of server.
-            var getEndpointsRequest = new GetEndpointsRequest
-            {
-                EndpointUrl = this.endpointUrl,
-                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
-            };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
-            var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
-
-            var selectedTokenType = selectedEndpoint.UserIdentityTokens[0].TokenType;
-            IUserIdentity selectedUserIdentity;
-            switch (selectedTokenType)
-            {
-                case UserTokenType.UserName:
-                    selectedUserIdentity = new UserNameIdentity("root", "secret");
-                    break;
-
-                case UserTokenType.Certificate:
-                    selectedUserIdentity = new X509Identity(localCertificate);
-                    break;
-
-                default:
-                    selectedUserIdentity = new AnonymousIdentity();
-                    break;
-            }
-
-            var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                localCertificate,
-                selectedUserIdentity,
-                selectedEndpoint,
-                sessionTimeout: 10000);
-
-            Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            await channel.OpenAsync();
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
-
-            // server should close session due to inactivity
-            await Task.Delay(20000);
-
-            // should throw exception
-            var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus_CurrentTime), AttributeId = AttributeIds.Value } } };
-            await channel.ReadAsync(readRequest);
-
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
-            await channel.CloseAsync();
         }
 
         /// <summary>
@@ -182,67 +193,72 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task TransferSubscriptions()
         {
-            // get or add application certificate.
-            var localCertificate = this.localDescription.GetCertificate();
-            if (localCertificate == null)
+            using (var eventlistener = new ConsoleEventListener())
             {
-                throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
+
+                // get or add application certificate.
+                var localCertificate = this.localDescription.GetCertificate();
+                if (localCertificate == null)
+                {
+                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+                }
+
+                // discover available endpoints of server.
+                var getEndpointsRequest = new GetEndpointsRequest
+                {
+                    EndpointUrl = this.endpointUrl,
+                    ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
+                };
+                Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+                var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+                var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
+
+                IUserIdentity selectedUserIdentity = new UserNameIdentity("root", "secret");
+
+                var channel = new UaTcpSessionChannel(
+                    this.localDescription,
+                    localCertificate,
+                    selectedUserIdentity,
+                    selectedEndpoint);
+
+                Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+                Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+                await channel.OpenAsync();
+                Console.WriteLine($"Activated session '{channel.SessionId}'.");
+                var req = new CreateSubscriptionRequest
+                {
+                    RequestedPublishingInterval = 1000,
+                    RequestedMaxKeepAliveCount = 20,
+                    PublishingEnabled = true
+                };
+                var res = await channel.CreateSubscriptionAsync(req);
+                Console.WriteLine($"Created subscription '{res.SubscriptionId}'.");
+
+                Console.WriteLine($"Aborting session '{channel.SessionId}'.");
+                await channel.AbortAsync();
+
+                var channel2 = new UaTcpSessionChannel(
+                    this.localDescription,
+                    localCertificate,
+                    selectedUserIdentity,
+                    selectedEndpoint);
+
+                await channel2.OpenAsync();
+                Console.WriteLine($"Activated session '{channel2.SessionId}'.");
+
+                var req2 = new TransferSubscriptionsRequest
+                {
+                    SubscriptionIds = new[] { res.SubscriptionId }
+                };
+                var res2 = await channel2.TransferSubscriptionsAsync(req2);
+                Console.WriteLine($"Transferred subscription result '{res2.Results[0].StatusCode}'.");
+                Console.WriteLine($"Closing session '{channel2.SessionId}'.");
+                await channel2.CloseAsync();
+
+                Assert.IsTrue(StatusCode.IsGood(res2.Results[0].StatusCode));
             }
-
-            // discover available endpoints of server.
-            var getEndpointsRequest = new GetEndpointsRequest
-            {
-                EndpointUrl = this.endpointUrl,
-                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
-            };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
-            var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
-
-            IUserIdentity selectedUserIdentity = new UserNameIdentity("root", "secret");
-
-            var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                localCertificate,
-                selectedUserIdentity,
-                selectedEndpoint);
-
-            Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            await channel.OpenAsync();
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
-            var req = new CreateSubscriptionRequest
-            {
-                RequestedPublishingInterval = 1000,
-                RequestedMaxKeepAliveCount = 20,
-                PublishingEnabled = true
-            };
-            var res = await channel.CreateSubscriptionAsync(req);
-            Console.WriteLine($"Created subscription '{res.SubscriptionId}'.");
-
-            Console.WriteLine($"Aborting session '{channel.SessionId}'.");
-            await channel.AbortAsync();
-
-            var channel2 = new UaTcpSessionChannel(
-                this.localDescription,
-                localCertificate,
-                selectedUserIdentity,
-                selectedEndpoint);
-
-            await channel2.OpenAsync();
-            Console.WriteLine($"Activated session '{channel2.SessionId}'.");
-
-            var req2 = new TransferSubscriptionsRequest
-            {
-                SubscriptionIds = new[] { res.SubscriptionId }
-            };
-            var res2 = await channel2.TransferSubscriptionsAsync(req2);
-            Console.WriteLine($"Transferred subscription result '{res2.Results[0].StatusCode}'.");
-            Console.WriteLine($"Closing session '{channel2.SessionId}'.");
-            await channel2.CloseAsync();
-
-            Assert.IsTrue(StatusCode.IsGood(res2.Results[0].StatusCode));
         }
 
         /// <summary>
@@ -252,78 +268,54 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task TestSubscription()
         {
-            // get or add application certificate.
-            var localCertificate = this.localDescription.GetCertificate();
-            if (localCertificate == null)
+            // Setup a logger for the EventSource
+            using (var eventlistener = new ConsoleEventListener())
             {
-                throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
+
+                // get or add application certificate.
+                var localCertificate = this.localDescription.GetCertificate();
+                if (localCertificate == null)
+                {
+                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
+                }
+
+                // discover available endpoints of server.
+                var getEndpointsRequest = new GetEndpointsRequest
+                {
+                    EndpointUrl = this.endpointUrl,
+                    ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
+                };
+                Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+                var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+                var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
+
+                var session = new UaTcpSessionClient(
+                    this.localDescription,
+                    localCertificate,
+                    sc => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
+                    selectedEndpoint);
+
+                Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
+                Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
+                Console.WriteLine($"SecurityMode: '{session.RemoteEndpoint.SecurityMode}'.");
+
+                var sub = session.CreateSubscription<MySubscription>();
+
+                Console.WriteLine($"Created subscription.");
+
+                await Task.Delay(5000);
+                session.Dispose();
+
+                Assert.IsTrue(sub.CurrentTime != DateTime.MinValue, "CurrentTime");
+                Assert.IsTrue(sub.CurrentTimeAsDataValue != null, "CurrentTimeAsDataValue");
+                Assert.IsTrue(sub.CurrentTimeQueue.Count > 0, "CurrentTimeQueue");
             }
-
-            // discover available endpoints of server.
-            var getEndpointsRequest = new GetEndpointsRequest
-            {
-                EndpointUrl = this.endpointUrl,
-                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
-            };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
-            var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
-
-            IUserIdentity selectedUserIdentity = new UserNameIdentity("root", "secret");
-
-            var session = new UaTcpSessionClient(
-                this.localDescription,
-                localCertificate,
-                selectedUserIdentity,
-                selectedEndpoint);
-
-            Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{session.RemoteEndpoint.SecurityMode}'.");
-
-            var sub = new MySubscription(session);
-
-            Console.WriteLine($"Created subscription.");
-
-            await Task.Delay(5000);
-            session.Dispose();
-
-            Assert.IsTrue(sub.CurrentTime != DateTime.MinValue);
-            Assert.IsTrue(sub.CurrentTimeAsDataValue != null);
-            Assert.IsTrue(sub.CurrentTimeQueue.Count > 0);
         }
 
-        private class MySubscription : ISubscription
+        [Subscription(publishingInterval: 500, keepAliveCount: 20)]
+        private class MySubscription
         {
-            public MySubscription(UaTcpSessionClient session)
-            {
-                this.Session = session;
-                this.PublishingInterval = 1000.0;
-                this.KeepAliveCount = 10;
-                this.LifetimeCount = 0;
-                this.PublishingEnabled = true;
-                this.MonitoredItems = new MonitoredItemCollection(this);
-                this.Session.Subscribe(this);
-            }
-
-            public event PropertyChangedEventHandler PropertyChanged;
-
-            public UaTcpSessionClient Session { get; set; }
-
-            public double PublishingInterval { get; set; }
-
-            public uint KeepAliveCount { get; set; }
-
-            public uint LifetimeCount { get; set; }
-
-            public bool PublishingEnabled { get; set; }
-
-            public MonitoredItemCollection MonitoredItems { get; set; }
-
-            public void SetErrors(string propertyName, IEnumerable<string> errors)
-            {
-            }
-
             /// <summary>
             /// Gets the value of CurrentTime.
             /// </summary>
