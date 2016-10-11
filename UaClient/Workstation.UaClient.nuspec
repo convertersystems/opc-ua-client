@@ -6,7 +6,8 @@
     <title>Workstation.UaClient</title>
     <authors>Andrew Cullen</authors>
     <owners>Converter Systems LLC</owners>
-    <projectUrl>https://github.com/convertersystems/workstation-uaclient</projectUrl>
+    <projectUrl>https://github.com/convertersystems/opc-ua-client</projectUrl>
+    <licenseUrl>https://github.com/convertersystems/opc-ua-client/blob/master/UaClient/LICENSE.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <summary>A communications library for OPC UA.</summary>
     <description>
@@ -17,7 +18,9 @@
       * Drag and drop the variable, method, and event nodes onto your view model.
       * Add XAML bindings to connect your UI elements to live data and events.
     </description>
-    <releaseNotes></releaseNotes>
+    <releaseNotes>
+      v1.4.0 UaTcpSessionClient now calls a asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners.
+    </releaseNotes>
     <copyright>Copyright ©  2016 Converter Systems LLC.</copyright>
     <tags>opc ua</tags>
     <dependencies>
