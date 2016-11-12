@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata minClientVersion="3.4">
     <id>Workstation.UaClient</id>
-    <version>1.4.0</version>
+    <version>1.4.1</version>
     <title>Workstation.UaClient</title>
     <authors>Andrew Cullen</authors>
     <owners>Converter Systems LLC</owners>
@@ -19,6 +19,7 @@
       * Add XAML bindings to connect your UI elements to live data and events.
     </description>
     <releaseNotes>
+      v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription&gt;T&lt;, use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
       v1.4.0 UaTcpSessionClient now calls a asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners.
     </releaseNotes>
     <copyright>Copyright ©  2016 Converter Systems LLC.</copyright>

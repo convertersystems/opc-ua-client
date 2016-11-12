@@ -53,7 +53,7 @@ namespace Workstation.ServiceModel.Ua
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
             X509Certificate2 localCertificate,
-            Func<UaTcpSessionClient, Task<IUserIdentity>> userIdentityProvider,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             EndpointDescription remoteEndpoint,
             double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
             uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
@@ -70,7 +70,7 @@ namespace Workstation.ServiceModel.Ua
 
             this.LocalDescription = localDescription;
             this.LocalCertificate = localCertificate;
-            this.UserIdentityProvider = userIdentityProvider ?? (sc => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
+            this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
             if (remoteEndpoint == null)
             {
                 throw new ArgumentNullException(nameof(remoteEndpoint));
@@ -105,7 +105,7 @@ namespace Workstation.ServiceModel.Ua
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
             X509Certificate2 localCertificate,
-            Func<UaTcpSessionClient, Task<IUserIdentity>> userIdentityProvider,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             string endpointUrl,
             double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
             uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
@@ -122,7 +122,7 @@ namespace Workstation.ServiceModel.Ua
 
             this.LocalDescription = localDescription;
             this.LocalCertificate = localCertificate;
-            this.UserIdentityProvider = userIdentityProvider ?? (sc => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
+            this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
             if (string.IsNullOrEmpty(endpointUrl))
             {
                 throw new ArgumentNullException(nameof(endpointUrl));
@@ -153,7 +153,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets an asynchronous function that provides the identity of the user. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.
         /// </summary>
-        public Func<UaTcpSessionClient, Task<IUserIdentity>> UserIdentityProvider { get; }
+        public Func<EndpointDescription, Task<IUserIdentity>> UserIdentityProvider { get; }
 
         /// <summary>
         /// Gets the <see cref="EndpointDescription"/> of the remote application.
@@ -265,6 +265,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <typeparam name="T">The type of model.</typeparam>
         /// <returns>Returns the model.</returns>
+        [Obsolete("Create T yourself and then use session.Subscribe().")]
         public T CreateSubscription<T>()
         {
             var model = Activator.CreateInstance<T>();
@@ -442,7 +443,7 @@ namespace Workstation.ServiceModel.Ua
                 token.ThrowIfCancellationRequested();
 
                 // evaluate the user identity provider (may show a dialog).
-                var userIdentity = await this.UserIdentityProvider(this);
+                var userIdentity = await this.UserIdentityProvider(this.RemoteEndpoint);
 
                 try
                 {

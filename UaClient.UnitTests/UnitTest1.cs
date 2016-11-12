@@ -300,7 +300,8 @@ namespace Workstation.UaClient.UnitTests
                 Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
                 Console.WriteLine($"SecurityMode: '{session.RemoteEndpoint.SecurityMode}'.");
 
-                var sub = session.CreateSubscription<MySubscription>();
+                var sub = new MySubscription();
+                session.Subscribe(sub);
 
                 Console.WriteLine($"Created subscription.");
 
