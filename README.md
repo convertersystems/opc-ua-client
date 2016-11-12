@@ -1,8 +1,6 @@
 ![robot][1]
 
 # opc-ua-client
-Looking for samples? See https://github.com/convertersystems/opc-ua-samples
-
 *New!* Install package 'Workstation.UaClient' from Nuget to get the latest release for your hmi project.
 
 *New!* Supports Universal Windows Platform (UWP) and Windows Presentation Framework (WPF) applications.
