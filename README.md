@@ -35,10 +35,10 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
             // Create the session client for the app.
             this.session = new UaTcpSessionClient(appDescription, appCertificate, null, endpointUrl);
 
-            // Create the MainViewModel subscription.
-            var subscription = this.session.CreateSubscription<MainViewModel>();
+            // Create the main view model.
+            var subscription = new MainViewModel(this.session);
 
-            // Create and show the MainView.
+            // Create and show the main view.
             var view = new MainView { DataContext = subscription };
 
             view.Show();
@@ -48,6 +48,14 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     [Subscription(publishingInterval: 500, keepAliveCount: 20)]
     public class MainViewModel : ViewModelBase
     {
+        private readonly UaTcpSessionClient session;
+
+        public MainViewModel(UaTcpSessionClient session)
+        {
+            this.session = session;
+            session.Subscribe(this);
+        }
+
         /// <summary>
         /// Gets the value of ServerStatusCurrentTime.
         /// </summary>
@@ -62,6 +70,8 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     }
 ```
 ### Releases
+
+v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription&gt;T&lt;, use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
 
 v1.4.0 UaTcpSessionClient now calls a asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners. 
 
