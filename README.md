@@ -71,7 +71,7 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 ```
 ### Releases
 
-v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription&gt;T&lt;, use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
+v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription<T>, use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
 
 v1.4.0 UaTcpSessionClient now calls a asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners. 
 

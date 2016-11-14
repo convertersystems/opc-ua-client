@@ -92,17 +92,10 @@ namespace Workstation.ServiceModel.Ua
                             SubscriptionIds = new[] { this.SubscriptionId },
                             PublishingEnabled = value
                         };
-                        Task.Run(async () =>
-                        {
-                            try
-                            {
-                                await this.session.SetPublishingModeAsync(request).ConfigureAwait(false);
-                            }
-                            catch (Exception ex)
-                            {
-                                EventSource.Log.Error($"Error setting publishing mode for subscription. {ex.Message}");
-                            }
-                        });
+                        this.session.SetPublishingModeAsync(request)
+                            .ContinueWith(
+                                t => EventSource.Log.Error("Error setting publishing mode for subscription."),
+                                TaskContinuationOptions.OnlyOnFaulted);
                     }
                 }
             }
@@ -246,7 +239,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="sender">the sender.</param>
         /// <param name="e">the event.</param>
-        internal void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
+        internal async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (this.isPublishing || string.IsNullOrEmpty(e.PropertyName))
             {
@@ -263,22 +256,19 @@ namespace Workstation.ServiceModel.Ua
                     {
                         NodesToWrite = new[] { new WriteValue { NodeId = item.NodeId, AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value } }
                     };
-                    Task.Run(async () =>
+                    try
                     {
-                        try
-                        {
-                            var writeResponse = await this.session.WriteAsync(writeRequest).ConfigureAwait(false);
-                            item.OnWriteResult(sender, writeResponse.Results[0]);
-                        }
-                        catch (ServiceResultException ex)
-                        {
-                            item.OnWriteResult(sender, (uint)ex.HResult);
-                        }
-                        catch (Exception)
-                        {
-                            item.OnWriteResult(sender, StatusCodes.BadServerNotConnected);
-                        }
-                    });
+                        var writeResponse = await this.session.WriteAsync(writeRequest).ConfigureAwait(false);
+                        item.OnWriteResult(sender, writeResponse.Results[0]);
+                    }
+                    catch (ServiceResultException ex)
+                    {
+                        item.OnWriteResult(sender, (uint)ex.HResult);
+                    }
+                    catch (Exception)
+                    {
+                        item.OnWriteResult(sender, StatusCodes.BadServerNotConnected);
+                    }
                 }
             }
         }

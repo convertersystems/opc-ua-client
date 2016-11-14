@@ -30,7 +30,7 @@ namespace Workstation.ServiceModel.Ua
 
             if (string.IsNullOrEmpty(description.ApplicationUri))
             {
-                throw new ArgumentOutOfRangeException(nameof(description), "Expecting ApplicationUri in the form of 'http://{hostname}/{appname}'.");
+                throw new ArgumentOutOfRangeException(nameof(description), "Expecting ApplicationUri in the form of 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.");
             }
 
             string subjectName = null;
