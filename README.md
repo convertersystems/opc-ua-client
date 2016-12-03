@@ -1,9 +1,9 @@
 ![robot][1]
 
 # opc-ua-client
-*New!* Install package 'Workstation.UaClient' from Nuget to get the latest release for your hmi project.
+Install package 'Workstation.UaClient' from Nuget to get the latest release for your hmi project.
 
-*New!* Supports Universal Windows Platform (UWP) and Windows Presentation Framework (WPF) applications.
+Supports Universal Windows Platform (UWP) and Windows Presentation Framework (WPF) applications.
 
 Build a free HMI using OPC Unified Architecture and Visual Studio. With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
 
@@ -13,6 +13,7 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 - Use XAML bindings to connect your UI elements to live data.
 
 ### Main Types
+- UaTcpSessionChannel - A fast channel for sending requests to your OPC UA server using the UaTcp binary protocol. Supports security up to Basic256Sha256. 100% asynchronous.
 - UaTcpSessionClient - A client for browsing, reading, writing and subscribing to nodes of your OPC UA server. Connects and reconnects automatically. 100% asynchronous.
 - SubscriptionAttribute - An attribute for your view models. Permits UaTcpSessionClient to automatically create and delete subscriptions on the server and deliver data change and event notifications to properties.
 - MonitoredItemAttribute - An attribute for properties that indicates the property will receive data change or event notifications from the server.
@@ -22,18 +23,17 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Prepare for constructing the shared session client.
-            var appDescription = new ApplicationDescription()
-            {
-                ApplicationName = "Workstation.StatusHmi",
-                ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:Workstation.StatusHmi",
-                ApplicationType = ApplicationType.Client
-            };
-            var appCertificate = appDescription.GetCertificate();
-            var endpointUrl = StatusHmi.Properties.Settings.Default.EndpointUrl;
-
             // Create the session client for the app.
-            this.session = new UaTcpSessionClient(appDescription, appCertificate, null, endpointUrl);
+            this.session = new UaTcpSessionClient(
+				new ApplicationDescription()
+				{
+					ApplicationName = "Workstation.StatusHmi",
+					ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:Workstation.StatusHmi",
+					ApplicationType = ApplicationType.Client
+				},
+			    ad => Task.FromResult<X509Certificate2>(ad.GetCertificate()),
+                ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
+				StatusHmi.Properties.Settings.Default.EndpointUrl);
 
             // Create the main view model.
             var subscription = new MainViewModel(this.session);
@@ -71,9 +71,11 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 ```
 ### Releases
 
-v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription<T>, use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
+v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate. 
 
-v1.4.0 UaTcpSessionClient now calls a asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners. 
+v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription(), use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
+
+v1.4.0 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners. 
 
 v1.3.0 Depreciated Subscription base class in favor of ISubscription interface to allow freedom to choose whatever base class you wish for your view models.
    

@@ -143,5 +143,129 @@ namespace Workstation.ServiceModel.Ua
 
             return clientCertificate;
         }
+
+        /// <summary>
+        /// Searches the stores for certificate with subject name matching the host and path extracted from the applicationUri.
+        /// </summary>
+        /// <param name="applicationUri">The applicationUri, similar to 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.</param>
+        /// <param name="createIfNotFound">Creates a new self-signed certificate if one not found.</param>
+        /// <returns>The certificate. </returns>
+        public static X509Certificate2 GetCertificate(string applicationUri, bool createIfNotFound = true)
+        {
+            if (string.IsNullOrEmpty(applicationUri))
+            {
+                throw new ArgumentOutOfRangeException(nameof(applicationUri), "Expecting ApplicationUri in the form of 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.");
+            }
+
+            string subjectName = null;
+
+            UriBuilder appUri = new UriBuilder(applicationUri);
+            if (appUri.Scheme == "http" && !string.IsNullOrEmpty(appUri.Host))
+            {
+                var path = appUri.Path.Trim('/');
+                if (!string.IsNullOrEmpty(path))
+                {
+                    subjectName = $"CN={path}, DC={appUri.Host}";
+                }
+            }
+
+            if (appUri.Scheme == "urn")
+            {
+                var parts = appUri.Path.Split(new[] { ':' }, 2);
+                if (parts.Length == 2)
+                {
+                    subjectName = $"CN={parts[1]}, DC={parts[0]}";
+                }
+            }
+
+            if (subjectName == null)
+            {
+                throw new ArgumentOutOfRangeException(nameof(applicationUri), "Expecting ApplicationUri in the form of 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.");
+            }
+
+            X509Certificate2 clientCertificate = null;
+            X509Store store = null;
+            List<X509Certificate2> foundCerts = new List<X509Certificate2>();
+
+            // First check the Local Machine store.
+            store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+            try
+            {
+                store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+                var certs = store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, subjectName, false);
+                if (certs.Count > 0)
+                {
+                    foundCerts.AddRange(certs.OfType<X509Certificate2>());
+                }
+            }
+            catch (Exception ex)
+            {
+                EventSource.Log.Error($"Error opening X509Store '{store}'. {ex.Message}");
+            }
+            finally
+            {
+                store.Dispose();
+            }
+
+            // Then check the Current User store.
+            store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            try
+            {
+                store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+                var certs = store.Certificates.Find(X509FindType.FindBySubjectDistinguishedName, subjectName, false);
+                if (certs.Count > 0)
+                {
+                    foundCerts.AddRange(certs.OfType<X509Certificate2>());
+                }
+            }
+            catch (Exception ex)
+            {
+                EventSource.Log.Error($"Error opening X509Store '{store}'. {ex.Message}");
+            }
+            finally
+            {
+                store.Dispose();
+            }
+
+            // Select the certificate that was created last.
+            if (foundCerts.Count > 0)
+            {
+                clientCertificate = foundCerts.OrderBy(c => c.NotBefore).Last();
+                EventSource.Log.Informational($"Found certificate '{subjectName}'.");
+                return clientCertificate;
+            }
+
+            EventSource.Log.Informational($"Creating new certificate '{subjectName}'.");
+            try
+            {
+                var pfx = CertificateGenerator.CreateSelfSignCertificatePfx(
+                    subjectName,
+                    DateTime.UtcNow,
+                    DateTime.UtcNow.AddYears(25),
+                    new X509KeyUsageExtension(X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.NonRepudiation | X509KeyUsageFlags.KeyEncipherment | X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyCertSign, true),
+                    new X509EnhancedKeyUsageExtension(new OidCollection { new Oid(EnhancedKeyUsageOids.ServerAuthentication), new Oid(EnhancedKeyUsageOids.ClientAuthentication) }, false),
+                    new X509SubjectAlternateNameExtension(new[] { new X509AlternativeName { Type = X509AlternateNameType.Url, Value = applicationUri } }, true));
+
+                clientCertificate = new X509Certificate2(pfx, (string)null, X509KeyStorageFlags.Exportable | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.DefaultKeySet);
+
+                // add cert to Current User store.
+                store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                try
+                {
+                    store.Open(OpenFlags.ReadWrite | OpenFlags.OpenExistingOnly);
+                    store.Add(clientCertificate);
+                }
+                finally
+                {
+                    store.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                EventSource.Log.Error($"Error creating certificate '{subjectName}'. {ex.Message}");
+            }
+
+            return clientCertificate;
+        }
     }
 }

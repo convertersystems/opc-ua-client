@@ -1,9 +1,10 @@
 ﻿{
   "supports": {},
   "dependencies": {
+    "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
     "NETStandard.Library": "1.6.0",
     "StyleCop.Analyzers": "1.0.0",
-    "System.Threading.Tasks.Dataflow": "4.6.0"
+    "System.Threading.Tasks.Dataflow": "4.7.0"
   },
   "frameworks": {
     "netstandard1.4": {}

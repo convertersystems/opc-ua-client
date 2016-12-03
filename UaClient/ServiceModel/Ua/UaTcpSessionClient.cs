@@ -40,6 +40,110 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="localCertificateProvider">An asynchronous function that provides the <see cref="X509Certificate2"/> of the local application.</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
+        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
+        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
+        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
+        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
+        /// <param name="localSendBufferSize">The size of the send buffer.</param>
+        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
+        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        public UaTcpSessionClient(
+            ApplicationDescription localDescription,
+            Func<ApplicationDescription, Task<X509Certificate2>> localCertificateProvider,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
+            EndpointDescription remoteEndpoint,
+            double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
+            uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
+            uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
+            uint localReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localSendBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
+            uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
+        {
+            if (localDescription == null)
+            {
+                throw new ArgumentNullException(nameof(localDescription));
+            }
+
+            this.LocalDescription = localDescription;
+            this.LocalCertificateProvider = localCertificateProvider ?? (ad => Task.FromResult<X509Certificate2>(null));
+            this.UserIdentityProvider = userIdentityProvider ?? (endpoint => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
+            if (remoteEndpoint == null)
+            {
+                throw new ArgumentNullException(nameof(remoteEndpoint));
+            }
+
+            this.RemoteEndpoint = remoteEndpoint;
+            this.SessionTimeout = sessionTimeout;
+            this.TimeoutHint = timeoutHint;
+            this.DiagnosticsHint = diagnosticsHint;
+            this.LocalReceiveBufferSize = localReceiveBufferSize;
+            this.LocalSendBufferSize = localSendBufferSize;
+            this.LocalMaxMessageSize = localMaxMessageSize;
+            this.LocalMaxChunkCount = localMaxChunkCount;
+            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="localCertificateProvider">An asynchronous function that provides the <see cref="X509Certificate2"/> of the local application.</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
+        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
+        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
+        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
+        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
+        /// <param name="localSendBufferSize">The size of the send buffer.</param>
+        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
+        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        public UaTcpSessionClient(
+            ApplicationDescription localDescription,
+            Func<ApplicationDescription, Task<X509Certificate2>> localCertificateProvider,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
+            string endpointUrl,
+            double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
+            uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
+            uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
+            uint localReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localSendBufferSize = UaTcpTransportChannel.DefaultBufferSize,
+            uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
+            uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
+        {
+            if (localDescription == null)
+            {
+                throw new ArgumentNullException(nameof(localDescription));
+            }
+
+            this.LocalDescription = localDescription;
+            this.LocalCertificateProvider = localCertificateProvider ?? (ad => Task.FromResult<X509Certificate2>(null));
+            this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
+            if (string.IsNullOrEmpty(endpointUrl))
+            {
+                throw new ArgumentNullException(nameof(endpointUrl));
+            }
+
+            this.discoveryUrl = endpointUrl;
+            this.SessionTimeout = sessionTimeout;
+            this.TimeoutHint = timeoutHint;
+            this.DiagnosticsHint = diagnosticsHint;
+            this.LocalReceiveBufferSize = localReceiveBufferSize;
+            this.LocalSendBufferSize = localSendBufferSize;
+            this.LocalMaxMessageSize = localMaxMessageSize;
+            this.LocalMaxChunkCount = localMaxChunkCount;
+            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
+            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
         /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
@@ -50,6 +154,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="localSendBufferSize">The size of the send buffer.</param>
         /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
         /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        [Obsolete("Use contructor with localCertificateProvider instead.")]
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
             X509Certificate2 localCertificate,
@@ -102,6 +207,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="localSendBufferSize">The size of the send buffer.</param>
         /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
         /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        [Obsolete("Use contructor with localCertificateProvider instead.")]
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
             X509Certificate2 localCertificate,
@@ -148,7 +254,13 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the <see cref="X509Certificate2"/> of the local application.
         /// </summary>
+        [Obsolete]
         public X509Certificate2 LocalCertificate { get; }
+
+        /// <summary>
+        /// Gets an asynchronous function that provides the <see cref="X509Certificate2"/> of the local application.
+        /// </summary>
+        public Func<ApplicationDescription, Task<X509Certificate2>> LocalCertificateProvider { get; }
 
         /// <summary>
         /// Gets an asynchronous function that provides the identity of the user. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.
@@ -442,6 +554,9 @@ namespace Workstation.ServiceModel.Ua
                 // throw here to exit state machine.
                 token.ThrowIfCancellationRequested();
 
+                // evaluate the local certificate provider (may show a dialog).
+                var localCertificate = await this.LocalCertificateProvider(this.LocalDescription);
+
                 // evaluate the user identity provider (may show a dialog).
                 var userIdentity = await this.UserIdentityProvider(this.RemoteEndpoint);
 
@@ -453,7 +568,7 @@ namespace Workstation.ServiceModel.Ua
 
                     this.innerChannel = new UaTcpSessionChannel(
                         this.LocalDescription,
-                        this.LocalCertificate,
+                        localCertificate,
                         userIdentity,
                         this.RemoteEndpoint,
                         this.SessionTimeout,

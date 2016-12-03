@@ -2,15 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+using System.Diagnostics.Tracing;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
-using System.Diagnostics.Tracing;
 
 namespace Workstation.UaClient.UnitTests
 {
@@ -273,13 +272,6 @@ namespace Workstation.UaClient.UnitTests
             {
                 eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
 
-                // get or add application certificate.
-                var localCertificate = this.localDescription.GetCertificate();
-                if (localCertificate == null)
-                {
-                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
-                }
-
                 // discover available endpoints of server.
                 var getEndpointsRequest = new GetEndpointsRequest
                 {
@@ -292,8 +284,8 @@ namespace Workstation.UaClient.UnitTests
 
                 var session = new UaTcpSessionClient(
                     this.localDescription,
-                    localCertificate,
-                    sc => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
+                    ad => Task.FromResult<X509Certificate2>(ad.GetCertificate()),
+                    ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
                     selectedEndpoint);
 
                 Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
