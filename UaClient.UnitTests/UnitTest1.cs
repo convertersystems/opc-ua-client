@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics.Tracing;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
@@ -23,23 +22,12 @@ namespace Workstation.UaClient.UnitTests
             ApplicationType = ApplicationType.Client
         };
 
+        private ICertificateStore certificateStore = new DirectoryStore(
+            Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\Workstation.UaClient.UnitTests\pki"));
+
         // private string endpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
         // private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
         private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
-
-        /// <summary>
-        /// Tests creation of self-signed certificate.
-        /// </summary>
-        [TestMethod]
-        public void GetOrAddCertificate()
-        {
-            // get or add application certificate.
-            var localCertificate = this.localDescription.GetCertificate();
-            if (localCertificate == null)
-            {
-                throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
-            }
-        }
 
         /// <summary>
         /// Tests all combinations of endpoint security and user identity types supported by the server.
@@ -48,16 +36,9 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task ConnnectToAllEndpoints()
         {
-            using (var eventlistener = new ConsoleEventListener())
+            using (var loggerFactory = new LoggerFactory())
             {
-                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
-
-                // get or add application certificate.
-                var localCertificate = this.localDescription.GetCertificate();
-                if (localCertificate == null)
-                {
-                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
-                }
+                loggerFactory.AddConsole(LogLevel.Trace);
 
                 // discover available endpoints of server.
                 var getEndpointsRequest = new GetEndpointsRequest
@@ -80,35 +61,33 @@ namespace Workstation.UaClient.UnitTests
                                 selectedUserIdentity = new UserNameIdentity("root", "secret");
                                 break;
 
-                            case UserTokenType.Certificate:
-                                selectedUserIdentity = new X509Identity(localCertificate);
+                            //case UserTokenType.Certificate:
+                            //    selectedUserIdentity = new X509Identity(localCertificate);
+                            //    break;
+
+                            case UserTokenType.Anonymous:
+                                selectedUserIdentity = new AnonymousIdentity();
                                 break;
 
                             default:
-                                selectedUserIdentity = new AnonymousIdentity();
-                                break;
+                                continue;
                         }
 
                         var channel = new UaTcpSessionChannel(
                             this.localDescription,
-                            localCertificate,
+                            this.certificateStore,
                             selectedUserIdentity,
-                            selectedEndpoint);
+                            selectedEndpoint,
+                            loggerFactory: loggerFactory);
 
                         Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                         Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
                         Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
                         Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
-                        try
-                        {
-                            await channel.OpenAsync();
-                            Console.WriteLine($"Closing session '{channel.SessionId}'.");
-                            await channel.CloseAsync();
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error opening session '{channel.SessionId}'. {ex.Message}");
-                        }
+
+                        await channel.OpenAsync();
+                        Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                        await channel.CloseAsync();
                     }
                 }
             }
@@ -122,16 +101,9 @@ namespace Workstation.UaClient.UnitTests
         [ExpectedException(typeof(ServiceResultException), "The session id is not valid.")]
         public async Task SessionTimeoutCausesFault()
         {
-            using (var eventlistener = new ConsoleEventListener())
+            using (var loggerFactory = new LoggerFactory())
             {
-                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
-
-                // get or add application certificate.
-                var localCertificate = this.localDescription.GetCertificate();
-                if (localCertificate == null)
-                {
-                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
-                }
+                loggerFactory.AddConsole(LogLevel.Trace);
 
                 // discover available endpoints of server.
                 var getEndpointsRequest = new GetEndpointsRequest
@@ -151,9 +123,9 @@ namespace Workstation.UaClient.UnitTests
                         selectedUserIdentity = new UserNameIdentity("root", "secret");
                         break;
 
-                    case UserTokenType.Certificate:
-                        selectedUserIdentity = new X509Identity(localCertificate);
-                        break;
+                    //case UserTokenType.Certificate:
+                    //    selectedUserIdentity = new X509Identity(localCertificate);
+                    //    break;
 
                     default:
                         selectedUserIdentity = new AnonymousIdentity();
@@ -162,9 +134,10 @@ namespace Workstation.UaClient.UnitTests
 
                 var channel = new UaTcpSessionChannel(
                     this.localDescription,
-                    localCertificate,
+                    this.certificateStore,
                     selectedUserIdentity,
                     selectedEndpoint,
+                    loggerFactory: loggerFactory,
                     sessionTimeout: 10000);
 
                 Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -192,16 +165,9 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task TransferSubscriptions()
         {
-            using (var eventlistener = new ConsoleEventListener())
+            using (var loggerFactory = new LoggerFactory())
             {
-                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
-
-                // get or add application certificate.
-                var localCertificate = this.localDescription.GetCertificate();
-                if (localCertificate == null)
-                {
-                    throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Application certificate is missing.");
-                }
+                loggerFactory.AddConsole(LogLevel.Trace);
 
                 // discover available endpoints of server.
                 var getEndpointsRequest = new GetEndpointsRequest
@@ -217,9 +183,10 @@ namespace Workstation.UaClient.UnitTests
 
                 var channel = new UaTcpSessionChannel(
                     this.localDescription,
-                    localCertificate,
+                    this.certificateStore,
                     selectedUserIdentity,
-                    selectedEndpoint);
+                    selectedEndpoint,
+                    loggerFactory: loggerFactory);
 
                 Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                 Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
@@ -240,7 +207,7 @@ namespace Workstation.UaClient.UnitTests
 
                 var channel2 = new UaTcpSessionChannel(
                     this.localDescription,
-                    localCertificate,
+                    this.certificateStore,
                     selectedUserIdentity,
                     selectedEndpoint);
 
@@ -267,10 +234,9 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task TestSubscription()
         {
-            // Setup a logger for the EventSource
-            using (var eventlistener = new ConsoleEventListener())
+            using (var loggerFactory = new LoggerFactory())
             {
-                eventlistener.EnableEvents(Workstation.ServiceModel.Ua.EventSource.Log, EventLevel.Verbose);
+                loggerFactory.AddConsole(LogLevel.Trace);
 
                 // discover available endpoints of server.
                 var getEndpointsRequest = new GetEndpointsRequest
@@ -284,9 +250,10 @@ namespace Workstation.UaClient.UnitTests
 
                 var session = new UaTcpSessionClient(
                     this.localDescription,
-                    ad => Task.FromResult<X509Certificate2>(ad.GetCertificate()),
+                    this.certificateStore,
                     ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
-                    selectedEndpoint);
+                    selectedEndpoint,
+                    loggerFactory);
 
                 Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
                 Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");

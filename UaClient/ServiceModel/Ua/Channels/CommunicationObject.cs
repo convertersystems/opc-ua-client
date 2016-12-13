@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
@@ -13,6 +14,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// </summary>
     public abstract class CommunicationObject : ICommunicationObject, IDisposable
     {
+        private readonly ILogger logger;
         private bool aborted;
         private bool closeCalled;
         private bool onClosingCalled;
@@ -27,8 +29,13 @@ namespace Workstation.ServiceModel.Ua.Channels
         private Lazy<ConcurrentQueue<Exception>> exceptions;
         private bool disposed = false;
 
-        public CommunicationObject()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommunicationObject"/> class.
+        /// </summary>
+        /// <param name="loggerFactory">The logger factory.</param>
+        public CommunicationObject(ILoggerFactory loggerFactory = null)
         {
+            this.logger = loggerFactory?.CreateLogger(this.GetType());
             this.semaphore = new SemaphoreSlim(1);
             this.exceptions = new Lazy<ConcurrentQueue<Exception>>();
         }
@@ -43,9 +50,16 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public event EventHandler Opening;
 
-        /// <summary>Gets or sets gets a value that indicates the current state of the communication object.</summary>
+        /// <summary>
+        /// Gets or sets gets a value that indicates the current state of the communication object.
+        /// </summary>
         /// <returns>A value from the <see cref="T:ConverterSystems.ServiceModel.Ua.CommunicationState" /> enumeration that indicates the current state of the object.</returns>
         public CommunicationState State { get; protected set; }
+
+        /// <summary>
+        /// Gets the current logger
+        /// </summary>
+        protected virtual ILogger Logger => this.logger;
 
         /// <summary>
         /// Causes a communication object to transition immediately from its current state into the closing state.
@@ -158,7 +172,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             if (flag2)
                             {
-                                EventSource.Log.Error($"Error closing channel.");
+                                this.logger?.LogError($"Error closing channel.");
                                 await this.AbortAsync(token).ConfigureAwait(false);
                             }
                         }
@@ -295,7 +309,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            EventSource.Log.Verbose($"Channel closed.");
+            this.logger?.LogTrace($"Channel closed.");
             EventHandler closed = this.Closed;
             if (closed != null)
             {
@@ -326,7 +340,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            EventSource.Log.Verbose($"Channel closing.");
+            this.logger?.LogTrace($"Channel closing.");
             EventHandler closing = this.Closing;
             if (closing != null)
             {
@@ -356,7 +370,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            EventSource.Log.Error($"Channel faulted.");
+            this.logger?.LogTrace($"Channel faulted.");
             EventHandler faulted = this.Faulted;
             if (faulted != null)
             {
@@ -394,7 +408,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            EventSource.Log.Verbose($"Channel opened.");
+            this.logger?.LogTrace($"Channel opened.");
             EventHandler opened = this.Opened;
             if (opened != null)
             {
@@ -419,7 +433,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.semaphore.Release();
             }
 
-            EventSource.Log.Verbose($"Channel opening.");
+            this.logger?.LogTrace($"Channel opening.");
             EventHandler opening = this.Opening;
             if (opening != null)
             {

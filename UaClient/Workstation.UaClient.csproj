@@ -131,8 +131,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ServiceModel\Ua\Channels\ServiceOperation.cs" />
     <Compile Include="Collections\ErrorsContainer.cs" />
+    <Compile Include="ServiceModel\Ua\DirectoryStore.cs" />
+    <Compile Include="ServiceModel\Ua\ICertificateStore.cs" />
     <Compile Include="ServiceModel\Ua\ISetDataErrorInfo.cs" />
-    <Compile Include="ServiceModel\Ua\DebugEventListener.cs" />
     <Compile Include="ServiceModel\Ua\AccessLevelFlags.cs" />
     <Compile Include="ServiceModel\Ua\AlarmCondition.cs" />
     <Compile Include="ServiceModel\Ua\AcknowledgeableCondition.cs" />
@@ -150,17 +151,12 @@
     <Compile Include="ServiceModel\Ua\Channels\Events.cs" />
     <Compile Include="ServiceModel\Ua\Channels\RecyclableMemoryStream.cs" />
     <Compile Include="ServiceModel\Ua\Channels\RecyclableMemoryStreamManager.cs" />
-    <Compile Include="ServiceModel\Ua\ConsoleEventListener.cs" />
-    <Compile Include="ServiceModel\Ua\EventSource.cs" />
-    <Compile Include="ServiceModel\Ua\FileEventListener.cs" />
     <Compile Include="ServiceModel\Ua\MonitoredItemBase.cs" />
     <Compile Include="ServiceModel\Ua\SessionServiceSet.cs" />
     <Compile Include="ServiceModel\Ua\Subscription.cs" />
     <Compile Include="ServiceModel\Ua\SubscriptionAttribute.cs" />
     <Compile Include="ServiceModel\Ua\UaTcpSessionClient.cs" />
     <Compile Include="ServiceModel\Ua\VariantExtensions.cs" />
-    <Compile Include="ServiceModel\Ua\X509CertificateExtensions.cs" />
-    <Compile Include="X509Certificates\CertificateGenerator.cs" />
     <Compile Include="ServiceModel\Ua\Channels\BinaryDecoder.cs" />
     <Compile Include="ServiceModel\Ua\Channels\BinaryEncoder.cs" />
     <Compile Include="ServiceModel\Ua\Channels\CommunicationObject.cs" />
@@ -226,18 +222,6 @@
     <Compile Include="ServiceModel\Ua\ViewServiceSet.cs" />
     <Compile Include="ServiceModel\Ua\X509Identity.cs" />
     <Compile Include="ServiceModel\Ua\XmlEncodingIdAttribute.cs" />
-    <Compile Include="X509Certificates\EnhancedKeyUsageOids.cs" />
-    <Compile Include="X509Certificates\SafeCertContextHandle.cs" />
-    <Compile Include="X509Certificates\SafeCertStoreHandle.cs" />
-    <Compile Include="X509Certificates\SafeCryptKeyHandle.cs" />
-    <Compile Include="X509Certificates\SafeCryptProvHandle.cs" />
-    <Compile Include="X509Certificates\SafeHandleZeroOrMinusOneIsInvalid.cs" />
-    <Compile Include="X509Certificates\SafeLocalAllocHandle.cs" />
-    <Compile Include="X509Certificates\SafeX509Extension.cs" />
-    <Compile Include="X509Certificates\X509AlternateNameType.cs" />
-    <Compile Include="X509Certificates\X509AlternativeName.cs" />
-    <Compile Include="X509Certificates\X509Native.cs" />
-    <Compile Include="X509Certificates\X509SubjectAlternateNameExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="LICENSE.txt" />

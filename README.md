@@ -3,7 +3,7 @@
 # opc-ua-client
 Install package 'Workstation.UaClient' from Nuget to get the latest release for your hmi project.
 
-Supports Universal Windows Platform (UWP) and Windows Presentation Framework (WPF) applications.
+Supports Universal Windows Platform (UWP), Windows Presentation Framework (WPF) and now Xamarin Forms applications.
 
 Build a free HMI using OPC Unified Architecture and Visual Studio. With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
 
@@ -31,7 +31,8 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 					ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:Workstation.StatusHmi",
 					ApplicationType = ApplicationType.Client
 				},
-			    ad => Task.FromResult<X509Certificate2>(ad.GetCertificate()),
+			    new DirectoryStore(
+					Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\Workstation.StatusHmi\pki")),
                 ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
 				StatusHmi.Properties.Settings.Default.EndpointUrl);
 
@@ -70,6 +71,8 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     }
 ```
 ### Releases
+
+v1.5.0 Added support for Xamarin Forms. Introduced ICertificateStore and DirectoryStore.
 
 v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate. 
 

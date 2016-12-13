@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using Microsoft.Extensions.Logging;
 using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.ServiceModel.Ua
@@ -23,6 +23,8 @@ namespace Workstation.ServiceModel.Ua
         private const uint DefaultKeepaliveCount = 10;
         private const uint PublishTimeoutHint = 120 * 1000; // 2 minutes
 
+        private readonly ILoggerFactory loggerFactory;
+        private readonly ILogger logger;
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private readonly SynchronizationContext syncContext = SynchronizationContext.Current ?? new SynchronizationContext();
         private BufferBlock<ServiceOperation> pendingRequests;
@@ -40,9 +42,10 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
-        /// <param name="localCertificateProvider">An asynchronous function that provides the <see cref="X509Certificate2"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
+        /// <param name="loggerFactory">A logger factory.</param>
         /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
         /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
         /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
@@ -52,9 +55,10 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
-            Func<ApplicationDescription, Task<X509Certificate2>> localCertificateProvider,
+            ICertificateStore certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             EndpointDescription remoteEndpoint,
+            ILoggerFactory loggerFactory = null,
             double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
             uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
             uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
@@ -67,15 +71,13 @@ namespace Workstation.ServiceModel.Ua
             {
                 throw new ArgumentNullException(nameof(localDescription));
             }
-
             this.LocalDescription = localDescription;
-            this.LocalCertificateProvider = localCertificateProvider ?? (ad => Task.FromResult<X509Certificate2>(null));
+            this.CertificateStore = certificateStore;
             this.UserIdentityProvider = userIdentityProvider ?? (endpoint => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
             if (remoteEndpoint == null)
             {
                 throw new ArgumentNullException(nameof(remoteEndpoint));
             }
-
             this.RemoteEndpoint = remoteEndpoint;
             this.SessionTimeout = sessionTimeout;
             this.TimeoutHint = timeoutHint;
@@ -84,6 +86,8 @@ namespace Workstation.ServiceModel.Ua
             this.LocalSendBufferSize = localSendBufferSize;
             this.LocalMaxMessageSize = localMaxMessageSize;
             this.LocalMaxChunkCount = localMaxChunkCount;
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionClient>();
             this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
             this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
         }
@@ -92,9 +96,10 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
-        /// <param name="localCertificateProvider">An asynchronous function that provides the <see cref="X509Certificate2"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
+        /// <param name="loggerFactory">A logger factory.</param>
         /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
         /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
         /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
@@ -104,9 +109,10 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
         public UaTcpSessionClient(
             ApplicationDescription localDescription,
-            Func<ApplicationDescription, Task<X509Certificate2>> localCertificateProvider,
+            ICertificateStore certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             string endpointUrl,
+            ILoggerFactory loggerFactory = null,
             double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
             uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
             uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
@@ -121,7 +127,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.LocalDescription = localDescription;
-            this.LocalCertificateProvider = localCertificateProvider ?? (ad => Task.FromResult<X509Certificate2>(null));
+            this.CertificateStore = certificateStore;
             this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
             if (string.IsNullOrEmpty(endpointUrl))
             {
@@ -136,112 +142,8 @@ namespace Workstation.ServiceModel.Ua
             this.LocalSendBufferSize = localSendBufferSize;
             this.LocalMaxMessageSize = localMaxMessageSize;
             this.LocalMaxChunkCount = localMaxChunkCount;
-            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
-        /// </summary>
-        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
-        /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
-        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
-        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
-        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
-        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
-        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
-        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
-        /// <param name="localSendBufferSize">The size of the send buffer.</param>
-        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
-        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
-        [Obsolete("Use contructor with localCertificateProvider instead.")]
-        public UaTcpSessionClient(
-            ApplicationDescription localDescription,
-            X509Certificate2 localCertificate,
-            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
-            EndpointDescription remoteEndpoint,
-            double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
-            uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
-            uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
-            uint localReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize,
-            uint localSendBufferSize = UaTcpTransportChannel.DefaultBufferSize,
-            uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
-            uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
-        {
-            if (localDescription == null)
-            {
-                throw new ArgumentNullException(nameof(localDescription));
-            }
-
-            this.LocalDescription = localDescription;
-            this.LocalCertificate = localCertificate;
-            this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
-            if (remoteEndpoint == null)
-            {
-                throw new ArgumentNullException(nameof(remoteEndpoint));
-            }
-
-            this.RemoteEndpoint = remoteEndpoint;
-            this.SessionTimeout = sessionTimeout;
-            this.TimeoutHint = timeoutHint;
-            this.DiagnosticsHint = diagnosticsHint;
-            this.LocalReceiveBufferSize = localReceiveBufferSize;
-            this.LocalSendBufferSize = localSendBufferSize;
-            this.LocalMaxMessageSize = localMaxMessageSize;
-            this.LocalMaxChunkCount = localMaxChunkCount;
-            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpSessionClient"/> class.
-        /// </summary>
-        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
-        /// <param name="localCertificate">The <see cref="X509Certificate2"/> of the local application.</param>
-        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
-        /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
-        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
-        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
-        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
-        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
-        /// <param name="localSendBufferSize">The size of the send buffer.</param>
-        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
-        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
-        [Obsolete("Use contructor with localCertificateProvider instead.")]
-        public UaTcpSessionClient(
-            ApplicationDescription localDescription,
-            X509Certificate2 localCertificate,
-            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
-            string endpointUrl,
-            double sessionTimeout = UaTcpSessionChannel.DefaultSessionTimeout,
-            uint timeoutHint = UaTcpSecureChannel.DefaultTimeoutHint,
-            uint diagnosticsHint = UaTcpSecureChannel.DefaultDiagnosticsHint,
-            uint localReceiveBufferSize = UaTcpTransportChannel.DefaultBufferSize,
-            uint localSendBufferSize = UaTcpTransportChannel.DefaultBufferSize,
-            uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
-            uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
-        {
-            if (localDescription == null)
-            {
-                throw new ArgumentNullException(nameof(localDescription));
-            }
-
-            this.LocalDescription = localDescription;
-            this.LocalCertificate = localCertificate;
-            this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
-            if (string.IsNullOrEmpty(endpointUrl))
-            {
-                throw new ArgumentNullException(nameof(endpointUrl));
-            }
-
-            this.discoveryUrl = endpointUrl;
-            this.SessionTimeout = sessionTimeout;
-            this.TimeoutHint = timeoutHint;
-            this.DiagnosticsHint = diagnosticsHint;
-            this.LocalReceiveBufferSize = localReceiveBufferSize;
-            this.LocalSendBufferSize = localSendBufferSize;
-            this.LocalMaxMessageSize = localMaxMessageSize;
-            this.LocalMaxChunkCount = localMaxChunkCount;
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionClient>();
             this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
             this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
         }
@@ -252,15 +154,9 @@ namespace Workstation.ServiceModel.Ua
         public ApplicationDescription LocalDescription { get; }
 
         /// <summary>
-        /// Gets the <see cref="X509Certificate2"/> of the local application.
+        /// Gets the local certificate store.
         /// </summary>
-        [Obsolete]
-        public X509Certificate2 LocalCertificate { get; }
-
-        /// <summary>
-        /// Gets an asynchronous function that provides the <see cref="X509Certificate2"/> of the local application.
-        /// </summary>
-        public Func<ApplicationDescription, Task<X509Certificate2>> LocalCertificateProvider { get; }
+        public ICertificateStore CertificateStore { get; }
 
         /// <summary>
         /// Gets an asynchronous function that provides the identity of the user. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.
@@ -346,6 +242,11 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
+        /// Gets the current logger
+        /// </summary>
+        protected virtual ILogger Logger => this.logger;
+
+        /// <summary>
         /// Gets the <see cref="UaTcpSessionClient"/> attached to this model.
         /// </summary>
         /// <param name="model">the model.</param>
@@ -367,23 +268,9 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>Returns a disposable token.</returns>
         public IDisposable Subscribe(object model)
         {
-            var subscription = new Subscription(this, model);
+            var subscription = new Subscription(this, model, this.loggerFactory);
             this.subscriptions.Add(subscription);
             return new Disposer(subscription, this.subscriptions);
-        }
-
-        /// <summary>
-        /// Creates a model and subscribes for data change and event notifications from the server.
-        /// </summary>
-        /// <typeparam name="T">The type of model.</typeparam>
-        /// <returns>Returns the model.</returns>
-        [Obsolete("Create T yourself and then use session.Subscribe().")]
-        public T CreateSubscription<T>()
-        {
-            var model = Activator.CreateInstance<T>();
-            var subscription = new Subscription(this, model);
-            this.subscriptions.Add(subscription);
-            return model;
         }
 
         /// <summary>
@@ -496,11 +383,11 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (OperationCanceledException ex)
                 {
-                    EventSource.Log.Error($"State machine canceling. {ex.Message}");
+                    this.Logger?.LogError($"State machine canceling. {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    EventSource.Log.Error($"State machine retrying. {ex.Message}");
+                    this.Logger?.LogError($"State machine retrying. {ex.Message}");
                     await Task.Delay(reconnectDelay, token).ConfigureAwait(false);
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
@@ -530,7 +417,7 @@ namespace Workstation.ServiceModel.Ua
                     // security level.
                     try
                     {
-                        EventSource.Log.Informational($"Discovering endpoints of '{this.discoveryUrl}'.");
+                        this.Logger?.LogInformation($"Discovering endpoints of '{this.discoveryUrl}'.");
                         var getEndpointsRequest = new GetEndpointsRequest
                         {
                             EndpointUrl = this.discoveryUrl,
@@ -543,19 +430,17 @@ namespace Workstation.ServiceModel.Ua
                         }
 
                         this.RemoteEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
+                        this.Logger?.LogTrace($"Success discovering endpoints of '{this.discoveryUrl}'.");
                     }
                     catch (Exception ex)
                     {
-                        EventSource.Log.Error($"Error discovering endpoints of '{this.discoveryUrl}'. {ex.Message}");
+                        this.Logger?.LogError($"Error discovering endpoints of '{this.discoveryUrl}'. {ex.Message}");
                         throw;
                     }
                 }
 
                 // throw here to exit state machine.
                 token.ThrowIfCancellationRequested();
-
-                // evaluate the local certificate provider (may show a dialog).
-                var localCertificate = await this.LocalCertificateProvider(this.LocalDescription);
 
                 // evaluate the user identity provider (may show a dialog).
                 var userIdentity = await this.UserIdentityProvider(this.RemoteEndpoint);
@@ -564,13 +449,13 @@ namespace Workstation.ServiceModel.Ua
                 {
                     this.linkToken?.Dispose();
                     this.innerChannel?.Dispose();
-                    EventSource.Log.Informational($"Opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
 
                     this.innerChannel = new UaTcpSessionChannel(
                         this.LocalDescription,
-                        localCertificate,
+                        this.CertificateStore,
                         userIdentity,
                         this.RemoteEndpoint,
+                        this.loggerFactory,
                         this.SessionTimeout,
                         this.TimeoutHint,
                         this.DiagnosticsHint,
@@ -578,6 +463,7 @@ namespace Workstation.ServiceModel.Ua
                         this.LocalSendBufferSize,
                         this.LocalMaxMessageSize,
                         this.LocalMaxChunkCount);
+
                     await this.innerChannel.OpenAsync(token).ConfigureAwait(false);
                     this.linkToken = this.pendingRequests.LinkTo(this.innerChannel);
 
@@ -595,7 +481,7 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (Exception ex)
                 {
-                    EventSource.Log.Error($"Error opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'. {ex.Message}");
+                    this.Logger?.LogError($"Error opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'. {ex.Message}");
                     throw;
                 }
             }
@@ -615,14 +501,14 @@ namespace Workstation.ServiceModel.Ua
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                EventSource.Log.Informational($"Closing channel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'.");
+                this.Logger?.LogInformation($"Closing channel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'.");
                 try
                 {
                     await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    EventSource.Log.Error($"Error closing channel. {ex.Message}");
+                    this.Logger?.LogError($"Error closing channel. {ex.Message}");
                 }
             }
             finally
@@ -680,12 +566,16 @@ namespace Workstation.ServiceModel.Ua
                                     var item = items[i];
                                     var result = itemsResponse.Results[i];
                                     item.OnCreateResult(target, result);
+                                    if (StatusCode.IsBad(result.StatusCode))
+                                    {
+                                        this.Logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                    }
                                 }
                             }
                         }
                         catch (ServiceResultException ex)
                         {
-                            EventSource.Log.Error($"Error creating subscription. {ex.Message}");
+                            this.Logger?.LogError($"Error creating subscription. {ex.Message}");
                             this.innerChannel.Fault(ex);
                         }
                     }
@@ -703,7 +593,7 @@ namespace Workstation.ServiceModel.Ua
                     }
                     catch (ServiceResultException ex)
                     {
-                        EventSource.Log.Error($"Error deleting subscriptions. {ex.Message}");
+                        this.Logger?.LogError($"Error deleting subscriptions. {ex.Message}");
                     }
                 }
             };
@@ -769,7 +659,7 @@ namespace Workstation.ServiceModel.Ua
                 {
                     if (!token.IsCancellationRequested)
                     {
-                        EventSource.Log.Error($"Error publishing subscription. {ex.Message}");
+                        this.Logger?.LogError($"Error publishing subscription. {ex.Message}");
 
                         // short delay, then retry.
                         await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
@@ -832,7 +722,7 @@ namespace Workstation.ServiceModel.Ua
             var operation = (ServiceOperation)o;
             if (operation.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
-                EventSource.Log.Verbose($"Canceled {operation.Request.GetType().Name} Handle: {operation.Request.RequestHeader.RequestHandle}");
+                this.Logger?.LogTrace($"Canceled {operation.Request.GetType().Name} Handle: {operation.Request.RequestHeader.RequestHandle}");
             }
         }
 

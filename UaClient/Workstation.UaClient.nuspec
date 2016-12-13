@@ -2,23 +2,25 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata minClientVersion="3.4">
     <id>Workstation.UaClient</id>
-    <version>1.4.2</version>
+    <version>1.5.0</version>
     <title>Workstation.UaClient</title>
     <authors>Andrew Cullen</authors>
     <owners>Converter Systems LLC</owners>
     <projectUrl>https://github.com/convertersystems/opc-ua-client</projectUrl>
     <licenseUrl>https://github.com/convertersystems/opc-ua-client/blob/master/UaClient/LICENSE.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>A communications library for OPC UA.</summary>
+    <summary>A library to browse, read, write and subscribe to the live data published by the OPC UA servers on your network.</summary>
     <description>
-      Supports both Universal Windows Platform (UWP) and WPF.
-      Building an HMI using Visual Studio 2015? With this library 'Workstation.UaClient', your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
+      Building an HMI using Visual Studio 2015? With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
       Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
       * Browse OPC UA servers directly from the Visual Studio IDE.
       * Drag and drop the variable, method, and event nodes onto your view model.
       * Add XAML bindings to connect your UI elements to live data and events.
+      
+      Supports WPF, Universal Windows Platform (UWP) and now Xamarin Forms.
     </description>
     <releaseNotes>
+      v1.5.0 Added support for Xamarin Forms. Introduced ICertificateStore and DirectoryStore.
       v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate.
       v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription(), use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
       v1.4.0 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners.
@@ -30,13 +32,17 @@
     <copyright>Copyright ©  2016 Converter Systems LLC.</copyright>
     <tags>opc ua</tags>
     <dependencies>
-      <group targetFramework="net46">
-        <dependency id="NETStandard.Library" version="1.6.0"/>
-        <dependency id="System.Threading.Tasks.Dataflow" version="4.7.0" />
-      </group>
       <group targetFramework="netstandard1.4">
         <dependency id="NETStandard.Library" version="1.6.0"/>
         <dependency id="System.Threading.Tasks.Dataflow" version="4.7.0" />
+        <dependency id="Microsoft.Extensions.Logging" version="1.0.0" />
+        <dependency id="Portable.BouncyCastle" version="1.8.1.2" />
+      </group>
+      <group targetFramework="net46">
+        <dependency id="NETStandard.Library" version="1.6.0"/>
+        <dependency id="System.Threading.Tasks.Dataflow" version="4.7.0" />
+        <dependency id="Microsoft.Extensions.Logging" version="1.0.0" />
+        <dependency id="Portable.BouncyCastle" version="1.8.1.2" />
       </group>
     </dependencies>
   </metadata>

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.Reflection;
 using System.Threading;
@@ -137,10 +138,6 @@ namespace Workstation.ServiceModel.Ua
         {
             this.ServerId = result.MonitoredItemId;
             var statusCode = result.StatusCode;
-            if (StatusCode.IsBad(statusCode))
-            {
-                EventSource.Log.Error($"Error creating MonitoredItem for {this.NodeId}. {StatusCodes.GetDefaultMessage(statusCode)}");
-            }
             if (this.statusCode == statusCode)
             {
                 return;
@@ -151,10 +148,6 @@ namespace Workstation.ServiceModel.Ua
 
         public virtual void OnWriteResult(object target, StatusCode statusCode)
         {
-            if (StatusCode.IsBad(statusCode))
-            {
-                EventSource.Log.Error($"Error writing value for {this.NodeId}. {StatusCodes.GetDefaultMessage(statusCode)}");
-            }
             if (this.statusCode == statusCode)
             {
                 return;

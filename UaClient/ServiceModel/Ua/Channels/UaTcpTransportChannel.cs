@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Net.Sockets;
@@ -29,16 +30,19 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Initializes a new instance of the <see cref="UaTcpTransportChannel"/> class.
         /// </summary>
         /// <param name="remoteEndpoint">The remote endpoint.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
         /// <param name="localSendBufferSize">The size of the send buffer.</param>
         /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
         /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
         public UaTcpTransportChannel(
             EndpointDescription remoteEndpoint,
+            ILoggerFactory loggerFactory = null,
             uint localReceiveBufferSize = DefaultBufferSize,
             uint localSendBufferSize = DefaultBufferSize,
             uint localMaxMessageSize = DefaultMaxMessageSize,
             uint localMaxChunkCount = DefaultMaxChunkCount)
+            : base (loggerFactory)
         {
             if (remoteEndpoint == null)
             {

@@ -4,11 +4,6 @@
         <name>Workstation.UaClient.UnitTests</name>
     </assembly>
     <members>
-        <member name="M:Workstation.UaClient.UnitTests.UnitTest1.GetOrAddCertificate">
-            <summary>
-            Tests creation of self-signed certificate.
-            </summary>
-        </member>
         <member name="M:Workstation.UaClient.UnitTests.UnitTest1.ConnnectToAllEndpoints">
             <summary>
             Tests all combinations of endpoint security and user identity types supported by the server.

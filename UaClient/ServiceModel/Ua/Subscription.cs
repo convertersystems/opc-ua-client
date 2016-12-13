@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
 using System.Reflection;
@@ -19,6 +20,7 @@ namespace Workstation.ServiceModel.Ua
 
         private static ConditionalWeakTable<object, Subscription> attachedSubscriptions = new ConditionalWeakTable<object, Subscription>();
 
+        private readonly ILogger logger;
         private volatile bool isPublishing = false;
         private WeakReference subscriptionRef;
         private UaTcpSessionClient session;
@@ -29,10 +31,12 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="session">The session client.</param>
         /// <param name="target">The target model.</param>
-        public Subscription(UaTcpSessionClient session, object target)
+        /// <param name="loggerFactory">The logger factory.</param>
+        public Subscription(UaTcpSessionClient session, object target, ILoggerFactory loggerFactory = null)
         {
             this.session = session;
             this.subscriptionRef = new WeakReference(target);
+            this.logger = loggerFactory?.CreateLogger<Subscription>();
 
             // get values from [Subscription] attribute.
             var typeInfo = target.GetType().GetTypeInfo();
@@ -94,7 +98,7 @@ namespace Workstation.ServiceModel.Ua
                         };
                         this.session.SetPublishingModeAsync(request)
                             .ContinueWith(
-                                t => EventSource.Log.Error("Error setting publishing mode for subscription."),
+                                t => this.Logger?.LogError("Error setting publishing mode for subscription."),
                                 TaskContinuationOptions.OnlyOnFaulted);
                     }
                 }
@@ -120,6 +124,11 @@ namespace Workstation.ServiceModel.Ua
         /// Gets the SubscriptionId assigned by the server.
         /// </summary>
         public uint SubscriptionId { get; internal set; }
+
+        /// <summary>
+        /// Gets the current logger
+        /// </summary>
+        protected virtual ILogger Logger => this.logger;
 
         /// <summary>
         /// Gets the <see cref="Subscription"/> attached to this model.
@@ -197,7 +206,7 @@ namespace Workstation.ServiceModel.Ua
                                 }
                                 catch (Exception ex)
                                 {
-                                    EventSource.Log.Error($"Error publishing value for NodeId {item.NodeId}. {ex.Message}");
+                                    this.Logger?.LogError($"Error publishing value for NodeId {item.NodeId}. {ex.Message}");
                                 }
                             }
                         }
@@ -220,7 +229,7 @@ namespace Workstation.ServiceModel.Ua
                                 }
                                 catch (Exception ex)
                                 {
-                                    EventSource.Log.Error($"Error publishing event for NodeId {item.NodeId}. {ex.Message}");
+                                    this.Logger?.LogError($"Error publishing event for NodeId {item.NodeId}. {ex.Message}");
                                 }
                             }
                         }
@@ -252,6 +261,7 @@ namespace Workstation.ServiceModel.Ua
                 DataValue value;
                 if (item.TryGetValue(sender, out value))
                 {
+                    StatusCode statusCode;
                     var writeRequest = new WriteRequest
                     {
                         NodesToWrite = new[] { new WriteValue { NodeId = item.NodeId, AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value } }
@@ -259,15 +269,20 @@ namespace Workstation.ServiceModel.Ua
                     try
                     {
                         var writeResponse = await this.session.WriteAsync(writeRequest).ConfigureAwait(false);
-                        item.OnWriteResult(sender, writeResponse.Results[0]);
+                        statusCode = writeResponse.Results[0];
                     }
                     catch (ServiceResultException ex)
                     {
-                        item.OnWriteResult(sender, (uint)ex.HResult);
+                        statusCode = (uint)ex.HResult;
                     }
                     catch (Exception)
                     {
-                        item.OnWriteResult(sender, StatusCodes.BadServerNotConnected);
+                        statusCode = StatusCodes.BadServerNotConnected;
+                    }
+                    item.OnWriteResult(sender, statusCode);
+                    if (StatusCode.IsBad(statusCode))
+                    {
+                        this.Logger?.LogError($"Error writing value for {item.NodeId}. {StatusCodes.GetDefaultMessage(statusCode)}");
                     }
                 }
             }

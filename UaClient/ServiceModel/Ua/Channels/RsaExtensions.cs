@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.IO;
 using System;
 using System.IO;
-using System.Security.Cryptography;
+using Microsoft.IO;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
@@ -14,9 +16,14 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Encrypts IdentityToken data with the RSA algorithm.
         /// </summary>
         /// <returns>A byte array.</returns>
-        public static byte[] EncryptTokenData(this RSA rsa, byte[] dataToEncrypt, string secPolicyUri)
+        public static byte[] EncryptTokenData(this RsaKeyParameters rsa, byte[] dataToEncrypt, string secPolicyUri)
         {
-            int cipherTextBlockSize = rsa.KeySize / 8;
+            if (rsa == null)
+            {
+                throw new ArgumentNullException(nameof(rsa));
+            }
+
+            int cipherTextBlockSize = rsa.Modulus.BitLength / 8;
             int plainTextBlockSize;
             switch (secPolicyUri)
             {
@@ -78,31 +85,39 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Encrypts a data stream with the RSA algorithm.
         /// </summary>
-        public static void EncryptStream(this RSA rsa, Stream source, Stream target, string secPolicyUri)
+        public static void EncryptStream(this RsaKeyParameters rsa, Stream source, Stream target, string secPolicyUri)
         {
-            int cipherTextBlockSize = rsa.KeySize / 8;
+            if (rsa == null)
+            {
+                throw new ArgumentNullException(nameof(rsa));
+            }
+
+            int cipherTextBlockSize = rsa.Modulus.BitLength / 8;
             int plainTextBlockSize;
-            RSAEncryptionPadding padding;
+            IBufferedCipher encryptor;
             switch (secPolicyUri)
             {
                 case SecurityPolicyUris.Basic128Rsa15:
+                    encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                    encryptor.Init(true, rsa);
                     plainTextBlockSize = Math.Max(cipherTextBlockSize - 11, 1);
-                    padding = RSAEncryptionPadding.Pkcs1;
                     break;
 
                 case SecurityPolicyUris.Basic256:
+                    encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                    encryptor.Init(true, rsa);
                     plainTextBlockSize = Math.Max(cipherTextBlockSize - 42, 1);
-                    padding = RSAEncryptionPadding.OaepSHA1;
                     break;
 
                 case SecurityPolicyUris.Basic256Sha256:
+                    encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                    encryptor.Init(true, rsa);
                     plainTextBlockSize = Math.Max(cipherTextBlockSize - 42, 1);
-                    padding = RSAEncryptionPadding.OaepSHA1;
                     break;
 
                 default:
+                    encryptor = null;
                     plainTextBlockSize = 1;
-                    padding = RSAEncryptionPadding.Pkcs1;
                     break;
             }
 
@@ -113,10 +128,20 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             byte[] plainTextBlock = new byte[plainTextBlockSize];
 
-            while (source.Read(plainTextBlock, 0, plainTextBlockSize) > 0)
+            if (encryptor != null)
             {
-                byte[] cipherTextBlock = rsa.Encrypt(plainTextBlock, padding);
-                target.Write(cipherTextBlock, 0, cipherTextBlockSize);
+                while (source.Read(plainTextBlock, 0, plainTextBlockSize) > 0)
+                {
+                    byte[] cipherTextBlock = encryptor.DoFinal(plainTextBlock);
+                    target.Write(cipherTextBlock, 0, cipherTextBlockSize);
+                }
+            }
+            else
+            {
+                while (source.Read(plainTextBlock, 0, plainTextBlockSize) > 0)
+                {
+                    target.Write(plainTextBlock, 0, plainTextBlockSize);
+                }
             }
         }
 
@@ -124,8 +149,13 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Decrypts IdentityToken data with the RSA algorithm.
         /// </summary>
         /// <returns>A byte array.</returns>
-        public static byte[] DecryptTokenData(this RSA rsa, byte[] dataToDecrypt, string secPolicyUri)
+        public static byte[] DecryptTokenData(this RsaKeyParameters rsa, byte[] dataToDecrypt, string secPolicyUri)
         {
+            if (rsa == null)
+            {
+                throw new ArgumentNullException(nameof(rsa));
+            }
+
             // setup source
             var source = new MemoryStream(dataToDecrypt, false);
             try
@@ -160,31 +190,39 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Decrypts a data stream with the RSA algorithm.
         /// </summary>
-        public static void DecryptStream(this RSA rsa, Stream source, Stream target, string secPolicyUri)
+        public static void DecryptStream(this RsaKeyParameters rsa, Stream source, Stream target, string secPolicyUri)
         {
-            int cipherTextBlockSize = (int)rsa.KeySize / 8;
+            if (rsa == null)
+            {
+                throw new ArgumentNullException(nameof(rsa));
+            }
+
+            int cipherTextBlockSize = rsa.Modulus.BitLength / 8;
             int plainTextBlockSize;
-            RSAEncryptionPadding padding;
+            IBufferedCipher decryptor;
             switch (secPolicyUri)
             {
                 case SecurityPolicyUris.Basic128Rsa15:
+                    decryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                    decryptor.Init(false, rsa);
                     plainTextBlockSize = Math.Max(cipherTextBlockSize - 11, 1);
-                    padding = RSAEncryptionPadding.Pkcs1;
                     break;
 
                 case SecurityPolicyUris.Basic256:
+                    decryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                    decryptor.Init(false, rsa);
                     plainTextBlockSize = Math.Max(cipherTextBlockSize - 42, 1);
-                    padding = RSAEncryptionPadding.OaepSHA1;
                     break;
 
                 case SecurityPolicyUris.Basic256Sha256:
+                    decryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                    decryptor.Init(false, rsa);
                     plainTextBlockSize = Math.Max(cipherTextBlockSize - 42, 1);
-                    padding = RSAEncryptionPadding.OaepSHA1;
                     break;
 
                 default:
+                    decryptor = null;
                     plainTextBlockSize = 1;
-                    padding = RSAEncryptionPadding.Pkcs1;
                     break;
             }
 
@@ -195,10 +233,20 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             byte[] cipherTextBlock = new byte[cipherTextBlockSize];
 
-            while (source.Read(cipherTextBlock, 0, cipherTextBlockSize) > 0)
+            if (decryptor != null)
             {
-                byte[] plainTextBlock = rsa.Decrypt(cipherTextBlock, padding);
-                target.Write(plainTextBlock, 0, plainTextBlockSize);
+                while (source.Read(cipherTextBlock, 0, cipherTextBlockSize) > 0)
+                {
+                    byte[] plainTextBlock = decryptor.DoFinal(cipherTextBlock);
+                    target.Write(plainTextBlock, 0, plainTextBlockSize);
+                }
+            }
+            else
+            {
+                while (source.Read(cipherTextBlock, 0, cipherTextBlockSize) > 0)
+                {
+                    target.Write(cipherTextBlock, 0, cipherTextBlockSize);
+                }
             }
         }
 
