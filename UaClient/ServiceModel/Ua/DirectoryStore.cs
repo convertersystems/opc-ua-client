@@ -2,34 +2,21 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Misc;
-using Org.BouncyCastle.Asn1.Utilities;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Macs;
 using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Security.Certificates;
-using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.Utilities.Encoders;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
-using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Pkix;
-using Org.BouncyCastle.X509;
 using System.IO;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.X509.Store;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -57,9 +44,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(pkiDirectoryPath));
             }
             this.pkiDirectoryPath = pkiDirectoryPath;
-            this.AcceptAllRemoteCertificates = acceptAllRemoteCertificates;
-            this.CreateLocalCertificateIfNotExist = createLocalCertificateIfNotExist;
-            this.logger = loggerFactory?.CreateLogger<DirectoryStore>();
+            AcceptAllRemoteCertificates = acceptAllRemoteCertificates;
+            CreateLocalCertificateIfNotExist = createLocalCertificateIfNotExist;
+            logger = loggerFactory?.CreateLogger<DirectoryStore>();
         }
 
         /// <summary>
@@ -109,19 +96,19 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentOutOfRangeException(nameof(applicationDescription), "Expecting ApplicationUri in the form of 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.");
             }
 
-            var cert = default(X509Certificate);
+            var crt = default(X509Certificate);
             var key = default(RsaPrivateCrtKeyParameters);
 
-            var certInfo = new FileInfo(Path.Combine(this.pkiDirectoryPath, "own", "certs", "certificate.der"));
-            var keyInfo = new FileInfo(Path.Combine(this.pkiDirectoryPath, "own", "private", "certificate.pem"));
-            if (certInfo.Exists && keyInfo.Exists)
+            var crtInfo = new FileInfo(Path.Combine(pkiDirectoryPath, "own", "certs", "client.crt"));
+            var keyInfo = new FileInfo(Path.Combine(pkiDirectoryPath, "own", "private", "client.key"));
+            if (crtInfo.Exists && keyInfo.Exists)
             {
-                using (var certStream = certInfo.OpenRead())
+                using (var crtStream = crtInfo.OpenRead())
                 {
-                    cert = this.certParser.ReadCertificate(certStream);
-                    if (cert != null)
+                    crt = certParser.ReadCertificate(crtStream);
+                    if (crt != null)
                     {
-                        var asn1OctetString = cert.GetExtensionValue(X509Extensions.SubjectAlternativeName);
+                        var asn1OctetString = crt.GetExtensionValue(X509Extensions.SubjectAlternativeName);
                         if (asn1OctetString != null)
                         {
                             var asn1Object = X509ExtensionUtilities.FromExtensionValue(asn1OctetString);
@@ -143,13 +130,13 @@ namespace Workstation.ServiceModel.Ua
                 }
             }
 
-            if (cert != null && key != null)
+            if (crt != null && key != null)
             {
-                this.logger?.LogTrace($"Found certificate with subject alt name '{applicationUri}'.");
-                return new Tuple<X509Certificate, RsaPrivateCrtKeyParameters>(cert, key);
+                logger?.LogTrace($"Found certificate with subject alt name '{applicationUri}'.");
+                return new Tuple<X509Certificate, RsaPrivateCrtKeyParameters>(crt, key);
             }
 
-            if (!this.CreateLocalCertificateIfNotExist)
+            if (!CreateLocalCertificateIfNotExist)
             {
                 return null;
             }
@@ -159,13 +146,13 @@ namespace Workstation.ServiceModel.Ua
 
             // Create a keypair.
             RsaKeyPairGenerator kg = new RsaKeyPairGenerator();
-            kg.Init(new KeyGenerationParameters(this.rng, 2048));
+            kg.Init(new KeyGenerationParameters(rng, 2048));
             AsymmetricCipherKeyPair kp = kg.GenerateKeyPair();
             key = kp.Private as RsaPrivateCrtKeyParameters;
 
             // Create a certificate.
             X509V3CertificateGenerator cg = new X509V3CertificateGenerator();
-            var subjectSN = BigInteger.ProbablePrime(120, this.rng);
+            var subjectSN = BigInteger.ProbablePrime(120, rng);
             cg.SetSerialNumber(subjectSN);
             cg.SetSubjectDN(subjectDN);
             cg.SetIssuerDN(subjectDN);
@@ -203,16 +190,15 @@ namespace Workstation.ServiceModel.Ua
                 true,
                 new ExtendedKeyUsage(KeyPurposeID.IdKPClientAuth, KeyPurposeID.IdKPServerAuth));
 
-            cert = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, this.rng));
+            crt = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, rng));
 
-            this.logger?.LogTrace($"Created certificate with subject alt name '{applicationUri}'.");
+            logger?.LogTrace($"Created certificate with subject alt name '{applicationUri}'.");
 
             if (!keyInfo.Directory.Exists)
             {
                 Directory.CreateDirectory(keyInfo.DirectoryName);
             }
-
-            if (keyInfo.Exists)
+            else if (keyInfo.Exists)
             {
                 keyInfo.Delete();
             }
@@ -223,25 +209,147 @@ namespace Workstation.ServiceModel.Ua
                 pemwriter.WriteObject(key);
             }
 
-            if (!certInfo.Directory.Exists)
+            if (!crtInfo.Directory.Exists)
             {
-                Directory.CreateDirectory(certInfo.DirectoryName);
+                Directory.CreateDirectory(crtInfo.DirectoryName);
+            }
+            else if (crtInfo.Exists)
+            {
+                crtInfo.Delete();
             }
 
-            if (certInfo.Exists)
+            using (var crtstream = new StreamWriter(crtInfo.OpenWrite()))
             {
-                certInfo.Delete();
+                var pemwriter = new PemWriter(crtstream);
+                pemwriter.WriteObject(crt);
             }
 
-            File.WriteAllBytes(certInfo.FullName, cert.GetEncoded());
-
-            return new Tuple<X509Certificate, RsaPrivateCrtKeyParameters>(cert, key);
+            return new Tuple<X509Certificate, RsaPrivateCrtKeyParameters>(crt, key);
         }
 
         /// <inheritdoc/>
-        public PkixCertPathValidatorResult ValidateRemoteCertificate(X509Certificate remoteCertificate)
+        public bool ValidateRemoteCertificate(X509Certificate target)
         {
-            throw new NotImplementedException();
+            if (AcceptAllRemoteCertificates)
+            {
+                return true;
+            }
+
+            var trustedCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
+            var intermediateCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
+            var trustedCertsInfo = new DirectoryInfo(Path.Combine(pkiDirectoryPath, "trusted", "certs"));
+            if (trustedCertsInfo.Exists)
+            {
+                foreach (var info in trustedCertsInfo.EnumerateFiles())
+                {
+                    using (var crtStream = info.OpenRead())
+                    {
+                        var crt = certParser.ReadCertificate(crtStream);
+                        if (crt != null)
+                        {
+                            trustedCerts.Add(crt);
+                        }
+                    }
+                }
+            }
+
+            var intermediateCertsInfo = new DirectoryInfo(Path.Combine(pkiDirectoryPath, "issuer", "certs"));
+            if (intermediateCertsInfo.Exists)
+            {
+                foreach (var info in intermediateCertsInfo.EnumerateFiles())
+                {
+                    using (var crtStream = info.OpenRead())
+                    {
+                        var crt = certParser.ReadCertificate(crtStream);
+                        if (crt != null)
+                        {
+                            intermediateCerts.Add(crt);
+                        }
+                    }
+                }
+            }
+
+            if (IsSelfSigned(target))
+            {
+                // Create the selector that specifies the starting certificate
+                var selector = new X509CertStoreSelector()
+                {
+                    Certificate = target
+                };
+                IX509Store trustedCertStore = X509StoreFactory.Create("Certificate/Collection", new X509CollectionStoreParameters(trustedCerts));
+                return trustedCertStore.GetMatches(selector).Count > 0;
+            }
+
+            try
+            {
+                var res = VerifyCertificate(target, trustedCerts, intermediateCerts);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private static PkixCertPathBuilderResult VerifyCertificate(X509Certificate target, Org.BouncyCastle.Utilities.Collections.HashSet trustedRootCerts, Org.BouncyCastle.Utilities.Collections.HashSet intermediateCerts)
+        {
+            intermediateCerts.Add(target);
+
+            // Create the selector that specifies the starting certificate
+            var selector = new X509CertStoreSelector()
+            {
+                Certificate = target
+            };
+
+            // Create the trust anchors (set of root CA certificates)
+            var trustAnchors = new Org.BouncyCastle.Utilities.Collections.HashSet();
+            foreach (X509Certificate trustedRootCert in trustedRootCerts)
+            {
+                trustAnchors.Add(new TrustAnchor(trustedRootCert, null));
+            }
+
+            PkixBuilderParameters pkixParams = new PkixBuilderParameters(trustAnchors, selector)
+            {
+
+                // Disable CRL checks (this is done manually as additional step)
+                IsRevocationEnabled = false
+            };
+
+            // Specify a list of intermediate certificates
+            IX509Store intermediateCertStore = X509StoreFactory.Create("Certificate/Collection", new X509CollectionStoreParameters(intermediateCerts));
+            pkixParams.AddStore(intermediateCertStore);
+
+            // Build and verify the certification chain
+            PkixCertPathBuilder builder = new PkixCertPathBuilder();
+            PkixCertPathBuilderResult result = builder.Build(pkixParams);
+            return result;
+        }
+
+        /// <summary>
+        /// Checks whether given <see cref="X509Certificate"/> is self-signed.
+        /// </summary>
+        /// <param name="cert">an <see cref="X509Certificate"/>.</param>
+        /// <returns>True, if self signed.</returns>
+        public static bool IsSelfSigned(X509Certificate cert)
+        {
+            try
+            {
+                // Try to verify certificate signature with its own public key
+                var key = cert.GetPublicKey();
+                cert.Verify(key);
+                return true;
+            }
+            catch (SignatureException)
+            {
+                // Invalid signature --> not self-signed
+                return false;
+            }
+            catch (InvalidKeyException)
+            {
+                // Invalid key --> not self-signed
+                return false;
+            }
         }
     }
 }

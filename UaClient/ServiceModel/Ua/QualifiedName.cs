@@ -14,8 +14,8 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="namespaceIndex">index that identifies the namespace that qualifies the name.</param>
         public QualifiedName(string name, ushort namespaceIndex = 0)
         {
-            this.Name = name;
-            this.NamespaceIndex = namespaceIndex;
+            Name = name;
+            NamespaceIndex = namespaceIndex;
         }
 
         public string Name { get; private set; }
@@ -93,14 +93,14 @@ namespace Workstation.ServiceModel.Ua
 
         public override int GetHashCode()
         {
-            int result = this.NamespaceIndex.GetHashCode();
-            result = (31 * result) + (this.Name != null ? this.Name.GetHashCode() : 0);
+            int result = NamespaceIndex.GetHashCode();
+            result = (31 * result) + (Name != null ? Name.GetHashCode() : 0);
             return result;
         }
 
         public override string ToString()
         {
-            return $"{this.NamespaceIndex}:{this.Name}";
+            return $"{NamespaceIndex}:{Name}";
         }
     }
 }

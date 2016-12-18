@@ -24,7 +24,7 @@ namespace Workstation.ServiceModel.Ua
 
         public StatusCode(uint value)
         {
-            this.Value = value;
+            Value = value;
         }
 
         public uint Value { get; }
@@ -96,12 +96,12 @@ namespace Workstation.ServiceModel.Ua
 
         public override int GetHashCode()
         {
-            return (int)(this.Value ^ ((long)((ulong)this.Value >> 32)));
+            return (int)(Value ^ ((long)((ulong)Value >> 32)));
         }
 
         public override string ToString()
         {
-            return $"0x{this.Value:X8}";
+            return $"0x{Value:X8}";
         }
     }
 }

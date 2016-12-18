@@ -67,29 +67,21 @@ namespace Workstation.ServiceModel.Ua
             uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
             uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
         {
-            if (localDescription == null)
-            {
-                throw new ArgumentNullException(nameof(localDescription));
-            }
-            this.LocalDescription = localDescription;
-            this.CertificateStore = certificateStore;
-            this.UserIdentityProvider = userIdentityProvider ?? (endpoint => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
-            if (remoteEndpoint == null)
-            {
-                throw new ArgumentNullException(nameof(remoteEndpoint));
-            }
-            this.RemoteEndpoint = remoteEndpoint;
-            this.SessionTimeout = sessionTimeout;
-            this.TimeoutHint = timeoutHint;
-            this.DiagnosticsHint = diagnosticsHint;
-            this.LocalReceiveBufferSize = localReceiveBufferSize;
-            this.LocalSendBufferSize = localSendBufferSize;
-            this.LocalMaxMessageSize = localMaxMessageSize;
-            this.LocalMaxChunkCount = localMaxChunkCount;
+            LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
+            CertificateStore = certificateStore;
+            UserIdentityProvider = userIdentityProvider ?? (endpoint => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
+            RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
+            SessionTimeout = sessionTimeout;
+            TimeoutHint = timeoutHint;
+            DiagnosticsHint = diagnosticsHint;
+            LocalReceiveBufferSize = localReceiveBufferSize;
+            LocalSendBufferSize = localSendBufferSize;
+            LocalMaxMessageSize = localMaxMessageSize;
+            LocalMaxChunkCount = localMaxChunkCount;
             this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory?.CreateLogger<UaTcpSessionClient>();
-            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
+            logger = loggerFactory?.CreateLogger<UaTcpSessionClient>();
+            pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = clientCts.Token });
+            stateMachineTask = Task.Run(() => StateMachineAsync(clientCts.Token));
         }
 
         /// <summary>
@@ -121,31 +113,26 @@ namespace Workstation.ServiceModel.Ua
             uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
             uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
         {
-            if (localDescription == null)
-            {
-                throw new ArgumentNullException(nameof(localDescription));
-            }
-
-            this.LocalDescription = localDescription;
-            this.CertificateStore = certificateStore;
-            this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
+            LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
+            CertificateStore = certificateStore;
+            UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
             if (string.IsNullOrEmpty(endpointUrl))
             {
                 throw new ArgumentNullException(nameof(endpointUrl));
             }
 
-            this.discoveryUrl = endpointUrl;
-            this.SessionTimeout = sessionTimeout;
-            this.TimeoutHint = timeoutHint;
-            this.DiagnosticsHint = diagnosticsHint;
-            this.LocalReceiveBufferSize = localReceiveBufferSize;
-            this.LocalSendBufferSize = localSendBufferSize;
-            this.LocalMaxMessageSize = localMaxMessageSize;
-            this.LocalMaxChunkCount = localMaxChunkCount;
+            discoveryUrl = endpointUrl;
+            SessionTimeout = sessionTimeout;
+            TimeoutHint = timeoutHint;
+            DiagnosticsHint = diagnosticsHint;
+            LocalReceiveBufferSize = localReceiveBufferSize;
+            LocalSendBufferSize = localSendBufferSize;
+            LocalMaxMessageSize = localMaxMessageSize;
+            LocalMaxChunkCount = localMaxChunkCount;
             this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory?.CreateLogger<UaTcpSessionClient>();
-            this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-            this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
+            logger = loggerFactory?.CreateLogger<UaTcpSessionClient>();
+            pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = clientCts.Token });
+            stateMachineTask = Task.Run(() => StateMachineAsync(clientCts.Token));
         }
 
         /// <summary>
@@ -206,37 +193,25 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the NamespaceUris.
         /// </summary>
-        public ReadOnlyCollection<string> NamespaceUris
-        {
-            get
-            {
-                return new ReadOnlyCollection<string>(this.innerChannel != null ? this.innerChannel.NamespaceUris : new List<string>());
-            }
-        }
+        public ReadOnlyCollection<string> NamespaceUris => new ReadOnlyCollection<string>(innerChannel?.NamespaceUris);
 
         /// <summary>
         /// Gets the ServerUris.
         /// </summary>
-        public ReadOnlyCollection<string> ServerUris
-        {
-            get
-            {
-                return new ReadOnlyCollection<string>(this.innerChannel != null ? this.innerChannel.ServerUris : new List<string>());
-            }
-        }
+        public ReadOnlyCollection<string> ServerUris => new ReadOnlyCollection<string>(innerChannel?.ServerUris);
 
         /// <summary>
         /// Gets the state of communication channel.
         /// </summary>
         public CommunicationState State
         {
-            get { return this.state; }
+            get { return state; }
 
             private set
             {
-                if (this.state != value)
+                if (state != value)
                 {
-                    this.state = value;
+                    state = value;
                 }
             }
         }
@@ -244,7 +219,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the current logger
         /// </summary>
-        protected virtual ILogger Logger => this.logger;
+        protected virtual ILogger Logger => logger;
 
         /// <summary>
         /// Gets the <see cref="UaTcpSessionClient"/> attached to this model.
@@ -268,9 +243,9 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>Returns a disposable token.</returns>
         public IDisposable Subscribe(object model)
         {
-            var subscription = new Subscription(this, model, this.loggerFactory);
-            this.subscriptions.Add(subscription);
-            return new Disposer(subscription, this.subscriptions);
+            var subscription = new Subscription(this, model, loggerFactory);
+            subscriptions.Add(subscription);
+            return new Disposer(subscription, subscriptions);
         }
 
         /// <summary>
@@ -280,13 +255,13 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns an <see cref="IServiceResponse"/>.</returns>
         public async Task<IServiceResponse> RequestAsync(IServiceRequest request)
         {
-            this.UpdateTimestamp(request);
+            UpdateTimestamp(request);
             var operation = new ServiceOperation(request);
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader.TimeoutHint))
-            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.clientCts.Token))
-            using (var registration = linkedCts.Token.Register(this.CancelRequest, operation, false))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, clientCts.Token))
+            using (var registration = linkedCts.Token.Register(CancelRequest, operation, false))
             {
-                if (this.pendingRequests.Post(operation))
+                if (pendingRequests.Post(operation))
                 {
                     return await operation.Task.ConfigureAwait(false);
                 }
@@ -300,8 +275,8 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that suspends the communication channel.</returns>
         public Task SuspendAsync()
         {
-            this.clientCts?.Cancel();
-            return this.stateMachineTask;
+            clientCts?.Cancel();
+            return stateMachineTask;
         }
 
         /// <summary>
@@ -309,11 +284,11 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public void Resume()
         {
-            if (this.clientCts.IsCancellationRequested)
+            if (clientCts.IsCancellationRequested)
             {
-                this.clientCts = new CancellationTokenSource();
-                this.pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = this.clientCts.Token });
-                this.stateMachineTask = Task.Run(() => this.StateMachine(this.clientCts.Token));
+                clientCts = new CancellationTokenSource();
+                pendingRequests = new BufferBlock<ServiceOperation>(new DataflowBlockOptions { CancellationToken = clientCts.Token });
+                stateMachineTask = Task.Run(() => StateMachineAsync(clientCts.Token));
             }
         }
 
@@ -322,7 +297,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -332,13 +307,13 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="disposing">If true, then dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing & !this.disposed)
+            if (disposing & !disposed)
             {
-                this.disposed = true;
-                this.clientCts?.Cancel();
+                disposed = true;
+                clientCts?.Cancel();
                 try
                 {
-                    this.stateMachineTask.Wait(5000);
+                    stateMachineTask.Wait(5000);
                 }
                 catch (Exception)
                 {
@@ -351,7 +326,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task StateMachine(CancellationToken token = default(CancellationToken))
+        private async Task StateMachineAsync(CancellationToken token = default(CancellationToken))
         {
             int reconnectDelay = 1000;
 
@@ -360,21 +335,21 @@ namespace Workstation.ServiceModel.Ua
                 try
                 {
                     // Opening.
-                    this.State = CommunicationState.Opening;
-                    await this.OpenAsync(token).ConfigureAwait(false);
+                    State = CommunicationState.Opening;
+                    await OpenAsync(token).ConfigureAwait(false);
                     reconnectDelay = 1000;
 
                     // Opened.
-                    this.State = CommunicationState.Opened;
+                    State = CommunicationState.Opened;
                     using (var localCts = CancellationTokenSource.CreateLinkedTokenSource(new[] { token }))
                     {
                         var tasks = new[]
                         {
-                            this.AutoCreateSubscriptions(localCts.Token),
-                            this.PublishAsync(localCts.Token),
-                            this.PublishAsync(localCts.Token),
-                            this.PublishAsync(localCts.Token),
-                            this.WhenChannelClosingAsync(localCts.Token),
+                            AutoCreateSubscriptionsAsync(localCts.Token),
+                            PublishAsync(localCts.Token),
+                            PublishAsync(localCts.Token),
+                            PublishAsync(localCts.Token),
+                            WhenChannelClosingAsync(localCts.Token),
                         };
                         var task = await Task.WhenAny(tasks).ConfigureAwait(false);
                         localCts.Cancel();
@@ -383,22 +358,22 @@ namespace Workstation.ServiceModel.Ua
                 }
                 catch (OperationCanceledException ex)
                 {
-                    this.Logger?.LogError($"State machine canceling. {ex.Message}");
+                    Logger?.LogError($"State machine canceling. {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    this.Logger?.LogError($"State machine retrying. {ex.Message}");
+                    Logger?.LogError($"State machine retrying. {ex.Message}");
                     await Task.Delay(reconnectDelay, token).ConfigureAwait(false);
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
             }
 
             // Closing
-            this.State = CommunicationState.Closing;
-            await this.CloseAsync();
+            State = CommunicationState.Closing;
+            await CloseAsync();
 
             // Closed
-            this.State = CommunicationState.Closed;
+            State = CommunicationState.Closed;
         }
 
         /// <summary>
@@ -408,33 +383,33 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A task.</returns>
         private async Task OpenAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                if (this.RemoteEndpoint == null)
+                if (RemoteEndpoint == null)
                 {
                     // If specific endpoint is not provided, use discovery to select endpoint with highest
                     // security level.
                     try
                     {
-                        this.Logger?.LogInformation($"Discovering endpoints of '{this.discoveryUrl}'.");
+                        Logger?.LogInformation($"Discovering endpoints of '{discoveryUrl}'.");
                         var getEndpointsRequest = new GetEndpointsRequest
                         {
-                            EndpointUrl = this.discoveryUrl,
+                            EndpointUrl = discoveryUrl,
                             ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
                         };
                         var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest).ConfigureAwait(false);
                         if (getEndpointsResponse.Endpoints == null || getEndpointsResponse.Endpoints.Length == 0)
                         {
-                            throw new InvalidOperationException($"'{this.discoveryUrl}' returned no endpoints.");
+                            throw new InvalidOperationException($"'{discoveryUrl}' returned no endpoints.");
                         }
 
-                        this.RemoteEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
-                        this.Logger?.LogTrace($"Success discovering endpoints of '{this.discoveryUrl}'.");
+                        RemoteEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
+                        Logger?.LogTrace($"Success discovering endpoints of '{discoveryUrl}'.");
                     }
                     catch (Exception ex)
                     {
-                        this.Logger?.LogError($"Error discovering endpoints of '{this.discoveryUrl}'. {ex.Message}");
+                        Logger?.LogError($"Error discovering endpoints of '{discoveryUrl}'. {ex.Message}");
                         throw;
                     }
                 }
@@ -443,51 +418,51 @@ namespace Workstation.ServiceModel.Ua
                 token.ThrowIfCancellationRequested();
 
                 // evaluate the user identity provider (may show a dialog).
-                var userIdentity = await this.UserIdentityProvider(this.RemoteEndpoint);
+                var userIdentity = await UserIdentityProvider(RemoteEndpoint);
 
                 try
                 {
-                    this.linkToken?.Dispose();
-                    this.innerChannel?.Dispose();
+                    linkToken?.Dispose();
+                    innerChannel?.Dispose();
 
-                    this.innerChannel = new UaTcpSessionChannel(
-                        this.LocalDescription,
-                        this.CertificateStore,
+                    innerChannel = new UaTcpSessionChannel(
+                        LocalDescription,
+                        CertificateStore,
                         userIdentity,
-                        this.RemoteEndpoint,
-                        this.loggerFactory,
-                        this.SessionTimeout,
-                        this.TimeoutHint,
-                        this.DiagnosticsHint,
-                        this.LocalReceiveBufferSize,
-                        this.LocalSendBufferSize,
-                        this.LocalMaxMessageSize,
-                        this.LocalMaxChunkCount);
+                        RemoteEndpoint,
+                        loggerFactory,
+                        SessionTimeout,
+                        TimeoutHint,
+                        DiagnosticsHint,
+                        LocalReceiveBufferSize,
+                        LocalSendBufferSize,
+                        LocalMaxMessageSize,
+                        LocalMaxChunkCount);
 
-                    await this.innerChannel.OpenAsync(token).ConfigureAwait(false);
-                    this.linkToken = this.pendingRequests.LinkTo(this.innerChannel);
+                    await innerChannel.OpenAsync(token).ConfigureAwait(false);
+                    linkToken = pendingRequests.LinkTo(innerChannel);
 
                     // create an internal subscription.
                     var subscriptionRequest = new CreateSubscriptionRequest
                     {
                         RequestedPublishingInterval = DefaultPublishingInterval,
                         RequestedMaxKeepAliveCount = DefaultKeepaliveCount,
-                        RequestedLifetimeCount = (uint)(this.SessionTimeout / DefaultPublishingInterval),
+                        RequestedLifetimeCount = (uint)(SessionTimeout / DefaultPublishingInterval),
                         PublishingEnabled = true,
                         Priority = 0
                     };
                     var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
-                    this.subscriptionId = subscriptionResponse.SubscriptionId;
+                    subscriptionId = subscriptionResponse.SubscriptionId;
                 }
                 catch (Exception ex)
                 {
-                    this.Logger?.LogError($"Error opening channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'. {ex.Message}");
+                    Logger?.LogError($"Error opening channel with endpoint '{RemoteEndpoint.EndpointUrl}'. {ex.Message}");
                     throw;
                 }
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
         }
 
@@ -498,22 +473,22 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A task.</returns>
         private async Task CloseAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                this.Logger?.LogInformation($"Closing channel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'.");
+                Logger?.LogInformation($"Closing channel with endpoint '{RemoteEndpoint?.EndpointUrl ?? discoveryUrl}'.");
                 try
                 {
-                    await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
+                    await innerChannel.CloseAsync(token).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    this.Logger?.LogError($"Error closing channel. {ex.Message}");
+                    Logger?.LogError($"Error closing channel. {ex.Message}");
                 }
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
         }
 
@@ -522,7 +497,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">A cancellation token. </param>
         /// <returns>A task.</returns>
-        private async Task AutoCreateSubscriptions(CancellationToken token = default(CancellationToken))
+        private async Task AutoCreateSubscriptionsAsync(CancellationToken token = default(CancellationToken))
         {
             var tcs = new TaskCompletionSource<bool>();
             NotifyCollectionChangedEventHandler handler = async (o, e) =>
@@ -568,15 +543,15 @@ namespace Workstation.ServiceModel.Ua
                                     item.OnCreateResult(target, result);
                                     if (StatusCode.IsBad(result.StatusCode))
                                     {
-                                        this.Logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                        Logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
                                     }
                                 }
                             }
                         }
                         catch (ServiceResultException ex)
                         {
-                            this.Logger?.LogError($"Error creating subscription. {ex.Message}");
-                            this.innerChannel.Fault(ex);
+                            Logger?.LogError($"Error creating subscription. {ex.Message}");
+                            innerChannel.Fault(ex);
                         }
                     }
                 }
@@ -593,7 +568,7 @@ namespace Workstation.ServiceModel.Ua
                     }
                     catch (ServiceResultException ex)
                     {
-                        this.Logger?.LogError($"Error deleting subscriptions. {ex.Message}");
+                        Logger?.LogError($"Error deleting subscriptions. {ex.Message}");
                     }
                 }
             };
@@ -601,14 +576,14 @@ namespace Workstation.ServiceModel.Ua
             {
                 try
                 {
-                    handler.Invoke(this.subscriptions, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, this.subscriptions.ToList()));
-                    this.subscriptions.CollectionChanged += handler;
+                    handler.Invoke(subscriptions, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, subscriptions.ToList()));
+                    subscriptions.CollectionChanged += handler;
                     await tcs.Task;
                 }
                 finally
                 {
-                    this.subscriptions.CollectionChanged -= handler;
-                    foreach (var subscription in this.subscriptions)
+                    subscriptions.CollectionChanged -= handler;
+                    foreach (var subscription in subscriptions)
                     {
                         subscription.SubscriptionId = 0;
                     }
@@ -625,7 +600,7 @@ namespace Workstation.ServiceModel.Ua
         {
             var publishRequest = new PublishRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.DiagnosticsHint },
+                RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = DiagnosticsHint },
                 SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
             };
             while (!token.IsCancellationRequested)
@@ -634,24 +609,24 @@ namespace Workstation.ServiceModel.Ua
                 {
                     var publishResponse = await this.PublishAsync(publishRequest).ConfigureAwait(false);
 
-                    this.syncContext.Post(
+                    syncContext.Post(
                         o =>
                         {
                             var pr = (PublishResponse)o;
-                            var sub = this.subscriptions.FirstOrDefault(s => s.SubscriptionId == pr.SubscriptionId);
+                            var sub = subscriptions.FirstOrDefault(s => s.SubscriptionId == pr.SubscriptionId);
                             if (sub != null)
                             {
                                 if (!sub.OnPublishResponse(pr))
                                 {
                                     // target was garbage collected. So delete subscription from server.
-                                    this.subscriptions.Remove(sub);
+                                    subscriptions.Remove(sub);
                                 }
                             }
                         }, publishResponse);
 
                     publishRequest = new PublishRequest
                     {
-                        RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.DiagnosticsHint },
+                        RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = DiagnosticsHint },
                         SubscriptionAcknowledgements = new[] { new SubscriptionAcknowledgement { SequenceNumber = publishResponse.NotificationMessage.SequenceNumber, SubscriptionId = publishResponse.SubscriptionId } }
                     };
                 }
@@ -659,7 +634,7 @@ namespace Workstation.ServiceModel.Ua
                 {
                     if (!token.IsCancellationRequested)
                     {
-                        this.Logger?.LogError($"Error publishing subscription. {ex.Message}");
+                        Logger?.LogError($"Error publishing subscription. {ex.Message}");
 
                         // short delay, then retry.
                         await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
@@ -675,7 +650,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A task.</returns>
         private Task WhenChannelClosingAsync(CancellationToken token = default(CancellationToken))
         {
-            return this.innerChannel.Completion.WithCancellation(token);
+            return innerChannel.Completion.WithCancellation(token);
         }
 
         /// <summary>
@@ -684,7 +659,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="response">The publish response.</param>
         private void OnPublishResponse(PublishResponse response)
         {
-            if (response.SubscriptionId != this.subscriptionId)
+            if (response.SubscriptionId != subscriptionId)
             {
                 return;
             }
@@ -707,7 +682,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request.RequestHeader == null)
             {
-                request.RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint };
+                request.RequestHeader = new RequestHeader { TimeoutHint = TimeoutHint, ReturnDiagnostics = DiagnosticsHint };
             }
 
             request.RequestHeader.Timestamp = DateTime.UtcNow;
@@ -722,7 +697,7 @@ namespace Workstation.ServiceModel.Ua
             var operation = (ServiceOperation)o;
             if (operation.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
-                this.Logger?.LogTrace($"Canceled {operation.Request.GetType().Name} Handle: {operation.Request.RequestHeader.RequestHandle}");
+                Logger?.LogTrace($"Canceled {operation.Request.GetType().Name} Handle: {operation.Request.RequestHeader.RequestHandle}");
             }
         }
 
@@ -739,8 +714,8 @@ namespace Workstation.ServiceModel.Ua
 
             public void Dispose()
             {
-                this.subscriptions.Remove(this.subscription);
-                this.subscription.Dispose();
+                subscriptions.Remove(subscription);
+                subscription.Dispose();
             }
         }
     }

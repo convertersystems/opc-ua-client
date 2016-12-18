@@ -17,22 +17,22 @@ namespace Workstation.ServiceModel.Ua
     {
         public ExtensionObject(byte[] body, ExpandedNodeId typeId)
         {
-            this.Body = body;
-            this.BodyType = body != null ? BodyType.ByteString : BodyType.None;
-            this.TypeId = typeId;
+            Body = body;
+            BodyType = body != null ? BodyType.ByteString : BodyType.None;
+            TypeId = typeId;
         }
 
         public ExtensionObject(XElement body, ExpandedNodeId typeId)
         {
-            this.Body = body;
-            this.BodyType = body != null ? BodyType.XmlElement : BodyType.None;
-            this.TypeId = typeId;
+            Body = body;
+            BodyType = body != null ? BodyType.XmlElement : BodyType.None;
+            TypeId = typeId;
         }
 
         public ExtensionObject(IEncodable body)
         {
-            this.Body = body;
-            this.BodyType = body != null ? BodyType.Encodable : BodyType.None;
+            Body = body;
+            BodyType = body != null ? BodyType.Encodable : BodyType.None;
         }
 
         public object Body { get; }

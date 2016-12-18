@@ -20,9 +20,9 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="namespaceIndex">the index of the namespace in the NamespaceArray. An index of 0 corresponds to "http://opcfoundation.org/UA/".</param>
         public NodeId(uint identifier, ushort namespaceIndex = 0)
         {
-            this.Identifier = identifier;
-            this.IdType = IdType.Numeric;
-            this.NamespaceIndex = namespaceIndex;
+            Identifier = identifier;
+            IdType = IdType.Numeric;
+            NamespaceIndex = namespaceIndex;
         }
 
         /// <summary>
@@ -37,9 +37,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException("identifier");
             }
 
-            this.Identifier = identifier;
-            this.IdType = IdType.String;
-            this.NamespaceIndex = namespaceIndex;
+            Identifier = identifier;
+            IdType = IdType.String;
+            NamespaceIndex = namespaceIndex;
         }
 
         /// <summary>
@@ -54,9 +54,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException("identifier");
             }
 
-            this.NamespaceIndex = namespaceIndex;
-            this.Identifier = identifier;
-            this.IdType = IdType.Guid;
+            NamespaceIndex = namespaceIndex;
+            Identifier = identifier;
+            IdType = IdType.Guid;
         }
 
         /// <summary>
@@ -71,9 +71,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException("identifier");
             }
 
-            this.NamespaceIndex = namespaceIndex;
-            this.Identifier = identifier.Clone();
-            this.IdType = IdType.Opaque;
+            NamespaceIndex = namespaceIndex;
+            Identifier = identifier.Clone();
+            IdType = IdType.Opaque;
         }
 
         public ushort NamespaceIndex { get; private set; }
@@ -204,16 +204,16 @@ namespace Workstation.ServiceModel.Ua
 
         public NodeId Clone()
         {
-            switch (this.IdType)
+            switch (IdType)
             {
                 case IdType.Numeric:
-                    return new NodeId((uint)this.Identifier, this.NamespaceIndex);
+                    return new NodeId((uint)Identifier, NamespaceIndex);
                 case IdType.String:
-                    return new NodeId((string)this.Identifier, this.NamespaceIndex);
+                    return new NodeId((string)Identifier, NamespaceIndex);
                 case IdType.Guid:
-                    return new NodeId((Guid)this.Identifier, this.NamespaceIndex);
+                    return new NodeId((Guid)Identifier, NamespaceIndex);
                 default:
-                    return new NodeId((byte[])this.Identifier, this.NamespaceIndex);
+                    return new NodeId((byte[])Identifier, NamespaceIndex);
             }
         }
 
@@ -234,32 +234,32 @@ namespace Workstation.ServiceModel.Ua
 
         public override int GetHashCode()
         {
-            int result = this.NamespaceIndex.GetHashCode();
-            result = (31 * result) + this.Identifier.GetHashCode();
+            int result = NamespaceIndex.GetHashCode();
+            result = (31 * result) + Identifier.GetHashCode();
             return result;
         }
 
         public override string ToString()
         {
             var sb = new StringBuilder();
-            if (this.NamespaceIndex > 0)
+            if (NamespaceIndex > 0)
             {
-                sb.AppendFormat("ns={0};", this.NamespaceIndex);
+                sb.AppendFormat("ns={0};", NamespaceIndex);
             }
 
-            switch (this.IdType)
+            switch (IdType)
             {
                 case IdType.Numeric:
-                    sb.AppendFormat("i={0}", this.Identifier);
+                    sb.AppendFormat("i={0}", Identifier);
                     break;
                 case IdType.String:
-                    sb.AppendFormat("s={0}", this.Identifier);
+                    sb.AppendFormat("s={0}", Identifier);
                     break;
                 case IdType.Guid:
-                    sb.AppendFormat("g={0}", this.Identifier);
+                    sb.AppendFormat("g={0}", Identifier);
                     break;
                 case IdType.Opaque:
-                    sb.AppendFormat("b={0}", Convert.ToBase64String((byte[])this.Identifier));
+                    sb.AppendFormat("b={0}", Convert.ToBase64String((byte[])Identifier));
                     break;
             }
 

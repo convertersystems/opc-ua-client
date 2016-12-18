@@ -4,6 +4,12 @@
         <name>Workstation.UaClient.UnitTests</name>
     </assembly>
     <members>
+        <member name="M:Workstation.UaClient.UnitTests.UnitTest1.ConnnectToEndpointsWithNoSecurityAndWithNoCertificate">
+            <summary>
+            Tests endpoint with no security and with no Certificate.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous unit test.</returns>
+        </member>
         <member name="M:Workstation.UaClient.UnitTests.UnitTest1.ConnnectToAllEndpoints">
             <summary>
             Tests all combinations of endpoint security and user identity types supported by the server.

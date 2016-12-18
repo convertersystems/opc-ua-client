@@ -107,11 +107,11 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(object value)
         {
-            this.Value = value;
+            Value = value;
             if (value == null)
             {
-                this.Type = VariantType.Null;
-                this.ArrayDimensions = null;
+                Type = VariantType.Null;
+                ArrayDimensions = null;
                 return;
             }
 
@@ -125,11 +125,11 @@ namespace Workstation.ServiceModel.Ua
                     throw new ArgumentOutOfRangeException("value", elemType, "Array element Type is unsupported.");
                 }
 
-                this.Type = variantType;
-                this.ArrayDimensions = new int[array.Rank];
+                Type = variantType;
+                ArrayDimensions = new int[array.Rank];
                 for (int i = 0; i < array.Rank; i++)
                 {
-                    this.ArrayDimensions[i] = array.GetLength(i);
+                    ArrayDimensions[i] = array.GetLength(i);
                 }
 
                 return;
@@ -141,427 +141,427 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentOutOfRangeException("value", type, "Type is unsupported.");
             }
 
-            this.Type = variantType;
-            this.ArrayDimensions = null;
+            Type = variantType;
+            ArrayDimensions = null;
         }
 
         public Variant(bool value)
         {
-            this.Value = value;
-            this.Type = VariantType.Boolean;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Boolean;
+            ArrayDimensions = null;
         }
 
         public Variant(sbyte value)
         {
-            this.Value = value;
-            this.Type = VariantType.SByte;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.SByte;
+            ArrayDimensions = null;
         }
 
         public Variant(byte value)
         {
-            this.Value = value;
-            this.Type = VariantType.Byte;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Byte;
+            ArrayDimensions = null;
         }
 
         public Variant(short value)
         {
-            this.Value = value;
-            this.Type = VariantType.Int16;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Int16;
+            ArrayDimensions = null;
         }
 
         public Variant(ushort value)
         {
-            this.Value = value;
-            this.Type = VariantType.UInt16;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.UInt16;
+            ArrayDimensions = null;
         }
 
         public Variant(int value)
         {
-            this.Value = value;
-            this.Type = VariantType.Int32;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Int32;
+            ArrayDimensions = null;
         }
 
         public Variant(uint value)
         {
-            this.Value = value;
-            this.Type = VariantType.UInt32;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.UInt32;
+            ArrayDimensions = null;
         }
 
         public Variant(long value)
         {
-            this.Value = value;
-            this.Type = VariantType.Int64;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Int64;
+            ArrayDimensions = null;
         }
 
         public Variant(ulong value)
         {
-            this.Value = value;
-            this.Type = VariantType.UInt64;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.UInt64;
+            ArrayDimensions = null;
         }
 
         public Variant(float value)
         {
-            this.Value = value;
-            this.Type = VariantType.Float;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Float;
+            ArrayDimensions = null;
         }
 
         public Variant(double value)
         {
-            this.Value = value;
-            this.Type = VariantType.Double;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Double;
+            ArrayDimensions = null;
         }
 
         public Variant(string value)
         {
-            this.Value = value;
-            this.Type = VariantType.String;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.String;
+            ArrayDimensions = null;
         }
 
         public Variant(DateTime value)
         {
-            this.Value = value;
-            this.Type = VariantType.DateTime;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.DateTime;
+            ArrayDimensions = null;
         }
 
         public Variant(Guid value)
         {
-            this.Value = value;
-            this.Type = VariantType.Guid;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.Guid;
+            ArrayDimensions = null;
         }
 
         public Variant(byte[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.ByteString;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.ByteString;
+            ArrayDimensions = null;
         }
 
         public Variant(XElement value)
         {
-            this.Value = value;
-            this.Type = VariantType.XmlElement;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.XmlElement;
+            ArrayDimensions = null;
         }
 
         public Variant(NodeId value)
         {
-            this.Value = value;
-            this.Type = VariantType.NodeId;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.NodeId;
+            ArrayDimensions = null;
         }
 
         public Variant(ExpandedNodeId value)
         {
-            this.Value = value;
-            this.Type = VariantType.ExpandedNodeId;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.ExpandedNodeId;
+            ArrayDimensions = null;
         }
 
         public Variant(StatusCode value)
         {
-            this.Value = value;
-            this.Type = VariantType.StatusCode;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.StatusCode;
+            ArrayDimensions = null;
         }
 
         public Variant(QualifiedName value)
         {
-            this.Value = value;
-            this.Type = VariantType.QualifiedName;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.QualifiedName;
+            ArrayDimensions = null;
         }
 
         public Variant(LocalizedText value)
         {
-            this.Value = value;
-            this.Type = VariantType.LocalizedText;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.LocalizedText;
+            ArrayDimensions = null;
         }
 
         public Variant(ExtensionObject value)
         {
-            this.Value = value;
-            this.Type = VariantType.ExtensionObject;
-            this.ArrayDimensions = null;
+            Value = value;
+            Type = VariantType.ExtensionObject;
+            ArrayDimensions = null;
         }
 
         public Variant(Enum value)
         {
-            this.Value = Convert.ToInt32(value, CultureInfo.InvariantCulture);
-            this.Type = VariantType.Int32;
-            this.ArrayDimensions = null;
+            Value = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+            Type = VariantType.Int32;
+            ArrayDimensions = null;
         }
 
         public Variant(bool[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Boolean;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Boolean;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(sbyte[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.SByte;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.SByte;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(short[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Int16;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Int16;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(ushort[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.UInt16;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.UInt16;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(int[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Int32;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Int32;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(uint[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.UInt32;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.UInt32;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(long[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Int64;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Int64;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(ulong[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.UInt64;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.UInt64;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(float[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Float;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Float;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(double[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Double;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Double;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(string[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.String;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.String;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(DateTime[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.DateTime;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.DateTime;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(Guid[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Guid;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Guid;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(byte[][] value)
         {
-            this.Value = value;
-            this.Type = VariantType.ByteString;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.ByteString;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(XElement[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.XmlElement;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.XmlElement;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(NodeId[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.NodeId;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.NodeId;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(ExpandedNodeId[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.ExpandedNodeId;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.ExpandedNodeId;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(StatusCode[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.StatusCode;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.StatusCode;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(QualifiedName[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.QualifiedName;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.QualifiedName;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(LocalizedText[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.LocalizedText;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.LocalizedText;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(ExtensionObject[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.ExtensionObject;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.ExtensionObject;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(Variant[] value)
         {
-            this.Value = value;
-            this.Type = VariantType.Variant;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value;
+            Type = VariantType.Variant;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(Enum[] value)
         {
-            this.Value = value.Select(v => Convert.ToInt32(v, CultureInfo.InvariantCulture)).ToArray();
-            this.Type = VariantType.Int32;
-            this.ArrayDimensions = new int[value.Rank];
+            Value = value.Select(v => Convert.ToInt32(v, CultureInfo.InvariantCulture)).ToArray();
+            Type = VariantType.Int32;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
         public Variant(Array value)
         {
-            this.Value = value;
+            Value = value;
             VariantType varType;
             Type elemType = value.GetType().GetElementType();
             if (elemType == null || !elemTypeMap.TryGetValue(elemType, out varType))
@@ -569,11 +569,11 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentOutOfRangeException("value", elemType, "Array element type is unsupported.");
             }
 
-            this.Type = varType;
-            this.ArrayDimensions = new int[value.Rank];
+            Type = varType;
+            ArrayDimensions = new int[value.Rank];
             for (int i = 0; i < value.Rank; i++)
             {
-                this.ArrayDimensions[i] = value.GetLength(i);
+                ArrayDimensions[i] = value.GetLength(i);
             }
         }
 
@@ -1020,7 +1020,7 @@ namespace Workstation.ServiceModel.Ua
 
         public override string ToString()
         {
-            return this.Value?.ToString() ?? "{null}";
+            return Value?.ToString() ?? "{null}";
         }
     }
 }

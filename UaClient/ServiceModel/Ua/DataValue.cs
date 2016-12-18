@@ -9,27 +9,27 @@ namespace Workstation.ServiceModel.Ua
     {
         public DataValue(object value, StatusCode statusCode = default(StatusCode), DateTime sourceTimestamp = default(DateTime), ushort sourcePicoseconds = 0, DateTime serverTimestamp = default(DateTime), ushort serverPicoseconds = 0)
         {
-            this.Variant = new Variant(value);
-            this.StatusCode = statusCode;
-            this.SourceTimestamp = sourceTimestamp;
-            this.SourcePicoseconds = sourcePicoseconds;
-            this.ServerTimestamp = serverTimestamp;
-            this.ServerPicoseconds = serverPicoseconds;
+            Variant = new Variant(value);
+            StatusCode = statusCode;
+            SourceTimestamp = sourceTimestamp;
+            SourcePicoseconds = sourcePicoseconds;
+            ServerTimestamp = serverTimestamp;
+            ServerPicoseconds = serverPicoseconds;
         }
 
         public DataValue(Variant value, StatusCode statusCode = default(StatusCode), DateTime sourceTimestamp = default(DateTime), ushort sourcePicoseconds = 0, DateTime serverTimestamp = default(DateTime), ushort serverPicoseconds = 0)
         {
-            this.Variant = value;
-            this.StatusCode = statusCode;
-            this.SourceTimestamp = sourceTimestamp;
-            this.SourcePicoseconds = sourcePicoseconds;
-            this.ServerTimestamp = serverTimestamp;
-            this.ServerPicoseconds = serverPicoseconds;
+            Variant = value;
+            StatusCode = statusCode;
+            SourceTimestamp = sourceTimestamp;
+            SourcePicoseconds = sourcePicoseconds;
+            ServerTimestamp = serverTimestamp;
+            ServerPicoseconds = serverPicoseconds;
         }
 
         public object Value
         {
-            get { return this.Variant.Value; }
+            get { return Variant.Value; }
         }
 
         public StatusCode StatusCode { get; }
@@ -46,7 +46,7 @@ namespace Workstation.ServiceModel.Ua
 
         public override string ToString()
         {
-            return $"{this.Value}; status: {this.StatusCode}; timestamp: {this.SourceTimestamp}";
+            return $"{Value}; status: {StatusCode}; timestamp: {SourceTimestamp}";
         }
     }
 }

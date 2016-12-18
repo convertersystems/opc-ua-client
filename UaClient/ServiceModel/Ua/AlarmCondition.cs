@@ -15,7 +15,7 @@ namespace Workstation.ServiceModel.Ua
         public override void Deserialize(Variant[] fields)
         {
             base.Deserialize(fields);
-            this.ActiveState = fields[11].GetValueOrDefault<LocalizedText>();
+            ActiveState = fields[11].GetValueOrDefault<LocalizedText>();
         }
 
         public override IEnumerable<SimpleAttributeOperand> GetSelectClauses()

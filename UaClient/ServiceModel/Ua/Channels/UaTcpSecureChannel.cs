@@ -161,22 +161,17 @@ namespace Workstation.ServiceModel.Ua.Channels
             uint localMaxChunkCount = DefaultMaxChunkCount)
             : base(remoteEndpoint, loggerFactory, localReceiveBufferSize, localSendBufferSize, localMaxMessageSize, localMaxChunkCount)
         {
-            if (localDescription == null)
-            {
-                throw new ArgumentNullException(nameof(localDescription));
-            }
-
-            this.LocalDescription = localDescription;
-            this.CertificateStore = certificateStore;
-            this.RemoteCertificate = this.RemoteEndpoint.ServerCertificate;
-            this.TimeoutHint = timeoutHint;
-            this.DiagnosticsHint = diagnosticsHint;
-            this.AuthenticationToken = null;
-            this.NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
-            this.ServerUris = new List<string>();
-            this.channelCts = new CancellationTokenSource();
-            this.pendingRequests = new ActionBlock<ServiceOperation>(t => this.SendRequestAction(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
-            this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
+            LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
+            CertificateStore = certificateStore;
+            RemoteCertificate = RemoteEndpoint.ServerCertificate;
+            TimeoutHint = timeoutHint;
+            DiagnosticsHint = diagnosticsHint;
+            AuthenticationToken = null;
+            NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
+            ServerUris = new List<string>();
+            channelCts = new CancellationTokenSource();
+            pendingRequests = new ActionBlock<ServiceOperation>(t => SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = channelCts.Token });
+            pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
         }
 
         public static Dictionary<ExpandedNodeId, Type> BinaryEncodingIdToTypeDictionary { get; }
@@ -213,7 +208,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public List<string> ServerUris { get; protected set; }
 
-        public Task Completion => this.pendingRequests.Completion;
+        public Task Completion => pendingRequests.Completion;
 
         public static void RegisterEncodables(Assembly assembly)
         {
@@ -249,14 +244,14 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public virtual async Task<IServiceResponse> RequestAsync(IServiceRequest request)
         {
-            this.ThrowIfClosedOrNotOpening();
-            this.TimestampHeader(request);
+            ThrowIfClosedOrNotOpening();
+            TimestampHeader(request);
             var operation = new ServiceOperation(request);
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader.TimeoutHint))
-            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.channelCts.Token))
-            using (var registration = linkedCts.Token.Register(this.CancelRequest, operation, false))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, channelCts.Token))
+            using (var registration = linkedCts.Token.Register(CancelRequest, operation, false))
             {
-                if (this.pendingRequests.Post(operation))
+                if (pendingRequests.Post(operation))
                 {
                     return await operation.Task.ConfigureAwait(false);
                 }
@@ -291,250 +286,266 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             await base.OnOpeningAsync(token).ConfigureAwait(false);
 
-            if (this.RemoteCertificate != null)
+            if (RemoteCertificate != null)
             {
-                this.RemotePublicKey = this.certificateParser.ReadCertificate(this.RemoteCertificate)?.GetPublicKey() as RsaKeyParameters;
+                var cert = certificateParser.ReadCertificate(RemoteCertificate);
+                if (cert != null)
+                {
+                    if (CertificateStore != null)
+                    {
+                        try
+                        {
+                            var result = CertificateStore.ValidateRemoteCertificate(cert);
+
+                        }
+                        catch (Exception ex)
+                        {
+                        }
+                    }
+
+                    RemotePublicKey = cert.GetPublicKey() as RsaKeyParameters;
+                }
             }
 
-            if (this.RemoteEndpoint.SecurityMode == MessageSecurityMode.SignAndEncrypt)
+            if (RemoteEndpoint.SecurityMode == MessageSecurityMode.SignAndEncrypt)
             {
-                if (this.LocalCertificate == null && this.CertificateStore != null)
+                if (LocalCertificate == null && CertificateStore != null)
                 {
-                    var tuple = this.CertificateStore.GetLocalCertificate(this.LocalDescription);
-                    this.LocalCertificate = tuple.Item1.GetEncoded();
-                    this.LocalPrivateKey = tuple.Item2;
+                    var tuple = CertificateStore.GetLocalCertificate(LocalDescription);
+                    LocalCertificate = tuple.Item1.GetEncoded();
+                    LocalPrivateKey = tuple.Item2;
                 }
 
-                if (this.LocalPrivateKey == null)
+                if (LocalPrivateKey == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "LocalPrivateKey is null.");
                 }
 
-                if (this.RemotePublicKey == null)
+                if (RemotePublicKey == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "RemotePublicKey is null.");
                 }
 
-                switch (this.RemoteEndpoint.SecurityPolicyUri)
+                switch (RemoteEndpoint.SecurityPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
 
-                        this.asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymSigner.Init(true, this.LocalPrivateKey);
-                        this.asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymVerifier.Init(false, this.RemotePublicKey);
-                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
-                        this.asymEncryptor.Init(true, this.RemotePublicKey);
-                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
-                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
-                        this.symSigner = new HMac(new Sha1Digest());
-                        this.symVerifier = new HMac(new Sha1Digest());
-                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
-                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
-                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
-                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
-                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 11, 1);
-                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 11, 1);
-                        this.symSignatureSize = 20;
-                        this.symSignatureKeySize = 16;
-                        this.symEncryptionBlockSize = 16;
-                        this.symEncryptionKeySize = 16;
+                        asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymSigner.Init(true, LocalPrivateKey);
+                        asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymVerifier.Init(false, RemotePublicKey);
+                        asymEncryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                        asymEncryptor.Init(true, RemotePublicKey);
+                        asymDecryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                        asymDecryptor.Init(false, LocalPrivateKey);
+                        symSigner = new HMac(new Sha1Digest());
+                        symVerifier = new HMac(new Sha1Digest());
+                        symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        asymLocalKeySize = LocalPrivateKey.Modulus.BitLength;
+                        asymRemoteKeySize = RemotePublicKey.Modulus.BitLength;
+                        asymLocalPlainTextBlockSize = Math.Max((asymLocalKeySize / 8) - 11, 1);
+                        asymRemotePlainTextBlockSize = Math.Max((asymRemoteKeySize / 8) - 11, 1);
+                        symSignatureSize = 20;
+                        symSignatureKeySize = 16;
+                        symEncryptionBlockSize = 16;
+                        symEncryptionKeySize = 16;
                         break;
 
                     case SecurityPolicyUris.Basic256:
 
-                        this.asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymSigner.Init(true, this.LocalPrivateKey);
-                        this.asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymVerifier.Init(false, this.RemotePublicKey);
-                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymEncryptor.Init(true, this.RemotePublicKey);
-                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
-                        this.symSigner = new HMac(new Sha1Digest());
-                        this.symVerifier = new HMac(new Sha1Digest());
-                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
-                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
-                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
-                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
-                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 42, 1);
-                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 42, 1);
-                        this.symSignatureSize = 20;
-                        this.symSignatureKeySize = 24;
-                        this.symEncryptionBlockSize = 16;
-                        this.symEncryptionKeySize = 32;
+                        asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymSigner.Init(true, LocalPrivateKey);
+                        asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymVerifier.Init(false, RemotePublicKey);
+                        asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymEncryptor.Init(true, RemotePublicKey);
+                        asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymDecryptor.Init(false, LocalPrivateKey);
+                        symSigner = new HMac(new Sha1Digest());
+                        symVerifier = new HMac(new Sha1Digest());
+                        symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        asymLocalKeySize = LocalPrivateKey.Modulus.BitLength;
+                        asymRemoteKeySize = RemotePublicKey.Modulus.BitLength;
+                        asymLocalPlainTextBlockSize = Math.Max((asymLocalKeySize / 8) - 42, 1);
+                        asymRemotePlainTextBlockSize = Math.Max((asymRemoteKeySize / 8) - 42, 1);
+                        symSignatureSize = 20;
+                        symSignatureKeySize = 24;
+                        symEncryptionBlockSize = 16;
+                        symEncryptionKeySize = 32;
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
 
-                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSA");
-                        this.asymSigner.Init(true, this.LocalPrivateKey);
-                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSA");
-                        this.asymVerifier.Init(false, this.RemotePublicKey);
-                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymEncryptor.Init(true, this.RemotePublicKey);
-                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
-                        this.symSigner = new HMac(new Sha256Digest());
-                        this.symVerifier = new HMac(new Sha256Digest());
-                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
-                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
-                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
-                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
-                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 42, 1);
-                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 42, 1);
-                        this.symSignatureSize = 32;
-                        this.symSignatureKeySize = 32;
-                        this.symEncryptionBlockSize = 16;
-                        this.symEncryptionKeySize = 32;
+                        asymSigner = SignerUtilities.GetSigner("SHA-256withRSA");
+                        asymSigner.Init(true, LocalPrivateKey);
+                        asymVerifier = SignerUtilities.GetSigner("SHA-256withRSA");
+                        asymVerifier.Init(false, RemotePublicKey);
+                        asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymEncryptor.Init(true, RemotePublicKey);
+                        asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymDecryptor.Init(false, LocalPrivateKey);
+                        symSigner = new HMac(new Sha256Digest());
+                        symVerifier = new HMac(new Sha256Digest());
+                        symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        asymLocalKeySize = LocalPrivateKey.Modulus.BitLength;
+                        asymRemoteKeySize = RemotePublicKey.Modulus.BitLength;
+                        asymLocalPlainTextBlockSize = Math.Max((asymLocalKeySize / 8) - 42, 1);
+                        asymRemotePlainTextBlockSize = Math.Max((asymRemoteKeySize / 8) - 42, 1);
+                        symSignatureSize = 32;
+                        symSignatureKeySize = 32;
+                        symEncryptionBlockSize = 16;
+                        symEncryptionKeySize = 32;
                         break;
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadSecurityPolicyRejected);
                 }
 
-                this.asymIsSigned = this.asymIsEncrypted = true;
-                this.symIsSigned = true;
-                this.symIsEncrypted = true;
-                this.asymLocalSignatureSize = this.asymLocalKeySize / 8;
-                this.asymLocalCipherTextBlockSize = Math.Max(this.asymLocalKeySize / 8, 1);
-                this.asymRemoteSignatureSize = this.asymRemoteKeySize / 8;
-                this.asymRemoteCipherTextBlockSize = Math.Max(this.asymRemoteKeySize / 8, 1);
-                this.clientSigningKey = new byte[this.symSignatureKeySize];
-                this.clientEncryptingKey = new byte[this.symEncryptionKeySize];
-                this.clientInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.serverSigningKey = new byte[this.symSignatureKeySize];
-                this.serverEncryptingKey = new byte[this.symEncryptionKeySize];
-                this.serverInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.encryptionBuffer = new byte[this.LocalSendBufferSize];
-                this.thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
+                asymIsSigned = asymIsEncrypted = true;
+                symIsSigned = true;
+                symIsEncrypted = true;
+                asymLocalSignatureSize = asymLocalKeySize / 8;
+                asymLocalCipherTextBlockSize = Math.Max(asymLocalKeySize / 8, 1);
+                asymRemoteSignatureSize = asymRemoteKeySize / 8;
+                asymRemoteCipherTextBlockSize = Math.Max(asymRemoteKeySize / 8, 1);
+                clientSigningKey = new byte[symSignatureKeySize];
+                clientEncryptingKey = new byte[symEncryptionKeySize];
+                clientInitializationVector = new byte[symEncryptionBlockSize];
+                serverSigningKey = new byte[symSignatureKeySize];
+                serverEncryptingKey = new byte[symEncryptionKeySize];
+                serverInitializationVector = new byte[symEncryptionBlockSize];
+                encryptionBuffer = new byte[LocalSendBufferSize];
+                thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
             }
-            else if (this.RemoteEndpoint.SecurityMode == MessageSecurityMode.Sign)
+            else if (RemoteEndpoint.SecurityMode == MessageSecurityMode.Sign)
             {
-                if (this.LocalCertificate == null && this.CertificateStore != null)
+                if (LocalCertificate == null && CertificateStore != null)
                 {
-                    var tuple = this.CertificateStore.GetLocalCertificate(this.LocalDescription);
-                    this.LocalCertificate = tuple.Item1.GetEncoded();
-                    this.LocalPrivateKey = tuple.Item2;
+                    var tuple = CertificateStore.GetLocalCertificate(LocalDescription);
+                    LocalCertificate = tuple.Item1.GetEncoded();
+                    LocalPrivateKey = tuple.Item2;
                 }
 
-                if (this.LocalPrivateKey == null)
+                if (LocalPrivateKey == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "LocalPrivateKey is null.");
                 }
 
-                if (this.RemotePublicKey == null)
+                if (RemotePublicKey == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "RemotePublicKey is null.");
                 }
 
-                this.RemotePublicKey = this.certificateParser.ReadCertificate(this.RemoteCertificate)?.GetPublicKey() as RsaKeyParameters;
+                RemotePublicKey = certificateParser.ReadCertificate(RemoteCertificate)?.GetPublicKey() as RsaKeyParameters;
 
-                switch (this.RemoteEndpoint.SecurityPolicyUri)
+                switch (RemoteEndpoint.SecurityPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
 
-                        this.asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymSigner.Init(true, this.LocalPrivateKey);
-                        this.asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymVerifier.Init(false, this.RemotePublicKey);
-                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
-                        this.asymEncryptor.Init(true, this.RemotePublicKey);
-                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
-                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
-                        this.symSigner = new HMac(new Sha1Digest());
-                        this.symVerifier = new HMac(new Sha1Digest());
-                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
-                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
-                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 11, 1);
-                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 11, 1);
-                        this.symSignatureSize = 20;
-                        this.symSignatureKeySize = 16;
-                        this.symEncryptionBlockSize = 16;
-                        this.symEncryptionKeySize = 16;
+                        asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymSigner.Init(true, LocalPrivateKey);
+                        asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymVerifier.Init(false, RemotePublicKey);
+                        asymEncryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                        asymEncryptor.Init(true, RemotePublicKey);
+                        asymDecryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                        asymDecryptor.Init(false, LocalPrivateKey);
+                        symSigner = new HMac(new Sha1Digest());
+                        symVerifier = new HMac(new Sha1Digest());
+                        asymLocalKeySize = LocalPrivateKey.Modulus.BitLength;
+                        asymRemoteKeySize = RemotePublicKey.Modulus.BitLength;
+                        asymLocalPlainTextBlockSize = Math.Max((asymLocalKeySize / 8) - 11, 1);
+                        asymRemotePlainTextBlockSize = Math.Max((asymRemoteKeySize / 8) - 11, 1);
+                        symSignatureSize = 20;
+                        symSignatureKeySize = 16;
+                        symEncryptionBlockSize = 16;
+                        symEncryptionKeySize = 16;
                         break;
 
                     case SecurityPolicyUris.Basic256:
 
-                        this.asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymSigner.Init(true, this.LocalPrivateKey);
-                        this.asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
-                        this.asymVerifier.Init(false, this.RemotePublicKey);
-                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymEncryptor.Init(true, this.RemotePublicKey);
-                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
-                        this.symSigner = new HMac(new Sha1Digest());
-                        this.symVerifier = new HMac(new Sha1Digest());
-                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
-                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
-                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 42, 1);
-                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 42, 1);
-                        this.symSignatureSize = 20;
-                        this.symSignatureKeySize = 24;
-                        this.symEncryptionBlockSize = 16;
-                        this.symEncryptionKeySize = 32;
+                        asymSigner = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymSigner.Init(true, LocalPrivateKey);
+                        asymVerifier = SignerUtilities.GetSigner("SHA-1withRSA");
+                        asymVerifier.Init(false, RemotePublicKey);
+                        asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymEncryptor.Init(true, RemotePublicKey);
+                        asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymDecryptor.Init(false, LocalPrivateKey);
+                        symSigner = new HMac(new Sha1Digest());
+                        symVerifier = new HMac(new Sha1Digest());
+                        asymLocalKeySize = LocalPrivateKey.Modulus.BitLength;
+                        asymRemoteKeySize = RemotePublicKey.Modulus.BitLength;
+                        asymLocalPlainTextBlockSize = Math.Max((asymLocalKeySize / 8) - 42, 1);
+                        asymRemotePlainTextBlockSize = Math.Max((asymRemoteKeySize / 8) - 42, 1);
+                        symSignatureSize = 20;
+                        symSignatureKeySize = 24;
+                        symEncryptionBlockSize = 16;
+                        symEncryptionKeySize = 32;
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
 
-                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSA");
-                        this.asymSigner.Init(true, this.LocalPrivateKey);
-                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSA");
-                        this.asymVerifier.Init(false, this.RemotePublicKey);
-                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymEncryptor.Init(true, this.RemotePublicKey);
-                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
-                        this.symSigner = new HMac(new Sha256Digest());
-                        this.symVerifier = new HMac(new Sha256Digest());
-                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
-                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
-                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 42, 1);
-                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 42, 1);
-                        this.symSignatureSize = 32;
-                        this.symSignatureKeySize = 32;
-                        this.symEncryptionBlockSize = 16;
-                        this.symEncryptionKeySize = 32;
+                        asymSigner = SignerUtilities.GetSigner("SHA-256withRSA");
+                        asymSigner.Init(true, LocalPrivateKey);
+                        asymVerifier = SignerUtilities.GetSigner("SHA-256withRSA");
+                        asymVerifier.Init(false, RemotePublicKey);
+                        asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymEncryptor.Init(true, RemotePublicKey);
+                        asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        asymDecryptor.Init(false, LocalPrivateKey);
+                        symSigner = new HMac(new Sha256Digest());
+                        symVerifier = new HMac(new Sha256Digest());
+                        asymLocalKeySize = LocalPrivateKey.Modulus.BitLength;
+                        asymRemoteKeySize = RemotePublicKey.Modulus.BitLength;
+                        asymLocalPlainTextBlockSize = Math.Max((asymLocalKeySize / 8) - 42, 1);
+                        asymRemotePlainTextBlockSize = Math.Max((asymRemoteKeySize / 8) - 42, 1);
+                        symSignatureSize = 32;
+                        symSignatureKeySize = 32;
+                        symEncryptionBlockSize = 16;
+                        symEncryptionKeySize = 32;
                         break;
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadSecurityPolicyRejected);
                 }
 
-                this.asymIsSigned = this.asymIsEncrypted = true;
-                this.symIsSigned = true;
-                this.symIsEncrypted = false;
-                this.asymLocalSignatureSize = this.asymLocalKeySize / 8;
-                this.asymLocalCipherTextBlockSize = Math.Max(this.asymLocalKeySize / 8, 1);
-                this.asymRemoteSignatureSize = this.asymRemoteKeySize / 8;
-                this.asymRemoteCipherTextBlockSize = Math.Max(this.asymRemoteKeySize / 8, 1);
-                this.clientSigningKey = new byte[this.symSignatureKeySize];
-                this.clientEncryptingKey = new byte[this.symEncryptionKeySize];
-                this.clientInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.serverSigningKey = new byte[this.symSignatureKeySize];
-                this.serverEncryptingKey = new byte[this.symEncryptionKeySize];
-                this.serverInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.encryptionBuffer = new byte[this.LocalSendBufferSize];
-                this.thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
+                asymIsSigned = asymIsEncrypted = true;
+                symIsSigned = true;
+                symIsEncrypted = false;
+                asymLocalSignatureSize = asymLocalKeySize / 8;
+                asymLocalCipherTextBlockSize = Math.Max(asymLocalKeySize / 8, 1);
+                asymRemoteSignatureSize = asymRemoteKeySize / 8;
+                asymRemoteCipherTextBlockSize = Math.Max(asymRemoteKeySize / 8, 1);
+                clientSigningKey = new byte[symSignatureKeySize];
+                clientEncryptingKey = new byte[symEncryptionKeySize];
+                clientInitializationVector = new byte[symEncryptionBlockSize];
+                serverSigningKey = new byte[symSignatureKeySize];
+                serverEncryptingKey = new byte[symEncryptionKeySize];
+                serverInitializationVector = new byte[symEncryptionBlockSize];
+                encryptionBuffer = new byte[LocalSendBufferSize];
+                thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
             }
-            else if (this.RemoteEndpoint.SecurityMode == MessageSecurityMode.None)
+            else if (RemoteEndpoint.SecurityMode == MessageSecurityMode.None)
             {
-                this.asymIsSigned = this.asymIsEncrypted = false;
-                this.symIsSigned = this.symIsEncrypted = false;
-                this.asymLocalKeySize = 0;
-                this.asymRemoteKeySize = 0;
-                this.asymLocalSignatureSize = 0;
-                this.asymLocalCipherTextBlockSize = 1;
-                this.asymRemoteSignatureSize = 0;
-                this.asymRemoteCipherTextBlockSize = 1;
-                this.asymLocalPlainTextBlockSize = 1;
-                this.asymRemotePlainTextBlockSize = 1;
-                this.symSignatureSize = 0;
-                this.symSignatureKeySize = 0;
-                this.symEncryptionBlockSize = 1;
-                this.symEncryptionKeySize = 0;
-                this.encryptionBuffer = null;
+                asymIsSigned = asymIsEncrypted = false;
+                symIsSigned = symIsEncrypted = false;
+                asymLocalKeySize = 0;
+                asymRemoteKeySize = 0;
+                asymLocalSignatureSize = 0;
+                asymLocalCipherTextBlockSize = 1;
+                asymRemoteSignatureSize = 0;
+                asymRemoteCipherTextBlockSize = 1;
+                asymLocalPlainTextBlockSize = 1;
+                asymRemotePlainTextBlockSize = 1;
+                symSignatureSize = 0;
+                symSignatureKeySize = 0;
+                symEncryptionBlockSize = 1;
+                symEncryptionKeySize = 0;
+                encryptionBuffer = null;
             }
             else
             {
@@ -546,22 +557,22 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             await base.OnOpenAsync(token).ConfigureAwait(false);
             token.ThrowIfCancellationRequested();
-            this.sendBuffer = new byte[this.LocalSendBufferSize];
-            this.receiveBuffer = new byte[this.LocalReceiveBufferSize];
+            sendBuffer = new byte[LocalSendBufferSize];
+            receiveBuffer = new byte[LocalReceiveBufferSize];
 
-            this.receiveResponsesTask = this.ReceiveResponsesAsync();
+            receiveResponsesTask = ReceiveResponsesAsync();
 
             var openSecureChannelRequest = new OpenSecureChannelRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
+                RequestHeader = new RequestHeader { TimeoutHint = TimeoutHint, ReturnDiagnostics = DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = GetNextHandle() },
                 ClientProtocolVersion = ProtocolVersion,
                 RequestType = SecurityTokenRequestType.Issue,
-                SecurityMode = this.RemoteEndpoint.SecurityMode,
-                ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce(this.symEncryptionKeySize) : null,
+                SecurityMode = RemoteEndpoint.SecurityMode,
+                ClientNonce = symIsSigned ? LocalNonce = GetNextNonce(symEncryptionKeySize) : null,
                 RequestedLifetime = TokenRequestedLifetime
             };
 
-            var openSecureChannelResponse = (OpenSecureChannelResponse)await this.RequestAsync(openSecureChannelRequest).ConfigureAwait(false);
+            var openSecureChannelResponse = (OpenSecureChannelResponse)await RequestAsync(openSecureChannelRequest).ConfigureAwait(false);
 
             if (openSecureChannelResponse.ServerProtocolVersion < ProtocolVersion)
             {
@@ -569,39 +580,39 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             // Schedule token renewal.
-            this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
+            tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
         }
 
         protected override async Task OnCloseAsync(CancellationToken token)
         {
-            this.channelCts?.Cancel();
+            channelCts?.Cancel();
             var closeSecureChannelRequest = new CloseSecureChannelRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
+                RequestHeader = new RequestHeader { TimeoutHint = TimeoutHint, ReturnDiagnostics = DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = GetNextHandle() },
             };
-            await this.SendRequestAsync(new ServiceOperation(closeSecureChannelRequest)).ConfigureAwait(false);
+            await SendRequestAsync(new ServiceOperation(closeSecureChannelRequest)).ConfigureAwait(false);
 
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
         protected override Task OnFaulted(CancellationToken token = default(CancellationToken))
         {
-            this.channelCts?.Cancel();
+            channelCts?.Cancel();
             return base.OnFaulted(token);
         }
 
         protected override async Task OnClosedAsync(CancellationToken token)
         {
-            if (this.receiveResponsesTask != null && !this.receiveResponsesTask.IsCompleted)
+            if (receiveResponsesTask != null && !receiveResponsesTask.IsCompleted)
             {
-                this.Logger?.LogTrace("Waiting for socket to close.");
-                var t = await Task.WhenAny(this.receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
-                if (t != this.receiveResponsesTask)
+                Logger?.LogTrace("Waiting for socket to close.");
+                var t = await Task.WhenAny(receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
+                if (t != receiveResponsesTask)
                 {
-                    this.Logger?.LogError("Timeout while waiting for socket to close.");
+                    Logger?.LogError("Timeout while waiting for socket to close.");
                 }
             }
-            this.channelCts?.Dispose();
+            channelCts?.Dispose();
             await base.OnClosedAsync(token);
         }
 
@@ -645,85 +656,85 @@ namespace Workstation.ServiceModel.Ua.Channels
             return output;
         }
 
-        private async Task SendRequestAction(ServiceOperation operation)
+        private async Task SendRequestActionAsync(ServiceOperation operation)
         {
-            var token = this.channelCts.Token;
+            var token = channelCts.Token;
             try
             {
                 if (!operation.Task.IsCompleted)
                 {
-                    await this.SendRequestAsync(operation, token).ConfigureAwait(false);
+                    await SendRequestAsync(operation, token).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
             {
                 if (!token.IsCancellationRequested)
                 {
-                    await this.FaultAsync(ex).ConfigureAwait(false);
-                    await this.AbortAsync().ConfigureAwait(false);
+                    await FaultAsync(ex).ConfigureAwait(false);
+                    await AbortAsync().ConfigureAwait(false);
                 }
             }
         }
 
         private async Task SendRequestAsync(ServiceOperation operation, CancellationToken token = default(CancellationToken))
         {
-            await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
+            await sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
             var request = operation.Request;
             try
             {
-                this.ThrowIfClosedOrNotOpening();
+                ThrowIfClosedOrNotOpening();
 
                 // Check if time to renew security token.
-                if (DateTime.UtcNow > this.tokenRenewalTime)
+                if (DateTime.UtcNow > tokenRenewalTime)
                 {
-                    this.tokenRenewalTime = this.tokenRenewalTime.AddMilliseconds(60000);
+                    tokenRenewalTime = tokenRenewalTime.AddMilliseconds(60000);
                     var openSecureChannelRequest = new OpenSecureChannelRequest
                     {
                         RequestHeader = new RequestHeader
                         {
-                            TimeoutHint = this.TimeoutHint,
-                            ReturnDiagnostics = this.DiagnosticsHint,
+                            TimeoutHint = TimeoutHint,
+                            ReturnDiagnostics = DiagnosticsHint,
                             Timestamp = DateTime.UtcNow,
-                            RequestHandle = this.GetNextHandle(),
-                            AuthenticationToken = this.AuthenticationToken
+                            RequestHandle = GetNextHandle(),
+                            AuthenticationToken = AuthenticationToken
                         },
                         ClientProtocolVersion = ProtocolVersion,
                         RequestType = SecurityTokenRequestType.Renew,
-                        SecurityMode = this.RemoteEndpoint.SecurityMode,
-                        ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce(this.symEncryptionKeySize) : null,
+                        SecurityMode = RemoteEndpoint.SecurityMode,
+                        ClientNonce = symIsSigned ? LocalNonce = GetNextNonce(symEncryptionKeySize) : null,
                         RequestedLifetime = TokenRequestedLifetime
                     };
-                    this.Logger?.LogTrace($"Sending {openSecureChannelRequest.GetType().Name} Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
-                    this.pendingCompletions.TryAdd(openSecureChannelRequest.RequestHeader.RequestHandle, new ServiceOperation(openSecureChannelRequest));
-                    await this.SendOpenSecureChannelRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
+                    Logger?.LogTrace($"Sending {openSecureChannelRequest.GetType().Name} Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
+                    pendingCompletions.TryAdd(openSecureChannelRequest.RequestHeader.RequestHandle, new ServiceOperation(openSecureChannelRequest));
+                    await SendOpenSecureChannelRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
                 }
 
-                request.RequestHeader.RequestHandle = this.GetNextHandle();
-                request.RequestHeader.AuthenticationToken = this.AuthenticationToken;
+                request.RequestHeader.RequestHandle = GetNextHandle();
+                request.RequestHeader.AuthenticationToken = AuthenticationToken;
 
-                this.Logger?.LogTrace($"Sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
-                this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, operation);
+                Logger?.LogTrace($"Sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, operation);
                 if (request is OpenSecureChannelRequest)
                 {
-                    await this.SendOpenSecureChannelRequestAsync((OpenSecureChannelRequest)request, token).ConfigureAwait(false);
+                    await SendOpenSecureChannelRequestAsync((OpenSecureChannelRequest)request, token).ConfigureAwait(false);
                 }
                 else if (request is CloseSecureChannelRequest)
                 {
-                    await this.SendCloseSecureChannelRequestAsync((CloseSecureChannelRequest)request, token).ConfigureAwait(false);
+                    await SendCloseSecureChannelRequestAsync((CloseSecureChannelRequest)request, token).ConfigureAwait(false);
                 }
                 else
                 {
-                    await this.SendServiceRequestAsync(request, token).ConfigureAwait(false);
+                    await SendServiceRequestAsync(request, token).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
             {
-                this.Logger?.LogError($"Error sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
+                Logger?.LogError($"Error sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
                 throw;
             }
             finally
             {
-                this.sendingSemaphore.Release();
+                sendingSemaphore.Release();
             }
         }
 
@@ -736,7 +747,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyEncoder.WriteNodeId(null, OpenSecureChannelRequestNodeId);
                 request.Encode(bodyEncoder);
                 bodyStream.Position = 0;
-                if (bodyStream.Length > this.RemoteMaxMessageSize)
+                if (bodyStream.Length > RemoteMaxMessageSize)
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }
@@ -747,28 +758,28 @@ namespace Workstation.ServiceModel.Ua.Channels
                 while (bodyCount > 0)
                 {
                     chunkCount++;
-                    if (this.RemoteMaxChunkCount > 0 && chunkCount > this.RemoteMaxChunkCount)
+                    if (RemoteMaxChunkCount > 0 && chunkCount > RemoteMaxChunkCount)
                     {
                         throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                     }
 
-                    var stream = new MemoryStream(this.sendBuffer, 0, (int)this.RemoteReceiveBufferSize, true, true);
+                    var stream = new MemoryStream(sendBuffer, 0, (int)RemoteReceiveBufferSize, true, true);
                     var encoder = new BinaryEncoder(stream, this);
                     try
                     {
                         // header
                         encoder.WriteUInt32(null, UaTcpMessageTypes.OPNF);
                         encoder.WriteUInt32(null, 0u);
-                        encoder.WriteUInt32(null, this.ChannelId);
+                        encoder.WriteUInt32(null, ChannelId);
 
                         // asymmetric security header
-                        encoder.WriteString(null, this.RemoteEndpoint.SecurityPolicyUri);
-                        if (this.RemoteEndpoint.SecurityMode != MessageSecurityMode.None)
+                        encoder.WriteString(null, RemoteEndpoint.SecurityPolicyUri);
+                        if (RemoteEndpoint.SecurityMode != MessageSecurityMode.None)
                         {
-                            encoder.WriteByteString(null, this.LocalCertificate);
-                            byte[] thumbprint = new byte[this.thumbprintDigest.GetDigestSize()];
-                            this.thumbprintDigest.BlockUpdate(this.RemoteCertificate, 0, this.RemoteCertificate.Length);
-                            this.thumbprintDigest.DoFinal(thumbprint, 0);
+                            encoder.WriteByteString(null, LocalCertificate);
+                            byte[] thumbprint = new byte[thumbprintDigest.GetDigestSize()];
+                            thumbprintDigest.BlockUpdate(RemoteCertificate, 0, RemoteCertificate.Length);
+                            thumbprintDigest.DoFinal(thumbprint, 0);
                             encoder.WriteByteString(null, thumbprint);
                         }
                         else
@@ -780,7 +791,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         int plainHeaderSize = encoder.Position;
 
                         // sequence header
-                        encoder.WriteUInt32(null, this.GetNextSequenceNumber());
+                        encoder.WriteUInt32(null, GetNextSequenceNumber());
                         encoder.WriteUInt32(null, request.RequestHeader.RequestHandle);
 
                         // body
@@ -789,14 +800,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                         int bodySize;
                         int paddingSize;
                         int chunkSize;
-                        if (this.asymIsEncrypted)
+                        if (asymIsEncrypted)
                         {
-                            paddingHeaderSize = this.asymRemoteCipherTextBlockSize > 256 ? 2 : 1;
-                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize - this.asymLocalSignatureSize - paddingHeaderSize) / this.asymRemoteCipherTextBlockSize) * this.asymRemotePlainTextBlockSize) - SequenceHeaderSize;
+                            paddingHeaderSize = asymRemoteCipherTextBlockSize > 256 ? 2 : 1;
+                            maxBodySize = ((((int)RemoteReceiveBufferSize - plainHeaderSize - asymLocalSignatureSize - paddingHeaderSize) / asymRemoteCipherTextBlockSize) * asymRemotePlainTextBlockSize) - SequenceHeaderSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
-                                paddingSize = (this.asymRemotePlainTextBlockSize - ((SequenceHeaderSize + bodySize + paddingHeaderSize + this.asymLocalSignatureSize) % this.asymRemotePlainTextBlockSize)) % this.asymRemotePlainTextBlockSize;
+                                paddingSize = (asymRemotePlainTextBlockSize - ((SequenceHeaderSize + bodySize + paddingHeaderSize + asymLocalSignatureSize) % asymRemotePlainTextBlockSize)) % asymRemotePlainTextBlockSize;
                             }
                             else
                             {
@@ -804,13 +815,13 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 paddingSize = 0;
                             }
 
-                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + this.asymLocalSignatureSize) / this.asymRemotePlainTextBlockSize) * this.asymRemoteCipherTextBlockSize);
+                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + asymLocalSignatureSize) / asymRemotePlainTextBlockSize) * asymRemoteCipherTextBlockSize);
                         }
                         else
                         {
                             paddingHeaderSize = 0;
                             paddingSize = 0;
-                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - this.asymLocalSignatureSize - SequenceHeaderSize;
+                            maxBodySize = (int)RemoteReceiveBufferSize - plainHeaderSize - asymLocalSignatureSize - SequenceHeaderSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -820,15 +831,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 bodySize = maxBodySize;
                             }
 
-                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + this.asymLocalSignatureSize;
+                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + asymLocalSignatureSize;
                         }
 
-                        bodyStream.Read(this.sendBuffer, encoder.Position, bodySize);
+                        bodyStream.Read(sendBuffer, encoder.Position, bodySize);
                         encoder.Position += bodySize;
                         bodyCount -= bodySize;
 
                         // padding
-                        if (this.asymIsEncrypted)
+                        if (asymIsEncrypted)
                         {
                             byte paddingByte = (byte)(paddingSize & 0xFF);
                             encoder.WriteByte(null, paddingByte);
@@ -852,39 +863,39 @@ namespace Workstation.ServiceModel.Ua.Channels
                         encoder.Position = position;
 
                         // sign
-                        if (this.asymIsSigned)
+                        if (asymIsSigned)
                         {
                             // sign with local private key.
-                            this.asymSigner.BlockUpdate(this.sendBuffer, 0, position);
-                            byte[] signature = this.asymSigner.GenerateSignature();
-                            Debug.Assert(signature.Length == this.asymLocalSignatureSize, nameof(this.asymLocalSignatureSize));
-                            encoder.Write(signature, 0, this.asymLocalSignatureSize);
+                            asymSigner.BlockUpdate(sendBuffer, 0, position);
+                            byte[] signature = asymSigner.GenerateSignature();
+                            Debug.Assert(signature.Length == asymLocalSignatureSize, nameof(asymLocalSignatureSize));
+                            encoder.Write(signature, 0, asymLocalSignatureSize);
                         }
 
                         // encrypt
-                        if (this.asymIsEncrypted)
+                        if (asymIsEncrypted)
                         {
                             position = encoder.Position;
-                            Buffer.BlockCopy(this.sendBuffer, 0, this.encryptionBuffer, 0, plainHeaderSize);
-                            byte[] plainText = new byte[this.asymRemotePlainTextBlockSize];
+                            Buffer.BlockCopy(sendBuffer, 0, encryptionBuffer, 0, plainHeaderSize);
+                            byte[] plainText = new byte[asymRemotePlainTextBlockSize];
                             int jj = plainHeaderSize;
-                            for (int ii = plainHeaderSize; ii < position; ii += this.asymRemotePlainTextBlockSize)
+                            for (int ii = plainHeaderSize; ii < position; ii += asymRemotePlainTextBlockSize)
                             {
-                                Buffer.BlockCopy(this.sendBuffer, ii, plainText, 0, this.asymRemotePlainTextBlockSize);
+                                Buffer.BlockCopy(sendBuffer, ii, plainText, 0, asymRemotePlainTextBlockSize);
 
                                 // encrypt with remote public key.
-                                byte[] cipherText = this.asymEncryptor.DoFinal(plainText);
-                                Debug.Assert(cipherText.Length == this.asymRemoteCipherTextBlockSize, nameof(this.asymRemoteCipherTextBlockSize));
-                                Buffer.BlockCopy(cipherText, 0, this.encryptionBuffer, jj, this.asymRemoteCipherTextBlockSize);
-                                jj += this.asymRemoteCipherTextBlockSize;
+                                byte[] cipherText = asymEncryptor.DoFinal(plainText);
+                                Debug.Assert(cipherText.Length == asymRemoteCipherTextBlockSize, nameof(asymRemoteCipherTextBlockSize));
+                                Buffer.BlockCopy(cipherText, 0, encryptionBuffer, jj, asymRemoteCipherTextBlockSize);
+                                jj += asymRemoteCipherTextBlockSize;
                             }
 
-                            await this.SendAsync(this.encryptionBuffer, 0, jj, token).ConfigureAwait(false);
+                            await SendAsync(encryptionBuffer, 0, jj, token).ConfigureAwait(false);
                             return;
                         }
 
                         // pass buffer to transport
-                        await this.SendAsync(this.sendBuffer, 0, encoder.Position, token).ConfigureAwait(false);
+                        await SendAsync(sendBuffer, 0, encoder.Position, token).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -907,7 +918,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyEncoder.WriteNodeId(null, CloseSecureChannelRequestNodeId);
                 request.Encode(bodyEncoder);
                 bodyStream.Position = 0;
-                if (bodyStream.Length > this.RemoteMaxMessageSize)
+                if (bodyStream.Length > RemoteMaxMessageSize)
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }
@@ -918,37 +929,37 @@ namespace Workstation.ServiceModel.Ua.Channels
                 while (bodyCount > 0)
                 {
                     chunkCount++;
-                    if (this.RemoteMaxChunkCount > 0 && chunkCount > this.RemoteMaxChunkCount)
+                    if (RemoteMaxChunkCount > 0 && chunkCount > RemoteMaxChunkCount)
                     {
                         throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                     }
 
-                    var stream = new MemoryStream(this.sendBuffer, 0, (int)this.RemoteReceiveBufferSize, true, true);
+                    var stream = new MemoryStream(sendBuffer, 0, (int)RemoteReceiveBufferSize, true, true);
                     var encoder = new BinaryEncoder(stream, this);
                     try
                     {
                         // header
                         encoder.WriteUInt32(null, UaTcpMessageTypes.CLOF);
                         encoder.WriteUInt32(null, 0u);
-                        encoder.WriteUInt32(null, this.ChannelId);
+                        encoder.WriteUInt32(null, ChannelId);
 
                         // symmetric security header
-                        encoder.WriteUInt32(null, this.TokenId);
+                        encoder.WriteUInt32(null, TokenId);
 
                         // detect new TokenId
-                        if (this.TokenId != this.currentClientTokenId)
+                        if (TokenId != currentClientTokenId)
                         {
-                            this.currentClientTokenId = this.TokenId;
+                            currentClientTokenId = TokenId;
 
                             // update signer and encrypter with new symmetric keys
-                            if (this.symIsSigned)
+                            if (symIsSigned)
                             {
-                                this.symSigner.Init(new KeyParameter(this.clientSigningKey));
-                                if (this.symIsEncrypted)
+                                symSigner.Init(new KeyParameter(clientSigningKey));
+                                if (symIsEncrypted)
                                 {
-                                    this.symEncryptor.Init(
+                                    symEncryptor.Init(
                                         true,
-                                        new ParametersWithIV(new KeyParameter(this.clientEncryptingKey), this.clientInitializationVector));
+                                        new ParametersWithIV(new KeyParameter(clientEncryptingKey), clientInitializationVector));
                                 }
                             }
                         }
@@ -956,7 +967,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         int plainHeaderSize = encoder.Position;
 
                         // sequence header
-                        encoder.WriteUInt32(null, this.GetNextSequenceNumber());
+                        encoder.WriteUInt32(null, GetNextSequenceNumber());
                         encoder.WriteUInt32(null, request.RequestHeader.RequestHandle);
 
                         // body
@@ -965,14 +976,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                         int bodySize;
                         int paddingSize;
                         int chunkSize;
-                        if (this.symIsEncrypted)
+                        if (symIsEncrypted)
                         {
-                            paddingHeaderSize = this.symEncryptionBlockSize > 256 ? 2 : 1;
-                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - paddingHeaderSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize) - SequenceHeaderSize;
+                            paddingHeaderSize = symEncryptionBlockSize > 256 ? 2 : 1;
+                            maxBodySize = ((((int)RemoteReceiveBufferSize - plainHeaderSize - symSignatureSize - paddingHeaderSize) / symEncryptionBlockSize) * symEncryptionBlockSize) - SequenceHeaderSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
-                                paddingSize = (this.symEncryptionBlockSize - ((SequenceHeaderSize + bodySize + paddingHeaderSize + this.symSignatureSize) % this.symEncryptionBlockSize)) % this.symEncryptionBlockSize;
+                                paddingSize = (symEncryptionBlockSize - ((SequenceHeaderSize + bodySize + paddingHeaderSize + symSignatureSize) % symEncryptionBlockSize)) % symEncryptionBlockSize;
                             }
                             else
                             {
@@ -980,13 +991,13 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 paddingSize = 0;
                             }
 
-                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + this.symSignatureSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize);
+                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + symSignatureSize) / symEncryptionBlockSize) * symEncryptionBlockSize);
                         }
                         else
                         {
                             paddingHeaderSize = 0;
                             paddingSize = 0;
-                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - SequenceHeaderSize;
+                            maxBodySize = (int)RemoteReceiveBufferSize - plainHeaderSize - symSignatureSize - SequenceHeaderSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -996,15 +1007,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 bodySize = maxBodySize;
                             }
 
-                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + this.symSignatureSize;
+                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + symSignatureSize;
                         }
 
-                        bodyStream.Read(this.sendBuffer, encoder.Position, bodySize);
+                        bodyStream.Read(sendBuffer, encoder.Position, bodySize);
                         encoder.Position += bodySize;
                         bodyCount -= bodySize;
 
                         // padding
-                        if (this.symIsEncrypted)
+                        if (symIsEncrypted)
                         {
                             var paddingByte = (byte)(paddingSize & 0xFF);
                             encoder.WriteByte(null, paddingByte);
@@ -1028,25 +1039,25 @@ namespace Workstation.ServiceModel.Ua.Channels
                         encoder.Position = position;
 
                         // signature
-                        if (this.symIsSigned)
+                        if (symIsSigned)
                         {
-                            this.symSigner.BlockUpdate(this.sendBuffer, 0, position);
-                            byte[] signature = new byte[this.symSigner.GetMacSize()];
-                            this.symSigner.DoFinal(signature, 0);
+                            symSigner.BlockUpdate(sendBuffer, 0, position);
+                            byte[] signature = new byte[symSigner.GetMacSize()];
+                            symSigner.DoFinal(signature, 0);
                             encoder.Write(signature, 0, signature.Length);
                         }
 
                         // encrypt
                         position = encoder.Position;
-                        if (this.symIsEncrypted)
+                        if (symIsEncrypted)
                         {
                             int inputCount = position - plainHeaderSize;
-                            Debug.Assert(inputCount % this.symEncryptor.GetBlockSize() == 0, "Input data is not an even number of encryption blocks.");
-                            this.symEncryptor.DoFinal(this.sendBuffer, plainHeaderSize, inputCount, this.sendBuffer, plainHeaderSize);
+                            Debug.Assert(inputCount % symEncryptor.GetBlockSize() == 0, "Input data is not an even number of encryption blocks.");
+                            symEncryptor.DoFinal(sendBuffer, plainHeaderSize, inputCount, sendBuffer, plainHeaderSize);
                         }
 
                         // pass buffer to transport
-                        await this.SendAsync(this.sendBuffer, 0, position, token).ConfigureAwait(false);
+                        await SendAsync(sendBuffer, 0, position, token).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -1066,16 +1077,15 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                ExpandedNodeId binaryEncodingId;
-                if (!TypeToBinaryEncodingIdDictionary.TryGetValue(request.GetType(), out binaryEncodingId))
+                if (!TypeToBinaryEncodingIdDictionary.TryGetValue(request.GetType(), out var binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadDataTypeIdUnknown);
                 }
 
-                bodyEncoder.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.NamespaceUris));
+                bodyEncoder.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, NamespaceUris));
                 request.Encode(bodyEncoder);
                 bodyStream.Position = 0;
-                if (bodyStream.Length > this.RemoteMaxMessageSize)
+                if (bodyStream.Length > RemoteMaxMessageSize)
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }
@@ -1086,37 +1096,37 @@ namespace Workstation.ServiceModel.Ua.Channels
                 while (bodyCount > 0)
                 {
                     chunkCount++;
-                    if (this.RemoteMaxChunkCount > 0 && chunkCount > this.RemoteMaxChunkCount)
+                    if (RemoteMaxChunkCount > 0 && chunkCount > RemoteMaxChunkCount)
                     {
                         throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                     }
 
-                    var stream = new MemoryStream(this.sendBuffer, 0, (int)this.RemoteReceiveBufferSize, true, true);
+                    var stream = new MemoryStream(sendBuffer, 0, (int)RemoteReceiveBufferSize, true, true);
                     var encoder = new BinaryEncoder(stream, this);
                     try
                     {
                         // header
                         encoder.WriteUInt32(null, UaTcpMessageTypes.MSGF);
                         encoder.WriteUInt32(null, 0u);
-                        encoder.WriteUInt32(null, this.ChannelId);
+                        encoder.WriteUInt32(null, ChannelId);
 
                         // symmetric security header
-                        encoder.WriteUInt32(null, this.TokenId);
+                        encoder.WriteUInt32(null, TokenId);
 
                         // detect new TokenId
-                        if (this.TokenId != this.currentClientTokenId)
+                        if (TokenId != currentClientTokenId)
                         {
-                            this.currentClientTokenId = this.TokenId;
+                            currentClientTokenId = TokenId;
 
                             // update signer and encrypter with new symmetric keys
-                            if (this.symIsSigned)
+                            if (symIsSigned)
                             {
-                                this.symSigner.Init(new KeyParameter(this.clientSigningKey));
-                                if (this.symIsEncrypted)
+                                symSigner.Init(new KeyParameter(clientSigningKey));
+                                if (symIsEncrypted)
                                 {
-                                    this.symEncryptor.Init(
+                                    symEncryptor.Init(
                                         true,
-                                        new ParametersWithIV(new KeyParameter(this.clientEncryptingKey), this.clientInitializationVector));
+                                        new ParametersWithIV(new KeyParameter(clientEncryptingKey), clientInitializationVector));
                                 }
                             }
                         }
@@ -1124,7 +1134,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         int plainHeaderSize = encoder.Position;
 
                         // sequence header
-                        encoder.WriteUInt32(null, this.GetNextSequenceNumber());
+                        encoder.WriteUInt32(null, GetNextSequenceNumber());
                         encoder.WriteUInt32(null, request.RequestHeader.RequestHandle);
 
                         // body
@@ -1133,14 +1143,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                         int bodySize;
                         int paddingSize;
                         int chunkSize;
-                        if (this.symIsEncrypted)
+                        if (symIsEncrypted)
                         {
-                            paddingHeaderSize = this.symEncryptionBlockSize > 256 ? 2 : 1;
-                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - paddingHeaderSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize) - SequenceHeaderSize;
+                            paddingHeaderSize = symEncryptionBlockSize > 256 ? 2 : 1;
+                            maxBodySize = ((((int)RemoteReceiveBufferSize - plainHeaderSize - symSignatureSize - paddingHeaderSize) / symEncryptionBlockSize) * symEncryptionBlockSize) - SequenceHeaderSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
-                                paddingSize = (this.symEncryptionBlockSize - ((SequenceHeaderSize + bodySize + paddingHeaderSize + this.symSignatureSize) % this.symEncryptionBlockSize)) % this.symEncryptionBlockSize;
+                                paddingSize = (symEncryptionBlockSize - ((SequenceHeaderSize + bodySize + paddingHeaderSize + symSignatureSize) % symEncryptionBlockSize)) % symEncryptionBlockSize;
                             }
                             else
                             {
@@ -1148,13 +1158,13 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 paddingSize = 0;
                             }
 
-                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + this.symSignatureSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize);
+                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + symSignatureSize) / symEncryptionBlockSize) * symEncryptionBlockSize);
                         }
                         else
                         {
                             paddingHeaderSize = 0;
                             paddingSize = 0;
-                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - SequenceHeaderSize;
+                            maxBodySize = (int)RemoteReceiveBufferSize - plainHeaderSize - symSignatureSize - SequenceHeaderSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -1164,15 +1174,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 bodySize = maxBodySize;
                             }
 
-                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + this.symSignatureSize;
+                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + symSignatureSize;
                         }
 
-                        bodyStream.Read(this.sendBuffer, encoder.Position, bodySize);
+                        bodyStream.Read(sendBuffer, encoder.Position, bodySize);
                         encoder.Position += bodySize;
                         bodyCount -= bodySize;
 
                         // padding
-                        if (this.symIsEncrypted)
+                        if (symIsEncrypted)
                         {
                             var paddingByte = (byte)(paddingSize & 0xFF);
                             encoder.WriteByte(null, paddingByte);
@@ -1196,25 +1206,25 @@ namespace Workstation.ServiceModel.Ua.Channels
                         encoder.Position = position;
 
                         // signature
-                        if (this.symIsSigned)
+                        if (symIsSigned)
                         {
-                            this.symSigner.BlockUpdate(this.sendBuffer, 0, position);
-                            byte[] signature = new byte[this.symSigner.GetMacSize()];
-                            this.symSigner.DoFinal(signature, 0);
+                            symSigner.BlockUpdate(sendBuffer, 0, position);
+                            byte[] signature = new byte[symSigner.GetMacSize()];
+                            symSigner.DoFinal(signature, 0);
                             encoder.Write(signature, 0, signature.Length);
                         }
 
                         // encrypt
                         position = encoder.Position;
-                        if (this.symIsEncrypted)
+                        if (symIsEncrypted)
                         {
                             int inputCount = position - plainHeaderSize;
-                            Debug.Assert(inputCount % this.symEncryptor.GetBlockSize() == 0, "Input data is not an even number of encryption blocks.");
-                            this.symEncryptor.DoFinal(this.sendBuffer, plainHeaderSize, inputCount, this.sendBuffer, plainHeaderSize);
+                            Debug.Assert(inputCount % symEncryptor.GetBlockSize() == 0, "Input data is not an even number of encryption blocks.");
+                            symEncryptor.DoFinal(sendBuffer, plainHeaderSize, inputCount, sendBuffer, plainHeaderSize);
                         }
 
                         // pass buffer to transport
-                        await this.SendAsync(this.sendBuffer, 0, position, token).ConfigureAwait(false);
+                        await SendAsync(sendBuffer, 0, position, token).ConfigureAwait(false);
                     }
                     finally
                     {
@@ -1234,11 +1244,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    var response = await this.ReceiveResponseAsync().ConfigureAwait(false);
+                    var response = await ReceiveResponseAsync().ConfigureAwait(false);
                     if (response == null)
                     {
                         // Null response indicates socket closed. This is expected when closing secure channel.
-                        if (this.State == CommunicationState.Closed || this.State == CommunicationState.Closing)
+                        if (State == CommunicationState.Closed || State == CommunicationState.Closing)
                         {
                             return;
                         }
@@ -1246,8 +1256,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         throw new ServiceResultException(StatusCodes.BadServerNotConnected);
                     }
                     var header = response.ResponseHeader;
-                    ServiceOperation tcs;
-                    if (this.pendingCompletions.TryRemove(header.RequestHandle, out tcs))
+                    if (pendingCompletions.TryRemove(header.RequestHandle, out var tcs))
                     {
                         if (StatusCode.IsBad(header.ServiceResult))
                         {
@@ -1262,28 +1271,28 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
                 catch (Exception ex)
                 {
-                    if (this.State == CommunicationState.Closed || this.State == CommunicationState.Closing)
+                    if (State == CommunicationState.Closed || State == CommunicationState.Closing)
                     {
                         return;
                     }
 
-                    if (this.State == CommunicationState.Faulted)
+                    if (State == CommunicationState.Faulted)
                     {
                         return;
                     }
-                    await this.FaultAsync(ex).ConfigureAwait(false);
-                    await this.AbortAsync().ConfigureAwait(false);
+                    await FaultAsync(ex).ConfigureAwait(false);
+                    await AbortAsync().ConfigureAwait(false);
                 }
             }
         }
 
         protected async Task<IServiceResponse> ReceiveResponseAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.receivingSemaphore.WaitAsync(token).ConfigureAwait(false);
+            await receivingSemaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
                 token.ThrowIfCancellationRequested();
-                this.ThrowIfClosedOrNotOpening();
+                ThrowIfClosedOrNotOpening();
                 uint sequenceNumber;
                 uint requestId;
                 int paddingHeaderSize;
@@ -1301,18 +1310,18 @@ namespace Workstation.ServiceModel.Ua.Channels
                     do
                     {
                         chunkCount++;
-                        if (this.LocalMaxChunkCount > 0 && chunkCount > this.LocalMaxChunkCount)
+                        if (LocalMaxChunkCount > 0 && chunkCount > LocalMaxChunkCount)
                         {
                             throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                         }
 
-                        var count = await this.ReceiveAsync(this.receiveBuffer, 0, (int)this.LocalReceiveBufferSize, token).ConfigureAwait(false);
+                        var count = await ReceiveAsync(receiveBuffer, 0, (int)LocalReceiveBufferSize, token).ConfigureAwait(false);
                         if (count == 0)
                         {
                             return null;
                         }
 
-                        var stream = new MemoryStream(this.receiveBuffer, 0, count, true, true);
+                        var stream = new MemoryStream(receiveBuffer, 0, count, true, true);
                         var decoder = new BinaryDecoder(stream, this);
                         try
                         {
@@ -1326,7 +1335,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 case UaTcpMessageTypes.MSGC:
                                     // header
                                     channelId = decoder.ReadUInt32(null);
-                                    if (channelId != this.ChannelId)
+                                    if (channelId != ChannelId)
                                     {
                                         throw new ServiceResultException(StatusCodes.BadTcpSecureChannelUnknown);
                                     }
@@ -1335,45 +1344,45 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     var tokenId = decoder.ReadUInt32(null);
 
                                     // detect new token
-                                    if (tokenId != this.currentServerTokenId)
+                                    if (tokenId != currentServerTokenId)
                                     {
-                                        this.currentServerTokenId = tokenId;
+                                        currentServerTokenId = tokenId;
 
                                         // update with new keys
-                                        if (this.symIsSigned)
+                                        if (symIsSigned)
                                         {
-                                            this.symVerifier.Init(new KeyParameter(this.serverSigningKey));
-                                            if (this.symIsEncrypted)
+                                            symVerifier.Init(new KeyParameter(serverSigningKey));
+                                            if (symIsEncrypted)
                                             {
-                                                this.symDecryptor.Init(
+                                                symDecryptor.Init(
                                                     false,
-                                                    new ParametersWithIV(new KeyParameter(this.serverEncryptingKey), this.serverInitializationVector));
+                                                    new ParametersWithIV(new KeyParameter(serverEncryptingKey), serverInitializationVector));
                                             }
                                         }
 
-                                        this.Logger?.LogTrace($"Installed new security token {tokenId}.");
+                                        Logger?.LogTrace($"Installed new security token {tokenId}.");
                                     }
 
                                     plainHeaderSize = decoder.Position;
 
                                     // decrypt
-                                    if (this.symIsEncrypted)
+                                    if (symIsEncrypted)
                                     {
                                         int inputCount = messageLength - plainHeaderSize;
-                                        Debug.Assert(inputCount % this.symDecryptor.GetBlockSize() == 0, "Input data is not an even number of encryption blocks.");
-                                        this.symDecryptor.DoFinal(this.receiveBuffer, plainHeaderSize, inputCount, this.receiveBuffer, plainHeaderSize);
+                                        Debug.Assert(inputCount % symDecryptor.GetBlockSize() == 0, "Input data is not an even number of encryption blocks.");
+                                        symDecryptor.DoFinal(receiveBuffer, plainHeaderSize, inputCount, receiveBuffer, plainHeaderSize);
                                     }
 
                                     // verify
-                                    if (this.symIsSigned)
+                                    if (symIsSigned)
                                     {
-                                        var datalen = messageLength - this.symSignatureSize;
+                                        var datalen = messageLength - symSignatureSize;
 
-                                        this.symVerifier.BlockUpdate(this.receiveBuffer, 0, datalen);
-                                        byte[] signature = new byte[this.symVerifier.GetMacSize()];
-                                        this.symVerifier.DoFinal(signature, 0);
+                                        symVerifier.BlockUpdate(receiveBuffer, 0, datalen);
+                                        byte[] signature = new byte[symVerifier.GetMacSize()];
+                                        symVerifier.DoFinal(signature, 0);
 
-                                        if (!signature.SequenceEqual(this.receiveBuffer.AsArraySegment(datalen, this.symSignatureSize)))
+                                        if (!signature.SequenceEqual(receiveBuffer.AsArraySegment(datalen, symSignatureSize)))
                                         {
                                             throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed);
                                         }
@@ -1384,27 +1393,27 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     requestId = decoder.ReadUInt32(null);
 
                                     // body
-                                    if (this.symIsEncrypted)
+                                    if (symIsEncrypted)
                                     {
-                                        if (this.symEncryptionBlockSize > 256)
+                                        if (symEncryptionBlockSize > 256)
                                         {
                                             paddingHeaderSize = 2;
-                                            paddingSize = BitConverter.ToInt16(this.receiveBuffer, messageLength - this.symSignatureSize - paddingHeaderSize);
+                                            paddingSize = BitConverter.ToInt16(receiveBuffer, messageLength - symSignatureSize - paddingHeaderSize);
                                         }
                                         else
                                         {
                                             paddingHeaderSize = 1;
-                                            paddingSize = this.receiveBuffer[messageLength - this.symSignatureSize - paddingHeaderSize];
+                                            paddingSize = receiveBuffer[messageLength - symSignatureSize - paddingHeaderSize];
                                         }
 
-                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - paddingSize - paddingHeaderSize - this.symSignatureSize;
+                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - paddingSize - paddingHeaderSize - symSignatureSize;
                                     }
                                     else
                                     {
-                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - this.symSignatureSize;
+                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - symSignatureSize;
                                     }
 
-                                    bodyStream.Write(this.receiveBuffer, plainHeaderSize + SequenceHeaderSize, bodySize);
+                                    bodyStream.Write(receiveBuffer, plainHeaderSize + SequenceHeaderSize, bodySize);
                                     isFinal = messageType == UaTcpMessageTypes.MSGF;
                                     break;
 
@@ -1420,19 +1429,19 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     plainHeaderSize = decoder.Position;
 
                                     // decrypt
-                                    if (this.asymIsEncrypted)
+                                    if (asymIsEncrypted)
                                     {
-                                        byte[] cipherTextBlock = new byte[this.asymLocalCipherTextBlockSize];
+                                        byte[] cipherTextBlock = new byte[asymLocalCipherTextBlockSize];
                                         int jj = plainHeaderSize;
-                                        for (int ii = plainHeaderSize; ii < messageLength; ii += this.asymLocalCipherTextBlockSize)
+                                        for (int ii = plainHeaderSize; ii < messageLength; ii += asymLocalCipherTextBlockSize)
                                         {
-                                            Buffer.BlockCopy(this.receiveBuffer, ii, cipherTextBlock, 0, this.asymLocalCipherTextBlockSize);
+                                            Buffer.BlockCopy(receiveBuffer, ii, cipherTextBlock, 0, asymLocalCipherTextBlockSize);
 
                                             // decrypt with local private key.
-                                            byte[] plainTextBlock = this.asymDecryptor.DoFinal(cipherTextBlock);
-                                            Debug.Assert(plainTextBlock.Length == this.asymLocalPlainTextBlockSize, "Decrypted block length was not as expected.");
-                                            Buffer.BlockCopy(plainTextBlock, 0, this.receiveBuffer, jj, this.asymLocalPlainTextBlockSize);
-                                            jj += this.asymLocalPlainTextBlockSize;
+                                            byte[] plainTextBlock = asymDecryptor.DoFinal(cipherTextBlock);
+                                            Debug.Assert(plainTextBlock.Length == asymLocalPlainTextBlockSize, "Decrypted block length was not as expected.");
+                                            Buffer.BlockCopy(plainTextBlock, 0, receiveBuffer, jj, asymLocalPlainTextBlockSize);
+                                            jj += asymLocalPlainTextBlockSize;
                                         }
 
                                         messageLength = jj;
@@ -1440,12 +1449,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     }
 
                                     // verify
-                                    if (this.asymIsSigned)
+                                    if (asymIsSigned)
                                     {
                                         // verify with remote public key.
-                                        var datalen = messageLength - this.asymRemoteSignatureSize;
-                                        this.asymVerifier.BlockUpdate(this.receiveBuffer, 0, datalen);
-                                        if (!this.asymVerifier.VerifySignature(this.receiveBuffer.AsArraySegment(datalen, this.asymRemoteSignatureSize).ToArray()))
+                                        var datalen = messageLength - asymRemoteSignatureSize;
+                                        asymVerifier.BlockUpdate(receiveBuffer, 0, datalen);
+                                        if (!asymVerifier.VerifySignature(receiveBuffer.AsArraySegment(datalen, asymRemoteSignatureSize).ToArray()))
                                         {
                                             throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed);
                                         }
@@ -1456,27 +1465,27 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     requestId = decoder.ReadUInt32(null);
 
                                     // body
-                                    if (this.asymIsEncrypted)
+                                    if (asymIsEncrypted)
                                     {
-                                        if (this.asymLocalCipherTextBlockSize > 256)
+                                        if (asymLocalCipherTextBlockSize > 256)
                                         {
                                             paddingHeaderSize = 2;
-                                            paddingSize = BitConverter.ToInt16(this.receiveBuffer, messageLength - this.asymRemoteSignatureSize - paddingHeaderSize);
+                                            paddingSize = BitConverter.ToInt16(receiveBuffer, messageLength - asymRemoteSignatureSize - paddingHeaderSize);
                                         }
                                         else
                                         {
                                             paddingHeaderSize = 1;
-                                            paddingSize = this.receiveBuffer[messageLength - this.asymRemoteSignatureSize - paddingHeaderSize];
+                                            paddingSize = receiveBuffer[messageLength - asymRemoteSignatureSize - paddingHeaderSize];
                                         }
 
-                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - paddingSize - paddingHeaderSize - this.asymRemoteSignatureSize;
+                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - paddingSize - paddingHeaderSize - asymRemoteSignatureSize;
                                     }
                                     else
                                     {
-                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - this.asymRemoteSignatureSize;
+                                        bodySize = messageLength - plainHeaderSize - SequenceHeaderSize - asymRemoteSignatureSize;
                                     }
 
-                                    bodyStream.Write(this.receiveBuffer, plainHeaderSize + SequenceHeaderSize, bodySize);
+                                    bodyStream.Write(receiveBuffer, plainHeaderSize + SequenceHeaderSize, bodySize);
                                     isFinal = messageType == UaTcpMessageTypes.OPNF;
                                     break;
 
@@ -1496,7 +1505,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     throw new ServiceResultException(StatusCodes.BadUnknownResponse);
                             }
 
-                            if (this.LocalMaxMessageSize > 0 && bodyStream.Position > this.LocalMaxMessageSize)
+                            if (LocalMaxMessageSize > 0 && bodyStream.Position > LocalMaxMessageSize)
                             {
                                 throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                             }
@@ -1523,8 +1532,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     else
                     {
                         // find node in dictionary
-                        Type type2;
-                        if (!BinaryEncodingIdToTypeDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, this.NamespaceUris), out type2))
+                        if (!BinaryEncodingIdToTypeDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, NamespaceUris), out var type2))
                         {
                             throw new ServiceResultException(StatusCodes.BadEncodingError, "NodeId not registered in dictionary.");
                         }
@@ -1536,41 +1544,39 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // set properties from message stream
                     response.Decode(bodyDecoder);
 
-                    this.Logger?.LogTrace($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
-
+                    Logger?.LogTrace($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.
-                    var openSecureChannelResponse = response as OpenSecureChannelResponse;
-                    if (openSecureChannelResponse != null && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader.ServiceResult))
+                    if (response is OpenSecureChannelResponse openSecureChannelResponse && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader.ServiceResult))
                     {
-                        this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
+                        tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
 
-                        await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
+                        await sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
                         try
                         {
-                            this.ChannelId = openSecureChannelResponse.SecurityToken.ChannelId;
-                            this.TokenId = openSecureChannelResponse.SecurityToken.TokenId;
-                            if (this.symIsSigned)
+                            ChannelId = openSecureChannelResponse.SecurityToken.ChannelId;
+                            TokenId = openSecureChannelResponse.SecurityToken.TokenId;
+                            if (symIsSigned)
                             {
-                                var clientNonce = this.LocalNonce;
+                                var clientNonce = LocalNonce;
                                 var serverNonce = openSecureChannelResponse.ServerNonce;
 
                                 // (re)create client security keys for encrypting the next message sent
-                                var clientSecurityKey = CalculatePSHA(serverNonce, clientNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.RemoteEndpoint.SecurityPolicyUri);
-                                Buffer.BlockCopy(clientSecurityKey, 0, this.clientSigningKey, 0, this.symSignatureKeySize);
-                                Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize, this.clientEncryptingKey, 0, this.symEncryptionKeySize);
-                                Buffer.BlockCopy(clientSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.clientInitializationVector, 0, this.symEncryptionBlockSize);
+                                var clientSecurityKey = CalculatePSHA(serverNonce, clientNonce, symSignatureKeySize + symEncryptionKeySize + symEncryptionBlockSize, RemoteEndpoint.SecurityPolicyUri);
+                                Buffer.BlockCopy(clientSecurityKey, 0, clientSigningKey, 0, symSignatureKeySize);
+                                Buffer.BlockCopy(clientSecurityKey, symSignatureKeySize, clientEncryptingKey, 0, symEncryptionKeySize);
+                                Buffer.BlockCopy(clientSecurityKey, symSignatureKeySize + symEncryptionKeySize, clientInitializationVector, 0, symEncryptionBlockSize);
 
                                 // (re)create server security keys for decrypting the next message received that has a new TokenId
-                                var serverSecurityKey = CalculatePSHA(clientNonce, serverNonce, this.symSignatureKeySize + this.symEncryptionKeySize + this.symEncryptionBlockSize, this.RemoteEndpoint.SecurityPolicyUri);
-                                Buffer.BlockCopy(serverSecurityKey, 0, this.serverSigningKey, 0, this.symSignatureKeySize);
-                                Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize, this.serverEncryptingKey, 0, this.symEncryptionKeySize);
-                                Buffer.BlockCopy(serverSecurityKey, this.symSignatureKeySize + this.symEncryptionKeySize, this.serverInitializationVector, 0, this.symEncryptionBlockSize);
+                                var serverSecurityKey = CalculatePSHA(clientNonce, serverNonce, symSignatureKeySize + symEncryptionKeySize + symEncryptionBlockSize, RemoteEndpoint.SecurityPolicyUri);
+                                Buffer.BlockCopy(serverSecurityKey, 0, serverSigningKey, 0, symSignatureKeySize);
+                                Buffer.BlockCopy(serverSecurityKey, symSignatureKeySize, serverEncryptingKey, 0, symEncryptionKeySize);
+                                Buffer.BlockCopy(serverSecurityKey, symSignatureKeySize + symEncryptionKeySize, serverInitializationVector, 0, symEncryptionBlockSize);
                             }
                         }
                         finally
                         {
-                            this.sendingSemaphore.Release();
+                            sendingSemaphore.Release();
                         }
                     }
 
@@ -1583,7 +1589,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             finally
             {
-                this.receivingSemaphore.Release();
+                receivingSemaphore.Release();
             }
         }
 
@@ -1591,7 +1597,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (request.RequestHeader == null)
             {
-                request.RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint };
+                request.RequestHeader = new RequestHeader { TimeoutHint = TimeoutHint, ReturnDiagnostics = DiagnosticsHint };
             }
 
             request.RequestHeader.Timestamp = DateTime.UtcNow;
@@ -1601,27 +1607,27 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             unchecked
             {
-                int snapshot = this.handle;
+                int snapshot = handle;
                 int value = snapshot + 1;
                 if (value == 0)
                 {
                     value = 1;
                 }
 
-                if (Interlocked.CompareExchange(ref this.handle, value, snapshot) != snapshot)
+                if (Interlocked.CompareExchange(ref handle, value, snapshot) != snapshot)
                 {
                     var spinner = default(SpinWait);
                     do
                     {
                         spinner.SpinOnce();
-                        snapshot = this.handle;
+                        snapshot = handle;
                         value = snapshot + 1;
                         if (value == 0)
                         {
                             value = 1;
                         }
                     }
-                    while (Interlocked.CompareExchange(ref this.handle, value, snapshot) != snapshot);
+                    while (Interlocked.CompareExchange(ref handle, value, snapshot) != snapshot);
                 }
 
                 return (uint)value;
@@ -1632,7 +1638,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             unchecked
             {
-                return (uint)Interlocked.Increment(ref this.sequenceNumber);
+                return (uint)Interlocked.Increment(ref sequenceNumber);
             }
         }
 
@@ -1649,23 +1655,23 @@ namespace Workstation.ServiceModel.Ua.Channels
             if (operation.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
             {
                 var request = operation.Request;
-                this.Logger?.LogTrace($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                Logger?.LogTrace($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
             }
         }
 
         public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, ServiceOperation messageValue, ISourceBlock<ServiceOperation> source, bool consumeToAccept)
         {
-            return ((ITargetBlock<ServiceOperation>)this.pendingRequests).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
+            return ((ITargetBlock<ServiceOperation>)pendingRequests).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
         }
 
         public void Complete()
         {
-            this.pendingRequests.Complete();
+            pendingRequests.Complete();
         }
 
         public void Fault(Exception exception)
         {
-            ((IDataflowBlock)this.pendingRequests).Fault(exception);
+            ((IDataflowBlock)pendingRequests).Fault(exception);
         }
     }
 }

@@ -43,55 +43,55 @@ namespace Workstation.Collections
         public new void Clear()
         {
             base.Clear();
-            this.OnPropertyChanged("Count");
-            this.OnPropertyChanged("Item[]");
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnPropertyChanged("Count");
+            OnPropertyChanged("Item[]");
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         public new T Dequeue()
         {
             var item = base.Dequeue();
-            this.OnPropertyChanged("Count");
-            this.OnPropertyChanged("Item[]");
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, 0));
+            OnPropertyChanged("Count");
+            OnPropertyChanged("Item[]");
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, 0));
             return item;
         }
 
         public new void Enqueue(T item)
         {
-            if (this.isFixedSize && this.capacity > 0)
+            if (isFixedSize && capacity > 0)
             {
-                while (this.Count >= this.capacity)
+                while (Count >= capacity)
                 {
-                    this.Dequeue();
+                    Dequeue();
                 }
             }
 
             base.Enqueue(item);
-            this.OnPropertyChanged("Count");
-            this.OnPropertyChanged("Item[]");
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, this.Count - 1));
+            OnPropertyChanged("Count");
+            OnPropertyChanged("Item[]");
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, Count - 1));
         }
 
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-            if (this.CollectionChanged != null)
+            if (CollectionChanged != null)
             {
-                this.CollectionChanged(this, e);
+                CollectionChanged(this, e);
             }
         }
 
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
         {
-            if (this.PropertyChanged != null)
+            if (PropertyChanged != null)
             {
-                this.PropertyChanged(this, e);
+                PropertyChanged(this, e);
             }
         }
 
         private void OnPropertyChanged(string propertyName)
         {
-            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
     }
 }

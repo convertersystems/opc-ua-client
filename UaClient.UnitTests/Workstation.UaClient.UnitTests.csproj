@@ -17,6 +17,8 @@
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
     <TargetFrameworkProfile />
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
   <PropertyGroup>
     <!--
@@ -120,7 +122,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\UaClient\Workstation.UaClient.csproj">
-      <Project>{df105a52-e17d-40c4-9d36-ccf9bfb508d0}</Project>
+      <Project>{b3368b10-e55a-4776-ba72-9b783d11178f}</Project>
       <Name>Workstation.UaClient</Name>
     </ProjectReference>
   </ItemGroup>

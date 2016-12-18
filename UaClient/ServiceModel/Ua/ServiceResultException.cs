@@ -10,25 +10,25 @@ namespace Workstation.ServiceModel.Ua
         public ServiceResultException(ServiceResult result)
             : base(result.ToString())
         {
-            this.HResult = unchecked((int)(uint)result.StatusCode);
+            HResult = unchecked((int)(uint)result.StatusCode);
         }
 
         public ServiceResultException(StatusCode statusCode)
             : base(StatusCodes.GetDefaultMessage(statusCode))
         {
-            this.HResult = unchecked((int)(uint)statusCode);
+            HResult = unchecked((int)(uint)statusCode);
         }
 
         public ServiceResultException(StatusCode statusCode, string message)
             : base(message)
         {
-            this.HResult = unchecked((int)(uint)statusCode);
+            HResult = unchecked((int)(uint)statusCode);
         }
 
         public ServiceResultException(StatusCode statusCode, string message, Exception innerException)
             : base(message, innerException)
         {
-            this.HResult = unchecked((int)(uint)statusCode);
+            HResult = unchecked((int)(uint)statusCode);
         }
     }
 }

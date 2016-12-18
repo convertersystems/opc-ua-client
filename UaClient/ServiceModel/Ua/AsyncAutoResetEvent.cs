@@ -9,21 +9,22 @@ namespace Workstation.ServiceModel.Ua
     public class AsyncAutoResetEvent
     {
         private readonly Queue<TaskCompletionSource<bool>> waits = new Queue<TaskCompletionSource<bool>>();
+        private static readonly Task completedTask = Task.FromResult(true);
         private bool signaled;
 
         public Task WaitAsync()
         {
-            lock (this.waits)
+            lock (waits)
             {
-                if (this.signaled)
+                if (signaled)
                 {
-                    this.signaled = false;
-                    return Task.CompletedTask;
+                    signaled = false;
+                    return completedTask;
                 }
                 else
                 {
                     var tcs = new TaskCompletionSource<bool>();
-                    this.waits.Enqueue(tcs);
+                    waits.Enqueue(tcs);
                     return tcs.Task;
                 }
             }
@@ -32,15 +33,15 @@ namespace Workstation.ServiceModel.Ua
         public void Set()
         {
             TaskCompletionSource<bool> toRelease = null;
-            lock (this.waits)
+            lock (waits)
             {
-                if (this.waits.Count > 0)
+                if (waits.Count > 0)
                 {
-                    toRelease = this.waits.Dequeue();
+                    toRelease = waits.Dequeue();
                 }
-                else if (!this.signaled)
+                else if (!signaled)
                 {
-                    this.signaled = true;
+                    signaled = true;
                 }
             }
 

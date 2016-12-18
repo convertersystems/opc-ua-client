@@ -12,8 +12,8 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="locale">The locale.</param>
         public LocalizedText(string text, string locale = "")
         {
-            this.Locale = locale;
-            this.Text = text;
+            Locale = locale;
+            Text = text;
         }
 
         public string Text { get; }
@@ -67,14 +67,14 @@ namespace Workstation.ServiceModel.Ua
 
         public override int GetHashCode()
         {
-            int result = this.Locale != null ? this.Locale.GetHashCode() : 0;
-            result = (31 * result) + (this.Text != null ? this.Text.GetHashCode() : 0);
+            int result = Locale != null ? Locale.GetHashCode() : 0;
+            result = (31 * result) + (Text != null ? Text.GetHashCode() : 0);
             return result;
         }
 
         public override string ToString()
         {
-            return this.Text;
+            return Text;
         }
     }
 }

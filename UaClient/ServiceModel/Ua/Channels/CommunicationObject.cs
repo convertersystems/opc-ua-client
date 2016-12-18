@@ -35,9 +35,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="loggerFactory">The logger factory.</param>
         public CommunicationObject(ILoggerFactory loggerFactory = null)
         {
-            this.logger = loggerFactory?.CreateLogger(this.GetType());
-            this.semaphore = new SemaphoreSlim(1);
-            this.exceptions = new Lazy<ConcurrentQueue<Exception>>();
+            logger = loggerFactory?.CreateLogger(GetType());
+            semaphore = new SemaphoreSlim(1);
+            exceptions = new Lazy<ConcurrentQueue<Exception>>();
         }
 
         public event EventHandler Closed;
@@ -59,7 +59,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets the current logger
         /// </summary>
-        protected virtual ILogger Logger => this.logger;
+        protected virtual ILogger Logger => logger;
 
         /// <summary>
         /// Causes a communication object to transition immediately from its current state into the closing state.
@@ -68,34 +68,34 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task AbortAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                if (this.aborted || this.State == CommunicationState.Closed)
+                if (aborted || State == CommunicationState.Closed)
                 {
                     return;
                 }
 
-                this.aborted = true;
-                this.State = CommunicationState.Closing;
+                aborted = true;
+                State = CommunicationState.Closing;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
             bool flag2 = true;
             try
             {
-                await this.OnClosingAsync(token).ConfigureAwait(false);
-                if (!this.onClosingCalled)
+                await OnClosingAsync(token).ConfigureAwait(false);
+                if (!onClosingCalled)
                 {
                     throw new InvalidOperationException($"Channel did not call base.OnClosingAsync");
                 }
 
-                await this.OnAbortAsync(token).ConfigureAwait(false);
-                await this.OnClosedAsync(token).ConfigureAwait(false);
-                if (!this.onClosedCalled)
+                await OnAbortAsync(token).ConfigureAwait(false);
+                await OnClosedAsync(token).ConfigureAwait(false);
+                if (!onClosedCalled)
                 {
                     throw new InvalidOperationException($"Channelc did not call base.OnClosedAsync");
                 }
@@ -118,20 +118,20 @@ namespace Workstation.ServiceModel.Ua.Channels
         public async Task CloseAsync(CancellationToken token = default(CancellationToken))
         {
             CommunicationState communicationState;
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                communicationState = this.State;
+                communicationState = State;
                 if (communicationState != CommunicationState.Closed)
                 {
-                    this.State = CommunicationState.Closing;
+                    State = CommunicationState.Closing;
                 }
 
-                this.closeCalled = true;
+                closeCalled = true;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
             switch (communicationState)
@@ -139,7 +139,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 case CommunicationState.Created:
                 case CommunicationState.Opening:
                 case CommunicationState.Faulted:
-                    await this.AbortAsync(token).ConfigureAwait(false);
+                    await AbortAsync(token).ConfigureAwait(false);
                     if (communicationState == CommunicationState.Faulted)
                     {
                         throw new InvalidOperationException($"Channel faulted.");
@@ -152,15 +152,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                         bool flag2 = true;
                         try
                         {
-                            await this.OnClosingAsync(token).ConfigureAwait(false);
-                            if (!this.onClosingCalled)
+                            await OnClosingAsync(token).ConfigureAwait(false);
+                            if (!onClosingCalled)
                             {
                                 throw new InvalidOperationException($"Channel did not call base.OnClosingAsync");
                             }
 
-                            await this.OnCloseAsync(token).ConfigureAwait(false);
-                            await this.OnClosedAsync(token).ConfigureAwait(false);
-                            if (!this.onClosedCalled)
+                            await OnCloseAsync(token).ConfigureAwait(false);
+                            await OnClosedAsync(token).ConfigureAwait(false);
+                            if (!onClosedCalled)
                             {
                                 throw new InvalidOperationException($"Channel did not call base.OnClosedAsync");
                             }
@@ -172,8 +172,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             if (flag2)
                             {
-                                this.logger?.LogError($"Error closing channel.");
-                                await this.AbortAsync(token).ConfigureAwait(false);
+                                logger?.LogError($"Error closing channel.");
+                                await AbortAsync(token).ConfigureAwait(false);
                             }
                         }
                     }
@@ -191,29 +191,29 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OpenAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                this.ThrowIfDisposedOrImmutable();
-                this.State = CommunicationState.Opening;
+                ThrowIfDisposedOrImmutable();
+                State = CommunicationState.Opening;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
             bool flag2 = true;
             try
             {
-                await this.OnOpeningAsync(token).ConfigureAwait(false);
-                if (!this.onOpeningCalled)
+                await OnOpeningAsync(token).ConfigureAwait(false);
+                if (!onOpeningCalled)
                 {
                     throw new InvalidOperationException($"Channel did not call base.OnOpeningAsync");
                 }
 
-                await this.OnOpenAsync(token).ConfigureAwait(false);
-                await this.OnOpenedAsync(token).ConfigureAwait(false);
-                if (!this.onOpenedCalled)
+                await OnOpenAsync(token).ConfigureAwait(false);
+                await OnOpenedAsync(token).ConfigureAwait(false);
+                if (!onOpenedCalled)
                 {
                     throw new InvalidOperationException($"Channel did not call base.OnOpenedAsync");
                 }
@@ -224,7 +224,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (flag2)
                 {
-                    await this.FaultAsync().ConfigureAwait(false);
+                    await FaultAsync().ConfigureAwait(false);
                 }
             }
         }
@@ -236,27 +236,27 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected async Task FaultAsync(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                if (this.State == CommunicationState.Closed || this.State == CommunicationState.Closing)
+                if (State == CommunicationState.Closed || State == CommunicationState.Closing)
                 {
                     return;
                 }
 
-                if (this.State == CommunicationState.Faulted)
+                if (State == CommunicationState.Faulted)
                 {
                     return;
                 }
 
-                this.State = CommunicationState.Faulted;
+                State = CommunicationState.Faulted;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
-            await this.OnFaulted(token).ConfigureAwait(false);
+            await OnFaulted(token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -267,8 +267,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected async Task FaultAsync(Exception exception, CancellationToken token = default(CancellationToken))
         {
-            this.AddPendingException(exception);
-            await this.FaultAsync(token).ConfigureAwait(false);
+            AddPendingException(exception);
+            await FaultAsync(token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -292,25 +292,25 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnClosedAsync(CancellationToken token = default(CancellationToken))
         {
-            this.onClosedCalled = true;
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            onClosedCalled = true;
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                if (this.raisedClosed)
+                if (raisedClosed)
                 {
                     return;
                 }
 
-                this.raisedClosed = true;
-                this.State = CommunicationState.Closed;
+                raisedClosed = true;
+                State = CommunicationState.Closed;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
-            this.logger?.LogTrace($"Channel closed.");
-            EventHandler closed = this.Closed;
+            logger?.LogTrace($"Channel closed.");
+            EventHandler closed = Closed;
             if (closed != null)
             {
                 closed(this, EventArgs.Empty);
@@ -324,24 +324,24 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnClosingAsync(CancellationToken token = default(CancellationToken))
         {
-            this.onClosingCalled = true;
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            onClosingCalled = true;
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                if (this.raisedClosing)
+                if (raisedClosing)
                 {
                     return;
                 }
 
-                this.raisedClosing = true;
+                raisedClosing = true;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
-            this.logger?.LogTrace($"Channel closing.");
-            EventHandler closing = this.Closing;
+            logger?.LogTrace($"Channel closing.");
+            EventHandler closing = Closing;
             if (closing != null)
             {
                 closing(this, EventArgs.Empty);
@@ -355,23 +355,23 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnFaulted(CancellationToken token = default(CancellationToken))
         {
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                if (this.raisedFaulted)
+                if (raisedFaulted)
                 {
                     return;
                 }
 
-                this.raisedFaulted = true;
+                raisedFaulted = true;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
-            this.logger?.LogTrace($"Channel faulted.");
-            EventHandler faulted = this.Faulted;
+            logger?.LogTrace($"Channel faulted.");
+            EventHandler faulted = Faulted;
             if (faulted != null)
             {
                 faulted(this, EventArgs.Empty);
@@ -392,24 +392,24 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnOpenedAsync(CancellationToken token = default(CancellationToken))
         {
-            this.onOpenedCalled = true;
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            onOpenedCalled = true;
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                if (this.aborted || this.State != CommunicationState.Opening)
+                if (aborted || State != CommunicationState.Opening)
                 {
                     return;
                 }
 
-                this.State = CommunicationState.Opened;
+                State = CommunicationState.Opened;
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
-            this.logger?.LogTrace($"Channel opened.");
-            EventHandler opened = this.Opened;
+            logger?.LogTrace($"Channel opened.");
+            EventHandler opened = Opened;
             if (opened != null)
             {
                 opened(this, EventArgs.Empty);
@@ -423,18 +423,18 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnOpeningAsync(CancellationToken token = default(CancellationToken))
         {
-            this.onOpeningCalled = true;
-            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
+            onOpeningCalled = true;
+            await semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
             }
             finally
             {
-                this.semaphore.Release();
+                semaphore.Release();
             }
 
-            this.logger?.LogTrace($"Channel opening.");
-            EventHandler opening = this.Opening;
+            logger?.LogTrace($"Channel opening.");
+            EventHandler opening = Opening;
             if (opening != null)
             {
                 opening(this, EventArgs.Empty);
@@ -443,13 +443,13 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected void AddPendingException(Exception exception)
         {
-            this.exceptions.Value.Enqueue(exception);
+            exceptions.Value.Enqueue(exception);
         }
 
         protected Exception GetPendingException()
         {
             Exception ex;
-            if (this.exceptions.Value.TryDequeue(out ex))
+            if (exceptions.Value.TryDequeue(out ex))
             {
                 return ex;
             }
@@ -459,7 +459,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected void ThrowPending()
         {
-            Exception exception = this.GetPendingException();
+            Exception exception = GetPendingException();
             if (exception != null)
             {
                 throw exception;
@@ -471,8 +471,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         protected void ThrowIfDisposedOrImmutable()
         {
-            this.ThrowPending();
-            switch (this.State)
+            ThrowPending();
+            switch (State)
             {
                 case CommunicationState.Created:
                     return;
@@ -492,8 +492,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         protected void ThrowIfClosedOrNotOpening()
         {
-            this.ThrowPending();
-            switch (this.State)
+            ThrowPending();
+            switch (State)
             {
                 case CommunicationState.Created:
                     throw new InvalidOperationException($"Channel not opened.");
@@ -512,16 +512,16 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing && !this.disposed)
+            if (disposing && !disposed)
             {
-                this.disposed = true;
-                Task.Run(() => this.CloseAsync()).Wait(2000);
+                disposed = true;
+                Task.Run(() => CloseAsync()).Wait(2000);
             }
         }
 
         public void Dispose()
         {
-            this.Dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
     }

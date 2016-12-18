@@ -9,7 +9,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public X509Identity(X509Certificate2 certificate)
         {
-            this.Certificate = certificate;
+            Certificate = certificate;
         }
 
         public X509Certificate2 Certificate { get; }

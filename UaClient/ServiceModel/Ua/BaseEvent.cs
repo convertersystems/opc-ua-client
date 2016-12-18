@@ -25,12 +25,12 @@ namespace Workstation.ServiceModel.Ua
 
         public virtual void Deserialize(Variant[] fields)
         {
-            this.EventId = fields[0].GetValueOrDefault<byte[]>();
-            this.EventType = fields[1].GetValueOrDefault<NodeId>();
-            this.SourceName = fields[2].GetValueOrDefault<string>();
-            this.Time = fields[3].GetValueOrDefault<DateTime>();
-            this.Message = fields[4].GetValueOrDefault<LocalizedText>();
-            this.Severity = fields[5].GetValueOrDefault<ushort>();
+            EventId = fields[0].GetValueOrDefault<byte[]>();
+            EventType = fields[1].GetValueOrDefault<NodeId>();
+            SourceName = fields[2].GetValueOrDefault<string>();
+            Time = fields[3].GetValueOrDefault<DateTime>();
+            Message = fields[4].GetValueOrDefault<LocalizedText>();
+            Severity = fields[5].GetValueOrDefault<ushort>();
         }
 
         public virtual IEnumerable<SimpleAttributeOperand> GetSelectClauses()

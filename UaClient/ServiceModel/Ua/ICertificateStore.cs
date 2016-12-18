@@ -21,6 +21,6 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="certificate">the remote certificate.</param>
         /// <returns>The validator result.</returns>
-        PkixCertPathValidatorResult ValidateRemoteCertificate(X509Certificate certificate);
+        bool ValidateRemoteCertificate(X509Certificate certificate);
     }
 }

@@ -49,7 +49,7 @@ namespace Workstation.ServiceModel.Ua
                 var propType = propertyInfo.PropertyType;
                 if (propType == typeof(DataValue))
                 {
-                    this.Add(new DataValueMonitoredItem(
+                    Add(new DataValueMonitoredItem(
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -63,7 +63,7 @@ namespace Workstation.ServiceModel.Ua
 
                 if (propType == typeof(ObservableQueue<DataValue>))
                 {
-                    this.Add(new DataValueQueueMonitoredItem(
+                    Add(new DataValueQueueMonitoredItem(
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -77,7 +77,7 @@ namespace Workstation.ServiceModel.Ua
 
                 if (propType == typeof(BaseEvent) || propType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
                 {
-                    this.Add(new EventMonitoredItem(
+                    Add(new EventMonitoredItem(
                         property: propertyInfo,
                         nodeId: NodeId.Parse(itemAttribute.NodeId),
                         indexRange: itemAttribute.IndexRange,
@@ -94,7 +94,7 @@ namespace Workstation.ServiceModel.Ua
                     var elemType = propType.GenericTypeArguments[0];
                     if (elemType == typeof(BaseEvent) || elemType.GetTypeInfo().IsSubclassOf(typeof(BaseEvent)))
                     {
-                        this.Add((MonitoredItemBase)Activator.CreateInstance(
+                        Add((MonitoredItemBase)Activator.CreateInstance(
                         typeof(EventQueueMonitoredItem<>).MakeGenericType(elemType),
                         propertyInfo,
                         NodeId.Parse(itemAttribute.NodeId),
@@ -109,7 +109,7 @@ namespace Workstation.ServiceModel.Ua
                     }
                 }
 
-                this.Add(new ValueMonitoredItem(
+                Add(new ValueMonitoredItem(
                     property: propertyInfo,
                     nodeId: NodeId.Parse(itemAttribute.NodeId),
                     indexRange: itemAttribute.IndexRange,
@@ -137,7 +137,7 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 MonitoredItemBase item;
-                if (this.nameMap.TryGetValue(name, out item))
+                if (nameMap.TryGetValue(name, out item))
                 {
                     return item;
                 }
@@ -157,7 +157,7 @@ namespace Workstation.ServiceModel.Ua
             get
             {
                 MonitoredItemBase item;
-                if (this.clientIdMap.TryGetValue(clientId, out item))
+                if (clientIdMap.TryGetValue(clientId, out item))
                 {
                     return item;
                 }
@@ -200,7 +200,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
         public bool TryGetValueByName(string name, out MonitoredItemBase value)
         {
-            return this.nameMap.TryGetValue(name, out value);
+            return nameMap.TryGetValue(name, out value);
         }
 
         /// <summary>Gets the value associated with the specified clientId.</summary>
@@ -209,36 +209,36 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
         public bool TryGetValueByClientId(uint clientId, out MonitoredItemBase value)
         {
-            return this.clientIdMap.TryGetValue(clientId, out value);
+            return clientIdMap.TryGetValue(clientId, out value);
         }
 
         protected override void InsertItem(int index, MonitoredItemBase item)
         {
-            this.nameMap.Add(item.Property.Name, item);
-            this.clientIdMap.Add(item.ClientId, item);
+            nameMap.Add(item.Property.Name, item);
+            clientIdMap.Add(item.ClientId, item);
             base.InsertItem(index, item);
         }
 
         protected override void RemoveItem(int index)
         {
-            this.nameMap.Remove(base[index].Property.Name);
-            this.clientIdMap.Remove(base[index].ClientId);
+            nameMap.Remove(base[index].Property.Name);
+            clientIdMap.Remove(base[index].ClientId);
             base.RemoveItem(index);
         }
 
         protected override void SetItem(int index, MonitoredItemBase item)
         {
-            this.nameMap.Remove(base[index].Property.Name);
-            this.clientIdMap.Remove(base[index].ClientId);
-            this.nameMap.Add(item.Property.Name, item);
-            this.clientIdMap.Add(item.ClientId, item);
+            nameMap.Remove(base[index].Property.Name);
+            clientIdMap.Remove(base[index].ClientId);
+            nameMap.Add(item.Property.Name, item);
+            clientIdMap.Add(item.ClientId, item);
             base.SetItem(index, item);
         }
 
         protected override void ClearItems()
         {
-            this.nameMap.Clear();
-            this.clientIdMap.Clear();
+            nameMap.Clear();
+            clientIdMap.Clear();
             base.ClearItems();
         }
 

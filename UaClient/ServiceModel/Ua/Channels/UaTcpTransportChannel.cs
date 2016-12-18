@@ -21,6 +21,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const uint DefaultMaxChunkCount = 4 * 1024;
 
         private const int MinBufferSize = 8 * 1024;
+        private static readonly Task completedTask = Task.FromResult(true);
         private byte[] sendBuffer;
         private byte[] receiveBuffer;
         private Stream stream;
@@ -42,18 +43,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             uint localSendBufferSize = DefaultBufferSize,
             uint localMaxMessageSize = DefaultMaxMessageSize,
             uint localMaxChunkCount = DefaultMaxChunkCount)
-            : base (loggerFactory)
+            : base(loggerFactory)
         {
-            if (remoteEndpoint == null)
-            {
-                throw new ArgumentNullException(nameof(remoteEndpoint));
-            }
-
-            this.RemoteEndpoint = remoteEndpoint;
-            this.LocalReceiveBufferSize = localReceiveBufferSize;
-            this.LocalSendBufferSize = localSendBufferSize;
-            this.LocalMaxMessageSize = localMaxMessageSize;
-            this.LocalMaxChunkCount = localMaxChunkCount;
+            RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
+            LocalReceiveBufferSize = localReceiveBufferSize;
+            LocalSendBufferSize = localSendBufferSize;
+            LocalMaxMessageSize = localMaxMessageSize;
+            LocalMaxChunkCount = localMaxChunkCount;
         }
 
         public EndpointDescription RemoteEndpoint { get; }
@@ -76,13 +72,13 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
-            this.ThrowIfClosedOrNotOpening();
-            await this.stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
+            ThrowIfClosedOrNotOpening();
+            await stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
         }
 
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
-            this.ThrowIfClosedOrNotOpening();
+            ThrowIfClosedOrNotOpening();
             int initialOffset = offset;
             int maxCount = count;
             int num = 0;
@@ -91,7 +87,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                    num = await stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -121,7 +117,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                    num = await stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
                 catch (ObjectDisposedException)
                 {
@@ -146,33 +142,33 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected override async Task OnOpenAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            this.sendBuffer = new byte[MinBufferSize];
-            this.receiveBuffer = new byte[MinBufferSize];
+            sendBuffer = new byte[MinBufferSize];
+            receiveBuffer = new byte[MinBufferSize];
 
-            this.tcpClient = new TcpClient { NoDelay = true };
-            var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl);
-            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
-            this.stream = this.tcpClient.GetStream();
+            tcpClient = new TcpClient { NoDelay = true };
+            var uri = new UriBuilder(RemoteEndpoint.EndpointUrl);
+            await tcpClient.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
+            stream = tcpClient.GetStream();
 
             // send 'hello'.
             int count;
-            var encoder = new BinaryEncoder(new MemoryStream(this.sendBuffer, 0, MinBufferSize, true, false));
+            var encoder = new BinaryEncoder(new MemoryStream(sendBuffer, 0, MinBufferSize, true, false));
             try
             {
                 encoder.WriteUInt32(null, UaTcpMessageTypes.HELF);
                 encoder.WriteUInt32(null, 0u);
                 encoder.WriteUInt32(null, ProtocolVersion);
-                encoder.WriteUInt32(null, this.LocalReceiveBufferSize);
-                encoder.WriteUInt32(null, this.LocalSendBufferSize);
-                encoder.WriteUInt32(null, this.LocalMaxMessageSize);
-                encoder.WriteUInt32(null, this.LocalMaxChunkCount);
+                encoder.WriteUInt32(null, LocalReceiveBufferSize);
+                encoder.WriteUInt32(null, LocalSendBufferSize);
+                encoder.WriteUInt32(null, LocalMaxMessageSize);
+                encoder.WriteUInt32(null, LocalMaxChunkCount);
                 encoder.WriteString(null, uri.ToString());
                 count = encoder.Position;
                 encoder.Position = 4;
                 encoder.WriteUInt32(null, (uint)count);
                 encoder.Position = count;
 
-                await this.SendAsync(this.sendBuffer, 0, count, token).ConfigureAwait(false);
+                await SendAsync(sendBuffer, 0, count, token).ConfigureAwait(false);
             }
             finally
             {
@@ -180,14 +176,14 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             // receive response
-            count = await this.ReceiveAsync(this.receiveBuffer, 0, MinBufferSize, token).ConfigureAwait(false);
+            count = await ReceiveAsync(receiveBuffer, 0, MinBufferSize, token).ConfigureAwait(false);
             if (count == 0)
             {
                 throw new ObjectDisposedException("socket");
             }
 
             // decode 'ack' or 'err'.
-            var decoder = new BinaryDecoder(new MemoryStream(this.receiveBuffer, 0, count, false, false));
+            var decoder = new BinaryDecoder(new MemoryStream(receiveBuffer, 0, count, false, false));
             try
             {
                 var type = decoder.ReadUInt32(null);
@@ -200,10 +196,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                         throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
                     }
 
-                    this.RemoteSendBufferSize = decoder.ReadUInt32(null);
-                    this.RemoteReceiveBufferSize = decoder.ReadUInt32(null);
-                    this.RemoteMaxMessageSize = decoder.ReadUInt32(null);
-                    this.RemoteMaxChunkCount = decoder.ReadUInt32(null);
+                    RemoteSendBufferSize = decoder.ReadUInt32(null);
+                    RemoteReceiveBufferSize = decoder.ReadUInt32(null);
+                    RemoteMaxMessageSize = decoder.ReadUInt32(null);
+                    RemoteMaxChunkCount = decoder.ReadUInt32(null);
                     return;
                 }
                 else if (type == UaTcpMessageTypes.ERRF)
@@ -232,17 +228,21 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected override Task OnCloseAsync(CancellationToken token)
         {
-            return Task.CompletedTask;
+            return completedTask;
         }
 
         protected override Task OnAbortAsync(CancellationToken token)
         {
-            return Task.CompletedTask;
+            return completedTask;
         }
 
         protected async override Task OnClosedAsync(CancellationToken token)
         {
-            this.tcpClient?.Dispose();
+#if NETSTANDARD
+            tcpClient?.Dispose();
+#else
+            tcpClient?.Close();
+#endif
             await base.OnClosedAsync(token);
         }
 
