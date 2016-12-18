@@ -72,6 +72,8 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 ```
 ### Releases
 
+v1.5.1 Added support for .Net Framework 4.5. Upgraded project to Visual Studio 2017.
+
 v1.5.0 Added support for Xamarin Forms. Introduced ICertificateStore and DirectoryStore.
 
 v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate. 
