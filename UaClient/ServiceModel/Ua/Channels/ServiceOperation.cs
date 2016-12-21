@@ -16,6 +16,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
         }
 
-        public IServiceRequest Request => (IServiceRequest)Task.AsyncState;
+        public IServiceRequest Request => (IServiceRequest)this.Task.AsyncState;
     }
 }

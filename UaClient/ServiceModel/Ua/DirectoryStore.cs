@@ -44,9 +44,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(pkiDirectoryPath));
             }
             this.pkiDirectoryPath = pkiDirectoryPath;
-            AcceptAllRemoteCertificates = acceptAllRemoteCertificates;
-            CreateLocalCertificateIfNotExist = createLocalCertificateIfNotExist;
-            logger = loggerFactory?.CreateLogger<DirectoryStore>();
+            this.AcceptAllRemoteCertificates = acceptAllRemoteCertificates;
+            this.CreateLocalCertificateIfNotExist = createLocalCertificateIfNotExist;
+            this.logger = loggerFactory?.CreateLogger<DirectoryStore>();
         }
 
         /// <summary>
@@ -99,13 +99,13 @@ namespace Workstation.ServiceModel.Ua
             var crt = default(X509Certificate);
             var key = default(RsaPrivateCrtKeyParameters);
 
-            var crtInfo = new FileInfo(Path.Combine(pkiDirectoryPath, "own", "certs", "client.crt"));
-            var keyInfo = new FileInfo(Path.Combine(pkiDirectoryPath, "own", "private", "client.key"));
+            var crtInfo = new FileInfo(Path.Combine(this.pkiDirectoryPath, "own", "certs", "client.crt"));
+            var keyInfo = new FileInfo(Path.Combine(this.pkiDirectoryPath, "own", "private", "client.key"));
             if (crtInfo.Exists && keyInfo.Exists)
             {
                 using (var crtStream = crtInfo.OpenRead())
                 {
-                    crt = certParser.ReadCertificate(crtStream);
+                    crt = this.certParser.ReadCertificate(crtStream);
                     if (crt != null)
                     {
                         var asn1OctetString = crt.GetExtensionValue(X509Extensions.SubjectAlternativeName);
@@ -132,11 +132,11 @@ namespace Workstation.ServiceModel.Ua
 
             if (crt != null && key != null)
             {
-                logger?.LogTrace($"Found certificate with subject alt name '{applicationUri}'.");
+                this.logger?.LogTrace($"Found certificate with subject alt name '{applicationUri}'.");
                 return new Tuple<X509Certificate, RsaPrivateCrtKeyParameters>(crt, key);
             }
 
-            if (!CreateLocalCertificateIfNotExist)
+            if (!this.CreateLocalCertificateIfNotExist)
             {
                 return null;
             }
@@ -146,13 +146,13 @@ namespace Workstation.ServiceModel.Ua
 
             // Create a keypair.
             RsaKeyPairGenerator kg = new RsaKeyPairGenerator();
-            kg.Init(new KeyGenerationParameters(rng, 2048));
+            kg.Init(new KeyGenerationParameters(this.rng, 2048));
             AsymmetricCipherKeyPair kp = kg.GenerateKeyPair();
             key = kp.Private as RsaPrivateCrtKeyParameters;
 
             // Create a certificate.
             X509V3CertificateGenerator cg = new X509V3CertificateGenerator();
-            var subjectSN = BigInteger.ProbablePrime(120, rng);
+            var subjectSN = BigInteger.ProbablePrime(120, this.rng);
             cg.SetSerialNumber(subjectSN);
             cg.SetSubjectDN(subjectDN);
             cg.SetIssuerDN(subjectDN);
@@ -190,9 +190,9 @@ namespace Workstation.ServiceModel.Ua
                 true,
                 new ExtendedKeyUsage(KeyPurposeID.IdKPClientAuth, KeyPurposeID.IdKPServerAuth));
 
-            crt = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, rng));
+            crt = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, this.rng));
 
-            logger?.LogTrace($"Created certificate with subject alt name '{applicationUri}'.");
+            this.logger?.LogTrace($"Created certificate with subject alt name '{applicationUri}'.");
 
             if (!keyInfo.Directory.Exists)
             {
@@ -230,21 +230,21 @@ namespace Workstation.ServiceModel.Ua
         /// <inheritdoc/>
         public bool ValidateRemoteCertificate(X509Certificate target)
         {
-            if (AcceptAllRemoteCertificates)
+            if (this.AcceptAllRemoteCertificates)
             {
                 return true;
             }
 
             var trustedCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
             var intermediateCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
-            var trustedCertsInfo = new DirectoryInfo(Path.Combine(pkiDirectoryPath, "trusted", "certs"));
+            var trustedCertsInfo = new DirectoryInfo(Path.Combine(this.pkiDirectoryPath, "trusted", "certs"));
             if (trustedCertsInfo.Exists)
             {
                 foreach (var info in trustedCertsInfo.EnumerateFiles())
                 {
                     using (var crtStream = info.OpenRead())
                     {
-                        var crt = certParser.ReadCertificate(crtStream);
+                        var crt = this.certParser.ReadCertificate(crtStream);
                         if (crt != null)
                         {
                             trustedCerts.Add(crt);
@@ -253,14 +253,14 @@ namespace Workstation.ServiceModel.Ua
                 }
             }
 
-            var intermediateCertsInfo = new DirectoryInfo(Path.Combine(pkiDirectoryPath, "issuer", "certs"));
+            var intermediateCertsInfo = new DirectoryInfo(Path.Combine(this.pkiDirectoryPath, "issuer", "certs"));
             if (intermediateCertsInfo.Exists)
             {
                 foreach (var info in intermediateCertsInfo.EnumerateFiles())
                 {
                     using (var crtStream = info.OpenRead())
                     {
-                        var crt = certParser.ReadCertificate(crtStream);
+                        var crt = this.certParser.ReadCertificate(crtStream);
                         if (crt != null)
                         {
                             intermediateCerts.Add(crt);

@@ -28,21 +28,21 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.stream = stream;
             this.channel = channel;
-            encoding = new UTF8Encoding(false, true);
-            writer = new BinaryWriter(this.stream, encoding, keepStreamOpen);
+            this.encoding = new UTF8Encoding(false, true);
+            this.writer = new BinaryWriter(this.stream, this.encoding, keepStreamOpen);
         }
 
         public int Position
         {
-            get { return (int)stream.Position; }
-            set { stream.Position = value; }
+            get { return (int)this.stream.Position; }
+            set { this.stream.Position = value; }
         }
 
         public void Dispose()
         {
-            if (writer != null)
+            if (this.writer != null)
             {
-                writer.Dispose();
+                this.writer.Dispose();
             }
         }
 
@@ -56,68 +56,68 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public void WriteBoolean(string fieldName, bool value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteSByte(string fieldName, sbyte value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteByte(string fieldName, byte value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteInt16(string fieldName, short value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteUInt16(string fieldName, ushort value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteInt32(string fieldName, int value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteUInt32(string fieldName, uint value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteInt64(string fieldName, long value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteUInt64(string fieldName, ulong value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteFloat(string fieldName, float value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteDouble(string fieldName, double value)
         {
-            writer.Write(value);
+            this.writer.Write(value);
         }
 
         public void WriteString(string fieldName, string value)
         {
             if (value == null)
             {
-                writer.Write(-1);
+                this.writer.Write(-1);
                 return;
             }
 
-            WriteByteString(null, encoding.GetBytes(value));
+            this.WriteByteString(null, this.encoding.GetBytes(value));
         }
 
         public void WriteDateTime(string fieldName, DateTime value)
@@ -129,46 +129,46 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (value.Ticks < MinFileTime)
             {
-                writer.Write(0L);
+                this.writer.Write(0L);
                 return;
             }
 
-            writer.Write(value.ToFileTimeUtc());
+            this.writer.Write(value.ToFileTimeUtc());
         }
 
         public void WriteGuid(string fieldName, Guid value)
         {
-            writer.Write(value.ToByteArray());
+            this.writer.Write(value.ToByteArray());
         }
 
         public void WriteByteString(string fieldName, byte[] value)
         {
             if (value == null)
             {
-                writer.Write(-1);
+                this.writer.Write(-1);
                 return;
             }
 
-            writer.Write(value.Length);
-            writer.Write(value);
+            this.writer.Write(value.Length);
+            this.writer.Write(value);
         }
 
         public void WriteXElement(string fieldName, XElement value)
         {
             if (value == null)
             {
-                writer.Write(-1);
+                this.writer.Write(-1);
                 return;
             }
 
-            WriteByteString(null, encoding.GetBytes(value.ToString()));
+            this.WriteByteString(null, this.encoding.GetBytes(value.ToString()));
         }
 
         public void WriteNodeId(string fieldName, NodeId value)
         {
             if (value == null)
             {
-                WriteUInt16(null, 0);
+                this.WriteUInt16(null, 0);
                 return;
             }
 
@@ -179,41 +179,41 @@ namespace Workstation.ServiceModel.Ua.Channels
                     var id = (uint)value.Identifier;
                     if (id <= 255u && ns == 0u)
                     {
-                        WriteByte(null, 0x00);
-                        WriteByte(null, (byte)id);
+                        this.WriteByte(null, 0x00);
+                        this.WriteByte(null, (byte)id);
                         break;
                     }
                     else if (id <= 65535u && ns <= 255u)
                     {
-                        WriteByte(null, 0x01);
-                        WriteByte(null, (byte)ns);
-                        WriteUInt16(null, (ushort)id);
+                        this.WriteByte(null, 0x01);
+                        this.WriteByte(null, (byte)ns);
+                        this.WriteUInt16(null, (ushort)id);
                         break;
                     }
                     else
                     {
-                        WriteByte(null, 0x02);
-                        WriteUInt16(null, ns);
-                        WriteUInt32(null, id);
+                        this.WriteByte(null, 0x02);
+                        this.WriteUInt16(null, ns);
+                        this.WriteUInt32(null, id);
                         break;
                     }
 
                 case IdType.String:
-                    WriteByte(null, 0x03);
-                    WriteUInt16(null, ns);
-                    WriteString(null, (string)value.Identifier);
+                    this.WriteByte(null, 0x03);
+                    this.WriteUInt16(null, ns);
+                    this.WriteString(null, (string)value.Identifier);
                     break;
 
                 case IdType.Guid:
-                    WriteByte(null, 0x04);
-                    WriteUInt16(null, ns);
-                    WriteGuid(null, (Guid)value.Identifier);
+                    this.WriteByte(null, 0x04);
+                    this.WriteUInt16(null, ns);
+                    this.WriteGuid(null, (Guid)value.Identifier);
                     break;
 
                 case IdType.Opaque:
-                    WriteByte(null, 0x05);
-                    WriteUInt16(null, ns);
-                    WriteByteString(null, (byte[])value.Identifier);
+                    this.WriteByte(null, 0x05);
+                    this.WriteUInt16(null, ns);
+                    this.WriteByteString(null, (byte[])value.Identifier);
                     break;
 
                 default:
@@ -225,7 +225,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (value == null)
             {
-                WriteUInt16(null, 0);
+                this.WriteUInt16(null, 0);
                 return;
             }
 
@@ -249,46 +249,46 @@ namespace Workstation.ServiceModel.Ua.Channels
                     var id = (uint)value.NodeId.Identifier;
                     if (id <= 255u && ns == 0u)
                     {
-                        WriteByte(null, b);
-                        WriteByte(null, (byte)id);
+                        this.WriteByte(null, b);
+                        this.WriteByte(null, (byte)id);
                         break;
                     }
                     else if (id <= 65535u && ns <= 255u)
                     {
                         b |= 0x01;
-                        WriteByte(null, b);
-                        WriteByte(null, (byte)ns);
-                        WriteUInt16(null, (ushort)id);
+                        this.WriteByte(null, b);
+                        this.WriteByte(null, (byte)ns);
+                        this.WriteUInt16(null, (ushort)id);
                         break;
                     }
                     else
                     {
                         b |= 0x02;
-                        WriteByte(null, b);
-                        WriteUInt16(null, ns);
-                        WriteUInt32(null, id);
+                        this.WriteByte(null, b);
+                        this.WriteUInt16(null, ns);
+                        this.WriteUInt32(null, id);
                         break;
                     }
 
                 case IdType.String:
                     b |= 0x03;
-                    WriteByte(null, b);
-                    WriteUInt16(null, ns);
-                    WriteString(null, (string)value.NodeId.Identifier);
+                    this.WriteByte(null, b);
+                    this.WriteUInt16(null, ns);
+                    this.WriteString(null, (string)value.NodeId.Identifier);
                     break;
 
                 case IdType.Guid:
                     b |= 0x04;
-                    WriteByte(null, b);
-                    WriteUInt16(null, ns);
-                    WriteGuid(null, (Guid)value.NodeId.Identifier);
+                    this.WriteByte(null, b);
+                    this.WriteUInt16(null, ns);
+                    this.WriteGuid(null, (Guid)value.NodeId.Identifier);
                     break;
 
                 case IdType.Opaque:
                     b |= 0x05;
-                    WriteByte(null, b);
-                    WriteUInt16(null, ns);
-                    WriteByteString(null, (byte[])value.NodeId.Identifier);
+                    this.WriteByte(null, b);
+                    this.WriteUInt16(null, ns);
+                    this.WriteByteString(null, (byte[])value.NodeId.Identifier);
                     break;
 
                 default:
@@ -297,25 +297,25 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if ((b & 0x80) != 0)
             {
-                WriteString(null, value.NamespaceUri);
+                this.WriteString(null, value.NamespaceUri);
             }
 
             if ((b & 0x40) != 0)
             {
-                WriteUInt32(null, svr);
+                this.WriteUInt32(null, svr);
             }
         }
 
         public void WriteStatusCode(string fieldName, StatusCode value)
         {
-            WriteUInt32(null, value.Value);
+            this.WriteUInt32(null, value.Value);
         }
 
         public void WriteDiagnosticInfo(string fieldName, DiagnosticInfo value)
         {
             if (value == null)
             {
-                WriteByte(null, 0);
+                this.WriteByte(null, 0);
                 return;
             }
 
@@ -355,40 +355,40 @@ namespace Workstation.ServiceModel.Ua.Channels
                 b |= 64;
             }
 
-            WriteByte(null, b);
+            this.WriteByte(null, b);
             if ((b & 1) != 0)
             {
-                WriteInt32(null, value.SymbolicId);
+                this.WriteInt32(null, value.SymbolicId);
             }
 
             if ((b & 2) != 0)
             {
-                WriteInt32(null, value.NamespaceUri);
+                this.WriteInt32(null, value.NamespaceUri);
             }
 
             if ((b & 8) != 0)
             {
-                WriteInt32(null, value.Locale);
+                this.WriteInt32(null, value.Locale);
             }
 
             if ((b & 4) != 0)
             {
-                WriteInt32(null, value.LocalizedText);
+                this.WriteInt32(null, value.LocalizedText);
             }
 
             if ((b & 16) != 0)
             {
-                WriteString(null, value.AdditionalInfo);
+                this.WriteString(null, value.AdditionalInfo);
             }
 
             if ((b & 32) != 0)
             {
-                WriteStatusCode(null, value.InnerStatusCode);
+                this.WriteStatusCode(null, value.InnerStatusCode);
             }
 
             if ((b & 64) != 0)
             {
-                WriteDiagnosticInfo(null, value.InnerDiagnosticInfo);
+                this.WriteDiagnosticInfo(null, value.InnerDiagnosticInfo);
             }
         }
 
@@ -396,20 +396,20 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (value == null)
             {
-                WriteUInt16(null, 0);
-                WriteString(null, null);
+                this.WriteUInt16(null, 0);
+                this.WriteString(null, null);
                 return;
             }
 
-            WriteUInt16(null, value.NamespaceIndex);
-            WriteString(null, value.Name);
+            this.WriteUInt16(null, value.NamespaceIndex);
+            this.WriteString(null, value.Name);
         }
 
         public void WriteLocalizedText(string fieldName, LocalizedText value)
         {
             if (value == null)
             {
-                WriteByte(null, 0);
+                this.WriteByte(null, 0);
                 return;
             }
 
@@ -424,15 +424,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                 b |= 2;
             }
 
-            WriteByte(null, b);
+            this.WriteByte(null, b);
             if ((b & 1) != 0)
             {
-                WriteString(null, value.Locale);
+                this.WriteString(null, value.Locale);
             }
 
             if ((b & 2) != 0)
             {
-                WriteString(null, value.Text);
+                this.WriteString(null, value.Text);
             }
         }
 
@@ -440,7 +440,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (Variant.IsNull(value))
             {
-                WriteByte(null, 0);
+                this.WriteByte(null, 0);
                 return;
             }
 
@@ -449,95 +449,95 @@ namespace Workstation.ServiceModel.Ua.Channels
             int[] dims = value.ArrayDimensions;
             if (dims == null)
             {
-                WriteByte(null, b);
+                this.WriteByte(null, b);
                 switch (value.Type)
                 {
                     case VariantType.Boolean:
-                        WriteBoolean(null, (bool)obj);
+                        this.WriteBoolean(null, (bool)obj);
                         break;
 
                     case VariantType.SByte:
-                        WriteSByte(null, (sbyte)obj);
+                        this.WriteSByte(null, (sbyte)obj);
                         break;
 
                     case VariantType.Byte:
-                        WriteByte(null, (byte)obj);
+                        this.WriteByte(null, (byte)obj);
                         break;
 
                     case VariantType.Int16:
-                        WriteInt16(null, (short)obj);
+                        this.WriteInt16(null, (short)obj);
                         break;
 
                     case VariantType.UInt16:
-                        WriteUInt16(null, (ushort)obj);
+                        this.WriteUInt16(null, (ushort)obj);
                         break;
 
                     case VariantType.Int32:
-                        WriteInt32(null, (int)obj);
+                        this.WriteInt32(null, (int)obj);
                         break;
 
                     case VariantType.UInt32:
-                        WriteUInt32(null, (uint)obj);
+                        this.WriteUInt32(null, (uint)obj);
                         break;
 
                     case VariantType.Int64:
-                        WriteInt64(null, (long)obj);
+                        this.WriteInt64(null, (long)obj);
                         break;
 
                     case VariantType.UInt64:
-                        WriteUInt64(null, (ulong)obj);
+                        this.WriteUInt64(null, (ulong)obj);
                         break;
 
                     case VariantType.Float:
-                        WriteFloat(null, (float)obj);
+                        this.WriteFloat(null, (float)obj);
                         break;
 
                     case VariantType.Double:
-                        WriteDouble(null, (double)obj);
+                        this.WriteDouble(null, (double)obj);
                         break;
 
                     case VariantType.String:
-                        WriteString(null, (string)obj);
+                        this.WriteString(null, (string)obj);
                         break;
 
                     case VariantType.DateTime:
-                        WriteDateTime(null, (DateTime)obj);
+                        this.WriteDateTime(null, (DateTime)obj);
                         break;
 
                     case VariantType.Guid:
-                        WriteGuid(null, (Guid)obj);
+                        this.WriteGuid(null, (Guid)obj);
                         break;
 
                     case VariantType.ByteString:
-                        WriteByteString(null, (byte[])obj);
+                        this.WriteByteString(null, (byte[])obj);
                         break;
 
                     case VariantType.XmlElement:
-                        WriteXElement(null, (XElement)obj);
+                        this.WriteXElement(null, (XElement)obj);
                         break;
 
                     case VariantType.NodeId:
-                        WriteNodeId(null, (NodeId)obj);
+                        this.WriteNodeId(null, (NodeId)obj);
                         break;
 
                     case VariantType.ExpandedNodeId:
-                        WriteExpandedNodeId(null, (ExpandedNodeId)obj);
+                        this.WriteExpandedNodeId(null, (ExpandedNodeId)obj);
                         break;
 
                     case VariantType.StatusCode:
-                        WriteStatusCode(null, (StatusCode)obj);
+                        this.WriteStatusCode(null, (StatusCode)obj);
                         break;
 
                     case VariantType.QualifiedName:
-                        WriteQualifiedName(null, (QualifiedName)obj);
+                        this.WriteQualifiedName(null, (QualifiedName)obj);
                         break;
 
                     case VariantType.LocalizedText:
-                        WriteLocalizedText(null, (LocalizedText)obj);
+                        this.WriteLocalizedText(null, (LocalizedText)obj);
                         break;
 
                     case VariantType.ExtensionObject:
-                        WriteExtensionObject(null, (ExtensionObject)obj);
+                        this.WriteExtensionObject(null, (ExtensionObject)obj);
                         break;
 
                     default:
@@ -550,99 +550,99 @@ namespace Workstation.ServiceModel.Ua.Channels
             b |= 128; // an array
             if (dims.Length == 1)
             {
-                WriteByte(null, b);
+                this.WriteByte(null, b);
                 switch (value.Type)
                 {
                     case VariantType.Boolean:
-                        WriteBooleanArray(null, (bool[])obj);
+                        this.WriteBooleanArray(null, (bool[])obj);
                         break;
 
                     case VariantType.SByte:
-                        WriteSByteArray(null, (sbyte[])obj);
+                        this.WriteSByteArray(null, (sbyte[])obj);
                         break;
 
                     case VariantType.Byte:
-                        WriteByteArray(null, (byte[])obj);
+                        this.WriteByteArray(null, (byte[])obj);
                         break;
 
                     case VariantType.Int16:
-                        WriteInt16Array(null, (short[])obj);
+                        this.WriteInt16Array(null, (short[])obj);
                         break;
 
                     case VariantType.UInt16:
-                        WriteUInt16Array(null, (ushort[])obj);
+                        this.WriteUInt16Array(null, (ushort[])obj);
                         break;
 
                     case VariantType.Int32:
-                        WriteInt32Array(null, (int[])obj);
+                        this.WriteInt32Array(null, (int[])obj);
                         break;
 
                     case VariantType.UInt32:
-                        WriteUInt32Array(null, (uint[])obj);
+                        this.WriteUInt32Array(null, (uint[])obj);
                         break;
 
                     case VariantType.Int64:
-                        WriteInt64Array(null, (long[])obj);
+                        this.WriteInt64Array(null, (long[])obj);
                         break;
 
                     case VariantType.UInt64:
-                        WriteUInt64Array(null, (ulong[])obj);
+                        this.WriteUInt64Array(null, (ulong[])obj);
                         break;
 
                     case VariantType.Float:
-                        WriteFloatArray(null, (float[])obj);
+                        this.WriteFloatArray(null, (float[])obj);
                         break;
 
                     case VariantType.Double:
-                        WriteDoubleArray(null, (double[])obj);
+                        this.WriteDoubleArray(null, (double[])obj);
                         break;
 
                     case VariantType.String:
-                        WriteStringArray(null, (string[])obj);
+                        this.WriteStringArray(null, (string[])obj);
                         break;
 
                     case VariantType.DateTime:
-                        WriteDateTimeArray(null, (DateTime[])obj);
+                        this.WriteDateTimeArray(null, (DateTime[])obj);
                         break;
 
                     case VariantType.Guid:
-                        WriteGuidArray(null, (Guid[])obj);
+                        this.WriteGuidArray(null, (Guid[])obj);
                         break;
 
                     case VariantType.ByteString:
-                        WriteByteStringArray(null, (byte[][])obj);
+                        this.WriteByteStringArray(null, (byte[][])obj);
                         break;
 
                     case VariantType.XmlElement:
-                        WriteXElementArray(null, (XElement[])obj);
+                        this.WriteXElementArray(null, (XElement[])obj);
                         break;
 
                     case VariantType.NodeId:
-                        WriteNodeIdArray(null, (NodeId[])obj);
+                        this.WriteNodeIdArray(null, (NodeId[])obj);
                         break;
 
                     case VariantType.ExpandedNodeId:
-                        WriteExpandedNodeIdArray(null, (ExpandedNodeId[])obj);
+                        this.WriteExpandedNodeIdArray(null, (ExpandedNodeId[])obj);
                         break;
 
                     case VariantType.StatusCode:
-                        WriteStatusCodeArray(null, (StatusCode[])obj);
+                        this.WriteStatusCodeArray(null, (StatusCode[])obj);
                         break;
 
                     case VariantType.QualifiedName:
-                        WriteQualifiedNameArray(null, (QualifiedName[])obj);
+                        this.WriteQualifiedNameArray(null, (QualifiedName[])obj);
                         break;
 
                     case VariantType.LocalizedText:
-                        WriteLocalizedTextArray(null, (LocalizedText[])obj);
+                        this.WriteLocalizedTextArray(null, (LocalizedText[])obj);
                         break;
 
                     case VariantType.ExtensionObject:
-                        WriteExtensionObjectArray(null, (ExtensionObject[])obj);
+                        this.WriteExtensionObjectArray(null, (ExtensionObject[])obj);
                         break;
 
                     case VariantType.Variant:
-                        WriteVariantArray(null, (Variant[])obj);
+                        this.WriteVariantArray(null, (Variant[])obj);
                         break;
 
                     default:
@@ -654,113 +654,113 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             var a1 = obj as Array;
             b |= 64;
-            WriteByte(null, b);
+            this.WriteByte(null, b);
             switch (value.Type)
             {
                 case VariantType.Boolean:
-                    WriteBooleanArray(null, FlattenArray<bool>(a1));
+                    this.WriteBooleanArray(null, this.FlattenArray<bool>(a1));
                     break;
 
                 case VariantType.SByte:
-                    WriteSByteArray(null, FlattenArray<sbyte>(a1));
+                    this.WriteSByteArray(null, this.FlattenArray<sbyte>(a1));
                     break;
 
                 case VariantType.Byte:
-                    WriteByteArray(null, FlattenArray<byte>(a1));
+                    this.WriteByteArray(null, this.FlattenArray<byte>(a1));
                     break;
 
                 case VariantType.Int16:
-                    WriteInt16Array(null, FlattenArray<short>(a1));
+                    this.WriteInt16Array(null, this.FlattenArray<short>(a1));
                     break;
 
                 case VariantType.UInt16:
-                    WriteUInt16Array(null, FlattenArray<ushort>(a1));
+                    this.WriteUInt16Array(null, this.FlattenArray<ushort>(a1));
                     break;
 
                 case VariantType.Int32:
-                    WriteInt32Array(null, FlattenArray<int>(a1));
+                    this.WriteInt32Array(null, this.FlattenArray<int>(a1));
                     break;
 
                 case VariantType.UInt32:
-                    WriteUInt32Array(null, FlattenArray<uint>(a1));
+                    this.WriteUInt32Array(null, this.FlattenArray<uint>(a1));
                     break;
 
                 case VariantType.Int64:
-                    WriteInt64Array(null, FlattenArray<long>(a1));
+                    this.WriteInt64Array(null, this.FlattenArray<long>(a1));
                     break;
 
                 case VariantType.UInt64:
-                    WriteUInt64Array(null, FlattenArray<ulong>(a1));
+                    this.WriteUInt64Array(null, this.FlattenArray<ulong>(a1));
                     break;
 
                 case VariantType.Float:
-                    WriteFloatArray(null, FlattenArray<float>(a1));
+                    this.WriteFloatArray(null, this.FlattenArray<float>(a1));
                     break;
 
                 case VariantType.Double:
-                    WriteDoubleArray(null, FlattenArray<double>(a1));
+                    this.WriteDoubleArray(null, this.FlattenArray<double>(a1));
                     break;
 
                 case VariantType.String:
-                    WriteStringArray(null, FlattenArray<string>(a1));
+                    this.WriteStringArray(null, this.FlattenArray<string>(a1));
                     break;
 
                 case VariantType.DateTime:
-                    WriteDateTimeArray(null, FlattenArray<DateTime>(a1));
+                    this.WriteDateTimeArray(null, this.FlattenArray<DateTime>(a1));
                     break;
 
                 case VariantType.Guid:
-                    WriteGuidArray(null, FlattenArray<Guid>(a1));
+                    this.WriteGuidArray(null, this.FlattenArray<Guid>(a1));
                     break;
 
                 case VariantType.ByteString:
-                    WriteByteStringArray(null, FlattenArray<byte[]>(a1));
+                    this.WriteByteStringArray(null, this.FlattenArray<byte[]>(a1));
                     break;
 
                 case VariantType.XmlElement:
-                    WriteXElementArray(null, FlattenArray<XElement>(a1));
+                    this.WriteXElementArray(null, this.FlattenArray<XElement>(a1));
                     break;
 
                 case VariantType.NodeId:
-                    WriteNodeIdArray(null, FlattenArray<NodeId>(a1));
+                    this.WriteNodeIdArray(null, this.FlattenArray<NodeId>(a1));
                     break;
 
                 case VariantType.ExpandedNodeId:
-                    WriteExpandedNodeIdArray(null, FlattenArray<ExpandedNodeId>(a1));
+                    this.WriteExpandedNodeIdArray(null, this.FlattenArray<ExpandedNodeId>(a1));
                     break;
 
                 case VariantType.StatusCode:
-                    WriteStatusCodeArray(null, FlattenArray<StatusCode>(a1));
+                    this.WriteStatusCodeArray(null, this.FlattenArray<StatusCode>(a1));
                     break;
 
                 case VariantType.QualifiedName:
-                    WriteQualifiedNameArray(null, FlattenArray<QualifiedName>(a1));
+                    this.WriteQualifiedNameArray(null, this.FlattenArray<QualifiedName>(a1));
                     break;
 
                 case VariantType.LocalizedText:
-                    WriteLocalizedTextArray(null, FlattenArray<LocalizedText>(a1));
+                    this.WriteLocalizedTextArray(null, this.FlattenArray<LocalizedText>(a1));
                     break;
 
                 case VariantType.ExtensionObject:
-                    WriteExtensionObjectArray(null, FlattenArray<ExtensionObject>(a1));
+                    this.WriteExtensionObjectArray(null, this.FlattenArray<ExtensionObject>(a1));
                     break;
 
                 case VariantType.Variant:
-                    WriteVariantArray(null, FlattenArray<Variant>(a1));
+                    this.WriteVariantArray(null, this.FlattenArray<Variant>(a1));
                     break;
 
                 default:
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
             }
 
-            WriteInt32Array(null, dims);
+            this.WriteInt32Array(null, dims);
         }
 
         public void WriteDataValue(string fieldName, DataValue value)
         {
             if (value == null)
             {
-                WriteByte(null, 0);
+                this.WriteByte(null, 0);
                 return;
             }
 
@@ -795,35 +795,35 @@ namespace Workstation.ServiceModel.Ua.Channels
                 b |= 32;
             }
 
-            WriteByte(null, b);
+            this.WriteByte(null, b);
             if ((b & 1) != 0)
             {
-                WriteVariant(null, value.Variant);
+                this.WriteVariant(null, value.Variant);
             }
 
             if ((b & 2) != 0)
             {
-                WriteStatusCode(null, value.StatusCode);
+                this.WriteStatusCode(null, value.StatusCode);
             }
 
             if ((b & 4) != 0)
             {
-                WriteDateTime(null, value.SourceTimestamp);
+                this.WriteDateTime(null, value.SourceTimestamp);
             }
 
             if ((b & 16) != 0)
             {
-                WriteUInt16(null, value.SourcePicoseconds);
+                this.WriteUInt16(null, value.SourcePicoseconds);
             }
 
             if ((b & 8) != 0)
             {
-                WriteDateTime(null, value.ServerTimestamp);
+                this.WriteDateTime(null, value.ServerTimestamp);
             }
 
             if ((b & 32) != 0)
             {
-                WriteUInt16(null, value.ServerPicoseconds);
+                this.WriteUInt16(null, value.ServerPicoseconds);
             }
         }
 
@@ -831,24 +831,24 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (value == null || value.BodyType == BodyType.None)
             {
-                WriteNodeId(null, NodeId.Null);
-                WriteByte(null, 0x00);
+                this.WriteNodeId(null, NodeId.Null);
+                this.WriteByte(null, 0x00);
                 return;
             }
 
             if (value.BodyType == BodyType.ByteString)
             {
-                WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, channel?.NamespaceUris));
-                WriteByte(null, 0x01);
-                WriteByteString(null, (byte[])value.Body);
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteByte(null, 0x01);
+                this.WriteByteString(null, (byte[])value.Body);
                 return;
             }
 
             if (value.BodyType == BodyType.XmlElement)
             {
-                WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, channel?.NamespaceUris));
-                WriteByte(null, 0x02);
-                WriteXElement(null, (XElement)value.Body);
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteByte(null, 0x02);
+                this.WriteXElement(null, (XElement)value.Body);
                 return;
             }
 
@@ -868,16 +868,16 @@ namespace Workstation.ServiceModel.Ua.Channels
                     binaryEncodingId = attr.NodeId;
                 }
 
-                WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, channel?.NamespaceUris));
-                WriteByte(null, 0x01);
-                var pos0 = writer.BaseStream.Position;
-                WriteInt32(null, -1);
-                var pos1 = writer.BaseStream.Position;
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.channel?.NamespaceUris));
+                this.WriteByte(null, 0x01);
+                var pos0 = this.writer.BaseStream.Position;
+                this.WriteInt32(null, -1);
+                var pos1 = this.writer.BaseStream.Position;
                 ((IEncodable)value.Body).Encode(this);
-                var pos2 = writer.BaseStream.Position;
-                writer.Seek((int)pos0, SeekOrigin.Begin);
-                WriteInt32(null, (int)(pos2 - pos1));
-                writer.Seek((int)pos2, SeekOrigin.Begin);
+                var pos2 = this.writer.BaseStream.Position;
+                this.writer.Seek((int)pos0, SeekOrigin.Begin);
+                this.WriteInt32(null, (int)(pos2 - pos1));
+                this.writer.Seek((int)pos2, SeekOrigin.Begin);
                 return;
             }
         }
@@ -887,8 +887,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (value == null)
             {
-                WriteNodeId(null, NodeId.Null);
-                WriteByte(null, 0x00);
+                this.WriteNodeId(null, NodeId.Null);
+                this.WriteByte(null, 0x00);
                 return;
             }
 
@@ -906,16 +906,16 @@ namespace Workstation.ServiceModel.Ua.Channels
                 binaryEncodingId = attr.NodeId;
             }
 
-            WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, channel?.NamespaceUris));
-            WriteByte(null, 0x01);
-            var pos0 = writer.BaseStream.Position;
-            WriteInt32(null, -1);
-            var pos1 = writer.BaseStream.Position;
+            this.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.channel?.NamespaceUris));
+            this.WriteByte(null, 0x01);
+            var pos0 = this.writer.BaseStream.Position;
+            this.WriteInt32(null, -1);
+            var pos1 = this.writer.BaseStream.Position;
             value.Encode(this);
-            var pos2 = writer.BaseStream.Position;
-            writer.Seek((int)pos0, SeekOrigin.Begin);
-            WriteInt32(null, (int)(pos2 - pos1));
-            writer.Seek((int)pos2, SeekOrigin.Begin);
+            var pos2 = this.writer.BaseStream.Position;
+            this.writer.Seek((int)pos0, SeekOrigin.Begin);
+            this.WriteInt32(null, (int)(pos2 - pos1));
+            this.writer.Seek((int)pos2, SeekOrigin.Begin);
             return;
         }
 
@@ -933,280 +933,280 @@ namespace Workstation.ServiceModel.Ua.Channels
         public void WriteEnumeration<T>(string fieldName, T value)
             where T : IConvertible
         {
-            WriteInt32(null, Convert.ToInt32(value, CultureInfo.InvariantCulture));
+            this.WriteInt32(null, Convert.ToInt32(value, CultureInfo.InvariantCulture));
         }
 
         public void WriteBooleanArray(string fieldName, bool[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteBoolean(null, values[i]);
+                    this.WriteBoolean(null, values[i]);
                 }
             }
         }
 
         public void WriteSByteArray(string fieldName, sbyte[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteSByte(null, values[i]);
+                    this.WriteSByte(null, values[i]);
                 }
             }
         }
 
         public void WriteByteArray(string fieldName, byte[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteByte(null, values[i]);
+                    this.WriteByte(null, values[i]);
                 }
             }
         }
 
         public void WriteInt16Array(string fieldName, short[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteInt16(null, values[i]);
+                    this.WriteInt16(null, values[i]);
                 }
             }
         }
 
         public void WriteUInt16Array(string fieldName, ushort[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteUInt16(null, values[i]);
+                    this.WriteUInt16(null, values[i]);
                 }
             }
         }
 
         public void WriteInt32Array(string fieldName, int[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteInt32(null, values[i]);
+                    this.WriteInt32(null, values[i]);
                 }
             }
         }
 
         public void WriteUInt32Array(string fieldName, uint[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteUInt32(null, values[i]);
+                    this.WriteUInt32(null, values[i]);
                 }
             }
         }
 
         public void WriteInt64Array(string fieldName, long[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteInt64(null, values[i]);
+                    this.WriteInt64(null, values[i]);
                 }
             }
         }
 
         public void WriteUInt64Array(string fieldName, ulong[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteUInt64(null, values[i]);
+                    this.WriteUInt64(null, values[i]);
                 }
             }
         }
 
         public void WriteFloatArray(string fieldName, float[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteFloat(null, values[i]);
+                    this.WriteFloat(null, values[i]);
                 }
             }
         }
 
         public void WriteDoubleArray(string fieldName, double[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteDouble(null, values[i]);
+                    this.WriteDouble(null, values[i]);
                 }
             }
         }
 
         public void WriteStringArray(string fieldName, string[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteString(null, values[i]);
+                    this.WriteString(null, values[i]);
                 }
             }
         }
 
         public void WriteDateTimeArray(string fieldName, DateTime[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteDateTime(null, values[i]);
+                    this.WriteDateTime(null, values[i]);
                 }
             }
         }
 
         public void WriteGuidArray(string fieldName, Guid[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteGuid(null, values[i]);
+                    this.WriteGuid(null, values[i]);
                 }
             }
         }
 
         public void WriteByteStringArray(string fieldName, byte[][] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteByteString(null, values[i]);
+                    this.WriteByteString(null, values[i]);
                 }
             }
         }
 
         public void WriteXElementArray(string fieldName, XElement[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteXElement(null, values[i]);
+                    this.WriteXElement(null, values[i]);
                 }
             }
         }
 
         public void WriteNodeIdArray(string fieldName, NodeId[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteNodeId(null, values[i]);
+                    this.WriteNodeId(null, values[i]);
                 }
             }
         }
 
         public void WriteExpandedNodeIdArray(string fieldName, ExpandedNodeId[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteExpandedNodeId(null, values[i]);
+                    this.WriteExpandedNodeId(null, values[i]);
                 }
             }
         }
 
         public void WriteStatusCodeArray(string fieldName, StatusCode[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteStatusCode(null, values[i]);
+                    this.WriteStatusCode(null, values[i]);
                 }
             }
         }
 
         public void WriteDiagnosticInfoArray(string fieldName, DiagnosticInfo[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteDiagnosticInfo(null, values[i]);
+                    this.WriteDiagnosticInfo(null, values[i]);
                 }
             }
         }
 
         public void WriteQualifiedNameArray(string fieldName, QualifiedName[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteQualifiedName(null, values[i]);
+                    this.WriteQualifiedName(null, values[i]);
                 }
             }
         }
 
         public void WriteLocalizedTextArray(string fieldName, LocalizedText[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteLocalizedText(null, values[i]);
+                    this.WriteLocalizedText(null, values[i]);
                 }
             }
         }
 
         public void WriteVariantArray(string fieldName, Variant[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteVariant(null, values[i]);
+                    this.WriteVariant(null, values[i]);
                 }
             }
         }
 
         public void WriteDataValueArray(string fieldName, DataValue[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteDataValue(null, values[i]);
+                    this.WriteDataValue(null, values[i]);
                 }
             }
         }
 
         public void WriteExtensionObjectArray(string fieldName, ExtensionObject[] values)
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteExtensionObject(null, values[i]);
+                    this.WriteExtensionObject(null, values[i]);
                 }
             }
         }
@@ -1214,11 +1214,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         public void WriteExtensionObjectArray<T>(string fieldName, T[] values)
             where T : IEncodable
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteExtensionObject(null, values[i]);
+                    this.WriteExtensionObject(null, values[i]);
                 }
             }
         }
@@ -1226,11 +1226,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         public void WriteEncodableArray<T>(string fieldName, T[] values)
             where T : IEncodable
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteEncodable(null, values[i]);
+                    this.WriteEncodable(null, values[i]);
                 }
             }
         }
@@ -1238,29 +1238,29 @@ namespace Workstation.ServiceModel.Ua.Channels
         public void WriteEnumerationArray<T>(string fieldName, T[] values)
             where T : IConvertible
         {
-            if (TryWriteArrayLength(values))
+            if (this.TryWriteArrayLength(values))
             {
                 for (int i = 0; i < values.Length; i++)
                 {
-                    WriteEnumeration(null, values[i]);
+                    this.WriteEnumeration(null, values[i]);
                 }
             }
         }
 
         public void Write(byte[] buffer, int index, int count)
         {
-            writer.Write(buffer, index, count);
+            this.writer.Write(buffer, index, count);
         }
 
         private bool TryWriteArrayLength<T>(T[] values)
         {
             if (values == null)
             {
-                WriteInt32(null, -1);
+                this.WriteInt32(null, -1);
                 return false;
             }
 
-            WriteInt32(null, values.Length);
+            this.WriteInt32(null, values.Length);
             return true;
         }
 

@@ -16,6 +16,8 @@
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <AppDesignerFolder>Properties</AppDesignerFolder>
+    <AssemblyOriginatorKeyFile>key.pfx</AssemblyOriginatorKeyFile>
+    <SignAssembly>True</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
@@ -23,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PostBuildEvent>cd ..\..\..\
-.\nuget\nuget.exe pack Workstation.UaClient.nuspec -Prop Configuration=Release -OutputDirectory .\bin\Release</PostBuildEvent>
+nuget.exe pack Workstation.UaClient.nuspec -Prop Configuration=Release -OutputDirectory bin\Release</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
@@ -147,7 +149,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="nuget\nuget.exe" />
+    <None Include="key.pfx" />
     <None Include="ServiceModel\Ua\AttributeIds.tt">
       <LastGenOutput>AttributeIds.generated.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>

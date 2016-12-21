@@ -24,12 +24,12 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="innerResult">An innerResult</param>
         public ServiceResult(StatusCode code, string symbolicId = null, string namespaceUri = null, LocalizedText localizedText = null, string additionalInfo = null, ServiceResult innerResult = null)
         {
-            StatusCode = code;
-            SymbolicId = symbolicId;
-            NamespaceUri = namespaceUri;
-            LocalizedText = localizedText;
-            AdditionalInfo = additionalInfo;
-            InnerResult = innerResult;
+            this.StatusCode = code;
+            this.SymbolicId = symbolicId;
+            this.NamespaceUri = namespaceUri;
+            this.LocalizedText = localizedText;
+            this.AdditionalInfo = additionalInfo;
+            this.InnerResult = innerResult;
         }
 
         /// <summary>
@@ -40,22 +40,22 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="stringTable">A string table.</param>
         public ServiceResult(StatusCode code, DiagnosticInfo diagnosticInfo, IList<string> stringTable)
         {
-            StatusCode = code;
+            this.StatusCode = code;
 
             if (diagnosticInfo != null)
             {
-                SymbolicId = LookupString(stringTable, diagnosticInfo.SymbolicId);
-                NamespaceUri = LookupString(stringTable, diagnosticInfo.NamespaceUri);
+                this.SymbolicId = LookupString(stringTable, diagnosticInfo.SymbolicId);
+                this.NamespaceUri = LookupString(stringTable, diagnosticInfo.NamespaceUri);
 
                 string locale = LookupString(stringTable, diagnosticInfo.Locale);
                 string localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
-                LocalizedText = new LocalizedText(locale, localizedText);
+                this.LocalizedText = new LocalizedText(locale, localizedText);
 
-                AdditionalInfo = diagnosticInfo.AdditionalInfo;
+                this.AdditionalInfo = diagnosticInfo.AdditionalInfo;
 
                 if (!StatusCode.IsGood(diagnosticInfo.InnerStatusCode))
                 {
-                    InnerResult = new ServiceResult(diagnosticInfo.InnerStatusCode, diagnosticInfo.InnerDiagnosticInfo, stringTable);
+                    this.InnerResult = new ServiceResult(diagnosticInfo.InnerStatusCode, diagnosticInfo.InnerDiagnosticInfo, stringTable);
                 }
             }
         }
@@ -69,7 +69,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="stringTable">A string table.</param>
         public ServiceResult(StatusCode code, int index, DiagnosticInfo[] diagnosticInfos, IList<string> stringTable)
         {
-            StatusCode = code;
+            this.StatusCode = code;
 
             if (index >= 0 && diagnosticInfos != null && index < diagnosticInfos.Length)
             {
@@ -77,18 +77,18 @@ namespace Workstation.ServiceModel.Ua
 
                 if (diagnosticInfo != null)
                 {
-                    SymbolicId = LookupString(stringTable, diagnosticInfo.SymbolicId);
-                    NamespaceUri = LookupString(stringTable, diagnosticInfo.NamespaceUri);
+                    this.SymbolicId = LookupString(stringTable, diagnosticInfo.SymbolicId);
+                    this.NamespaceUri = LookupString(stringTable, diagnosticInfo.NamespaceUri);
 
                     string locale = LookupString(stringTable, diagnosticInfo.Locale);
                     string localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
-                    LocalizedText = new LocalizedText(locale, localizedText);
+                    this.LocalizedText = new LocalizedText(locale, localizedText);
 
-                    AdditionalInfo = diagnosticInfo.AdditionalInfo;
+                    this.AdditionalInfo = diagnosticInfo.AdditionalInfo;
 
                     if (!StatusCode.IsGood(diagnosticInfo.InnerStatusCode))
                     {
-                        InnerResult = new ServiceResult(diagnosticInfo.InnerStatusCode, diagnosticInfo.InnerDiagnosticInfo, stringTable);
+                        this.InnerResult = new ServiceResult(diagnosticInfo.InnerStatusCode, diagnosticInfo.InnerDiagnosticInfo, stringTable);
                     }
                 }
             }
@@ -192,28 +192,28 @@ namespace Workstation.ServiceModel.Ua
         {
             StringBuilder buffer = new StringBuilder();
 
-            buffer.Append(StatusCodes.GetDefaultMessage(StatusCode));
+            buffer.Append(StatusCodes.GetDefaultMessage(this.StatusCode));
 
-            if (!string.IsNullOrEmpty(SymbolicId))
+            if (!string.IsNullOrEmpty(this.SymbolicId))
             {
-                if (!string.IsNullOrEmpty(NamespaceUri))
+                if (!string.IsNullOrEmpty(this.NamespaceUri))
                 {
-                    buffer.AppendFormat(" ({0}:{1})", NamespaceUri, SymbolicId);
+                    buffer.AppendFormat(" ({0}:{1})", this.NamespaceUri, this.SymbolicId);
                 }
-                else if (SymbolicId != buffer.ToString())
+                else if (this.SymbolicId != buffer.ToString())
                 {
-                    buffer.AppendFormat(" ({0})", SymbolicId);
+                    buffer.AppendFormat(" ({0})", this.SymbolicId);
                 }
             }
 
-            if (!string.IsNullOrEmpty(LocalizedText))
+            if (!string.IsNullOrEmpty(this.LocalizedText))
             {
-                buffer.AppendFormat(" '{0}'", LocalizedText);
+                buffer.AppendFormat(" '{0}'", this.LocalizedText);
             }
 
-            if ((0x0000FFFF & StatusCode) != 0)
+            if ((0x0000FFFF & this.StatusCode) != 0)
             {
-                buffer.AppendFormat(" [{0:X4}]", 0x0000FFFF & StatusCode);
+                buffer.AppendFormat(" [{0:X4}]", 0x0000FFFF & this.StatusCode);
             }
 
             return buffer.ToString();

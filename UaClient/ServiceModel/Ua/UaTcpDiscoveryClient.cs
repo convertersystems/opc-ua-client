@@ -18,8 +18,8 @@ namespace Workstation.ServiceModel.Ua
 
         private UaTcpDiscoveryClient(EndpointDescription remoteEndpoint)
         {
-            innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryClient) }, null, remoteEndpoint);
-            semaphore = new SemaphoreSlim(1);
+            this.innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryClient) }, null, remoteEndpoint);
+            this.semaphore = new SemaphoreSlim(1);
         }
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public EndpointDescription RemoteEndpoint
         {
-            get { return innerChannel.RemoteEndpoint; }
+            get { return this.innerChannel.RemoteEndpoint; }
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Workstation.ServiceModel.Ua
         {
             get
             {
-                return innerChannel.State;
+                return this.innerChannel.State;
             }
         }
 
@@ -114,14 +114,14 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task AbortAsync(CancellationToken token = default(CancellationToken))
         {
-            await semaphore.WaitAsync(token).ConfigureAwait(false);
+            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                await ((ICommunicationObject)innerChannel).AbortAsync(token).ConfigureAwait(false);
+                await ((ICommunicationObject)this.innerChannel).AbortAsync(token).ConfigureAwait(false);
             }
             finally
             {
-                semaphore.Release();
+                this.semaphore.Release();
             }
         }
 
@@ -132,14 +132,14 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task CloseAsync(CancellationToken token = default(CancellationToken))
         {
-            await semaphore.WaitAsync(token).ConfigureAwait(false);
+            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                await innerChannel.CloseAsync(token).ConfigureAwait(false);
+                await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
             }
             finally
             {
-                semaphore.Release();
+                this.semaphore.Release();
             }
         }
 
@@ -150,20 +150,20 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OpenAsync(CancellationToken token = default(CancellationToken))
         {
-            await semaphore.WaitAsync(token).ConfigureAwait(false);
+            await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
             {
-                await innerChannel.OpenAsync(token).ConfigureAwait(false);
+                await this.innerChannel.OpenAsync(token).ConfigureAwait(false);
             }
             finally
             {
-                semaphore.Release();
+                this.semaphore.Release();
             }
         }
 
         void IDisposable.Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -172,7 +172,7 @@ namespace Workstation.ServiceModel.Ua
             {
                 try
                 {
-                    CloseAsync().Wait(5000);
+                    this.CloseAsync().Wait(5000);
                 }
                 catch (Exception)
                 {

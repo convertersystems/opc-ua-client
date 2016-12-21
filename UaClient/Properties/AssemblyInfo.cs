@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿// Copyright (c) Converter Systems LLC. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Reflection;
 
 #if NETSTANDARD
 [assembly: AssemblyTitle("Workstation.UaClient for .NetStandard")]
@@ -9,5 +12,5 @@
 [assembly: AssemblyCompany("Converter Systems LLC")]
 [assembly: AssemblyCopyright("Copyright © 2016 Converter Systems LLC.")]
 
-[assembly: AssemblyVersion("1.5.1.0")]
-[assembly: AssemblyFileVersion("1.5.1.0")]
+[assembly: AssemblyVersion("1.5.2.0")]
+[assembly: AssemblyFileVersion("1.5.2.0")]

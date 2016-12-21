@@ -13,7 +13,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public BinaryEncodingIdAttribute(string s)
         {
-            NodeId = ExpandedNodeId.Parse(s);
+            this.NodeId = ExpandedNodeId.Parse(s);
         }
 
         public ExpandedNodeId NodeId { get; }

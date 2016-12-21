@@ -25,15 +25,15 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="deadbandValue">the deadband value.</param>
         public MonitoredItemAttribute(string nodeId = null, uint attributeId = AttributeIds.Value, string indexRange = null, int samplingInterval = -1, uint queueSize = 0, bool discardOldest = true, DataChangeTrigger dataChangeTrigger = DataChangeTrigger.StatusValue, DeadbandType deadbandType = DeadbandType.None, double deadbandValue = 0.0)
         {
-            NodeId = nodeId;
-            AttributeId = attributeId;
-            IndexRange = indexRange;
-            SamplingInterval = samplingInterval;
-            QueueSize = queueSize;
-            DiscardOldest = discardOldest;
-            DataChangeTrigger = dataChangeTrigger;
-            DeadbandType = deadbandType;
-            DeadbandValue = deadbandValue;
+            this.NodeId = nodeId;
+            this.AttributeId = attributeId;
+            this.IndexRange = indexRange;
+            this.SamplingInterval = samplingInterval;
+            this.QueueSize = queueSize;
+            this.DiscardOldest = discardOldest;
+            this.DataChangeTrigger = dataChangeTrigger;
+            this.DeadbandType = deadbandType;
+            this.DeadbandValue = deadbandValue;
         }
 
         /// <summary>

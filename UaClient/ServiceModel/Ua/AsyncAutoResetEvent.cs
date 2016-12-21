@@ -14,17 +14,17 @@ namespace Workstation.ServiceModel.Ua
 
         public Task WaitAsync()
         {
-            lock (waits)
+            lock (this.waits)
             {
-                if (signaled)
+                if (this.signaled)
                 {
-                    signaled = false;
+                    this.signaled = false;
                     return completedTask;
                 }
                 else
                 {
                     var tcs = new TaskCompletionSource<bool>();
-                    waits.Enqueue(tcs);
+                    this.waits.Enqueue(tcs);
                     return tcs.Task;
                 }
             }
@@ -33,15 +33,15 @@ namespace Workstation.ServiceModel.Ua
         public void Set()
         {
             TaskCompletionSource<bool> toRelease = null;
-            lock (waits)
+            lock (this.waits)
             {
-                if (waits.Count > 0)
+                if (this.waits.Count > 0)
                 {
-                    toRelease = waits.Dequeue();
+                    toRelease = this.waits.Dequeue();
                 }
-                else if (!signaled)
+                else if (!this.signaled)
                 {
-                    signaled = true;
+                    this.signaled = true;
                 }
             }
 

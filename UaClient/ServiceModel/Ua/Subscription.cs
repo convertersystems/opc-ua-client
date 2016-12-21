@@ -35,26 +35,26 @@ namespace Workstation.ServiceModel.Ua
         public Subscription(UaTcpSessionClient session, object target, ILoggerFactory loggerFactory = null)
         {
             this.session = session;
-            subscriptionRef = new WeakReference(target);
-            logger = loggerFactory?.CreateLogger<Subscription>();
+            this.subscriptionRef = new WeakReference(target);
+            this.logger = loggerFactory?.CreateLogger<Subscription>();
 
             // get values from [Subscription] attribute.
             var typeInfo = target.GetType().GetTypeInfo();
             var sa = typeInfo.GetCustomAttribute<SubscriptionAttribute>();
             if (sa != null)
             {
-                PublishingInterval = sa.PublishingInterval;
-                KeepAliveCount = sa.KeepAliveCount;
-                LifetimeCount = sa.LifetimeCount;
-                PublishingEnabled = sa.PublishingEnabled;
-                MonitoredItems = new MonitoredItemCollection(target);
+                this.PublishingInterval = sa.PublishingInterval;
+                this.KeepAliveCount = sa.KeepAliveCount;
+                this.LifetimeCount = sa.LifetimeCount;
+                this.PublishingEnabled = sa.PublishingEnabled;
+                this.MonitoredItems = new MonitoredItemCollection(target);
             }
 
             // register for property change.
             var inpc = target as INotifyPropertyChanged;
             if (inpc != null)
             {
-                inpc.PropertyChanged += OnPropertyChanged;
+                inpc.PropertyChanged += this.OnPropertyChanged;
             }
 
             // store this in the shared attached subscriptions list
@@ -82,23 +82,23 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public bool PublishingEnabled
         {
-            get { return publishingEnabled; }
+            get { return this.publishingEnabled; }
 
             set
             {
-                if (publishingEnabled != value)
+                if (this.publishingEnabled != value)
                 {
-                    publishingEnabled = value;
-                    if (session.State == CommunicationState.Opened && SubscriptionId != 0u)
+                    this.publishingEnabled = value;
+                    if (this.session.State == CommunicationState.Opened && this.SubscriptionId != 0u)
                     {
                         var request = new SetPublishingModeRequest
                         {
-                            SubscriptionIds = new[] { SubscriptionId },
+                            SubscriptionIds = new[] { this.SubscriptionId },
                             PublishingEnabled = value
                         };
-                        session.SetPublishingModeAsync(request)
+                        this.session.SetPublishingModeAsync(request)
                             .ContinueWith(
-                                t => Logger?.LogError("Error setting publishing mode for subscription."),
+                                t => this.Logger?.LogError("Error setting publishing mode for subscription."),
                                 TaskContinuationOptions.OnlyOnFaulted);
                     }
                 }
@@ -113,12 +113,12 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the UaTcpSessionClient.
         /// </summary>
-        public UaTcpSessionClient Session => session;
+        public UaTcpSessionClient Session => this.session;
 
         /// <summary>
         /// Gets the target.
         /// </summary>
-        public object Target => subscriptionRef.Target;
+        public object Target => this.subscriptionRef.Target;
 
         /// <summary>
         /// Gets the SubscriptionId assigned by the server.
@@ -128,7 +128,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the current logger
         /// </summary>
-        protected virtual ILogger Logger => logger;
+        protected virtual ILogger Logger => this.logger;
 
         /// <summary>
         /// Gets the <see cref="Subscription"/> attached to this model.
@@ -150,7 +150,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
@@ -158,14 +158,14 @@ namespace Workstation.ServiceModel.Ua
         {
             if (disposing)
             {
-                var target = Target;
+                var target = this.Target;
                 if (target != null)
                 {
                     attachedSubscriptions.Remove(target);
-                    var inpc = Target as INotifyPropertyChanged;
+                    var inpc = this.Target as INotifyPropertyChanged;
                     if (inpc != null)
                     {
-                        inpc.PropertyChanged -= OnPropertyChanged;
+                        inpc.PropertyChanged -= this.OnPropertyChanged;
                     }
                 }
             }
@@ -178,13 +178,13 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>False if target reference is not alive.</returns>
         internal bool OnPublishResponse(PublishResponse response)
         {
-            var target = Target;
+            var target = this.Target;
             if (target == null)
             {
                 return false;
             }
 
-            isPublishing = true;
+            this.isPublishing = true;
             try
             {
                 // loop thru all the notifications
@@ -198,7 +198,7 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItemBase item;
                         foreach (var min in dcn.MonitoredItems)
                         {
-                            if (MonitoredItems.TryGetValueByClientId(min.ClientHandle, out item))
+                            if (this.MonitoredItems.TryGetValueByClientId(min.ClientHandle, out item))
                             {
                                 try
                                 {
@@ -206,7 +206,7 @@ namespace Workstation.ServiceModel.Ua
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger?.LogError($"Error publishing value for NodeId {item.NodeId}. {ex.Message}");
+                                    this.Logger?.LogError($"Error publishing value for NodeId {item.NodeId}. {ex.Message}");
                                 }
                             }
                         }
@@ -221,7 +221,7 @@ namespace Workstation.ServiceModel.Ua
                         MonitoredItemBase item;
                         foreach (var efl in enl.Events)
                         {
-                            if (MonitoredItems.TryGetValueByClientId(efl.ClientHandle, out item))
+                            if (this.MonitoredItems.TryGetValueByClientId(efl.ClientHandle, out item))
                             {
                                 try
                                 {
@@ -229,7 +229,7 @@ namespace Workstation.ServiceModel.Ua
                                 }
                                 catch (Exception ex)
                                 {
-                                    Logger?.LogError($"Error publishing event for NodeId {item.NodeId}. {ex.Message}");
+                                    this.Logger?.LogError($"Error publishing event for NodeId {item.NodeId}. {ex.Message}");
                                 }
                             }
                         }
@@ -239,7 +239,7 @@ namespace Workstation.ServiceModel.Ua
             }
             finally
             {
-                isPublishing = false;
+                this.isPublishing = false;
             }
         }
 
@@ -250,13 +250,13 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="e">the event.</param>
         internal async void OnPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (isPublishing || string.IsNullOrEmpty(e.PropertyName))
+            if (this.isPublishing || string.IsNullOrEmpty(e.PropertyName))
             {
                 return;
             }
 
             MonitoredItemBase item;
-            if (MonitoredItems.TryGetValueByName(e.PropertyName, out item))
+            if (this.MonitoredItems.TryGetValueByName(e.PropertyName, out item))
             {
                 DataValue value;
                 if (item.TryGetValue(sender, out value))
@@ -268,7 +268,7 @@ namespace Workstation.ServiceModel.Ua
                     };
                     try
                     {
-                        var writeResponse = await session.WriteAsync(writeRequest).ConfigureAwait(false);
+                        var writeResponse = await this.session.WriteAsync(writeRequest).ConfigureAwait(false);
                         statusCode = writeResponse.Results[0];
                     }
                     catch (ServiceResultException ex)
@@ -282,7 +282,7 @@ namespace Workstation.ServiceModel.Ua
                     item.OnWriteResult(sender, statusCode);
                     if (StatusCode.IsBad(statusCode))
                     {
-                        Logger?.LogError($"Error writing value for {item.NodeId}. {StatusCodes.GetDefaultMessage(statusCode)}");
+                        this.Logger?.LogError($"Error writing value for {item.NodeId}. {StatusCodes.GetDefaultMessage(statusCode)}");
                     }
                 }
             }

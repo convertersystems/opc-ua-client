@@ -20,10 +20,10 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="publishingEnabled">whether publishing is enabled.</param>
         public SubscriptionAttribute(double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, bool publishingEnabled = true)
         {
-            PublishingInterval = publishingInterval;
-            KeepAliveCount = keepAliveCount;
-            LifetimeCount = lifetimeCount;
-            PublishingEnabled = publishingEnabled;
+            this.PublishingInterval = publishingInterval;
+            this.KeepAliveCount = keepAliveCount;
+            this.LifetimeCount = lifetimeCount;
+            this.PublishingEnabled = publishingEnabled;
         }
 
         /// <summary>

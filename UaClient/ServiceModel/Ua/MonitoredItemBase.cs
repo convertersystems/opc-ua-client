@@ -41,16 +41,16 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(nodeId));
             }
 
-            Property = property;
-            NodeId = nodeId;
-            AttributeId = attributeId;
-            IndexRange = indexRange;
-            MonitoringMode = monitoringMode;
-            SamplingInterval = samplingInterval;
-            Filter = filter;
-            QueueSize = queueSize;
-            DiscardOldest = discardOldest;
-            ClientId = (uint)Interlocked.Increment(ref lastClientId);
+            this.Property = property;
+            this.NodeId = nodeId;
+            this.AttributeId = attributeId;
+            this.IndexRange = indexRange;
+            this.MonitoringMode = monitoringMode;
+            this.SamplingInterval = samplingInterval;
+            this.Filter = filter;
+            this.QueueSize = queueSize;
+            this.DiscardOldest = discardOldest;
+            this.ClientId = (uint)Interlocked.Increment(ref lastClientId);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the latest status code assigned by the server.
         /// </summary>
-        public StatusCode StatusCode => statusCode;
+        public StatusCode StatusCode => this.statusCode;
 
         public virtual void Publish(object target, DataValue dataValue)
         {
@@ -121,7 +121,7 @@ namespace Workstation.ServiceModel.Ua
                 return;
             }
             this.statusCode = statusCode;
-            SetDataErrorInfo(target, statusCode);
+            this.SetDataErrorInfo(target, statusCode);
         }
 
         public virtual void Publish(object target, Variant[] eventFields)
@@ -136,14 +136,14 @@ namespace Workstation.ServiceModel.Ua
 
         public virtual void OnCreateResult(object target, MonitoredItemCreateResult result)
         {
-            ServerId = result.MonitoredItemId;
+            this.ServerId = result.MonitoredItemId;
             var statusCode = result.StatusCode;
             if (this.statusCode == statusCode)
             {
                 return;
             }
             this.statusCode = statusCode;
-            SetDataErrorInfo(target, statusCode);
+            this.SetDataErrorInfo(target, statusCode);
         }
 
         public virtual void OnWriteResult(object target, StatusCode statusCode)
@@ -153,7 +153,7 @@ namespace Workstation.ServiceModel.Ua
                 return;
             }
             this.statusCode = statusCode;
-            SetDataErrorInfo(target, statusCode);
+            this.SetDataErrorInfo(target, statusCode);
         }
 
         private void SetDataErrorInfo(object target, StatusCode statusCode)
@@ -163,11 +163,11 @@ namespace Workstation.ServiceModel.Ua
             {
                 if (!StatusCode.IsGood(statusCode))
                 {
-                    targetAsDataErrorInfo.SetErrors(Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
+                    targetAsDataErrorInfo.SetErrors(this.Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
                 }
                 else
                 {
-                    targetAsDataErrorInfo.SetErrors(Property.Name, null);
+                    targetAsDataErrorInfo.SetErrors(this.Property.Name, null);
                 }
             }
         }
@@ -186,13 +186,13 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(object target, DataValue dataValue)
         {
-            Property.SetValue(target, dataValue);
+            this.Property.SetValue(target, dataValue);
             base.Publish(target, dataValue);
         }
 
         public override bool TryGetValue(object target, out DataValue value)
         {
-            var pi = Property;
+            var pi = this.Property;
             if (pi.CanRead)
             {
                 value = (DataValue)pi.GetValue(target);
@@ -216,16 +216,16 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(object target, DataValue dataValue)
         {
-            Property.SetValue(target, dataValue.GetValue());
+            this.Property.SetValue(target, dataValue.GetValue());
             base.Publish(target, dataValue);
         }
 
         public override bool TryGetValue(object target, out DataValue value)
         {
-            var pi = Property;
+            var pi = this.Property;
             if (pi.CanRead)
             {
-                value = new DataValue(Property.GetValue(target));
+                value = new DataValue(this.Property.GetValue(target));
                 return true;
             }
             value = default(DataValue);
@@ -246,7 +246,7 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(object target, DataValue dataValue)
         {
-            var queue = (ObservableQueue<DataValue>)Property.GetValue(target);
+            var queue = (ObservableQueue<DataValue>)this.Property.GetValue(target);
             queue.Enqueue(dataValue);
             base.Publish(target, dataValue);
         }
@@ -265,8 +265,8 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(object target, Variant[] eventFields)
         {
-            var currentEvent = EventHelper.Deserialize(Property.PropertyType, eventFields);
-            Property.SetValue(target, currentEvent);
+            var currentEvent = EventHelper.Deserialize(this.Property.PropertyType, eventFields);
+            this.Property.SetValue(target, currentEvent);
             base.Publish(target, eventFields);
         }
     }
@@ -286,7 +286,7 @@ namespace Workstation.ServiceModel.Ua
         public override void Publish(object target, Variant[] eventFields)
         {
             var currentEvent = EventHelper.Deserialize<T>(eventFields);
-            var queue = (ObservableQueue<T>)Property.GetValue(target);
+            var queue = (ObservableQueue<T>)this.Property.GetValue(target);
             queue.Enqueue(currentEvent);
             base.Publish(target, eventFields);
         }

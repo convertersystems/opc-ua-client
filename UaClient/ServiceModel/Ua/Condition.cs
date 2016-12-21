@@ -19,9 +19,9 @@ namespace Workstation.ServiceModel.Ua
         public override void Deserialize(Variant[] fields)
         {
             base.Deserialize(fields);
-            ConditionName = fields[6].GetValueOrDefault<string>();
-            BranchId = fields[7].GetValueOrDefault<NodeId>();
-            Retain = fields[8].GetValueOrDefault<bool>();
+            this.ConditionName = fields[6].GetValueOrDefault<string>();
+            this.BranchId = fields[7].GetValueOrDefault<NodeId>();
+            this.Retain = fields[8].GetValueOrDefault<bool>();
         }
 
         public override IEnumerable<SimpleAttributeOperand> GetSelectClauses()

@@ -7,7 +7,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public IssuedIdentity(byte[] tokenData)
         {
-            TokenData = tokenData;
+            this.TokenData = tokenData;
         }
 
         public byte[] TokenData { get; }

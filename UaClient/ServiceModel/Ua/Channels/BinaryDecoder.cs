@@ -25,21 +25,21 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.stream = stream;
             this.channel = channel;
-            encoding = new UTF8Encoding(false, true);
-            reader = new BinaryReader(this.stream, encoding, keepStreamOpen);
+            this.encoding = new UTF8Encoding(false, true);
+            this.reader = new BinaryReader(this.stream, this.encoding, keepStreamOpen);
         }
 
         public int Position
         {
-            get { return (int)stream.Position; }
-            set { stream.Position = value; }
+            get { return (int)this.stream.Position; }
+            set { this.stream.Position = value; }
         }
 
         public void Dispose()
         {
-            if (reader != null)
+            if (this.reader != null)
             {
-                reader.Dispose();
+                this.reader.Dispose();
             }
         }
 
@@ -53,132 +53,132 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public bool ReadBoolean(string fieldName)
         {
-            return reader.ReadBoolean();
+            return this.reader.ReadBoolean();
         }
 
         public sbyte ReadSByte(string fieldName)
         {
-            return reader.ReadSByte();
+            return this.reader.ReadSByte();
         }
 
         public byte ReadByte(string fieldName)
         {
-            return reader.ReadByte();
+            return this.reader.ReadByte();
         }
 
         public short ReadInt16(string fieldName)
         {
-            return reader.ReadInt16();
+            return this.reader.ReadInt16();
         }
 
         public ushort ReadUInt16(string fieldName)
         {
-            return reader.ReadUInt16();
+            return this.reader.ReadUInt16();
         }
 
         public int ReadInt32(string fieldName)
         {
-            return reader.ReadInt32();
+            return this.reader.ReadInt32();
         }
 
         public uint ReadUInt32(string fieldName)
         {
-            return reader.ReadUInt32();
+            return this.reader.ReadUInt32();
         }
 
         public long ReadInt64(string fieldName)
         {
-            return reader.ReadInt64();
+            return this.reader.ReadInt64();
         }
 
         public ulong ReadUInt64(string fieldName)
         {
-            return reader.ReadUInt64();
+            return this.reader.ReadUInt64();
         }
 
         public float ReadFloat(string fieldName)
         {
-            return reader.ReadSingle();
+            return this.reader.ReadSingle();
         }
 
         public double ReadDouble(string fieldName)
         {
-            return reader.ReadDouble();
+            return this.reader.ReadDouble();
         }
 
         public string ReadString(string fieldName)
         {
-            byte[] array = ReadByteString(fieldName);
+            byte[] array = this.ReadByteString(fieldName);
             if (array == null || array.Length == 0)
             {
                 return null;
             }
 
-            return encoding.GetString(array, 0, array.Length);
+            return this.encoding.GetString(array, 0, array.Length);
         }
 
         public DateTime ReadDateTime(string fieldName)
         {
-            long num = reader.ReadInt64();
+            long num = this.reader.ReadInt64();
             return DateTime.FromFileTimeUtc(num);
         }
 
         public Guid ReadGuid(string fieldName)
         {
-            byte[] b = reader.ReadBytes(16);
+            byte[] b = this.reader.ReadBytes(16);
             return new Guid(b);
         }
 
         public byte[] ReadByteString(string fieldName)
         {
-            int num = reader.ReadInt32();
+            int num = this.reader.ReadInt32();
             if (num == -1)
             {
                 return null;
             }
 
-            return reader.ReadBytes(num);
+            return this.reader.ReadBytes(num);
         }
 
         public XElement ReadXElement(string fieldName)
         {
-            byte[] array = ReadByteString(fieldName);
+            byte[] array = this.ReadByteString(fieldName);
             if (array == null || array.Length == 0)
             {
                 return null;
             }
 
-            return XElement.Parse(encoding.GetString(array, 0, array.Length));
+            return XElement.Parse(this.encoding.GetString(array, 0, array.Length));
         }
 
         public NodeId ReadNodeId(string fieldName)
         {
             ushort ns = 0;
-            byte b = reader.ReadByte();
+            byte b = this.reader.ReadByte();
             switch (b)
             {
                 case 0x00:
-                    return new NodeId(reader.ReadByte(), ns);
+                    return new NodeId(this.reader.ReadByte(), ns);
 
                 case 0x01:
-                    ns = reader.ReadByte();
-                    return new NodeId(reader.ReadUInt16(), ns);
+                    ns = this.reader.ReadByte();
+                    return new NodeId(this.reader.ReadUInt16(), ns);
 
                 case 0x02:
-                    ns = reader.ReadUInt16();
-                    return new NodeId(reader.ReadUInt32(), ns);
+                    ns = this.reader.ReadUInt16();
+                    return new NodeId(this.reader.ReadUInt32(), ns);
 
                 case 0x03:
-                    ns = reader.ReadUInt16();
-                    return new NodeId(ReadString(null), ns);
+                    ns = this.reader.ReadUInt16();
+                    return new NodeId(this.ReadString(null), ns);
 
                 case 0x04:
-                    ns = reader.ReadUInt16();
-                    return new NodeId(ReadGuid(null), ns);
+                    ns = this.reader.ReadUInt16();
+                    return new NodeId(this.ReadGuid(null), ns);
 
                 case 0x05:
-                    ns = reader.ReadUInt16();
-                    return new NodeId(ReadByteString(null), ns);
+                    ns = this.reader.ReadUInt16();
+                    return new NodeId(this.ReadByteString(null), ns);
 
                 default:
                     throw new ServiceResultException(StatusCodes.BadDecodingError);
@@ -191,36 +191,36 @@ namespace Workstation.ServiceModel.Ua.Channels
             NodeId nodeId = null;
             string nsu = null;
             uint svr = 0;
-            byte b = reader.ReadByte();
+            byte b = this.reader.ReadByte();
             switch (b)
             {
                 case 0x00:
-                    nodeId = new NodeId(reader.ReadByte());
+                    nodeId = new NodeId(this.reader.ReadByte());
                     break;
 
                 case 0x01:
-                    ns = reader.ReadByte();
-                    nodeId = new NodeId(reader.ReadUInt16(), ns);
+                    ns = this.reader.ReadByte();
+                    nodeId = new NodeId(this.reader.ReadUInt16(), ns);
                     break;
 
                 case 0x02:
-                    ns = reader.ReadUInt16();
-                    nodeId = new NodeId(reader.ReadUInt32(), ns);
+                    ns = this.reader.ReadUInt16();
+                    nodeId = new NodeId(this.reader.ReadUInt32(), ns);
                     break;
 
                 case 0x03:
-                    ns = reader.ReadUInt16();
-                    nodeId = new NodeId(ReadString(null), ns);
+                    ns = this.reader.ReadUInt16();
+                    nodeId = new NodeId(this.ReadString(null), ns);
                     break;
 
                 case 0x04:
-                    ns = reader.ReadUInt16();
-                    nodeId = new NodeId(ReadGuid(null), ns);
+                    ns = this.reader.ReadUInt16();
+                    nodeId = new NodeId(this.ReadGuid(null), ns);
                     break;
 
                 case 0x05:
-                    ns = reader.ReadUInt16();
-                    nodeId = new NodeId(ReadByteString(null), ns);
+                    ns = this.reader.ReadUInt16();
+                    nodeId = new NodeId(this.ReadByteString(null), ns);
                     break;
 
                 default:
@@ -229,12 +229,12 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if ((b & 0x80) != 0)
             {
-                nsu = ReadString(null);
+                nsu = this.ReadString(null);
             }
 
             if ((b & 0x40) != 0)
             {
-                svr = ReadUInt32(null);
+                svr = this.ReadUInt32(null);
             }
 
             return new ExpandedNodeId(nodeId, nsu, svr);
@@ -242,7 +242,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public StatusCode ReadStatusCode(string fieldName)
         {
-            return ReadUInt32(fieldName);
+            return this.ReadUInt32(fieldName);
         }
 
         public DiagnosticInfo ReadDiagnosticInfo(string fieldName)
@@ -254,40 +254,40 @@ namespace Workstation.ServiceModel.Ua.Channels
             string additionalInfo = null;
             StatusCode innerStatusCode = default(StatusCode);
             DiagnosticInfo innerDiagnosticInfo = default(DiagnosticInfo);
-            byte b = reader.ReadByte();
+            byte b = this.reader.ReadByte();
             if ((b & 1) != 0)
             {
-                symbolicId = ReadInt32(null);
+                symbolicId = this.ReadInt32(null);
             }
 
             if ((b & 2) != 0)
             {
-                namespaceUri = ReadInt32(null);
+                namespaceUri = this.ReadInt32(null);
             }
 
             if ((b & 8) != 0)
             {
-                locale = ReadInt32(null);
+                locale = this.ReadInt32(null);
             }
 
             if ((b & 4) != 0)
             {
-                localizedText = ReadInt32(null);
+                localizedText = this.ReadInt32(null);
             }
 
             if ((b & 16) != 0)
             {
-                additionalInfo = ReadString(null);
+                additionalInfo = this.ReadString(null);
             }
 
             if ((b & 32) != 0)
             {
-                innerStatusCode = ReadStatusCode(null);
+                innerStatusCode = this.ReadStatusCode(null);
             }
 
             if ((b & 64) != 0)
             {
-                innerDiagnosticInfo = ReadDiagnosticInfo(null);
+                innerDiagnosticInfo = this.ReadDiagnosticInfo(null);
             }
 
             return new DiagnosticInfo(namespaceUri, symbolicId, locale, localizedText, additionalInfo, innerStatusCode, innerDiagnosticInfo);
@@ -295,8 +295,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public QualifiedName ReadQualifiedName(string fieldName)
         {
-            ushort ns = ReadUInt16(null);
-            string name = ReadString(null);
+            ushort ns = this.ReadUInt16(null);
+            string name = this.ReadString(null);
             return new QualifiedName(name, ns);
         }
 
@@ -304,15 +304,15 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             string text = null;
             string locale = null;
-            byte b = reader.ReadByte();
+            byte b = this.reader.ReadByte();
             if ((b & 1) != 0)
             {
-                locale = ReadString(null);
+                locale = this.ReadString(null);
             }
 
             if ((b & 2) != 0)
             {
-                text = ReadString(null);
+                text = this.ReadString(null);
             }
 
             return new LocalizedText(text, locale);
@@ -320,7 +320,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public Variant ReadVariant(string fieldName)
         {
-            byte b = reader.ReadByte();
+            byte b = this.reader.ReadByte();
             if ((b & 0x80) == 0)
             {
                 switch (b & 0x3F)
@@ -329,70 +329,70 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return Variant.Null;
 
                     case 1:
-                        return new Variant(ReadBoolean(null));
+                        return new Variant(this.ReadBoolean(null));
 
                     case 2:
-                        return new Variant(ReadSByte(null));
+                        return new Variant(this.ReadSByte(null));
 
                     case 3:
-                        return new Variant(ReadByte(null));
+                        return new Variant(this.ReadByte(null));
 
                     case 4:
-                        return new Variant(ReadInt16(null));
+                        return new Variant(this.ReadInt16(null));
 
                     case 5:
-                        return new Variant(ReadUInt16(null));
+                        return new Variant(this.ReadUInt16(null));
 
                     case 6:
-                        return new Variant(ReadInt32(null));
+                        return new Variant(this.ReadInt32(null));
 
                     case 7:
-                        return new Variant(ReadUInt32(null));
+                        return new Variant(this.ReadUInt32(null));
 
                     case 8:
-                        return new Variant(ReadInt64(null));
+                        return new Variant(this.ReadInt64(null));
 
                     case 9:
-                        return new Variant(ReadUInt64(null));
+                        return new Variant(this.ReadUInt64(null));
 
                     case 10:
-                        return new Variant(ReadFloat(null));
+                        return new Variant(this.ReadFloat(null));
 
                     case 11:
-                        return new Variant(ReadDouble(null));
+                        return new Variant(this.ReadDouble(null));
 
                     case 12:
-                        return new Variant(ReadString(null));
+                        return new Variant(this.ReadString(null));
 
                     case 13:
-                        return new Variant(ReadDateTime(null));
+                        return new Variant(this.ReadDateTime(null));
 
                     case 14:
-                        return new Variant(ReadGuid(null));
+                        return new Variant(this.ReadGuid(null));
 
                     case 15:
-                        return new Variant(ReadByteString(null));
+                        return new Variant(this.ReadByteString(null));
 
                     case 16:
-                        return new Variant(ReadXElement(null));
+                        return new Variant(this.ReadXElement(null));
 
                     case 17:
-                        return new Variant(ReadNodeId(null));
+                        return new Variant(this.ReadNodeId(null));
 
                     case 18:
-                        return new Variant(ReadExpandedNodeId(null));
+                        return new Variant(this.ReadExpandedNodeId(null));
 
                     case 19:
-                        return new Variant(ReadStatusCode(null));
+                        return new Variant(this.ReadStatusCode(null));
 
                     case 20:
-                        return new Variant(ReadQualifiedName(null));
+                        return new Variant(this.ReadQualifiedName(null));
 
                     case 21:
-                        return new Variant(ReadLocalizedText(null));
+                        return new Variant(this.ReadLocalizedText(null));
 
                     case 22:
-                        return new Variant(ReadExtensionObject(null));
+                        return new Variant(this.ReadExtensionObject(null));
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
@@ -407,73 +407,73 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return Variant.Null;
 
                     case 1:
-                        return new Variant(ReadBooleanArray(null));
+                        return new Variant(this.ReadBooleanArray(null));
 
                     case 2:
-                        return new Variant(ReadSByteArray(null));
+                        return new Variant(this.ReadSByteArray(null));
 
                     case 3:
-                        return new Variant(ReadByteArray(null));
+                        return new Variant(this.ReadByteArray(null));
 
                     case 4:
-                        return new Variant(ReadInt16Array(null));
+                        return new Variant(this.ReadInt16Array(null));
 
                     case 5:
-                        return new Variant(ReadUInt16Array(null));
+                        return new Variant(this.ReadUInt16Array(null));
 
                     case 6:
-                        return new Variant(ReadInt32Array(null));
+                        return new Variant(this.ReadInt32Array(null));
 
                     case 7:
-                        return new Variant(ReadUInt32Array(null));
+                        return new Variant(this.ReadUInt32Array(null));
 
                     case 8:
-                        return new Variant(ReadInt64Array(null));
+                        return new Variant(this.ReadInt64Array(null));
 
                     case 9:
-                        return new Variant(ReadUInt64Array(null));
+                        return new Variant(this.ReadUInt64Array(null));
 
                     case 10:
-                        return new Variant(ReadFloatArray(null));
+                        return new Variant(this.ReadFloatArray(null));
 
                     case 11:
-                        return new Variant(ReadDoubleArray(null));
+                        return new Variant(this.ReadDoubleArray(null));
 
                     case 12:
-                        return new Variant(ReadStringArray(null));
+                        return new Variant(this.ReadStringArray(null));
 
                     case 13:
-                        return new Variant(ReadDateTimeArray(null));
+                        return new Variant(this.ReadDateTimeArray(null));
 
                     case 14:
-                        return new Variant(ReadGuidArray(null));
+                        return new Variant(this.ReadGuidArray(null));
 
                     case 15:
-                        return new Variant(ReadByteStringArray(null));
+                        return new Variant(this.ReadByteStringArray(null));
 
                     case 16:
-                        return new Variant(ReadXElementArray(null));
+                        return new Variant(this.ReadXElementArray(null));
 
                     case 17:
-                        return new Variant(ReadNodeIdArray(null));
+                        return new Variant(this.ReadNodeIdArray(null));
 
                     case 18:
-                        return new Variant(ReadExpandedNodeIdArray(null));
+                        return new Variant(this.ReadExpandedNodeIdArray(null));
 
                     case 19:
-                        return new Variant(ReadStatusCodeArray(null));
+                        return new Variant(this.ReadStatusCodeArray(null));
 
                     case 20:
-                        return new Variant(ReadQualifiedNameArray(null));
+                        return new Variant(this.ReadQualifiedNameArray(null));
 
                     case 21:
-                        return new Variant(ReadLocalizedTextArray(null));
+                        return new Variant(this.ReadLocalizedTextArray(null));
 
                     case 22:
-                        return new Variant(ReadExtensionObjectArray(null));
+                        return new Variant(this.ReadExtensionObjectArray(null));
 
                     case 24:
-                        return new Variant(ReadVariantArray(null));
+                        return new Variant(this.ReadVariantArray(null));
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
@@ -487,73 +487,73 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return Variant.Null;
 
                     case 1:
-                        return new Variant(BuildArray(ReadBooleanArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadBooleanArray(null), this.ReadInt32Array(null)));
 
                     case 2:
-                        return new Variant(BuildArray(ReadSByteArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadSByteArray(null), this.ReadInt32Array(null)));
 
                     case 3:
-                        return new Variant(BuildArray(ReadByteArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadByteArray(null), this.ReadInt32Array(null)));
 
                     case 4:
-                        return new Variant(BuildArray(ReadInt16Array(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadInt16Array(null), this.ReadInt32Array(null)));
 
                     case 5:
-                        return new Variant(BuildArray(ReadUInt16Array(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadUInt16Array(null), this.ReadInt32Array(null)));
 
                     case 6:
-                        return new Variant(BuildArray(ReadInt32Array(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadInt32Array(null), this.ReadInt32Array(null)));
 
                     case 7:
-                        return new Variant(BuildArray(ReadUInt32Array(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadUInt32Array(null), this.ReadInt32Array(null)));
 
                     case 8:
-                        return new Variant(BuildArray(ReadInt64Array(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadInt64Array(null), this.ReadInt32Array(null)));
 
                     case 9:
-                        return new Variant(BuildArray(ReadUInt64Array(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadUInt64Array(null), this.ReadInt32Array(null)));
 
                     case 10:
-                        return new Variant(BuildArray(ReadFloatArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadFloatArray(null), this.ReadInt32Array(null)));
 
                     case 11:
-                        return new Variant(BuildArray(ReadDoubleArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadDoubleArray(null), this.ReadInt32Array(null)));
 
                     case 12:
-                        return new Variant(BuildArray(ReadStringArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadStringArray(null), this.ReadInt32Array(null)));
 
                     case 13:
-                        return new Variant(BuildArray(ReadDateTimeArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadDateTimeArray(null), this.ReadInt32Array(null)));
 
                     case 14:
-                        return new Variant(BuildArray(ReadGuidArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadGuidArray(null), this.ReadInt32Array(null)));
 
                     case 15:
-                        return new Variant(BuildArray(ReadByteStringArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadByteStringArray(null), this.ReadInt32Array(null)));
 
                     case 16:
-                        return new Variant(BuildArray(ReadXElementArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadXElementArray(null), this.ReadInt32Array(null)));
 
                     case 17:
-                        return new Variant(BuildArray(ReadNodeIdArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadNodeIdArray(null), this.ReadInt32Array(null)));
 
                     case 18:
-                        return new Variant(BuildArray(ReadExpandedNodeIdArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadExpandedNodeIdArray(null), this.ReadInt32Array(null)));
 
                     case 19:
-                        return new Variant(BuildArray(ReadStatusCodeArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadStatusCodeArray(null), this.ReadInt32Array(null)));
 
                     case 20:
-                        return new Variant(BuildArray(ReadQualifiedNameArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadQualifiedNameArray(null), this.ReadInt32Array(null)));
 
                     case 21:
-                        return new Variant(BuildArray(ReadLocalizedTextArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadLocalizedTextArray(null), this.ReadInt32Array(null)));
 
                     case 22:
-                        return new Variant(BuildArray(ReadExtensionObjectArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadExtensionObjectArray(null), this.ReadInt32Array(null)));
 
                     case 24:
-                        return new Variant(BuildArray(ReadVariantArray(null), ReadInt32Array(null)));
+                        return new Variant(this.BuildArray(this.ReadVariantArray(null), this.ReadInt32Array(null)));
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
@@ -569,35 +569,35 @@ namespace Workstation.ServiceModel.Ua.Channels
             ushort sourcePicoseconds = 0;
             DateTime serverTimestamp = DateTime.MinValue;
             ushort serverPicoseconds = 0;
-            byte b = reader.ReadByte();
+            byte b = this.reader.ReadByte();
             if ((b & 1) != 0)
             {
-                variant = ReadVariant(null);
+                variant = this.ReadVariant(null);
             }
 
             if ((b & 2) != 0)
             {
-                statusCode = ReadStatusCode(null);
+                statusCode = this.ReadStatusCode(null);
             }
 
             if ((b & 4) != 0)
             {
-                sourceTimestamp = ReadDateTime(null);
+                sourceTimestamp = this.ReadDateTime(null);
             }
 
             if ((b & 16) != 0)
             {
-                sourcePicoseconds = ReadUInt16(null);
+                sourcePicoseconds = this.ReadUInt16(null);
             }
 
             if ((b & 8) != 0)
             {
-                serverTimestamp = ReadDateTime(null);
+                serverTimestamp = this.ReadDateTime(null);
             }
 
             if ((b & 32) != 0)
             {
-                serverPicoseconds = ReadUInt16(null);
+                serverPicoseconds = this.ReadUInt16(null);
             }
 
             return new DataValue(variant, statusCode, sourceTimestamp, sourcePicoseconds, serverTimestamp, serverPicoseconds);
@@ -605,26 +605,26 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ExtensionObject ReadExtensionObject(string fieldName)
         {
-            NodeId nodeId = ReadNodeId(null);
-            byte b = reader.ReadByte();
+            NodeId nodeId = this.ReadNodeId(null);
+            byte b = this.reader.ReadByte();
             if (b == 1)
             {
-                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, channel?.NamespaceUris);
+                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
                 Type type2;
                 if (UaTcpSecureChannel.BinaryEncodingIdToTypeDictionary.TryGetValue(binaryEncodingId, out type2))
                 {
-                    var len = ReadInt32(null);
+                    var len = this.ReadInt32(null);
                     var encodable = Activator.CreateInstance(type2) as IEncodable;
                     encodable.Decode(this);
                     return new ExtensionObject(encodable);
                 }
 
-                return new ExtensionObject(ReadByteString(null), binaryEncodingId);
+                return new ExtensionObject(this.ReadByteString(null), binaryEncodingId);
             }
             else if (b == 2)
             {
-                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, channel?.NamespaceUris);
-                return new ExtensionObject(ReadXElement(null), xmlEncodingId);
+                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
+                return new ExtensionObject(this.ReadXElement(null), xmlEncodingId);
             }
 
             return null;
@@ -633,11 +633,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T ReadExtensionObject<T>(string fieldName)
             where T : IEncodable
         {
-            NodeId nodeId = ReadNodeId(null);
-            byte b = reader.ReadByte();
+            NodeId nodeId = this.ReadNodeId(null);
+            byte b = this.reader.ReadByte();
             if (b == 1)
             {
-                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, channel?.NamespaceUris);
+                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
                 Type type2;
                 if (!UaTcpSecureChannel.BinaryEncodingIdToTypeDictionary.TryGetValue(binaryEncodingId, out type2))
                 {
@@ -649,7 +649,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     throw new ServiceResultException(StatusCodes.BadDecodingError);
                 }
 
-                var len = ReadInt32(null);
+                var len = this.ReadInt32(null);
                 var encodable = Activator.CreateInstance(type2) as IEncodable;
                 encodable.Decode(this);
                 return (T)encodable;
@@ -671,12 +671,12 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T ReadEnumeration<T>(string fieldName)
             where T : IConvertible
         {
-            return (T)Enum.ToObject(typeof(T), ReadInt32(null));
+            return (T)Enum.ToObject(typeof(T), this.ReadInt32(null));
         }
 
         public bool[] ReadBooleanArray(string fieldNames)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -685,7 +685,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new bool[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadBoolean(null);
+                list[i] = this.ReadBoolean(null);
             }
 
             return list;
@@ -693,7 +693,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public sbyte[] ReadSByteArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -702,7 +702,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new sbyte[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadSByte(null);
+                list[i] = this.ReadSByte(null);
             }
 
             return list;
@@ -710,7 +710,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public byte[] ReadByteArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -719,7 +719,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new byte[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadByte(null);
+                list[i] = this.ReadByte(null);
             }
 
             return list;
@@ -727,7 +727,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public short[] ReadInt16Array(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -736,7 +736,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new short[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadInt16(null);
+                list[i] = this.ReadInt16(null);
             }
 
             return list;
@@ -744,7 +744,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ushort[] ReadUInt16Array(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -753,7 +753,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ushort[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadUInt16(null);
+                list[i] = this.ReadUInt16(null);
             }
 
             return list;
@@ -761,7 +761,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public int[] ReadInt32Array(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -770,7 +770,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new int[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadInt32(null);
+                list[i] = this.ReadInt32(null);
             }
 
             return list;
@@ -778,7 +778,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public uint[] ReadUInt32Array(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -787,7 +787,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new uint[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadUInt32(null);
+                list[i] = this.ReadUInt32(null);
             }
 
             return list;
@@ -795,7 +795,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public long[] ReadInt64Array(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -804,7 +804,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new long[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadInt64(null);
+                list[i] = this.ReadInt64(null);
             }
 
             return list;
@@ -812,7 +812,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ulong[] ReadUInt64Array(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -821,7 +821,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ulong[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadUInt64(null);
+                list[i] = this.ReadUInt64(null);
             }
 
             return list;
@@ -829,7 +829,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public float[] ReadFloatArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -838,7 +838,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new float[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadFloat(null);
+                list[i] = this.ReadFloat(null);
             }
 
             return list;
@@ -846,7 +846,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public double[] ReadDoubleArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -855,7 +855,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new double[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadDouble(null);
+                list[i] = this.ReadDouble(null);
             }
 
             return list;
@@ -863,7 +863,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public string[] ReadStringArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -872,7 +872,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new string[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadString(null);
+                list[i] = this.ReadString(null);
             }
 
             return list;
@@ -880,7 +880,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public DateTime[] ReadDateTimeArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -889,7 +889,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new DateTime[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadDateTime(null);
+                list[i] = this.ReadDateTime(null);
             }
 
             return list;
@@ -897,7 +897,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public Guid[] ReadGuidArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -906,7 +906,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new Guid[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadGuid(null);
+                list[i] = this.ReadGuid(null);
             }
 
             return list;
@@ -914,7 +914,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public byte[][] ReadByteStringArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -923,7 +923,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new byte[num][];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadByteString(null);
+                list[i] = this.ReadByteString(null);
             }
 
             return list;
@@ -931,7 +931,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public XElement[] ReadXElementArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -940,7 +940,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new XElement[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadXElement(null);
+                list[i] = this.ReadXElement(null);
             }
 
             return list;
@@ -948,7 +948,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public NodeId[] ReadNodeIdArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -957,7 +957,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new NodeId[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadNodeId(null);
+                list[i] = this.ReadNodeId(null);
             }
 
             return list;
@@ -965,7 +965,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ExpandedNodeId[] ReadExpandedNodeIdArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -974,7 +974,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ExpandedNodeId[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadExpandedNodeId(null);
+                list[i] = this.ReadExpandedNodeId(null);
             }
 
             return list;
@@ -982,7 +982,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public StatusCode[] ReadStatusCodeArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -991,7 +991,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new StatusCode[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadStatusCode(null);
+                list[i] = this.ReadStatusCode(null);
             }
 
             return list;
@@ -999,7 +999,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public DiagnosticInfo[] ReadDiagnosticInfoArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1008,7 +1008,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new DiagnosticInfo[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadDiagnosticInfo(null);
+                list[i] = this.ReadDiagnosticInfo(null);
             }
 
             return list;
@@ -1016,7 +1016,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public QualifiedName[] ReadQualifiedNameArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1025,7 +1025,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new QualifiedName[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadQualifiedName(null);
+                list[i] = this.ReadQualifiedName(null);
             }
 
             return list;
@@ -1033,7 +1033,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public LocalizedText[] ReadLocalizedTextArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1042,7 +1042,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new LocalizedText[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadLocalizedText(null);
+                list[i] = this.ReadLocalizedText(null);
             }
 
             return list;
@@ -1050,7 +1050,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public Variant[] ReadVariantArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1059,7 +1059,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new Variant[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadVariant(null);
+                list[i] = this.ReadVariant(null);
             }
 
             return list;
@@ -1067,7 +1067,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public DataValue[] ReadDataValueArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1076,7 +1076,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new DataValue[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadDataValue(null);
+                list[i] = this.ReadDataValue(null);
             }
 
             return list;
@@ -1084,7 +1084,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ExtensionObject[] ReadExtensionObjectArray(string fieldName)
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1093,7 +1093,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ExtensionObject[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadExtensionObject(null);
+                list[i] = this.ReadExtensionObject(null);
             }
 
             return list;
@@ -1102,7 +1102,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T[] ReadExtensionObjectArray<T>(string fieldName)
             where T : IEncodable
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1111,7 +1111,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new T[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadExtensionObject<T>(null);
+                list[i] = this.ReadExtensionObject<T>(null);
             }
 
             return list;
@@ -1120,7 +1120,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T[] ReadEncodableArray<T>(string fieldName)
             where T : IEncodable
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1129,7 +1129,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new T[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadEncodable<T>(null);
+                list[i] = this.ReadEncodable<T>(null);
             }
 
             return list;
@@ -1138,7 +1138,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T[] ReadEnumerationArray<T>(string fieldName)
             where T : IConvertible
         {
-            int num = ReadArrayLength();
+            int num = this.ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1147,7 +1147,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new T[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = ReadEnumeration<T>(null);
+                list[i] = this.ReadEnumeration<T>(null);
             }
 
             return list;
@@ -1155,12 +1155,12 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public int Read(byte[] buffer, int offset, int count)
         {
-            return reader.Read(buffer, offset, count);
+            return this.reader.Read(buffer, offset, count);
         }
 
         private int ReadArrayLength()
         {
-            int num = reader.ReadInt32();
+            int num = this.reader.ReadInt32();
             return num;
         }
 

@@ -7,8 +7,8 @@ namespace Workstation.ServiceModel.Ua
     {
         public UserNameIdentity(string userName, string password)
         {
-            UserName = userName;
-            Password = password;
+            this.UserName = userName;
+            this.Password = password;
         }
 
         public string UserName { get; set; }
