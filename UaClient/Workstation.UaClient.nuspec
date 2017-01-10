@@ -20,16 +20,16 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 Supports WPF, Universal Windows Platform (UWP) and now Xamarin Forms.
     </description>
     <releaseNotes>
-v1.5.2 Signed the assembly.
-v1.5.1 Added support for .Net Framework 4.5.
-v1.5.0 Added support for Xamarin Forms. Introduced ICertificateStore and DirectoryStore.
-v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate.
-v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription(), use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
-v1.4.0 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners.
-v1.3.0 Depreciated Subscription base class in favor of ISubscription interface to allow freedom to choose whatever base class you wish for your view models.
-v1.2.0 Client, Subscription and Channel class constructors have new optional arguments. Corresponding property setters are removed to prevent changes after construction. Fixed some threading issues: Subscription's publish on thread pool, viewmodel's update on dispatcher thread.
-v1.1.0 Simplified Subscription base class to automatically subscribe for data change and event notifications when constructed, re-subscribe if the server reboots, and un-subscribe when garbage collected.
-v1.0.0 First commit. Includes UaTcpSessionChannel for 'opc.tcp' servers. Supports security up to Basic256Sha256. Automatically creates self-signed X509Certificate with 2048bit key.
+      v1.5.2 Signed the assembly. Reports proper exception if server denies connection due to security.
+      v1.5.1 Added support for .Net Framework 4.5.
+      v1.5.0 Added support for Xamarin Forms. Introduced ICertificateStore and DirectoryStore.
+      v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate.
+      v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription(), use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
+      v1.4.0 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners.
+      v1.3.0 Depreciated Subscription base class in favor of ISubscription interface to allow freedom to choose whatever base class you wish for your view models.
+      v1.2.0 Client, Subscription and Channel class constructors have new optional arguments. Corresponding property setters are removed to prevent changes after construction. Fixed some threading issues: Subscription's publish on thread pool, viewmodel's update on dispatcher thread.
+      v1.1.0 Simplified Subscription base class to automatically subscribe for data change and event notifications when constructed, re-subscribe if the server reboots, and un-subscribe when garbage collected.
+      v1.0.0 First commit. Includes UaTcpSessionChannel for 'opc.tcp' servers. Supports security up to Basic256Sha256. Automatically creates self-signed X509Certificate with 2048bit key.
     </releaseNotes>
     <copyright>Copyright ©  2016 Converter Systems LLC.</copyright>
     <tags>opc ua</tags>

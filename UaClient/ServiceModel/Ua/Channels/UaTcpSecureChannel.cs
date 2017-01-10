@@ -56,7 +56,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly CancellationTokenSource channelCts;
         private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim receivingSemaphore = new SemaphoreSlim(1, 1);
-        internal readonly ActionBlock<ServiceOperation> pendingRequests;
+        private readonly ActionBlock<ServiceOperation> pendingRequests;
         private readonly ConcurrentDictionary<uint, ServiceOperation> pendingCompletions;
         private readonly X509CertificateParser certificateParser = new X509CertificateParser();
 
@@ -561,7 +561,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.sendBuffer = new byte[this.LocalSendBufferSize];
             this.receiveBuffer = new byte[this.LocalReceiveBufferSize];
 
-            this.receiveResponsesTask = this.ReceiveResponsesAsync();
+            this.receiveResponsesTask = this.ReceiveResponsesAsync(this.channelCts.Token);
 
             var openSecureChannelRequest = new OpenSecureChannelRequest
             {
@@ -587,6 +587,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected override async Task OnCloseAsync(CancellationToken token)
         {
             this.channelCts?.Cancel();
+            this.channelCts?.Dispose();
             var closeSecureChannelRequest = new CloseSecureChannelRequest
             {
                 RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
@@ -596,25 +597,17 @@ namespace Workstation.ServiceModel.Ua.Channels
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
-        protected override Task OnFaulted(CancellationToken token = default(CancellationToken))
+        protected override async Task OnFaulted(CancellationToken token = default(CancellationToken))
         {
+            await base.OnFaulted(token);
             this.channelCts?.Cancel();
-            return base.OnFaulted(token);
         }
 
-        protected override async Task OnClosedAsync(CancellationToken token)
+        protected override Task OnAbortAsync(CancellationToken token)
         {
-            if (this.receiveResponsesTask != null && !this.receiveResponsesTask.IsCompleted)
-            {
-                this.Logger?.LogTrace("Waiting for socket to close.");
-                var t = await Task.WhenAny(this.receiveResponsesTask, Task.Delay(2000)).ConfigureAwait(false);
-                if (t != this.receiveResponsesTask)
-                {
-                    this.Logger?.LogError("Timeout while waiting for socket to close.");
-                }
-            }
+            this.channelCts?.Cancel();
             this.channelCts?.Dispose();
-            await base.OnClosedAsync(token);
+            return base.OnAbortAsync(token);
         }
 
         private static byte[] CalculatePSHA(byte[] secret, byte[] seed, int sizeBytes, string securityPolicyUri)
@@ -669,11 +662,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                if (!token.IsCancellationRequested)
-                {
-                    await this.FaultAsync(ex).ConfigureAwait(false);
-                    await this.AbortAsync().ConfigureAwait(false);
-                }
+                this.Logger?.LogError($"Error sending request. {ex.Message}");
+                await this.FaultAsync(ex).ConfigureAwait(false);
             }
         }
 
@@ -1241,9 +1231,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private async Task ReceiveResponsesAsync(CancellationToken token = default(CancellationToken))
         {
-            while (true)
+            try
             {
-                try
+                while (!token.IsCancellationRequested)
                 {
                     var response = await this.ReceiveResponseAsync().ConfigureAwait(false);
                     if (response == null)
@@ -1256,6 +1246,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                         throw new ServiceResultException(StatusCodes.BadServerNotConnected);
                     }
+
                     var header = response.ResponseHeader;
                     if (this.pendingCompletions.TryRemove(header.RequestHandle, out var tcs))
                     {
@@ -1270,20 +1261,11 @@ namespace Workstation.ServiceModel.Ua.Channels
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    if (this.State == CommunicationState.Closed || this.State == CommunicationState.Closing)
-                    {
-                        return;
-                    }
-
-                    if (this.State == CommunicationState.Faulted)
-                    {
-                        return;
-                    }
-                    await this.FaultAsync(ex).ConfigureAwait(false);
-                    await this.AbortAsync().ConfigureAwait(false);
-                }
+            }
+            catch (Exception ex)
+            {
+                this.Logger?.LogError($"Error receiving response. {ex.Message}");
+                await this.FaultAsync(ex).ConfigureAwait(false);
             }
         }
 
@@ -1546,6 +1528,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     response.Decode(bodyDecoder);
 
                     this.Logger?.LogTrace($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
+
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.
                     if (response is OpenSecureChannelResponse openSecureChannelResponse && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader.ServiceResult))
@@ -1653,11 +1636,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private void CancelRequest(object o)
         {
             var operation = (ServiceOperation)o;
-            if (operation.TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)))
-            {
-                var request = operation.Request;
-                this.Logger?.LogTrace($"Canceled {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
-            }
+            operation.TrySetException(this.GetPendingException() ?? new ServiceResultException(StatusCodes.BadRequestTimeout));
         }
 
         public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, ServiceOperation messageValue, ISourceBlock<ServiceOperation> source, bool consumeToAccept)

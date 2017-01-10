@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
@@ -221,30 +221,24 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        protected override Task OnOpenedAsync(CancellationToken token)
-        {
-            return base.OnOpenedAsync(token);
-        }
-
         protected override Task OnCloseAsync(CancellationToken token)
         {
+#if NETSTANDARD
+            this.tcpClient?.Dispose();
+#else
+            this.tcpClient?.Close();
+#endif
             return completedTask;
         }
 
         protected override Task OnAbortAsync(CancellationToken token)
         {
-            return completedTask;
-        }
-
-        protected async override Task OnClosedAsync(CancellationToken token)
-        {
 #if NETSTANDARD
             this.tcpClient?.Dispose();
 #else
-            tcpClient?.Close();
+            this.tcpClient?.Close();
 #endif
-            await base.OnClosedAsync(token);
+            return completedTask;
         }
-
     }
 }

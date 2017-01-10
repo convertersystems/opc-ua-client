@@ -12,7 +12,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// Provides a common base implementation for the basic state machine common to all communication-oriented objects in the system.
     /// </summary>
-    public abstract class CommunicationObject : ICommunicationObject, IDisposable
+    public abstract class CommunicationObject : ICommunicationObject
     {
         private readonly ILogger logger;
         private bool aborted;
@@ -24,10 +24,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         private bool raisedClosed;
         private bool raisedClosing;
         private bool raisedFaulted;
-        private object eventSender;
         private SemaphoreSlim semaphore;
         private Lazy<ConcurrentQueue<Exception>> exceptions;
-        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommunicationObject"/> class.
@@ -97,7 +95,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 await this.OnClosedAsync(token).ConfigureAwait(false);
                 if (!this.onClosedCalled)
                 {
-                    throw new InvalidOperationException($"Channelc did not call base.OnClosedAsync");
+                    throw new InvalidOperationException($"Channel did not call base.OnClosedAsync");
                 }
 
                 flag2 = false;
@@ -508,21 +506,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                     throw new InvalidOperationException($"Channel closed or faulted.");
 
             }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing && !this.disposed)
-            {
-                this.disposed = true;
-                Task.Run(() => this.CloseAsync()).Wait(2000);
-            }
-        }
-
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

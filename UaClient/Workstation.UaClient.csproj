@@ -1,34 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <PropertyGroup Label="Configuration">
+    <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
     <AssemblyName>Workstation.UaClient</AssemblyName>
     <RootNamespace>Workstation.ServiceModel.Ua</RootNamespace>
     <OutputType>library</OutputType>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyTrademarkAttribute>false</GenerateAssemblyTrademarkAttribute>
-    <GenerateAssemblyCultureAttribute>false</GenerateAssemblyCultureAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <ProductName>Workstation.UaClient</ProductName>
+    <Company>Converter Systems LLC.</Company>
+    <AssemblyCopyright>Copyright © 2016 Converter Systems LLC.</AssemblyCopyright>
+    <AssemblyVersion>1.5.2.0</AssemblyVersion>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyOriginatorKeyFile>key.pfx</AssemblyOriginatorKeyFile>
-    <SignAssembly>True</SignAssembly>
+    <PackageId>Workstation.UaClient</PackageId>
+    <PackageVersion>1.5.2</PackageVersion>
+    <Authors>Andrew Cullen</Authors>
+    <Description>A library to browse, read, write and subscribe to the live data published by the OPC UA servers on your network. Supports WPF, Universal Windows Platform (UWP) and Xamarin Forms.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageReleaseNotes>
+ v1.5.2 Sign Assembly. Report proper exception if server denies connection due to security.
+    </PackageReleaseNotes>
+    <Copyright>Copyright © 2016 Converter Systems LLC.</Copyright>
+    <PackageTags>opc ua</PackageTags>
   </PropertyGroup>
-  <PropertyGroup>
-    <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <PostBuildEvent>cd ..\..\..\
-nuget.exe pack Workstation.UaClient.nuspec -Prop Configuration=Release -OutputDirectory bin\Release</PostBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.4|AnyCPU'">
     <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net45|AnyCPU'">
+    <DebugType>full</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard1.4|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
+    <DebugType>full</DebugType>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>Workstation.UaClient.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net45|AnyCPU'">
+    <DebugType>full</DebugType>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>Workstation.UaClient.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
     <PackageReference Include="NETStandard.Library" Version="1.6.0" />
@@ -44,13 +52,12 @@ nuget.exe pack Workstation.UaClient.nuspec -Prop Configuration=Release -OutputDi
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.0.1" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.0" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Collections\ErrorsContainer.cs" />
     <Compile Include="Collections\ObservableQueue.cs" />
     <Compile Include="ServiceModel\Ua\AccessLevelFlags.cs" />
@@ -149,7 +156,7 @@ nuget.exe pack Workstation.UaClient.nuspec -Prop Configuration=Release -OutputDi
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="key.pfx" />
+    <None Include="pack.cmd" />
     <None Include="ServiceModel\Ua\AttributeIds.tt">
       <LastGenOutput>AttributeIds.generated.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -173,8 +180,6 @@ nuget.exe pack Workstation.UaClient.nuspec -Prop Configuration=Release -OutputDi
     <None Include="ServiceModel\Ua\References\StatusCodes.csv" />
     <None Include="ServiceModel\Ua\References\Types.xsd" />
     <None Include="Workstation.UaClient.nuspec" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+    <None Include="Workstation.UaClient.snk" />
   </ItemGroup>
 </Project>

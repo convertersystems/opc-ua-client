@@ -69,7 +69,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected override async Task OnOpenAsync(CancellationToken token)
         {
-            this.Logger?.LogInformation($"Opening secure channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
+            this.Logger?.LogInformation($"Opening session channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
             this.Logger?.LogInformation($"SecurityPolicy: '{this.RemoteEndpoint.SecurityPolicyUri}'.");
             this.Logger?.LogInformation($"SecurityMode: '{this.RemoteEndpoint.SecurityMode}'.");
             this.Logger?.LogInformation($"UserIdentityToken: '{this.UserIdentity}'.");

@@ -71,6 +71,9 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     }
 ```
 ### Releases
+v1.5.3 Bug fix to report proper exception if server denies connection due to security.
+
+v1.5.2 Signed the assembly.
 
 v1.5.1 Added support for .Net Framework 4.5. Upgraded project to Visual Studio 2017.
 

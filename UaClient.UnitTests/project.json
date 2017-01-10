@@ -1,5 +1,8 @@
 ﻿{
-  "dependencies": {},
+  "dependencies": {
+    "Microsoft.Extensions.Logging": "1.0.1",
+    "Microsoft.Extensions.Logging.Debug": "1.0.1"
+  },
   "frameworks": {
     ".NETFramework,Version=v4.6.1": {}
   },

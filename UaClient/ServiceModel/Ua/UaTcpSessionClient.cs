@@ -334,6 +334,9 @@ namespace Workstation.ServiceModel.Ua
             {
                 try
                 {
+                    this.Logger?.LogTrace($"Connecting in {reconnectDelay} ms.");
+                    await Task.Delay(reconnectDelay, token).ConfigureAwait(false);
+
                     // Opening.
                     this.State = CommunicationState.Opening;
                     await this.OpenAsync(token).ConfigureAwait(false);
@@ -356,24 +359,21 @@ namespace Workstation.ServiceModel.Ua
                         await Task.WhenAll(tasks).ConfigureAwait(false);
                     }
                 }
-                catch (OperationCanceledException ex)
+                catch (OperationCanceledException)
                 {
-                    this.Logger?.LogError($"State machine canceling. {ex.Message}");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    this.Logger?.LogError($"State machine retrying. {ex.Message}");
-                    await Task.Delay(reconnectDelay, token).ConfigureAwait(false);
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
-            }
 
             // Closing
             this.State = CommunicationState.Closing;
-            await this.CloseAsync();
+            await this.CloseAsync().ConfigureAwait(false);
 
             // Closed
             this.State = CommunicationState.Closed;
+            }
         }
 
         /// <summary>
@@ -423,7 +423,10 @@ namespace Workstation.ServiceModel.Ua
                 try
                 {
                     this.linkToken?.Dispose();
-                    this.innerChannel?.Dispose();
+                    if (this.innerChannel != null && this.innerChannel.State != CommunicationState.Closed)
+                    {
+                        await this.innerChannel.AbortAsync();
+                    }
 
                     this.innerChannel = new UaTcpSessionChannel(
                         this.LocalDescription,
@@ -479,7 +482,22 @@ namespace Workstation.ServiceModel.Ua
                 this.Logger?.LogInformation($"Closing channel with endpoint '{this.RemoteEndpoint?.EndpointUrl ?? this.discoveryUrl}'.");
                 try
                 {
-                    await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
+                    switch (this.innerChannel.State)
+                    {
+                        case CommunicationState.Created:
+                        case CommunicationState.Opening:
+                        case CommunicationState.Faulted:
+                            await this.innerChannel.AbortAsync(token).ConfigureAwait(false);
+                            break;
+
+                        case CommunicationState.Opened:
+                            await this.innerChannel.CloseAsync(token).ConfigureAwait(false);
+                            break;
+
+                        case CommunicationState.Closing:
+                        case CommunicationState.Closed:
+                            break;
+                    }
                 }
                 catch (Exception ex)
                 {

@@ -4,6 +4,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
@@ -14,6 +15,9 @@ namespace Workstation.UaClient.UnitTests
     [TestClass]
     public class UnitTest1
     {
+        private readonly ILoggerFactory loggerFactory;
+        private readonly ILogger<UnitTest1> logger;
+
         private ApplicationDescription localDescription = new ApplicationDescription
         {
             ApplicationName = typeof(UnitTest1).Namespace,
@@ -25,8 +29,15 @@ namespace Workstation.UaClient.UnitTests
             Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\Workstation.UaClient.UnitTests\pki"));
 
         // private string endpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
-        // private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
+        private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
+        // private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
+
+        public UnitTest1()
+        {
+            this.loggerFactory = new LoggerFactory();
+            this.loggerFactory.AddDebug(LogLevel.Trace);
+            this.logger = this.loggerFactory?.CreateLogger<UnitTest1>();
+        }
 
         /// <summary>
         /// Tests endpoint with no security and with no Certificate.
@@ -72,7 +83,8 @@ namespace Workstation.UaClient.UnitTests
                         this.localDescription,
                         null,
                         selectedUserIdentity,
-                        selectedEndpoint);
+                        selectedEndpoint,
+                        loggerFactory: this.loggerFactory);
 
                     Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                     Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
@@ -93,6 +105,7 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task ConnnectToAllEndpoints()
         {
+
             // discover available endpoints of server.
             var getEndpointsRequest = new GetEndpointsRequest
             {
@@ -130,16 +143,27 @@ namespace Workstation.UaClient.UnitTests
                         this.localDescription,
                         this.certificateStore,
                         selectedUserIdentity,
-                        selectedEndpoint);
+                        selectedEndpoint,
+                        loggerFactory: this.loggerFactory,
+                        timeoutHint: 60000);
 
                     Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                     Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
                     Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
                     Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
 
-                    await channel.OpenAsync();
-                    Console.WriteLine($"Closing session '{channel.SessionId}'.");
-                    await channel.CloseAsync();
+                    try
+                    {
+                        await channel.OpenAsync();
+                        Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                        await channel.CloseAsync();
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                        throw;
+                    }
                 }
             }
         }
@@ -184,6 +208,7 @@ namespace Workstation.UaClient.UnitTests
                 this.certificateStore,
                 selectedUserIdentity,
                 selectedEndpoint,
+                loggerFactory: this.loggerFactory,
                 sessionTimeout: 10000);
 
             Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -226,7 +251,8 @@ namespace Workstation.UaClient.UnitTests
                 this.localDescription,
                 this.certificateStore,
                 selectedUserIdentity,
-                selectedEndpoint);
+                selectedEndpoint,
+                loggerFactory: this.loggerFactory);
 
             Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
             Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
@@ -249,7 +275,8 @@ namespace Workstation.UaClient.UnitTests
                 this.localDescription,
                 this.certificateStore,
                 selectedUserIdentity,
-                selectedEndpoint);
+                selectedEndpoint,
+                loggerFactory: this.loggerFactory);
 
             await channel2.OpenAsync();
             Console.WriteLine($"Activated session '{channel2.SessionId}'.");
@@ -287,7 +314,8 @@ namespace Workstation.UaClient.UnitTests
                 this.localDescription,
                 this.certificateStore,
                 ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
-                selectedEndpoint);
+                selectedEndpoint,
+                loggerFactory: this.loggerFactory);
 
             Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
             Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
