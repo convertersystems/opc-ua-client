@@ -161,7 +161,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             uint localMaxChunkCount = DefaultMaxChunkCount)
             : base(remoteEndpoint, loggerFactory, localReceiveBufferSize, localSendBufferSize, localMaxMessageSize, localMaxChunkCount)
         {
-            this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
+            if (localDescription == null)
+            {
+                throw new ArgumentNullException(nameof(localDescription));
+            }
+
+            this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
             this.RemoteCertificate = this.RemoteEndpoint.ServerCertificate;
             this.TimeoutHint = timeoutHint;
@@ -1068,7 +1073,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                if (!TypeToBinaryEncodingIdDictionary.TryGetValue(request.GetType(), out var binaryEncodingId))
+                ExpandedNodeId binaryEncodingId;
+                if (!TypeToBinaryEncodingIdDictionary.TryGetValue(request.GetType(), out binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadDataTypeIdUnknown);
                 }
@@ -1248,7 +1254,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
 
                     var header = response.ResponseHeader;
-                    if (this.pendingCompletions.TryRemove(header.RequestHandle, out var tcs))
+                    ServiceOperation tcs;
+                    if (this.pendingCompletions.TryRemove(header.RequestHandle, out tcs))
                     {
                         if (StatusCode.IsBad(header.ServiceResult))
                         {
@@ -1515,7 +1522,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     else
                     {
                         // find node in dictionary
-                        if (!BinaryEncodingIdToTypeDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, this.NamespaceUris), out var type2))
+                        Type type2;
+                        if (!BinaryEncodingIdToTypeDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, this.NamespaceUris), out type2))
                         {
                             throw new ServiceResultException(StatusCodes.BadEncodingError, "NodeId not registered in dictionary.");
                         }
@@ -1531,7 +1539,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.
-                    if (response is OpenSecureChannelResponse openSecureChannelResponse && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader.ServiceResult))
+                    var openSecureChannelResponse = response as OpenSecureChannelResponse;
+                    if (openSecureChannelResponse != null && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader.ServiceResult))
                     {
                         this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
 

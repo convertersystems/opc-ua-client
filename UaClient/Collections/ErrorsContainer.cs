@@ -24,7 +24,13 @@ namespace Workstation.Collections
         /// event.</param>
         public ErrorsContainer(Action<string> raiseErrorsChanged)
         {
-            this.raiseErrorsChanged = raiseErrorsChanged ?? throw new ArgumentNullException(nameof(raiseErrorsChanged));
+
+            if (raiseErrorsChanged == null)
+            {
+                throw new ArgumentNullException(nameof(raiseErrorsChanged));
+            }
+
+            this.raiseErrorsChanged = raiseErrorsChanged;
             this.validationResults = new Dictionary<string, List<T>>();
         }
 
@@ -47,7 +53,8 @@ namespace Workstation.Collections
         public IEnumerable<T> GetErrors(string propertyName)
         {
             var localPropertyName = propertyName ?? string.Empty;
-            if (this.validationResults.TryGetValue(localPropertyName, out var currentValidationResults))
+            List<T> currentValidationResults = null;
+            if (this.validationResults.TryGetValue(localPropertyName, out currentValidationResults))
             {
                 return currentValidationResults;
             }

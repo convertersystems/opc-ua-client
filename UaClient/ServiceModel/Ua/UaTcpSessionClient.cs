@@ -67,10 +67,20 @@ namespace Workstation.ServiceModel.Ua
             uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
             uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
         {
-            this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
+            if (localDescription == null)
+            {
+                throw new ArgumentNullException(nameof(localDescription));
+            }
+
+            this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
             this.UserIdentityProvider = userIdentityProvider ?? (endpoint => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
-            this.RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
+            if (remoteEndpoint == null)
+            {
+                throw new ArgumentNullException(nameof(remoteEndpoint));
+            }
+
+            this.RemoteEndpoint = remoteEndpoint;
             this.SessionTimeout = sessionTimeout;
             this.TimeoutHint = timeoutHint;
             this.DiagnosticsHint = diagnosticsHint;
@@ -113,7 +123,12 @@ namespace Workstation.ServiceModel.Ua
             uint localMaxMessageSize = UaTcpTransportChannel.DefaultMaxMessageSize,
             uint localMaxChunkCount = UaTcpTransportChannel.DefaultMaxChunkCount)
         {
-            this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
+            if (localDescription == null)
+            {
+                throw new ArgumentNullException(nameof(localDescription));
+            }
+
+            this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
             this.UserIdentityProvider = userIdentityProvider ?? (ep => Task.FromResult<IUserIdentity>(new AnonymousIdentity()));
             if (string.IsNullOrEmpty(endpointUrl))

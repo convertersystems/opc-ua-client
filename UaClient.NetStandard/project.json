@@ -1,0 +1,13 @@
+﻿{
+  "supports": {},
+  "dependencies": {
+    "Microsoft.Extensions.Logging": "1.0.0",
+    "NETStandard.Library": "1.6.0",
+    "Portable.BouncyCastle": "1.8.1.2",
+    "StyleCop.Analyzers": "1.0.0",
+    "System.Threading.Tasks.Dataflow": "4.7.0"
+  },
+  "frameworks": {
+    "netstandard1.4": {}
+  }
+}

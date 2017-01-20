@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+  <metadata minClientVersion="3.4">
+    <id>Workstation.UaClient</id>
+    <version>1.5.2</version>
+    <title>Workstation.UaClient</title>
+    <authors>Andrew Cullen</authors>
+    <owners>Converter Systems LLC</owners>
+    <projectUrl>https://github.com/convertersystems/opc-ua-client</projectUrl>
+    <licenseUrl>https://github.com/convertersystems/opc-ua-client/blob/master/UaClient/LICENSE.txt</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <summary>A library to browse, read, write and subscribe to the live data published by the OPC UA servers on your network.</summary>
+    <description>
+Building an HMI using Visual Studio 2015? With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
+Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
+* Browse OPC UA servers directly from the Visual Studio IDE.
+* Drag and drop the variable, method, and event nodes onto your view model.
+* Add XAML bindings to connect your UI elements to live data and events.
+
+Supports WPF, Universal Windows Platform (UWP) and now Xamarin Forms.
+    </description>
+    <releaseNotes>
+      v1.5.2 Signed the assembly. Reports proper exception if server denies connection due to security.
+      v1.5.1 Added support for .Net Framework 4.5.
+      v1.5.0 Added support for Xamarin Forms. Introduced ICertificateStore and DirectoryStore.
+      v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate.
+      v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription(), use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
+      v1.4.0 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners.
+      v1.3.0 Depreciated Subscription base class in favor of ISubscription interface to allow freedom to choose whatever base class you wish for your view models.
+      v1.2.0 Client, Subscription and Channel class constructors have new optional arguments. Corresponding property setters are removed to prevent changes after construction. Fixed some threading issues: Subscription's publish on thread pool, viewmodel's update on dispatcher thread.
+      v1.1.0 Simplified Subscription base class to automatically subscribe for data change and event notifications when constructed, re-subscribe if the server reboots, and un-subscribe when garbage collected.
+      v1.0.0 First commit. Includes UaTcpSessionChannel for 'opc.tcp' servers. Supports security up to Basic256Sha256. Automatically creates self-signed X509Certificate with 2048bit key.
+    </releaseNotes>
+    <copyright>Copyright ©  2016 Converter Systems LLC.</copyright>
+    <tags>opc ua</tags>
+    <dependencies>
+      <group targetFramework="netstandard1.4">
+        <dependency id="NETStandard.Library" version="1.6.0"/>
+        <dependency id="System.Threading.Tasks.Dataflow" version="4.7.0" />
+        <dependency id="Microsoft.Extensions.Logging" version="1.0.1" />
+        <dependency id="Portable.BouncyCastle" version="1.8.1.2" />
+      </group>
+      <group targetFramework="net45">
+        <dependency id="System.Threading.Tasks.Dataflow" version="4.7.0" />
+        <dependency id="Microsoft.Extensions.Logging" version="1.0.1" />
+        <dependency id="Portable.BouncyCastle" version="1.8.1.2" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="UaClient.NetStandard\bin\release\Workstation.UaClient.dll" target="lib\netstandard1.4" />
+    <file src="UaClient.NetStandard\bin\release\Workstation.UaClient.xml" target="lib\netstandard1.4" />
+    <file src="UaClient.Net45\bin\release\Workstation.UaClient.dll" target="lib\net45" />
+    <file src="UaClient.Net45\bin\release\Workstation.UaClient.xml" target="lib\net45" />
+  </files>
+</package>

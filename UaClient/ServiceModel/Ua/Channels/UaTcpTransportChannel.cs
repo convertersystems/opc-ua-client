@@ -45,7 +45,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             uint localMaxChunkCount = DefaultMaxChunkCount)
             : base(loggerFactory)
         {
-            this.RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
+            if (remoteEndpoint == null)
+            {
+                throw new ArgumentNullException(nameof(remoteEndpoint));
+            }
+
+            this.RemoteEndpoint = remoteEndpoint;
             this.LocalReceiveBufferSize = localReceiveBufferSize;
             this.LocalSendBufferSize = localSendBufferSize;
             this.LocalMaxMessageSize = localMaxMessageSize;
