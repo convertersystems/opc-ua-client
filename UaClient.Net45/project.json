@@ -6,7 +6,7 @@
     "System.Threading.Tasks.Dataflow": "4.7.0"
   },
   "frameworks": {
-    ".NETFramework,Version=v4.5.2": {}
+    ".NETFramework,Version=v4.5": {}
   },
   "runtimes": {
     "win": {}
