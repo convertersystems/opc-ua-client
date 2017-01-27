@@ -382,12 +382,12 @@ namespace Workstation.ServiceModel.Ua
                     reconnectDelay = Math.Min(reconnectDelay * 2, 20000);
                 }
 
-            // Closing
-            this.State = CommunicationState.Closing;
-            await this.CloseAsync().ConfigureAwait(false);
+                // Closing
+                this.State = CommunicationState.Closing;
+                await this.CloseAsync().ConfigureAwait(false);
 
-            // Closed
-            this.State = CommunicationState.Closed;
+                // Closed
+                this.State = CommunicationState.Closed;
             }
         }
 
@@ -671,6 +671,13 @@ namespace Workstation.ServiceModel.Ua
 
                         // short delay, then retry.
                         await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
+
+                        // retry with fresh request.
+                        publishRequest = new PublishRequest
+                        {
+                            RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.DiagnosticsHint },
+                            SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
+                        };
                     }
                 }
             }
