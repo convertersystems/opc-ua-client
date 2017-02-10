@@ -188,7 +188,12 @@ namespace Workstation.ServiceModel.Ua
             try
             {
                 // loop thru all the notifications
-                var nd = response.NotificationMessage.NotificationData;
+                var nd = response.NotificationMessage?.NotificationData;
+                if (nd == null)
+                {
+                    return true;
+                }
+
                 foreach (var n in nd)
                 {
                     // if data change.
@@ -235,6 +240,11 @@ namespace Workstation.ServiceModel.Ua
                         }
                     }
                 }
+
+                return true;
+            }
+            catch
+            {
                 return true;
             }
             finally
@@ -273,7 +283,7 @@ namespace Workstation.ServiceModel.Ua
                     }
                     catch (ServiceResultException ex)
                     {
-                        statusCode = (uint)ex.HResult;
+                        statusCode = ex.StatusCode;
                     }
                     catch (Exception)
                     {

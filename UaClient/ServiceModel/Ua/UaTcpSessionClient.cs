@@ -460,17 +460,17 @@ namespace Workstation.ServiceModel.Ua
                     await this.innerChannel.OpenAsync(token).ConfigureAwait(false);
                     this.linkToken = this.pendingRequests.LinkTo(this.innerChannel);
 
-                    // create an internal subscription.
-                    var subscriptionRequest = new CreateSubscriptionRequest
-                    {
-                        RequestedPublishingInterval = DefaultPublishingInterval,
-                        RequestedMaxKeepAliveCount = DefaultKeepaliveCount,
-                        RequestedLifetimeCount = (uint)(this.SessionTimeout / DefaultPublishingInterval),
-                        PublishingEnabled = true,
-                        Priority = 0
-                    };
-                    var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
-                    this.subscriptionId = subscriptionResponse.SubscriptionId;
+                    //// create an internal subscription.
+                    //var subscriptionRequest = new CreateSubscriptionRequest
+                    //{
+                    //    RequestedPublishingInterval = DefaultPublishingInterval,
+                    //    RequestedMaxKeepAliveCount = DefaultKeepaliveCount,
+                    //    RequestedLifetimeCount = (uint)(this.SessionTimeout / DefaultPublishingInterval),
+                    //    PublishingEnabled = true,
+                    //    Priority = 0
+                    //};
+                    //var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
+                    //this.subscriptionId = subscriptionResponse.SubscriptionId;
                 }
                 catch (Exception ex)
                 {
@@ -669,15 +669,21 @@ namespace Workstation.ServiceModel.Ua
                     {
                         this.Logger?.LogError($"Error publishing subscription. {ex.Message}");
 
-                        // short delay, then retry.
-                        await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
-
-                        // retry with fresh request.
-                        publishRequest = new PublishRequest
+                        if (ex.StatusCode == StatusCodes.BadNoSubscription)
                         {
-                            RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.DiagnosticsHint },
-                            SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
-                        };
+                            // short delay, then retry.
+                            await Task.Delay((int)DefaultPublishingInterval).ConfigureAwait(false);
+
+                            // retry with fresh request.
+                            publishRequest = new PublishRequest
+                            {
+                                RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.DiagnosticsHint },
+                                SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
+                            };
+                            continue;
+                        }
+
+                        return;
                     }
                 }
             }

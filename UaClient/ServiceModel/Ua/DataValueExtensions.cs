@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Workstation.ServiceModel.Ua
@@ -16,9 +17,15 @@ namespace Workstation.ServiceModel.Ua
         public static object GetValue(this DataValue dataValue)
         {
             var value = dataValue.Value;
+
             if (value is ExtensionObject)
             {
-                value = ((ExtensionObject)value).Body;
+                return ((ExtensionObject)value).Body;
+            }
+
+            if (value is ExtensionObject[])
+            {
+                return ((ExtensionObject[])value).Select(e => e.Body).ToArray();
             }
 
             return value;

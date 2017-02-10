@@ -30,5 +30,10 @@ namespace Workstation.ServiceModel.Ua
         {
             this.HResult = unchecked((int)(uint)statusCode);
         }
+
+        /// <summary>
+        /// Gets the StatusCode of the ServiceResult.
+        /// </summary>
+        public StatusCode StatusCode => (uint)this.HResult;
     }
 }
