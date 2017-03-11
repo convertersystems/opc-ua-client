@@ -10,6 +10,8 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class Condition : BaseEvent
     {
+        public NodeId ConditionId { get; set; }
+
         public string ConditionName { get; set; }
 
         public NodeId BranchId { get; set; }
@@ -19,9 +21,10 @@ namespace Workstation.ServiceModel.Ua
         public override void Deserialize(Variant[] fields)
         {
             base.Deserialize(fields);
-            this.ConditionName = fields[6].GetValueOrDefault<string>();
-            this.BranchId = fields[7].GetValueOrDefault<NodeId>();
-            this.Retain = fields[8].GetValueOrDefault<bool>();
+            this.ConditionId = fields[6].GetValueOrDefault<NodeId>();
+            this.ConditionName = fields[7].GetValueOrDefault<string>();
+            this.BranchId = fields[8].GetValueOrDefault<NodeId>();
+            this.Retain = fields[9].GetValueOrDefault<bool>();
         }
 
         public override IEnumerable<SimpleAttributeOperand> GetSelectClauses()
@@ -31,6 +34,7 @@ namespace Workstation.ServiceModel.Ua
                 yield return clause;
             }
 
+            yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.ConditionType), BrowsePath = new QualifiedName[0], AttributeId = AttributeIds.NodeId };
             yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.ConditionType), BrowsePath = new[] { new QualifiedName("ConditionName") }, AttributeId = AttributeIds.Value };
             yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.ConditionType), BrowsePath = new[] { new QualifiedName("BranchId") }, AttributeId = AttributeIds.Value };
             yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.ConditionType), BrowsePath = new[] { new QualifiedName("Retain") }, AttributeId = AttributeIds.Value };
