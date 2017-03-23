@@ -1,7 +1,7 @@
 ﻿{
   "supports": {},
   "dependencies": {
-    "Microsoft.Extensions.Logging": "1.1.0",
+    "Microsoft.Extensions.Logging.Abstractions": "1.1.1",
     "NETStandard.Library": "1.6.1",
     "Portable.BouncyCastle": "1.8.1.2",
     "StyleCop.Analyzers": "1.0.0",

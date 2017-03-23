@@ -29,8 +29,8 @@ namespace Workstation.UaClient.UnitTests
             Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\Workstation.UaClient.UnitTests\pki"));
 
         // private string endpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
-        private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        // private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
+        // private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
+        private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
 
         public UnitTest1()
         {

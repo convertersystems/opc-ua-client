@@ -72,6 +72,18 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 ```
 ### Releases
 
+v1.5.8 Bugfix for UaTcpSecureChannel DataLengthException
+
+v1.5.7 Added ConditionId property
+
+v1.5.6 Subscription bugfix
+
+v1.5.5 Upgrade NetStandard to 1.6.1
+
+v1.5.4 Fix support for net45
+
+v1.5.3 Support Nuget 2.12
+
 v1.5.2 Signed the assembly. Bug fix to report proper exception if server denies connection due to security.
 
 v1.5.1 Added support for .Net Framework 4.5. Upgraded project to Visual Studio 2017.

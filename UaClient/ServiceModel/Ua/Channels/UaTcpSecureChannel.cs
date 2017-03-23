@@ -799,7 +799,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         if (this.asymIsEncrypted)
                         {
                             paddingHeaderSize = this.asymRemoteCipherTextBlockSize > 256 ? 2 : 1;
-                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize - this.asymLocalSignatureSize - paddingHeaderSize) / this.asymRemoteCipherTextBlockSize) * this.asymRemotePlainTextBlockSize) - SequenceHeaderSize;
+                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize) / this.asymRemoteCipherTextBlockSize) * this.asymRemotePlainTextBlockSize) - SequenceHeaderSize - paddingHeaderSize - this.asymLocalSignatureSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -817,7 +817,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             paddingHeaderSize = 0;
                             paddingSize = 0;
-                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - this.asymLocalSignatureSize - SequenceHeaderSize;
+                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - SequenceHeaderSize - this.asymLocalSignatureSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -975,7 +975,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         if (this.symIsEncrypted)
                         {
                             paddingHeaderSize = this.symEncryptionBlockSize > 256 ? 2 : 1;
-                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - paddingHeaderSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize) - SequenceHeaderSize;
+                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize) - SequenceHeaderSize - paddingHeaderSize - this.symSignatureSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -987,13 +987,13 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 paddingSize = 0;
                             }
 
-                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + this.symSignatureSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize);
+                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + this.symSignatureSize;
                         }
                         else
                         {
                             paddingHeaderSize = 0;
                             paddingSize = 0;
-                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - SequenceHeaderSize;
+                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - SequenceHeaderSize - this.symSignatureSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -1143,7 +1143,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         if (this.symIsEncrypted)
                         {
                             paddingHeaderSize = this.symEncryptionBlockSize > 256 ? 2 : 1;
-                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - paddingHeaderSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize) - SequenceHeaderSize;
+                            maxBodySize = ((((int)this.RemoteReceiveBufferSize - plainHeaderSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize) - SequenceHeaderSize - paddingHeaderSize - this.symSignatureSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
@@ -1155,13 +1155,13 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 paddingSize = 0;
                             }
 
-                            chunkSize = plainHeaderSize + (((SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + this.symSignatureSize) / this.symEncryptionBlockSize) * this.symEncryptionBlockSize);
+                            chunkSize = plainHeaderSize + SequenceHeaderSize + bodySize + paddingSize + paddingHeaderSize + this.symSignatureSize;
                         }
                         else
                         {
                             paddingHeaderSize = 0;
                             paddingSize = 0;
-                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - this.symSignatureSize - SequenceHeaderSize;
+                            maxBodySize = (int)this.RemoteReceiveBufferSize - plainHeaderSize - SequenceHeaderSize - this.symSignatureSize;
                             if (bodyCount < maxBodySize)
                             {
                                 bodySize = bodyCount;
