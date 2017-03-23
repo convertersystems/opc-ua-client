@@ -43,12 +43,12 @@ Supports WPF, Universal Windows Platform (UWP) and now Xamarin Forms.
       <group targetFramework="netstandard1.4">
         <dependency id="NETStandard.Library" version="1.6.1"/>
         <dependency id="System.Threading.Tasks.Dataflow" version="4.7.0" />
-        <dependency id="Microsoft.Extensions.Logging" version="1.1.0" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="1.1.1" />
         <dependency id="Portable.BouncyCastle" version="1.8.1.2" />
       </group>
       <group targetFramework="net45">
         <dependency id="System.Threading.Tasks.Dataflow" version="4.7.0" />
-        <dependency id="Microsoft.Extensions.Logging" version="1.1.0" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="1.1.1" />
         <dependency id="Portable.BouncyCastle" version="1.8.1.2" />
       </group>
     </dependencies>
