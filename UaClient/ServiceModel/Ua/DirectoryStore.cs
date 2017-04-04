@@ -156,8 +156,8 @@ namespace Workstation.ServiceModel.Ua
             cg.SetSerialNumber(subjectSN);
             cg.SetSubjectDN(subjectDN);
             cg.SetIssuerDN(subjectDN);
-            cg.SetNotBefore(DateTime.Now);
-            cg.SetNotAfter(DateTime.Now.AddYears(25));
+            cg.SetNotBefore(DateTime.UtcNow);
+            cg.SetNotAfter(DateTime.UtcNow.AddYears(25));
             cg.SetPublicKey(kp.Public);
 
             cg.AddExtension(
