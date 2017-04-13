@@ -406,5 +406,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             var closeSessionResponse = await this.CloseSessionAsync(closeSessionRequest).ConfigureAwait(false);
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
+
+        protected override Task OnFaulted(CancellationToken token = default(CancellationToken))
+        {
+            this.Complete();
+            return base.OnFaulted(token);
+        }
     }
 }

@@ -646,7 +646,7 @@ namespace Workstation.ServiceModel.Ua
             {
                 try
                 {
-                    var publishResponse = await this.PublishAsync(publishRequest).ConfigureAwait(false);
+                    var publishResponse = await this.PublishAsync(publishRequest).WithCancellation(token).ConfigureAwait(false);
 
                     this.syncContext.Post(
                         o =>
