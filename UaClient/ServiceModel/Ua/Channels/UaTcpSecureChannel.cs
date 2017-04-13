@@ -258,8 +258,14 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (this.pendingRequests.Post(operation))
                 {
+                    if (request is CloseSecureChannelRequest)
+                    {
+                        return null;
+                    }
+
                     return await operation.Task.ConfigureAwait(false);
                 }
+
                 throw new ServiceResultException(StatusCodes.BadSecureChannelClosed);
             }
         }
@@ -589,30 +595,36 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
         }
 
-        protected override async Task OnCloseAsync(CancellationToken token)
+        /// <inheritdoc/>
+        protected override async Task OnCloseAsync(CancellationToken token = default(CancellationToken))
         {
             this.channelCts?.Cancel();
-            this.channelCts?.Dispose();
-            var closeSecureChannelRequest = new CloseSecureChannelRequest
+            var request = new CloseSecureChannelRequest();
+            this.TimestampHeader(request);
+            try
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
-            };
-            await this.SendRequestAsync(new ServiceOperation(closeSecureChannelRequest)).ConfigureAwait(false);
-
+                await this.SendRequestAsync(new ServiceOperation(request)).ConfigureAwait(false);
+            }
+            catch { }
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
-        protected override async Task OnFaulted(CancellationToken token = default(CancellationToken))
+        /// <inheritdoc/>
+        protected override async Task OnAbortAsync(CancellationToken token = default(CancellationToken))
         {
-            await base.OnFaulted(token);
             this.channelCts?.Cancel();
-        }
+            if (this.Socket != null && this.Socket.Connected)
+            {
+                var request = new CloseSecureChannelRequest();
+                this.TimestampHeader(request);
+                try
+                {
+                    await this.SendRequestAsync(new ServiceOperation(request)).ConfigureAwait(false);
+                }
+                catch { }
+            }
 
-        protected override Task OnAbortAsync(CancellationToken token)
-        {
-            this.channelCts?.Cancel();
-            this.channelCts?.Dispose();
-            return base.OnAbortAsync(token);
+            await base.OnAbortAsync(token).ConfigureAwait(false);
         }
 
         private static byte[] CalculatePSHA(byte[] secret, byte[] seed, int sizeBytes, string securityPolicyUri)
@@ -1590,7 +1602,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (request.RequestHeader == null)
             {
-                request.RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint };
+                request.RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow };
+                return;
             }
 
             request.RequestHeader.Timestamp = DateTime.UtcNow;

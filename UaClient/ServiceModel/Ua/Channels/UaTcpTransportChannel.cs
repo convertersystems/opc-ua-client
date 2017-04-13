@@ -75,6 +75,11 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public uint RemoteMaxChunkCount { get; protected set; }
 
+        /// <summary>
+        /// Gets the inner TCP socket.
+        /// </summary>
+        protected virtual Socket Socket => this.tcpClient?.Client;
+
         protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
             this.ThrowIfClosedOrNotOpening();
@@ -152,7 +157,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.tcpClient = new TcpClient { NoDelay = true };
             var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl);
-            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
+            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).WithTimeoutAfter(2000).ConfigureAwait(false);
             this.stream = this.tcpClient.GetStream();
 
             // send 'hello'.

@@ -151,6 +151,11 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
+        /// State changed.
+        /// </summary>
+        public event EventHandler StateChanged;
+
+        /// <summary>
         /// Gets the <see cref="ApplicationDescription"/> of the local application.
         /// </summary>
         public ApplicationDescription LocalDescription { get; }
@@ -227,6 +232,7 @@ namespace Workstation.ServiceModel.Ua
                 if (this.state != value)
                 {
                     this.state = value;
+                    this.StateChanged?.Invoke(this, new EventArgs());
                 }
             }
         }
@@ -343,7 +349,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A task.</returns>
         private async Task StateMachineAsync(CancellationToken token = default(CancellationToken))
         {
-            int reconnectDelay = 1000;
+            int reconnectDelay = 2000;
 
             while (!token.IsCancellationRequested)
             {
@@ -355,7 +361,7 @@ namespace Workstation.ServiceModel.Ua
                     // Opening.
                     this.State = CommunicationState.Opening;
                     await this.OpenAsync(token).ConfigureAwait(false);
-                    reconnectDelay = 1000;
+                    reconnectDelay = 2000;
 
                     // Opened.
                     this.State = CommunicationState.Opened;
@@ -461,16 +467,16 @@ namespace Workstation.ServiceModel.Ua
                     this.linkToken = this.pendingRequests.LinkTo(this.innerChannel);
 
                     //// create an internal subscription.
-                    //var subscriptionRequest = new CreateSubscriptionRequest
-                    //{
-                    //    RequestedPublishingInterval = DefaultPublishingInterval,
-                    //    RequestedMaxKeepAliveCount = DefaultKeepaliveCount,
-                    //    RequestedLifetimeCount = (uint)(this.SessionTimeout / DefaultPublishingInterval),
-                    //    PublishingEnabled = true,
-                    //    Priority = 0
-                    //};
-                    //var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
-                    //this.subscriptionId = subscriptionResponse.SubscriptionId;
+                    var subscriptionRequest = new CreateSubscriptionRequest
+                    {
+                        RequestedPublishingInterval = DefaultPublishingInterval,
+                        RequestedMaxKeepAliveCount = DefaultKeepaliveCount,
+                        RequestedLifetimeCount = (uint)(this.SessionTimeout / DefaultPublishingInterval),
+                        PublishingEnabled = true,
+                        Priority = 0
+                    };
+                    var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
+                    this.subscriptionId = subscriptionResponse.SubscriptionId;
                 }
                 catch (Exception ex)
                 {
@@ -683,6 +689,7 @@ namespace Workstation.ServiceModel.Ua
                             continue;
                         }
 
+                        this.innerChannel.Fault(ex);
                         return;
                     }
                 }
