@@ -30,7 +30,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Initializes a new instance of the <see cref="CommunicationObject"/> class.
         /// </summary>
-        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="loggerFactory">The logger.</param>
         public CommunicationObject(ILoggerFactory loggerFactory = null)
         {
             this.logger = loggerFactory?.CreateLogger(this.GetType());
@@ -53,11 +53,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <returns>A value from the <see cref="T:ConverterSystems.ServiceModel.Ua.CommunicationState" /> enumeration that indicates the current state of the object.</returns>
         public CommunicationState State { get; protected set; }
-
-        /// <summary>
-        /// Gets the current logger
-        /// </summary>
-        protected virtual ILogger Logger => this.logger;
 
         /// <summary>
         /// Causes a communication object to transition immediately from its current state into the closing state.

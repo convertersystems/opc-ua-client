@@ -14,17 +14,24 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionAttribute"/> class.
         /// </summary>
+        /// <param name="endpointName">the endpoint name.</param>
         /// <param name="publishingInterval">the publishing interval.</param>
         /// <param name="keepAliveCount">the number of PublishingIntervals before the server should return an empty Publish response.</param>
         /// <param name="lifetimeCount">the number of PublishingIntervals before the server should delete the subscription.</param>
         /// <param name="publishingEnabled">whether publishing is enabled.</param>
-        public SubscriptionAttribute(double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, bool publishingEnabled = true)
+        public SubscriptionAttribute(string endpointName, double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, bool publishingEnabled = true)
         {
+            this.EndpointName = endpointName;
             this.PublishingInterval = publishingInterval;
             this.KeepAliveCount = keepAliveCount;
             this.LifetimeCount = lifetimeCount;
             this.PublishingEnabled = publishingEnabled;
         }
+
+        /// <summary>
+        /// Gets the endpoint name.
+        /// </summary>
+        public string EndpointName { get; }
 
         /// <summary>
         /// Gets the publishing interval.

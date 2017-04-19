@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
-    /// A channel that opens a TCP socket.
+    /// A channel for communicating with OPC UA servers using the UA TCP transport profile.
     /// </summary>
     public class UaTcpTransportChannel : CommunicationObject
     {
@@ -19,9 +19,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const uint DefaultBufferSize = 64 * 1024;
         public const uint DefaultMaxMessageSize = 16 * 1024 * 1024;
         public const uint DefaultMaxChunkCount = 4 * 1024;
-
         private const int MinBufferSize = 8 * 1024;
-        private static readonly Task completedTask = Task.FromResult(true);
+        private static readonly Task CompletedTask = Task.FromResult(true);
+
+        private readonly ILogger logger;
+        private readonly UaTcpTransportChannelOptions options;
         private byte[] sendBuffer;
         private byte[] receiveBuffer;
         private Stream stream;
@@ -32,17 +34,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <param name="remoteEndpoint">The remote endpoint.</param>
         /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
-        /// <param name="localSendBufferSize">The size of the send buffer.</param>
-        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
-        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        /// <param name="options">The transport channel options.</param>
         public UaTcpTransportChannel(
             EndpointDescription remoteEndpoint,
             ILoggerFactory loggerFactory = null,
-            uint localReceiveBufferSize = DefaultBufferSize,
-            uint localSendBufferSize = DefaultBufferSize,
-            uint localMaxMessageSize = DefaultMaxMessageSize,
-            uint localMaxChunkCount = DefaultMaxChunkCount)
+            UaTcpTransportChannelOptions options = null)
             : base(loggerFactory)
         {
             if (remoteEndpoint == null)
@@ -51,28 +47,38 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.RemoteEndpoint = remoteEndpoint;
-            this.LocalReceiveBufferSize = localReceiveBufferSize;
-            this.LocalSendBufferSize = localSendBufferSize;
-            this.LocalMaxMessageSize = localMaxMessageSize;
-            this.LocalMaxChunkCount = localMaxChunkCount;
+            this.options = options ?? new UaTcpTransportChannelOptions();
+            this.logger = loggerFactory?.CreateLogger<UaTcpTransportChannel>();
         }
 
+        /// <summary>
+        /// Gets the remote endpoint.
+        /// </summary>
         public EndpointDescription RemoteEndpoint { get; }
 
-        public uint LocalReceiveBufferSize { get; }
+        /// <summary>
+        /// Gets the transport channel options.
+        /// </summary>
+        public UaTcpTransportChannelOptions UaTcpTransportChannelOptions { get; }
 
-        public uint LocalSendBufferSize { get; }
-
-        public uint LocalMaxMessageSize { get; }
-
-        public uint LocalMaxChunkCount { get; }
-
+        /// <summary>
+        /// Gets the size of the remote receive buffer.
+        /// </summary>
         public uint RemoteReceiveBufferSize { get; protected set; }
 
+        /// <summary>
+        /// Gets the size of the remote send buffer.
+        /// </summary>
         public uint RemoteSendBufferSize { get; protected set; }
 
+        /// <summary>
+        /// Gets the maximum size of a message that may be sent.
+        /// </summary>
         public uint RemoteMaxMessageSize { get; protected set; }
 
+        /// <summary>
+        /// Gets the maximum number of message chunks that may be sent.
+        /// </summary>
         public uint RemoteMaxChunkCount { get; protected set; }
 
         /// <summary>
@@ -80,12 +86,28 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         protected virtual Socket Socket => this.tcpClient?.Client;
 
+        /// <summary>
+        /// Asynchronously sends a sequence of bytes to the remote endpoint.
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="count">The count.</param>
+        /// <param name="token">A cancellation token.</param>
+        /// <returns>A task.</returns>
         protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
             this.ThrowIfClosedOrNotOpening();
             await this.stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Asynchronously receives a sequence of bytes from the remote endpoint.
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="offset">The offset.</param>
+        /// <param name="count">The count.</param>
+        /// <param name="token">A cancellation token.</param>
+        /// <returns>A task.</returns>
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
             this.ThrowIfClosedOrNotOpening();
@@ -149,6 +171,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return offset - initialOffset;
         }
 
+        /// <inheritdoc/>
         protected override async Task OnOpenAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -157,7 +180,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.tcpClient = new TcpClient { NoDelay = true };
             var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl);
-            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).WithTimeoutAfter(2000).ConfigureAwait(false);
+            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
             this.stream = this.tcpClient.GetStream();
 
             // send 'hello'.
@@ -168,10 +191,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                 encoder.WriteUInt32(null, UaTcpMessageTypes.HELF);
                 encoder.WriteUInt32(null, 0u);
                 encoder.WriteUInt32(null, ProtocolVersion);
-                encoder.WriteUInt32(null, this.LocalReceiveBufferSize);
-                encoder.WriteUInt32(null, this.LocalSendBufferSize);
-                encoder.WriteUInt32(null, this.LocalMaxMessageSize);
-                encoder.WriteUInt32(null, this.LocalMaxChunkCount);
+                encoder.WriteUInt32(null, this.options.LocalReceiveBufferSize);
+                encoder.WriteUInt32(null, this.options.LocalSendBufferSize);
+                encoder.WriteUInt32(null, this.options.LocalMaxMessageSize);
+                encoder.WriteUInt32(null, this.options.LocalMaxChunkCount);
                 encoder.WriteString(null, uri.ToString());
                 count = encoder.Position;
                 encoder.Position = 4;
@@ -231,24 +254,26 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <inheritdoc/>
         protected override Task OnCloseAsync(CancellationToken token)
         {
-#if NETSTANDARD
+#if NETSTANDARD1_4
             this.tcpClient?.Dispose();
 #else
             this.tcpClient?.Close();
 #endif
-            return completedTask;
+            return CompletedTask;
         }
 
+        /// <inheritdoc/>
         protected override Task OnAbortAsync(CancellationToken token)
         {
-#if NETSTANDARD
+#if NETSTANDARD1_4
             this.tcpClient?.Dispose();
 #else
             this.tcpClient?.Close();
 #endif
-            return completedTask;
+            return CompletedTask;
         }
     }
 }

@@ -53,7 +53,7 @@ namespace Workstation.UaClient.UnitTests
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
             foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.Where(e => e.SecurityMode == MessageSecurityMode.None))
@@ -82,7 +82,7 @@ namespace Workstation.UaClient.UnitTests
                     var channel = new UaTcpSessionChannel(
                         this.localDescription,
                         null,
-                        selectedUserIdentity,
+                        async e => selectedUserIdentity,
                         selectedEndpoint,
                         loggerFactory: this.loggerFactory);
 
@@ -113,7 +113,7 @@ namespace Workstation.UaClient.UnitTests
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
             foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel))
@@ -142,28 +142,19 @@ namespace Workstation.UaClient.UnitTests
                     var channel = new UaTcpSessionChannel(
                         this.localDescription,
                         this.certificateStore,
-                        selectedUserIdentity,
+                        async e => selectedUserIdentity,
                         selectedEndpoint,
                         loggerFactory: this.loggerFactory,
-                        timeoutHint: 60000);
+                        options: new UaTcpSessionChannelOptions { TimeoutHint = 60000 });
 
                     Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                     Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
                     Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
                     Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
 
-                    try
-                    {
-                        await channel.OpenAsync();
-                        Console.WriteLine($"Closing session '{channel.SessionId}'.");
-                        await channel.CloseAsync();
-
-                    }
-                    catch (Exception ex)
-                    {
-
-                        throw;
-                    }
+                    await channel.OpenAsync();
+                    Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                    await channel.CloseAsync();
                 }
             }
         }
@@ -183,7 +174,7 @@ namespace Workstation.UaClient.UnitTests
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
+            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
             var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
 
             var selectedTokenType = selectedEndpoint.UserIdentityTokens[0].TokenType;
@@ -206,10 +197,10 @@ namespace Workstation.UaClient.UnitTests
             var channel = new UaTcpSessionChannel(
                 this.localDescription,
                 this.certificateStore,
-                selectedUserIdentity,
+                async e => selectedUserIdentity,
                 selectedEndpoint,
                 loggerFactory: this.loggerFactory,
-                sessionTimeout: 10000);
+                options: new UaTcpSessionChannelOptions { SessionTimeout = 10000 });
 
             Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
             Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
@@ -229,113 +220,38 @@ namespace Workstation.UaClient.UnitTests
         }
 
         /// <summary>
-        /// Tests reconnecting to previous endpoint and transferring subscriptions.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
-        public async Task TransferSubscriptions()
-        {
-            // discover available endpoints of server.
-            var getEndpointsRequest = new GetEndpointsRequest
-            {
-                EndpointUrl = this.endpointUrl,
-                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
-            };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
-            var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
-
-            IUserIdentity selectedUserIdentity = new UserNameIdentity("root", "secret");
-
-            var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
-                selectedUserIdentity,
-                selectedEndpoint,
-                loggerFactory: this.loggerFactory);
-
-            Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            await channel.OpenAsync();
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
-            var req = new CreateSubscriptionRequest
-            {
-                RequestedPublishingInterval = 1000,
-                RequestedMaxKeepAliveCount = 20,
-                PublishingEnabled = true
-            };
-            var res = await channel.CreateSubscriptionAsync(req);
-            Console.WriteLine($"Created subscription '{res.SubscriptionId}'.");
-
-            Console.WriteLine($"Aborting session '{channel.SessionId}'.");
-            await channel.AbortAsync();
-
-            var channel2 = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
-                selectedUserIdentity,
-                selectedEndpoint,
-                loggerFactory: this.loggerFactory);
-
-            await channel2.OpenAsync();
-            Console.WriteLine($"Activated session '{channel2.SessionId}'.");
-
-            var req2 = new TransferSubscriptionsRequest
-            {
-                SubscriptionIds = new[] { res.SubscriptionId }
-            };
-            var res2 = await channel2.TransferSubscriptionsAsync(req2);
-            Console.WriteLine($"Transferred subscription result '{res2.Results[0].StatusCode}'.");
-            Console.WriteLine($"Closing session '{channel2.SessionId}'.");
-            await channel2.CloseAsync();
-
-            Assert.IsTrue(StatusCode.IsGood(res2.Results[0].StatusCode));
-        }
-
-        /// <summary>
         /// Tests connecting to endpoint and creating subscriptions.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [TestMethod]
         public async Task TestSubscription()
         {
-            // discover available endpoints of server.
-            var getEndpointsRequest = new GetEndpointsRequest
-            {
-                EndpointUrl = this.endpointUrl,
-                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
-            };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryClient.GetEndpointsAsync(getEndpointsRequest);
-            var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
 
-            var session = new UaTcpSessionClient(
-                this.localDescription,
-                this.certificateStore,
-                ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
-                selectedEndpoint,
-                loggerFactory: this.loggerFactory);
+            var app = new UaApplicationBuilder()
+                .UseApplicationUri(@"urn:%COMPUTERNAME%:Workstation.UaClient.UnitTests")
+                .UseDirectoryStore(@"%LOCALAPPDATA%\Workstation.UaClient.UnitTests\pki")
+                .UseIdentityProvider(async e => new UserNameIdentity("root", "secret"))
+                .UseLoggerFactory(this.loggerFactory)
+                .AddEndpoint("PLC1", this.endpointUrl)
+                .Build();
 
-            Console.WriteLine($"Creating session with endpoint '{session.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{session.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{session.RemoteEndpoint.SecurityMode}'.");
+            app.Run();
 
             var sub = new MySubscription();
-            session.Subscribe(sub);
+            sub.PropertyChanged += (s, e) => { };
 
             Console.WriteLine($"Created subscription.");
 
             await Task.Delay(5000);
-            session.Dispose();
+            app.Dispose();
 
             Assert.IsTrue(sub.CurrentTime != DateTime.MinValue, "CurrentTime");
             Assert.IsTrue(sub.CurrentTimeAsDataValue != null, "CurrentTimeAsDataValue");
             Assert.IsTrue(sub.CurrentTimeQueue.Count > 0, "CurrentTimeQueue");
         }
 
-        [Subscription(publishingInterval: 500, keepAliveCount: 20)]
-        private class MySubscription
+        [Subscription(endpointName: "PLC1", publishingInterval: 500, keepAliveCount: 20)]
+        private class MySubscription : SubscriptionBase
         {
             /// <summary>
             /// Gets the value of CurrentTime.

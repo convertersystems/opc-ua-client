@@ -36,16 +36,16 @@ using Org.BouncyCastle.X509.Extension;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
-
     /// <summary>
-    /// A channel that opens a secure channel.
+    /// A secure channel for communicating with OPC UA servers using the UA TCP transport profile.
     /// </summary>
-    public class UaTcpSecureChannel : UaTcpTransportChannel, IRequestChannel, ITargetBlock<ServiceOperation>
+    public class UaTcpSecureChannel : UaTcpTransportChannel, IRequestChannel
     {
         public const uint DefaultTimeoutHint = 15 * 1000; // 15 seconds
         public const uint DefaultDiagnosticsHint = (uint)DiagnosticFlags.None;
+        public const uint PublishTimeoutHint = 10 * 60 * 1000; // 10 minutes
         private const int SequenceHeaderSize = 8;
-        private const int TokenRequestedLifetime = 60 * 60 * 1000; // 1 hour
+        private const int TokenRequestedLifetime = 60 * 60 * 1000; // 60 minutes
 
         private static readonly NodeId OpenSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId CloseSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.CloseSecureChannelRequest_Encoding_DefaultBinary);
@@ -53,7 +53,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         private static readonly NodeId PublishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
         private static readonly SecureRandom Rng = new SecureRandom();
 
-        private readonly CancellationTokenSource channelCts;
+        protected readonly CancellationTokenSource channelCts;
+        private readonly ILogger logger;
+        private readonly UaTcpSecureChannelOptions options;
         private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim receivingSemaphore = new SemaphoreSlim(1, 1);
         private readonly ActionBlock<ServiceOperation> pendingRequests;
@@ -142,24 +144,14 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="remoteEndpoint">The remote endpoint</param>
         /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
-        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
-        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
-        /// <param name="localSendBufferSize">The size of the send buffer.</param>
-        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
-        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        /// <param name="options">The secure channel options.</param>
         public UaTcpSecureChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
             EndpointDescription remoteEndpoint,
             ILoggerFactory loggerFactory = null,
-            uint timeoutHint = DefaultTimeoutHint,
-            uint diagnosticsHint = DefaultDiagnosticsHint,
-            uint localReceiveBufferSize = DefaultBufferSize,
-            uint localSendBufferSize = DefaultBufferSize,
-            uint localMaxMessageSize = DefaultMaxMessageSize,
-            uint localMaxChunkCount = DefaultMaxChunkCount)
-            : base(remoteEndpoint, loggerFactory, localReceiveBufferSize, localSendBufferSize, localMaxMessageSize, localMaxChunkCount)
+            UaTcpSecureChannelOptions options = null)
+            : base(remoteEndpoint, loggerFactory, options)
         {
             if (localDescription == null)
             {
@@ -168,9 +160,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
-            this.RemoteCertificate = this.RemoteEndpoint.ServerCertificate;
-            this.TimeoutHint = timeoutHint;
-            this.DiagnosticsHint = diagnosticsHint;
+            this.options = options ?? new UaTcpSecureChannelOptions();
+
+            this.logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
             this.AuthenticationToken = null;
             this.NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
             this.ServerUris = new List<string>();
@@ -189,19 +181,15 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ICertificateStore CertificateStore { get; }
 
-        protected byte[] LocalCertificate { get; set; }
+        protected byte[] LocalCertificate { get; private set; }
 
-        protected byte[] RemoteCertificate { get; set; }
+        protected byte[] RemoteCertificate => this.RemoteEndpoint.ServerCertificate;
 
-        protected RsaKeyParameters LocalPrivateKey { get; set; }
+        protected RsaKeyParameters LocalPrivateKey { get; private set; }
 
-        protected RsaKeyParameters RemotePublicKey { get; set; }
+        protected RsaKeyParameters RemotePublicKey { get; private set; }
 
         protected byte[] LocalNonce { get; private set; }
-
-        public uint TimeoutHint { get; }
-
-        public uint DiagnosticsHint { get; }
 
         public uint ChannelId { get; protected set; }
 
@@ -212,8 +200,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         public List<string> NamespaceUris { get; protected set; }
 
         public List<string> ServerUris { get; protected set; }
-
-        public Task Completion => this.pendingRequests.Completion;
 
         public static void RegisterEncodables(Assembly assembly)
         {
@@ -305,13 +291,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     if (this.CertificateStore != null)
                     {
-                        try
+                        var result = await this.CertificateStore.ValidateRemoteCertificateAsync(cert, this.logger);
+                        if (!result)
                         {
-                            var result = this.CertificateStore.ValidateRemoteCertificate(cert);
-
-                        }
-                        catch (Exception ex)
-                        {
+                            throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Remote certificate is untrusted.");
                         }
                     }
 
@@ -323,7 +306,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (this.LocalCertificate == null && this.CertificateStore != null)
                 {
-                    var tuple = this.CertificateStore.GetLocalCertificate(this.LocalDescription);
+                    var tuple = await this.CertificateStore.GetLocalCertificateAsync(this.LocalDescription, this.logger);
                     this.LocalCertificate = tuple.Item1.GetEncoded();
                     this.LocalPrivateKey = tuple.Item2;
                 }
@@ -429,14 +412,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.serverSigningKey = new byte[this.symSignatureKeySize];
                 this.serverEncryptingKey = new byte[this.symEncryptionKeySize];
                 this.serverInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.encryptionBuffer = new byte[this.LocalSendBufferSize];
+                this.encryptionBuffer = new byte[this.options.LocalSendBufferSize];
                 this.thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
             }
             else if (this.RemoteEndpoint.SecurityMode == MessageSecurityMode.Sign)
             {
                 if (this.LocalCertificate == null && this.CertificateStore != null)
                 {
-                    var tuple = this.CertificateStore.GetLocalCertificate(this.LocalDescription);
+                    var tuple = await this.CertificateStore.GetLocalCertificateAsync(this.LocalDescription, this.logger);
                     this.LocalCertificate = tuple.Item1.GetEncoded();
                     this.LocalPrivateKey = tuple.Item2;
                 }
@@ -450,8 +433,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "RemotePublicKey is null.");
                 }
-
-                this.RemotePublicKey = this.certificateParser.ReadCertificate(this.RemoteCertificate)?.GetPublicKey() as RsaKeyParameters;
 
                 switch (this.RemoteEndpoint.SecurityPolicyUri)
                 {
@@ -538,7 +519,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.serverSigningKey = new byte[this.symSignatureKeySize];
                 this.serverEncryptingKey = new byte[this.symEncryptionKeySize];
                 this.serverInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.encryptionBuffer = new byte[this.LocalSendBufferSize];
+                this.encryptionBuffer = new byte[this.options.LocalSendBufferSize];
                 this.thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
             }
             else if (this.RemoteEndpoint.SecurityMode == MessageSecurityMode.None)
@@ -565,18 +546,21 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        protected override async Task OnOpenAsync(CancellationToken token)
+        /// <inheritdoc/>
+        protected override async Task OnOpenAsync(CancellationToken token = default(CancellationToken))
         {
             await base.OnOpenAsync(token).ConfigureAwait(false);
+
             token.ThrowIfCancellationRequested();
-            this.sendBuffer = new byte[this.LocalSendBufferSize];
-            this.receiveBuffer = new byte[this.LocalReceiveBufferSize];
+
+            this.sendBuffer = new byte[this.options.LocalSendBufferSize];
+            this.receiveBuffer = new byte[this.options.LocalReceiveBufferSize];
 
             this.receiveResponsesTask = this.ReceiveResponsesAsync(this.channelCts.Token);
 
             var openSecureChannelRequest = new OpenSecureChannelRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
+                RequestHeader = new RequestHeader { TimeoutHint = this.options.TimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
                 ClientProtocolVersion = ProtocolVersion,
                 RequestType = SecurityTokenRequestType.Issue,
                 SecurityMode = this.RemoteEndpoint.SecurityMode,
@@ -679,7 +663,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                this.Logger?.LogError($"Error sending request. {ex.Message}");
+                this.logger?.LogError($"Error sending request. {ex.Message}");
                 await this.FaultAsync(ex).ConfigureAwait(false);
             }
         }
@@ -700,8 +684,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     {
                         RequestHeader = new RequestHeader
                         {
-                            TimeoutHint = this.TimeoutHint,
-                            ReturnDiagnostics = this.DiagnosticsHint,
+                            TimeoutHint = this.options.TimeoutHint,
+                            ReturnDiagnostics = this.options.DiagnosticsHint,
                             Timestamp = DateTime.UtcNow,
                             RequestHandle = this.GetNextHandle(),
                             AuthenticationToken = this.AuthenticationToken
@@ -712,7 +696,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce(this.symEncryptionKeySize) : null,
                         RequestedLifetime = TokenRequestedLifetime
                     };
-                    this.Logger?.LogTrace($"Sending {openSecureChannelRequest.GetType().Name} Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
+                    this.logger?.LogTrace($"Sending {openSecureChannelRequest.GetType().Name}, Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
                     this.pendingCompletions.TryAdd(openSecureChannelRequest.RequestHeader.RequestHandle, new ServiceOperation(openSecureChannelRequest));
                     await this.SendOpenSecureChannelRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
                 }
@@ -720,7 +704,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 request.RequestHeader.RequestHandle = this.GetNextHandle();
                 request.RequestHeader.AuthenticationToken = this.AuthenticationToken;
 
-                this.Logger?.LogTrace($"Sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}");
+                this.logger?.LogTrace($"Sending {request.GetType().Name}, Handle: {request.RequestHeader.RequestHandle}");
                 this.pendingCompletions.TryAdd(request.RequestHeader.RequestHandle, operation);
                 if (request is OpenSecureChannelRequest)
                 {
@@ -737,7 +721,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                this.Logger?.LogError($"Error sending {request.GetType().Name} Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
+                this.logger?.LogError($"Error sending {request.GetType().Name}, Handle: {request.RequestHeader.RequestHandle}. {ex.Message}");
                 throw;
             }
             finally
@@ -1283,7 +1267,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                this.Logger?.LogError($"Error receiving response. {ex.Message}");
+                this.logger?.LogError($"Error receiving response. {ex.Message}");
                 await this.FaultAsync(ex).ConfigureAwait(false);
             }
         }
@@ -1312,12 +1296,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                     do
                     {
                         chunkCount++;
-                        if (this.LocalMaxChunkCount > 0 && chunkCount > this.LocalMaxChunkCount)
+                        if (this.options.LocalMaxChunkCount > 0 && chunkCount > this.options.LocalMaxChunkCount)
                         {
                             throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                         }
 
-                        var count = await this.ReceiveAsync(this.receiveBuffer, 0, (int)this.LocalReceiveBufferSize, token).ConfigureAwait(false);
+                        var count = await this.ReceiveAsync(this.receiveBuffer, 0, (int)this.options.LocalReceiveBufferSize, token).ConfigureAwait(false);
                         if (count == 0)
                         {
                             return null;
@@ -1362,7 +1346,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                             }
                                         }
 
-                                        this.Logger?.LogTrace($"Installed new security token {tokenId}.");
+                                        this.logger?.LogTrace($"Installed new security token {tokenId}.");
                                     }
 
                                     plainHeaderSize = decoder.Position;
@@ -1420,7 +1404,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     break;
 
                                 case UaTcpMessageTypes.OPNF:
-                                case UaTcpMessageTypes.OPNC:
                                     // header
                                     channelId = decoder.ReadUInt32(null);
 
@@ -1493,8 +1476,6 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                                 case UaTcpMessageTypes.ERRF:
                                 case UaTcpMessageTypes.MSGA:
-                                case UaTcpMessageTypes.OPNA:
-                                case UaTcpMessageTypes.CLOA:
                                     var statusCode = (StatusCode)decoder.ReadUInt32(null);
                                     var message = decoder.ReadString(null);
                                     if (message != null)
@@ -1507,7 +1488,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     throw new ServiceResultException(StatusCodes.BadUnknownResponse);
                             }
 
-                            if (this.LocalMaxMessageSize > 0 && bodyStream.Position > this.LocalMaxMessageSize)
+                            if (this.options.LocalMaxMessageSize > 0 && bodyStream.Position > this.options.LocalMaxMessageSize)
                             {
                                 throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                             }
@@ -1547,7 +1528,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // set properties from message stream
                     response.Decode(bodyDecoder);
 
-                    this.Logger?.LogTrace($"Received {response.GetType().Name} Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
+                    this.logger?.LogTrace($"Received {response.GetType().Name}, Handle: {response.ResponseHeader.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
 
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.
@@ -1602,7 +1583,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (request.RequestHeader == null)
             {
-                request.RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow };
+                request.RequestHeader = new RequestHeader { TimeoutHint = this.options.TimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint, Timestamp = DateTime.UtcNow };
                 return;
             }
 
@@ -1659,21 +1640,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             var operation = (ServiceOperation)o;
             operation.TrySetException(this.GetPendingException() ?? new ServiceResultException(StatusCodes.BadRequestTimeout));
-        }
-
-        public DataflowMessageStatus OfferMessage(DataflowMessageHeader messageHeader, ServiceOperation messageValue, ISourceBlock<ServiceOperation> source, bool consumeToAccept)
-        {
-            return ((ITargetBlock<ServiceOperation>)this.pendingRequests).OfferMessage(messageHeader, messageValue, source, consumeToAccept);
-        }
-
-        public void Complete()
-        {
-            this.pendingRequests.Complete();
-        }
-
-        public void Fault(Exception exception)
-        {
-            ((IDataflowBlock)this.pendingRequests).Fault(exception);
         }
     }
 }
