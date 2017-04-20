@@ -32,6 +32,11 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(uri));
             }
 
+            if (this.localDescription != null)
+            {
+                throw new InvalidOperationException("The localDescription has already been specified.");
+            }
+
             string appName = null;
 
             UriBuilder appUri = new UriBuilder(Environment.ExpandEnvironmentVariables(uri));
@@ -82,22 +87,33 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(path));
             }
 
+            if (this.certificateStore != null)
+            {
+                throw new InvalidOperationException("The certificateStore has already been specified.");
+            }
+
             this.certificateStore = new DirectoryStore(path, acceptAllRemoteCertificates, createLocalCertificateIfNotExist);
             return this;
         }
 
         /// <summary>
-        /// Use the <see cref="AnonymousIdentity"/>.
+        /// Use the <see cref="IUserIdentity"/>.
         /// </summary>
+        /// <param name="identity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseAnonymousIdentity()
+        public UaApplicationBuilder UseIdentity(IUserIdentity identity)
         {
-            if (this.identityProvider != null)
+            if (identity == null)
             {
-                throw new InvalidOperationException("The IdentityProvider has already been specified.");
+                throw new ArgumentNullException(nameof(identity));
             }
 
-            this.identityProvider = async endpoint => new AnonymousIdentity();
+            if (this.identityProvider != null)
+            {
+                throw new InvalidOperationException("The identityProvider has already been specified.");
+            }
+
+            this.identityProvider = async endpoint => identity;
             return this;
         }
 
@@ -134,6 +150,11 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
+            if (this.loggerFactory != null)
+            {
+                throw new InvalidOperationException("The loggerFactory has already been specified.");
+            }
+
             this.loggerFactory = loggerFactory;
             return this;
         }
@@ -148,6 +169,11 @@ namespace Workstation.ServiceModel.Ua
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
+            }
+
+            if (this.options != null)
+            {
+                throw new InvalidOperationException("The options has already been specified.");
             }
 
             this.options = options;
@@ -208,21 +234,6 @@ namespace Workstation.ServiceModel.Ua
             if (this.localDescription == null)
             {
                 throw new InvalidOperationException("An ApplicationUri or ApplicationDescription must be specified.");
-            }
-
-            if (this.certificateStore == null)
-            {
-                throw new InvalidOperationException("An CertificateStore must be specified.");
-            }
-
-            if (this.identityProvider == null)
-            {
-                throw new InvalidOperationException("An IdentityProvider or AnonymousIdentity must be specified.");
-            }
-
-            if (this.endpoints == null)
-            {
-                throw new InvalidOperationException("An Endpoints dictionary must be specified.");
             }
 
             return new UaApplication(

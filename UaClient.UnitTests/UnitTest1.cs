@@ -86,12 +86,12 @@ namespace Workstation.UaClient.UnitTests
                         selectedEndpoint,
                         loggerFactory: this.loggerFactory);
 
-                    Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                    await channel.OpenAsync();
+                    Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                     Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
                     Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
                     Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
 
-                    await channel.OpenAsync();
                     Console.WriteLine($"Closing session '{channel.SessionId}'.");
                     await channel.CloseAsync();
                 }
@@ -147,12 +147,12 @@ namespace Workstation.UaClient.UnitTests
                         loggerFactory: this.loggerFactory,
                         options: new UaTcpSessionChannelOptions { TimeoutHint = 60000 });
 
-                    Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                    await channel.OpenAsync();
+                    Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
                     Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
                     Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
                     Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
 
-                    await channel.OpenAsync();
                     Console.WriteLine($"Closing session '{channel.SessionId}'.");
                     await channel.CloseAsync();
                 }
@@ -202,10 +202,10 @@ namespace Workstation.UaClient.UnitTests
                 loggerFactory: this.loggerFactory,
                 options: new UaTcpSessionChannelOptions { SessionTimeout = 10000 });
 
-            Console.WriteLine($"Creating session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            await channel.OpenAsync();
+            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
             Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
             Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            await channel.OpenAsync();
             Console.WriteLine($"Activated session '{channel.SessionId}'.");
 
             // server should close session due to inactivity

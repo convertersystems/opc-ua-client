@@ -42,16 +42,6 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(localDescription));
             }
 
-            if (certificateStore == null)
-            {
-                throw new ArgumentNullException(nameof(certificateStore));
-            }
-
-            if (userIdentityProvider == null)
-            {
-                throw new ArgumentNullException(nameof(userIdentityProvider));
-            }
-
             if (remoteEndpoint == null)
             {
                 throw new ArgumentNullException(nameof(remoteEndpoint));

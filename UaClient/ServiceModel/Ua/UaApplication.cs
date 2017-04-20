@@ -58,21 +58,6 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(localDescription));
             }
 
-            if (certificateStore == null)
-            {
-                throw new ArgumentNullException(nameof(certificateStore));
-            }
-
-            if (userIdentityProvider == null)
-            {
-                throw new ArgumentNullException(nameof(userIdentityProvider));
-            }
-
-            if (endpoints == null)
-            {
-                throw new ArgumentNullException(nameof(endpoints));
-            }
-
             this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
             this.UserIdentityProvider = userIdentityProvider;

@@ -97,16 +97,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         public IUserIdentity UserIdentity { get; private set; }
 
         /// <summary>
-        /// Gets the number of milliseconds that a session may be unused before being closed by the server.
-        /// </summary>
-        //public double SessionTimeout { get; }
-
-        /// <summary>
-        /// Gets the number of PublishRequests that the channel sends.
-        /// </summary>
-        //public uint PublishTasks { get; }
-
-        /// <summary>
         /// Gets the session id provided by the server.
         /// </summary>
         public NodeId SessionId { get; private set; }
