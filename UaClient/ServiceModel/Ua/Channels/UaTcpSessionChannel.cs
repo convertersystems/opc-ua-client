@@ -92,7 +92,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     ClientNonce = localNonce,
                     ClientCertificate = localCertificate,
                     RequestedSessionTimeout = this.SessionTimeout,
-                    MaxResponseMessageSize = this.RemoteMaxMessageSize
+                    MaxResponseMessageSize = 0
                 };
 
                 var createSessionResponse = await this.CreateSessionAsync(createSessionRequest).ConfigureAwait(false);

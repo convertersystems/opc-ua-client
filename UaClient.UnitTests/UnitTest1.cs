@@ -28,9 +28,10 @@ namespace Workstation.UaClient.UnitTests
         private ICertificateStore certificateStore = new DirectoryStore(
             Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\Workstation.UaClient.UnitTests\pki"));
 
-        // private string endpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
-        // private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
+        // private string endpointUrl = @"opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
+        // private string endpointUrl = @"opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
+        private string endpointUrl = @"opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys OPC Server.
+        // private string endpointUrl = @"opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
 
         public UnitTest1()
         {
@@ -313,7 +314,7 @@ namespace Workstation.UaClient.UnitTests
             var session = new UaTcpSessionClient(
                 this.localDescription,
                 this.certificateStore,
-                ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
+                ed => Task.FromResult<IUserIdentity>(new AnonymousIdentity()),
                 selectedEndpoint,
                 loggerFactory: this.loggerFactory);
 
