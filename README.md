@@ -71,6 +71,8 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
     }
 ```
 ### Releases
+v1.5.12 Improve encoder limits.
+
 v1.5.10 Added Socket connectAsync timeout of 2 seconds.
 
 v1.5.8 Bugfix for UaTcpSecureChannel DataLengthException
