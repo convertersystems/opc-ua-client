@@ -202,7 +202,7 @@ namespace Workstation.ServiceModel.Ua
             UaTcpSessionChannelFactory factory;
             if (!this.channelMap.TryGetValue(name, out factory))
             {
-                throw new InvalidOperationException("The endpoint name was not found.");
+                throw new InvalidOperationException($"The endpoint '{name}' was not found.");
             }
 
             return await factory.GetChannelAsync(token).ConfigureAwait(false);
