@@ -43,7 +43,7 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(path));
             }
 
-            this.pkiPath = Environment.ExpandEnvironmentVariables(path);
+            this.pkiPath = path;
             this.AcceptAllRemoteCertificates = acceptAllRemoteCertificates;
             this.CreateLocalCertificateIfNotExist = createLocalCertificateIfNotExist;
         }
@@ -267,35 +267,39 @@ namespace Workstation.ServiceModel.Ua
             }
 
             var trustedCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
-            var trustedCertsInfo = new DirectoryInfo(Path.Combine(this.pkiPath, "trusted", "certs"));
-            if (trustedCertsInfo.Exists)
+            var trustedCertsInfo = new DirectoryInfo(Path.Combine(this.pkiPath, "trusted"));
+            if (!trustedCertsInfo.Exists)
             {
-                foreach (var info in trustedCertsInfo.EnumerateFiles())
+                trustedCertsInfo.Create();
+            }
+
+            foreach (var info in trustedCertsInfo.EnumerateFiles())
+            {
+                using (var crtStream = info.OpenRead())
                 {
-                    using (var crtStream = info.OpenRead())
+                    var crt = this.certParser.ReadCertificate(crtStream);
+                    if (crt != null)
                     {
-                        var crt = this.certParser.ReadCertificate(crtStream);
-                        if (crt != null)
-                        {
-                            trustedCerts.Add(crt);
-                        }
+                        trustedCerts.Add(crt);
                     }
                 }
             }
 
             var intermediateCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
-            var intermediateCertsInfo = new DirectoryInfo(Path.Combine(this.pkiPath, "issuer", "certs"));
-            if (intermediateCertsInfo.Exists)
+            var intermediateCertsInfo = new DirectoryInfo(Path.Combine(this.pkiPath, "issuer"));
+            if (!intermediateCertsInfo.Exists)
             {
-                foreach (var info in intermediateCertsInfo.EnumerateFiles())
+                intermediateCertsInfo.Create();
+            }
+
+            foreach (var info in intermediateCertsInfo.EnumerateFiles())
+            {
+                using (var crtStream = info.OpenRead())
                 {
-                    using (var crtStream = info.OpenRead())
+                    var crt = this.certParser.ReadCertificate(crtStream);
+                    if (crt != null)
                     {
-                        var crt = this.certParser.ReadCertificate(crtStream);
-                        if (crt != null)
-                        {
-                            intermediateCerts.Add(crt);
-                        }
+                        intermediateCerts.Add(crt);
                     }
                 }
             }
@@ -308,7 +312,13 @@ namespace Workstation.ServiceModel.Ua
                     Certificate = target
                 };
                 IX509Store trustedCertStore = X509StoreFactory.Create("Certificate/Collection", new X509CollectionStoreParameters(trustedCerts));
-                return trustedCertStore.GetMatches(selector).Count > 0;
+                if (trustedCertStore.GetMatches(selector).Count > 0)
+                {
+                    return true;
+                }
+
+                this.StoreInRejectedFolder(target);
+                return false;
             }
 
             try
@@ -317,6 +327,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
+                this.StoreInRejectedFolder(target);
                 return false;
             }
 
@@ -362,7 +373,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="cert">an <see cref="X509Certificate"/>.</param>
         /// <returns>True, if self signed.</returns>
-        public static bool IsSelfSigned(X509Certificate cert)
+        private static bool IsSelfSigned(X509Certificate cert)
         {
             try
             {
@@ -380,6 +391,25 @@ namespace Workstation.ServiceModel.Ua
             {
                 // Invalid key --> not self-signed
                 return false;
+            }
+        }
+
+        private void StoreInRejectedFolder(X509Certificate crt)
+        {
+            var crtInfo = new FileInfo(Path.Combine(this.pkiPath, "rejected", $"{crt.SerialNumber}.crt"));
+            if (!crtInfo.Directory.Exists)
+            {
+                Directory.CreateDirectory(crtInfo.DirectoryName);
+            }
+            else if (crtInfo.Exists)
+            {
+                crtInfo.Delete();
+            }
+
+            using (var crtstream = new StreamWriter(crtInfo.OpenWrite()))
+            {
+                var pemwriter = new PemWriter(crtstream);
+                pemwriter.WriteObject(crt);
             }
         }
     }

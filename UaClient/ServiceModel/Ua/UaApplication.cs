@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,7 @@ namespace Workstation.ServiceModel.Ua
         private static volatile UaApplication appInstance;
 
         private readonly ILogger logger;
-        private readonly ConcurrentDictionary<string, UaTcpSessionChannelFactory> channelMap = new ConcurrentDictionary<string, UaTcpSessionChannelFactory>();
+        private readonly ConcurrentDictionary<string, Lazy<Task<UaTcpSessionChannel>>> channelMap;
         private readonly TaskCompletionSource<bool> completionTask = new TaskCompletionSource<bool>();
         private volatile TaskCompletionSource<bool> suspensionTask = new TaskCompletionSource<bool>();
         private bool disposed;
@@ -31,15 +32,15 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
-        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
-        /// <param name="endpoints">The configured endpoints.</param>
+        /// <param name="identityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="mappedEndpoints">The mapped endpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The application options.</param>
         public UaApplication(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
-            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
-            IDictionary<string, EndpointDescription> endpoints,
+            Func<EndpointDescription, Task<IUserIdentity>> identityProvider,
+            IDictionary<string, EndpointDescription> mappedEndpoints,
             ILoggerFactory loggerFactory = null,
             UaApplicationOptions options = null)
         {
@@ -60,12 +61,13 @@ namespace Workstation.ServiceModel.Ua
 
             this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
-            this.UserIdentityProvider = userIdentityProvider;
-            this.ConfiguredEndpoints = new ReadOnlyDictionary<string, EndpointDescription>(endpoints);
+            this.UserIdentityProvider = identityProvider;
+            this.MappedEndpoints = new ReadOnlyDictionary<string, EndpointDescription>(mappedEndpoints);
             this.LoggerFactory = loggerFactory;
             this.Options = options ?? new UaApplicationOptions();
 
             this.logger = loggerFactory?.CreateLogger<UaApplication>();
+            this.channelMap = new ConcurrentDictionary<string, Lazy<Task<UaTcpSessionChannel>>>();
         }
 
         /// <summary>
@@ -89,9 +91,9 @@ namespace Workstation.ServiceModel.Ua
         public Func<EndpointDescription, Task<IUserIdentity>> UserIdentityProvider { get; }
 
         /// <summary>
-        /// Gets the configured endpoints.
+        /// Gets the mapped endpoints.
         /// </summary>
-        public IReadOnlyDictionary<string, EndpointDescription> ConfiguredEndpoints { get; }
+        public IReadOnlyDictionary<string, EndpointDescription> MappedEndpoints { get; }
 
         /// <summary>
         /// Gets the logger factory.
@@ -133,12 +135,18 @@ namespace Workstation.ServiceModel.Ua
                     appInstance = null;
                 }
 
-                foreach (var factory in this.channelMap.Values)
+                foreach (var value in this.channelMap.Values)
                 {
-                    factory.Dispose();
+                    var task = value.Value;
+                    if (task.Status == TaskStatus.RanToCompletion)
+                    {
+                        try
+                        {
+                            task.Result.CloseAsync().Wait(2000);
+                        }
+                        catch { }
+                    }
                 }
-
-                this.channelMap.Clear();
             }
         }
 
@@ -153,12 +161,20 @@ namespace Workstation.ServiceModel.Ua
                 this.suspensionTask = new TaskCompletionSource<bool>();
             }
 
-            foreach (var factory in this.channelMap.Values)
+            foreach (var value in this.channelMap.Values)
             {
-                await factory.SuspendAsync().ConfigureAwait(false);
+                var task = value.Value;
+                if (task.Status == TaskStatus.RanToCompletion)
+                {
+                    try
+                    {
+                        await task.Result.CloseAsync().ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                    }
+                }
             }
-
-            this.channelMap.Clear();
         }
 
         /// <summary>
@@ -166,11 +182,6 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public void Run()
         {
-            foreach (var endpoint in this.ConfiguredEndpoints)
-            {
-                this.channelMap.TryAdd(endpoint.Key, new UaTcpSessionChannelFactory(this.LocalDescription, this.CertificateStore, this.UserIdentityProvider, endpoint.Value, this.LoggerFactory, this.Options));
-            }
-
             this.suspensionTask.TrySetResult(true);
         }
 
@@ -185,27 +196,62 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Gets the named <see cref="UaTcpSessionChannel"/>.
+        /// Gets or creates an <see cref="UaTcpSessionChannel"/>.
         /// </summary>
-        /// <param name="name">The name of the configured endpoint.</param>
+        /// <param name="endpointUrl">The endpoint url of the OPC UA server</param>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A <see cref="UaTcpSessionChannel"/>.</returns>
-        public async Task<UaTcpSessionChannel> GetChannelAsync(string name, CancellationToken token = default(CancellationToken))
+        public async Task<UaTcpSessionChannel> GetChannelAsync(string endpointUrl, CancellationToken token = default(CancellationToken))
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(endpointUrl))
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(endpointUrl));
             }
 
             await this.CheckSuspension(token).ConfigureAwait(false);
 
-            UaTcpSessionChannelFactory factory;
-            if (!this.channelMap.TryGetValue(name, out factory))
+            return await this.channelMap.GetOrAdd(endpointUrl, k => new Lazy<Task<UaTcpSessionChannel>>(() => this.CreateChannelAsync(k, token))).Value
+                .WithCancellation(token);
+        }
+
+        private async Task<UaTcpSessionChannel> CreateChannelAsync(string endpointUrl, CancellationToken token = default(CancellationToken))
+        {
+            await this.CheckSuspension(token).ConfigureAwait(false);
+
+            EndpointDescription endpoint;
+            if (!this.MappedEndpoints.TryGetValue(endpointUrl, out endpoint))
             {
-                throw new InvalidOperationException($"The endpoint '{name}' was not found.");
+                endpoint = new EndpointDescription { EndpointUrl = endpointUrl };
             }
 
-            return await factory.GetChannelAsync(token).ConfigureAwait(false);
+            var channel = new UaTcpSessionChannel(
+                this.LocalDescription,
+                this.CertificateStore,
+                this.UserIdentityProvider,
+                endpoint,
+                this.LoggerFactory,
+                this.Options);
+
+            channel.Faulted += (s, e) =>
+            {
+                var ch = (UaTcpSessionChannel)s;
+                try
+                {
+                    ch.AbortAsync().Wait();
+                }
+                catch
+                {
+                }
+            };
+
+            channel.Closing += (s, e) =>
+            {
+                Lazy<Task<UaTcpSessionChannel>> value;
+                this.channelMap.TryRemove(endpointUrl, out value);
+            };
+
+            await channel.OpenAsync(token).ConfigureAwait(false);
+            return channel;
         }
     }
 }

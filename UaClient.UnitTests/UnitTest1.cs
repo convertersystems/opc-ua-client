@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,28 +17,33 @@ namespace Workstation.UaClient.UnitTests
     [TestClass]
     public class UnitTest1
     {
+        // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
+        // private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
+        private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
+
         private readonly ILoggerFactory loggerFactory;
         private readonly ILogger<UnitTest1> logger;
-
-        private ApplicationDescription localDescription = new ApplicationDescription
-        {
-            ApplicationName = typeof(UnitTest1).Namespace,
-            ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:{typeof(UnitTest1).Namespace}",
-            ApplicationType = ApplicationType.Client
-        };
-
-        private ICertificateStore certificateStore = new DirectoryStore(
-            Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\Workstation.UaClient.UnitTests\pki"));
-
-        // private string endpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
-        // private string endpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        private string endpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
+        private readonly ApplicationDescription localDescription;
+        private readonly ICertificateStore certificateStore;
 
         public UnitTest1()
         {
             this.loggerFactory = new LoggerFactory();
             this.loggerFactory.AddDebug(LogLevel.Trace);
             this.logger = this.loggerFactory?.CreateLogger<UnitTest1>();
+
+            this.localDescription = new ApplicationDescription
+            {
+                ApplicationName = "Workstation.UaClient.UnitTests",
+                ApplicationUri = $"urn:{Dns.GetHostName()}:Workstation.UaClient.UnitTests",
+                ApplicationType = ApplicationType.Client
+            };
+
+            this.certificateStore = new DirectoryStore(
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Workstation.UaClient.UnitTests",
+                    "pki"));
         }
 
         /// <summary>
@@ -49,7 +56,7 @@ namespace Workstation.UaClient.UnitTests
             // discover available endpoints of server.
             var getEndpointsRequest = new GetEndpointsRequest
             {
-                EndpointUrl = this.endpointUrl,
+                EndpointUrl = EndpointUrl,
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
@@ -109,7 +116,7 @@ namespace Workstation.UaClient.UnitTests
             // discover available endpoints of server.
             var getEndpointsRequest = new GetEndpointsRequest
             {
-                EndpointUrl = this.endpointUrl,
+                EndpointUrl = EndpointUrl,
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
@@ -170,7 +177,7 @@ namespace Workstation.UaClient.UnitTests
             // discover available endpoints of server.
             var getEndpointsRequest = new GetEndpointsRequest
             {
-                EndpointUrl = this.endpointUrl,
+                EndpointUrl = EndpointUrl,
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
@@ -226,13 +233,15 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task TestSubscription()
         {
-
             var app = new UaApplicationBuilder()
-                .UseApplicationUri(@"urn:%COMPUTERNAME%:Workstation.UaClient.UnitTests")
-                .UseDirectoryStore(@"%LOCALAPPDATA%\Workstation.UaClient.UnitTests\pki")
-                .UseIdentityProvider(async e => new UserNameIdentity("root", "secret"))
+                .UseApplicationUri($"urn:{Dns.GetHostName()}:Workstation.UaClient.UnitTests")
+                .UseDirectoryStore(Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "Workstation.UaClient.UnitTests",
+                    "pki"))
+                .UseIdentity(new UserNameIdentity("root", "secret"))
                 .UseLoggerFactory(this.loggerFactory)
-                .AddEndpoint("PLC1", this.endpointUrl)
+                .Map("PLC1", EndpointUrl)
                 .Build();
 
             app.Run();
@@ -250,7 +259,7 @@ namespace Workstation.UaClient.UnitTests
             Assert.IsTrue(sub.CurrentTimeQueue.Count > 0, "CurrentTimeQueue");
         }
 
-        [Subscription(endpointName: "PLC1", publishingInterval: 500, keepAliveCount: 20)]
+        [Subscription(endpointUrl: "PLC1", publishingInterval: 500, keepAliveCount: 20)]
         private class MySubscription : SubscriptionBase
         {
             /// <summary>

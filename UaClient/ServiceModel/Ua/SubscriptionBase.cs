@@ -76,7 +76,7 @@ namespace Workstation.ServiceModel.Ua
             var sa = typeInfo.GetCustomAttribute<SubscriptionAttribute>();
             if (sa != null)
             {
-                this.endpointName = sa.EndpointName;
+                this.endpointName = sa.EndpointUrl;
                 this.publishingInterval = sa.PublishingInterval;
                 this.keepAliveCount = sa.KeepAliveCount;
                 this.lifetimeCount = sa.LifetimeCount;
@@ -206,7 +206,7 @@ namespace Workstation.ServiceModel.Ua
         public CommunicationState State
         {
             get { return this.state; }
-            private set { this.SetValue(ref this.state, value); }
+            private set { this.SetProperty(ref this.state, value); }
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Workstation.ServiceModel.Ua
         /// support CallerMemberName.</param>
         /// <returns>True if the value was changed, false if the existing value matched the
         /// desired value.</returns>
-        protected virtual bool SetValue<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        protected virtual bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
             if (object.Equals(storage, value))
             {

@@ -18,7 +18,7 @@ namespace Workstation.ServiceModel.Ua
         private Func<EndpointDescription, Task<IUserIdentity>> identityProvider;
         private ILoggerFactory loggerFactory;
         private UaApplicationOptions options;
-        private Dictionary<string, EndpointDescription> endpoints = new Dictionary<string, EndpointDescription>();
+        private Dictionary<string, EndpointDescription> mappedEndpoints = new Dictionary<string, EndpointDescription>();
 
         /// <summary>
         /// Specify the ApplicationUri.
@@ -39,7 +39,7 @@ namespace Workstation.ServiceModel.Ua
 
             string appName = null;
 
-            UriBuilder appUri = new UriBuilder(Environment.ExpandEnvironmentVariables(uri));
+            UriBuilder appUri = new UriBuilder(uri);
             if (appUri.Scheme == "http" && !string.IsNullOrEmpty(appUri.Host))
             {
                 var path = appUri.Path.Trim('/');
@@ -122,7 +122,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="identityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseIdentityProvider(Func<EndpointDescription, Task<IUserIdentity>> identityProvider)
+        public UaApplicationBuilder UseIdentity(Func<EndpointDescription, Task<IUserIdentity>> identityProvider)
         {
             if (identityProvider == null)
             {
@@ -181,16 +181,16 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Adds the named <see cref="EndpointDescription"/> to the collection of configured endpoints.
+        /// Substitute the <see cref="EndpointDescription"/> for the requested url.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="endpoint">The endpoint.</param>
+        /// <param name="requestedUrl">The url requested.</param>
+        /// <param name="endpoint">The endpoint decription to use.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder AddEndpoint(string name, EndpointDescription endpoint)
+        public UaApplicationBuilder Map(string requestedUrl, EndpointDescription endpoint)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(requestedUrl))
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(requestedUrl));
             }
 
             if (endpoint == null)
@@ -198,22 +198,22 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(endpoint));
             }
 
-            this.endpoints.Add(name, endpoint);
+            this.mappedEndpoints.Add(requestedUrl, endpoint);
             return this;
         }
 
         /// <summary>
-        /// Adds the named endpoint url to the collection of configured endpoints. The most secure <see cref="EndpointDescription"/> with matching SecurityPolicyUri will be selected.
+        /// Substitute the endpoint url for the requested url. The most secure <see cref="EndpointDescription"/> with matching SecurityPolicyUri will be selected.
         /// </summary>
-        /// <param name="name">The name.</param>
-        /// <param name="endpointUrl">The endpoint url.</param>
+        /// <param name="requestedUrl">The url requested.</param>
+        /// <param name="endpointUrl">The endpoint url to use.</param>
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder AddEndpoint(string name, string endpointUrl, string securityPolicyUri = null)
+        public UaApplicationBuilder Map(string requestedUrl, string endpointUrl, string securityPolicyUri = null)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(requestedUrl))
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(requestedUrl));
             }
 
             if (string.IsNullOrEmpty(endpointUrl))
@@ -221,7 +221,7 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(endpointUrl));
             }
 
-            this.endpoints.Add(name, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri });
+            this.mappedEndpoints.Add(requestedUrl, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri });
             return this;
         }
 
@@ -240,7 +240,7 @@ namespace Workstation.ServiceModel.Ua
                 this.localDescription,
                 this.certificateStore,
                 this.identityProvider,
-                this.endpoints,
+                this.mappedEndpoints,
                 this.loggerFactory,
                 this.options);
         }
