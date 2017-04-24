@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -222,6 +223,26 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.mappedEndpoints.Add(requestedUrl, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri });
+            return this;
+        }
+
+        /// <summary>
+        /// Substitute the endpoint url for the requested url. The most secure <see cref="EndpointDescription"/> will be selected.
+        /// </summary>
+        /// <param name="configuration">The configuration.</param>
+        /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
+        public UaApplicationBuilder Map(IConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            foreach (var kvp in configuration.AsEnumerable())
+            {
+                this.mappedEndpoints.Add(kvp.Key, new EndpointDescription { EndpointUrl = kvp.Value } );
+            }
+
             return this;
         }
 

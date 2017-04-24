@@ -739,7 +739,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyEncoder.WriteNodeId(null, OpenSecureChannelRequestNodeId);
                 request.Encode(bodyEncoder);
                 bodyStream.Position = 0;
-                if (bodyStream.Length > this.RemoteMaxMessageSize)
+                if (this.RemoteMaxMessageSize > 0 && bodyStream.Length > this.RemoteMaxMessageSize)
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }
@@ -910,7 +910,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyEncoder.WriteNodeId(null, CloseSecureChannelRequestNodeId);
                 request.Encode(bodyEncoder);
                 bodyStream.Position = 0;
-                if (bodyStream.Length > this.RemoteMaxMessageSize)
+                if (this.RemoteMaxMessageSize > 0 && bodyStream.Length > this.RemoteMaxMessageSize)
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }
@@ -1078,7 +1078,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyEncoder.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.NamespaceUris));
                 request.Encode(bodyEncoder);
                 bodyStream.Position = 0;
-                if (bodyStream.Length > this.RemoteMaxMessageSize)
+                if (this.RemoteMaxMessageSize > 0 && bodyStream.Length > this.RemoteMaxMessageSize)
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }

@@ -642,7 +642,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    var publishResponse = await this.PublishAsync(publishRequest).ConfigureAwait(false);
+                    var publishResponse = await this.PublishAsync(publishRequest).WithCancellation(token).ConfigureAwait(false);
 
                     // post to linked data flow blocks and subscriptions.
                     this.publishResponses.Post(publishResponse);
