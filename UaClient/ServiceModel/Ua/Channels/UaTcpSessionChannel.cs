@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
@@ -13,66 +14,205 @@ using Org.BouncyCastle.Security;
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
-    /// A channel that opens a session.
+    /// A session-full, secure channel for communicating with OPC UA servers using the UA TCP transport profile.
     /// </summary>
-    public class UaTcpSessionChannel : UaTcpSecureChannel
+    public class UaTcpSessionChannel : UaTcpSecureChannel, ISourceBlock<PublishResponse>, IObservable<PublishResponse>
     {
         public const double DefaultSessionTimeout = 120 * 1000; // 2 minutes
+        public const double DefaultPublishingInterval = 1000f;
+        public const uint DefaultKeepaliveCount = 30;
         public const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         // public const string RsaSha256Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
         public const string RsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
         public const string RsaV15KeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-1_5";
         public const string RsaOaepKeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-oaep";
-        protected const int NonceLength = 32;
+        public const int NonceLength = 32;
+
+        private readonly ILogger logger;
+        private readonly BroadcastBlock<PublishResponse> publishResponses;
+        private readonly ActionBlock<PublishResponse> actionBlock;
+        private readonly UaTcpSessionChannelOptions options;
+        private Task stateMachineTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
-        /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
-        /// <param name="sessionTimeout">The requested number of milliseconds that a session may be unused before being closed by the server.</param>
-        /// <param name="timeoutHint">The default number of milliseconds that may elapse before an operation is cancelled by the service.</param>
-        /// <param name="diagnosticsHint">The default diagnostics flags to be requested by the service.</param>
-        /// <param name="localReceiveBufferSize">The size of the receive buffer.</param>
-        /// <param name="localSendBufferSize">The size of the send buffer.</param>
-        /// <param name="localMaxMessageSize">The maximum total size of a message.</param>
-        /// <param name="localMaxChunkCount">The maximum number of message chunks.</param>
+        /// <param name="options">The session channel options.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
-            IUserIdentity userIdentity,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             EndpointDescription remoteEndpoint,
             ILoggerFactory loggerFactory = null,
-            double sessionTimeout = DefaultSessionTimeout,
-            uint timeoutHint = DefaultTimeoutHint,
-            uint diagnosticsHint = DefaultDiagnosticsHint,
-            uint localReceiveBufferSize = DefaultBufferSize,
-            uint localSendBufferSize = DefaultBufferSize,
-            uint localMaxMessageSize = DefaultMaxMessageSize,
-            uint localMaxChunkCount = DefaultMaxChunkCount)
-            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, timeoutHint, diagnosticsHint, localReceiveBufferSize, localSendBufferSize, localMaxMessageSize, localMaxChunkCount)
+            UaTcpSessionChannelOptions options = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
         {
-            this.UserIdentity = userIdentity;
-            this.SessionTimeout = sessionTimeout;
+            this.UserIdentityProvider = userIdentityProvider;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.channelCts.Token });
         }
 
-        public IUserIdentity UserIdentity { get; }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
+        /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The session channel options.</param>
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            ICertificateStore certificateStore,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
+            string endpointUrl,
+            string securityPolicyUri = null,
+            ILoggerFactory loggerFactory = null,
+            UaTcpSessionChannelOptions options = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
+        {
+            this.UserIdentityProvider = userIdentityProvider;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.channelCts.Token });
+        }
 
-        public double SessionTimeout { get; }
+        /// <summary>
+        /// Gets the asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>
+        /// </summary>
+        public Func<EndpointDescription, Task<IUserIdentity>> UserIdentityProvider { get; }
 
+        /// <summary>
+        /// Gets the user identity.
+        /// </summary>
+        public IUserIdentity UserIdentity { get; private set; }
+
+        /// <summary>
+        /// Gets the session id provided by the server.
+        /// </summary>
         public NodeId SessionId { get; private set; }
 
+        /// <summary>
+        /// Gets the remote nonce provided by the server.
+        /// </summary>
         public byte[] RemoteNonce { get; private set; }
 
+        /// <summary>
+        /// Gets a Task that represents the asynchronous operation and completion of the channel.
+        /// </summary>
+        public Task Completion => this.publishResponses.Completion;
+
+        /// <inheritdoc/>
+        public IDisposable LinkTo(ITargetBlock<PublishResponse> target, DataflowLinkOptions linkOptions)
+        {
+            return this.publishResponses.LinkTo(target, linkOptions);
+        }
+
+        /// <inheritdoc/>
+        public PublishResponse ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target, out bool messageConsumed)
+        {
+            return ((ISourceBlock<PublishResponse>)this.publishResponses).ConsumeMessage(messageHeader, target, out messageConsumed);
+        }
+
+        /// <inheritdoc/>
+        public bool ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target)
+        {
+            return ((ISourceBlock<PublishResponse>)this.publishResponses).ReserveMessage(messageHeader, target);
+        }
+
+        /// <inheritdoc/>
+        public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target)
+        {
+            ((ISourceBlock<PublishResponse>)this.publishResponses).ReleaseReservation(messageHeader, target);
+        }
+
+        /// <inheritdoc/>
+        public void Complete()
+        {
+            this.publishResponses.Complete();
+        }
+
+        /// <inheritdoc/>
+        public void Fault(Exception exception)
+        {
+            ((ISourceBlock<PublishResponse>)this.publishResponses).Fault(exception);
+        }
+
+        /// <inheritdoc/>
+        public IDisposable Subscribe(IObserver<PublishResponse> observer)
+        {
+            return this.AsObservable().Subscribe(observer);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task OnOpeningAsync(CancellationToken token)
+        {
+            if (this.RemoteEndpoint.Server == null)
+            {
+                // If specific endpoint is not provided, use discovery to select endpoint with highest
+                // security level.
+                var endpointUrl = this.RemoteEndpoint.EndpointUrl;
+                var securityPolicyUri = this.RemoteEndpoint.SecurityPolicyUri;
+                try
+                {
+                    this.logger?.LogInformation($"Discovering endpoints of '{endpointUrl}'.");
+                    var getEndpointsRequest = new GetEndpointsRequest
+                    {
+                        EndpointUrl = endpointUrl,
+                        ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
+                    };
+                    var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest).ConfigureAwait(false);
+                    if (getEndpointsResponse.Endpoints == null || getEndpointsResponse.Endpoints.Length == 0)
+                    {
+                        throw new InvalidOperationException($"'{endpointUrl}' returned no endpoints.");
+                    }
+
+                    var selectedEndpoint = getEndpointsResponse.Endpoints
+                        .Where(e => string.IsNullOrEmpty(securityPolicyUri) || e.SecurityPolicyUri == securityPolicyUri)
+                        .OrderBy(e => e.SecurityLevel).Last();
+
+                    this.RemoteEndpoint.Server = selectedEndpoint.Server;
+                    this.RemoteEndpoint.ServerCertificate = selectedEndpoint.ServerCertificate;
+                    this.RemoteEndpoint.SecurityMode = selectedEndpoint.SecurityMode;
+                    this.RemoteEndpoint.SecurityPolicyUri = selectedEndpoint.SecurityPolicyUri;
+                    this.RemoteEndpoint.UserIdentityTokens = selectedEndpoint.UserIdentityTokens;
+                    this.RemoteEndpoint.TransportProfileUri = selectedEndpoint.TransportProfileUri;
+                    this.RemoteEndpoint.SecurityLevel = selectedEndpoint.SecurityLevel;
+
+                    this.logger?.LogTrace($"Success discovering endpoints of '{endpointUrl}'.");
+                }
+                catch (Exception ex)
+                {
+                    this.logger?.LogError($"Error discovering endpoints of '{endpointUrl}'. {ex.Message}");
+                    throw;
+                }
+            }
+
+            // Ask for user identity. May show dialog.
+            if (this.UserIdentityProvider != null)
+            {
+                this.UserIdentity = await this.UserIdentityProvider(this.RemoteEndpoint);
+            }
+
+            await base.OnOpeningAsync(token);
+        }
+
+        /// <inheritdoc/>
         protected override async Task OnOpenAsync(CancellationToken token)
         {
-            this.Logger?.LogInformation($"Opening session channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
-            this.Logger?.LogInformation($"SecurityPolicy: '{this.RemoteEndpoint.SecurityPolicyUri}'.");
-            this.Logger?.LogInformation($"SecurityMode: '{this.RemoteEndpoint.SecurityMode}'.");
-            this.Logger?.LogInformation($"UserIdentityToken: '{this.UserIdentity}'.");
+            this.logger?.LogInformation($"Opening session channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
+            this.logger?.LogInformation($"SecurityPolicy: '{this.RemoteEndpoint.SecurityPolicyUri}'.");
+            this.logger?.LogInformation($"SecurityMode: '{this.RemoteEndpoint.SecurityMode}'.");
+            this.logger?.LogInformation($"UserIdentity: '{this.UserIdentity}'.");
 
             await base.OnOpenAsync(token).ConfigureAwait(false);
 
@@ -91,8 +231,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     SessionName = this.LocalDescription.ApplicationName,
                     ClientNonce = localNonce,
                     ClientCertificate = localCertificate,
-                    RequestedSessionTimeout = this.SessionTimeout,
-                    MaxResponseMessageSize = 0
+                    RequestedSessionTimeout = this.options.SessionTimeout,
+                    MaxResponseMessageSize = this.RemoteMaxMessageSize
                 };
 
                 var createSessionResponse = await this.CreateSessionAsync(createSessionRequest).ConfigureAwait(false);
@@ -108,51 +248,51 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 // verify the server's signature.
                 ISigner verifier = null;
-                byte[] dataToVerify = null;
+                bool verified = false;
+
                 switch (this.RemoteEndpoint.SecurityPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
                     case SecurityPolicyUris.Basic256:
-                        dataToVerify = Concat(localCertificate, localNonce);
                         verifier = SignerUtilities.GetSigner("SHA-1withRSA");
                         verifier.Init(false, this.RemotePublicKey);
-                        verifier.BlockUpdate(dataToVerify, 0, dataToVerify.Length);
-                        if (!verifier.VerifySignature(createSessionResponse.ServerSignature.Signature))
-                        {
-                            throw new ServiceResultException(StatusCodes.BadApplicationSignatureInvalid, "Server did not provide a correct signature for the nonce data provided by the client.");
-                        }
-
+                        verifier.BlockUpdate(localCertificate, 0, localCertificate.Length);
+                        verifier.BlockUpdate(localNonce, 0, localNonce.Length);
+                        verified = verifier.VerifySignature(createSessionResponse.ServerSignature.Signature);
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
-                        dataToVerify = Concat(localCertificate, localNonce);
                         verifier = SignerUtilities.GetSigner("SHA-256withRSA");
                         verifier.Init(false, this.RemotePublicKey);
-                        verifier.BlockUpdate(dataToVerify, 0, dataToVerify.Length);
-                        if (!verifier.VerifySignature(createSessionResponse.ServerSignature.Signature))
-                        {
-                            throw new ServiceResultException(StatusCodes.BadApplicationSignatureInvalid, "Server did not provide a correct signature for the nonce data provided by the client.");
-                        }
-
+                        verifier.BlockUpdate(localCertificate, 0, localCertificate.Length);
+                        verifier.BlockUpdate(localNonce, 0, localNonce.Length);
+                        verified = verifier.VerifySignature(createSessionResponse.ServerSignature.Signature);
                         break;
 
                     default:
+                        verified = true;
                         break;
+                }
+
+                verifier = null;
+                if (!verified)
+                {
+                    throw new ServiceResultException(StatusCodes.BadApplicationSignatureInvalid, "Server did not provide a correct signature for the nonce data provided by the client.");
                 }
             }
 
             // create client signature
             SignatureData clientSignature = null;
             ISigner signer = null;
-            byte[] dataToSign = null;
+
             switch (this.RemoteEndpoint.SecurityPolicyUri)
             {
                 case SecurityPolicyUris.Basic128Rsa15:
                 case SecurityPolicyUris.Basic256:
-                    dataToSign = Concat(this.RemoteEndpoint.ServerCertificate, this.RemoteNonce);
                     signer = SignerUtilities.GetSigner("SHA-1withRSA");
                     signer.Init(true, this.LocalPrivateKey);
-                    signer.BlockUpdate(dataToSign, 0, dataToSign.Length);
+                    signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
+                    signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce.Length);
                     clientSignature = new SignatureData
                     {
                         Signature = signer.GenerateSignature(),
@@ -162,10 +302,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                     break;
 
                 case SecurityPolicyUris.Basic256Sha256:
-                    dataToSign = Concat(this.RemoteEndpoint.ServerCertificate, this.RemoteNonce);
                     signer = SignerUtilities.GetSigner("SHA-256withRSA");
                     signer.Init(true, this.LocalPrivateKey);
-                    signer.BlockUpdate(dataToSign, 0, dataToSign.Length);
+                    signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
+                    signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce.Length);
                     clientSignature = new SignatureData
                     {
                         Signature = signer.GenerateSignature(),
@@ -178,6 +318,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     clientSignature = new SignatureData();
                     break;
             }
+
+            signer = null;
 
             // supported UserIdentityToken types are AnonymousIdentityToken, UserNameIdentityToken, IssuedIdentityToken, X509IdentityToken
             UserIdentityToken identityToken = null;
@@ -194,13 +336,22 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 var issuedIdentity = (IssuedIdentity)this.UserIdentity;
                 byte[] plainText = Concat(issuedIdentity.TokenData, this.RemoteNonce);
+                IBufferedCipher encryptor;
+                byte[] cipherText;
+                int pos;
+
                 var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? this.RemoteEndpoint.SecurityPolicyUri;
                 switch (secPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
+                        encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                        encryptor.Init(true, this.RemotePublicKey);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainText.Length)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainText.Length), cipherText, 0);
+                        pos = encryptor.DoFinal(plainText, cipherText, pos);
                         identityToken = new IssuedIdentityToken
                         {
-                            TokenData = this.RemotePublicKey.EncryptTokenData(plainText, secPolicyUri),
+                            TokenData = cipherText,
                             EncryptionAlgorithm = RsaV15KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
@@ -209,9 +360,14 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Basic256:
                     case SecurityPolicyUris.Basic256Sha256:
+                        encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                        encryptor.Init(true, this.RemotePublicKey);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainText.Length)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainText.Length), cipherText, 0);
+                        pos = encryptor.DoFinal(plainText, cipherText, pos);
                         identityToken = new IssuedIdentityToken
                         {
-                            TokenData = this.RemotePublicKey.EncryptTokenData(plainText, secPolicyUri),
+                            TokenData = cipherText,
                             EncryptionAlgorithm = RsaOaepKeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
@@ -229,6 +385,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 tokenSignature = new SignatureData();
+                plainText = null;
+                encryptor = null;
+                cipherText = null;
             }
 
             // if UserIdentity type is X509Identity
@@ -284,6 +443,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                         tokenSignature = new SignatureData();
                         break;
                 }
+
+                dataToSign = null;
                 */
             }
 
@@ -297,15 +458,26 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var userNameIdentity = (UserNameIdentity)this.UserIdentity;
-                byte[] plainText = Concat(System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password), this.RemoteNonce);
+                byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password);
+                int plainTextLength = passwordBytes.Length + this.RemoteNonce.Length;
+                IBufferedCipher encryptor;
+                byte[] cipherText;
+                int pos;
+
                 var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? this.RemoteEndpoint.SecurityPolicyUri;
                 switch (secPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
+                        encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                        encryptor.Init(true, this.RemotePublicKey);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
+                        pos = encryptor.ProcessBytes(passwordBytes, cipherText, pos);
+                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
                         identityToken = new UserNameIdentityToken
                         {
                             UserName = userNameIdentity.UserName,
-                            Password = this.RemotePublicKey.EncryptTokenData(plainText, secPolicyUri),
+                            Password = cipherText,
                             EncryptionAlgorithm = RsaV15KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
@@ -314,10 +486,16 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Basic256:
                     case SecurityPolicyUris.Basic256Sha256:
+                        encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        encryptor.Init(true, this.RemotePublicKey);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
+                        pos = encryptor.ProcessBytes(passwordBytes, cipherText, pos);
+                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
                         identityToken = new UserNameIdentityToken
                         {
                             UserName = userNameIdentity.UserName,
-                            Password = this.RemotePublicKey.EncryptTokenData(plainText, secPolicyUri),
+                            Password = cipherText,
                             EncryptionAlgorithm = RsaOaepKeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
@@ -328,7 +506,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         identityToken = new UserNameIdentityToken
                         {
                             UserName = userNameIdentity.UserName,
-                            Password = System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password),
+                            Password = passwordBytes,
                             EncryptionAlgorithm = null,
                             PolicyId = tokenPolicy.PolicyId
                         };
@@ -336,6 +514,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 tokenSignature = new SignatureData();
+                passwordBytes = null;
+                encryptor = null;
+                cipherText = null;
             }
 
             // if UserIdentity type is AnonymousIdentity or null
@@ -395,22 +576,96 @@ namespace Workstation.ServiceModel.Ua.Channels
                     this.ServerUris.AddRange(readResponse.Results[1].GetValueOrDefault<string[]>());
                 }
             }
+
+            // create the keep alive subscription.
+            var subscriptionRequest = new CreateSubscriptionRequest
+            {
+                RequestedPublishingInterval = DefaultPublishingInterval,
+                RequestedMaxKeepAliveCount = DefaultKeepaliveCount,
+                RequestedLifetimeCount = DefaultKeepaliveCount * 3,
+                PublishingEnabled = true,
+            };
+            var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(true);
+
+            // link up the dataflow blocks
+            var id = subscriptionResponse.SubscriptionId;
+            var linkToken = this.LinkTo(this.actionBlock, pr => pr.SubscriptionId == id);
+
+            // start publishing.
+            this.stateMachineTask = Task.Run(() => this.StateMachineAsync(this.channelCts.Token));
         }
 
+        /// <inheritdoc/>
         protected override async Task OnCloseAsync(CancellationToken token)
         {
-            var closeSessionRequest = new CloseSessionRequest
-            {
-                DeleteSubscriptions = true
-            };
-            var closeSessionResponse = await this.CloseSessionAsync(closeSessionRequest).ConfigureAwait(false);
+            await this.CloseSessionAsync(new CloseSessionRequest { DeleteSubscriptions = true }).ConfigureAwait(false);
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
-        protected override Task OnFaulted(CancellationToken token = default(CancellationToken))
+        /// <summary>
+        /// Handle PublishResponse message.
+        /// </summary>
+        /// <param name="publishResponse">The publish response.</param>
+        private void OnPublishResponse(PublishResponse publishResponse)
         {
-            this.Complete();
-            return base.OnFaulted(token);
+            // handle the internal subscription (keep-alive)
+        }
+
+        /// <summary>
+        /// Sends publish requests to the server.
+        /// </summary>
+        /// <param name="token">A cancellation token.</param>
+        /// <returns>A task.</returns>
+        private async Task PublishAsync(CancellationToken token = default(CancellationToken))
+        {
+            var publishRequest = new PublishRequest
+            {
+                RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint },
+                SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
+            };
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    var publishResponse = await this.PublishAsync(publishRequest).WithCancellation(token).ConfigureAwait(false);
+
+                    // post to linked data flow blocks and subscriptions.
+                    this.publishResponses.Post(publishResponse);
+
+                    publishRequest = new PublishRequest
+                    {
+                        RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint },
+                        SubscriptionAcknowledgements = publishResponse.NotificationMessage.NotificationData != null ? new[] { new SubscriptionAcknowledgement { SequenceNumber = publishResponse.NotificationMessage.SequenceNumber, SubscriptionId = publishResponse.SubscriptionId } } : new SubscriptionAcknowledgement[0]
+                    };
+                }
+                catch (ServiceResultException ex)
+                {
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    this.logger?.LogError($"Error publishing subscription. {ex.Message}");
+                    this.Fault(ex);
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// The state machine manages the state of the channel.
+        /// </summary>
+        /// <param name="token">A cancellation token.</param>
+        /// <returns>A task.</returns>
+        private async Task StateMachineAsync(CancellationToken token = default(CancellationToken))
+        {
+            var tasks = new[]
+            {
+                this.PublishAsync(token),
+                this.PublishAsync(token),
+                this.PublishAsync(token),
+            };
+            await Task.WhenAll(tasks).ConfigureAwait(false);
         }
     }
 }

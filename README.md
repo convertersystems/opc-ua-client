@@ -3,9 +3,9 @@
 # opc-ua-client
 Install package 'Workstation.UaClient' from Nuget to get the latest release for your hmi project.
 
-Supports Universal Windows Platform (UWP), Windows Presentation Framework (WPF) and now Xamarin Forms applications.
+Supports Universal Windows Platform (UWP), Windows Presentation Framework (WPF) and Xamarin applications.
 
-Build a free HMI using OPC Unified Architecture and Visual Studio. With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
+Build a HMI using OPC Unified Architecture and Visual Studio. With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
 
 Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 - Browse OPC UA servers directly from the Visual Studio IDE.
@@ -13,98 +13,56 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 - Use XAML bindings to connect your UI elements to live data.
 
 ### Main Types
-- UaTcpSessionChannel - A fast channel for sending requests to your OPC UA server using the UaTcp binary protocol. Supports security up to Basic256Sha256. 100% asynchronous.
-- UaTcpSessionClient - A client for browsing, reading, writing and subscribing to nodes of your OPC UA server. Connects and reconnects automatically. 100% asynchronous.
-- SubscriptionAttribute - An attribute for your view models. Permits UaTcpSessionClient to automatically create and delete subscriptions on the server and deliver data change and event notifications to properties.
-- MonitoredItemAttribute - An attribute for properties that indicates the property will receive data change or event notifications from the server.
+- UaTcpSessionChannel - A channel for sending requests to your OPC UA server using the UaTcp binary protocol. Supports security up to Basic256Sha256. 100% asynchronous.
+- UaApplication - A service for managing the channels to your OPC UA servers. Connects and reconnects automatically. 100% asynchronous.
+- SubscriptionBase - A base class for view models that receive data change or event notifications from the server.
+- SubscriptionAttribute - An attribute for your view models to specify the OPC UA server and subscription properties.
+- MonitoredItemAttribute - An attribute for your properties that indicates the property will receive data change or event notifications from the server.
 
 ```
     public partial class App : Application
     {
+        private ILoggerFactory loggerFactory;
+        private UaApplication application;
+
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Create the session client for the app.
-            this.session = new UaTcpSessionClient(
-				new ApplicationDescription()
-				{
-					ApplicationName = "Workstation.StatusHmi",
-					ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:Workstation.StatusHmi",
-					ApplicationType = ApplicationType.Client
-				},
-			    new DirectoryStore(
-					Environment.ExpandEnvironmentVariables(@"%LOCALAPPDATA%\Workstation.StatusHmi\pki")),
-                ed => Task.FromResult<IUserIdentity>(new UserNameIdentity("root", "secret")),
-				StatusHmi.Properties.Settings.Default.EndpointUrl);
+            // Setup a logger.
+            this.loggerFactory = new LoggerFactory();
+            this.loggerFactory.AddDebug(LogLevel.Trace);
 
-            // Create the main view model.
-            var subscription = new MainViewModel(this.session);
+            // Build and run an OPC UA application instance.
+            this.application = new UaApplicationBuilder()
+                .UseApplicationUri($"urn:{Dns.GetHostName()}:Workstation.StatusHmi")
+                .UseDirectoryStore($"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Workstation.StatusHmi\\pki")
+                .UseIdentity(this.ShowSignInDialog)
+                .UseLoggerFactory(this.loggerFactory)
+                .Build();
+
+            this.application.Run();
 
             // Create and show the main view.
-            var view = new MainView { DataContext = subscription };
-
+            var view = new MainView();
             view.Show();
+            base.OnStartup(e);
         }
+		...
     }
     
-    [Subscription(publishingInterval: 500, keepAliveCount: 20)]
-    public class MainViewModel : ViewModelBase
+    [Subscription(endpointUrl: "opc.tcp://localhost:26543", publishingInterval: 500, keepAliveCount: 20)]
+    public class MainViewModel : SubscriptionBase
     {
-        private readonly UaTcpSessionClient session;
-
-        public MainViewModel(UaTcpSessionClient session)
-        {
-            this.session = session;
-            session.Subscribe(this);
-        }
-
         /// <summary>
-        /// Gets the value of ServerStatusCurrentTime.
+        /// Gets the value of ServerServerStatus.
         /// </summary>
-        [MonitoredItem(nodeId: "i=2258")]
-        public DateTime ServerStatusCurrentTime
+        [MonitoredItem(nodeId: "i=2256")]
+        public ServerStatusDataType ServerServerStatus
         {
-            get { return this.serverStatusCurrentTime; }
-            private set { this.SetProperty(ref this.serverStatusCurrentTime, value); }
+            get { return this.serverServerStatus; }
+            private set { this.SetValue(ref this.serverServerStatus, value); }
         }
 
-        private DateTime serverStatusCurrentTime;
+        private ServerStatusDataType serverServerStatus;
     }
 ```
-### Releases
-v1.5.12 Improve encoder limits.
-
-v1.5.10 Added Socket connectAsync timeout of 2 seconds.
-
-v1.5.8 Bugfix for UaTcpSecureChannel DataLengthException
-
-v1.5.7 Added ConditionId property
-
-v1.5.6 Subscription bugfix
-
-v1.5.5 Upgrade NetStandard to 1.6.1
-
-v1.5.4 Fix support for net45
-
-v1.5.3 Support Nuget 2.12
-
-v1.5.2 Signed the assembly. Bug fix to report proper exception if server denies connection due to security.
-
-v1.5.1 Added support for .Net Framework 4.5. Upgraded project to Visual Studio 2017.
-
-v1.5.0 Added support for Xamarin Forms. Introduced ICertificateStore and DirectoryStore.
-
-v1.4.2 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a X509Certificate. 
-
-v1.4.1 Depreciated UaTcpSessionClient.CreateSubscription(), use Subscribe() instead. Modified UserIdentityProvider to be a function of RemoteEndpoint.
-
-v1.4.0 UaTcpSessionClient now calls an asynchronous function you provide when connecting to servers that request a UserNameIdentity. Depreciated ISubscription and replaced with SubscriptionAttribute to specify Subscription parameters.  If ViewModelBase implements ISetDataErrorInfo and INotifyDataErrorInfo then it will record any error messages that occur when creating, writing or publishing a MonitoredItem. Diagnostics now use EventSource for logging. Added Debug, Console and File EventListeners. 
-
-v1.3.0 Depreciated Subscription base class in favor of ISubscription interface to allow freedom to choose whatever base class you wish for your view models.
-   
-v1.2.0 Client, Subscription and Channel class constructors have new optional arguments. Corresponding property setters are removed to prevent changes after construction. Fixed some threading issues: Subscription's publish on thread pool, viewmodel's update on dispatcher thread. 
-
-v1.1.0 Simplified Subscription base class to automatically subscribe for data change and event notifications when constructed, re-subscribe if the server reboots, and un-subscribe when garbage collected.   
-
-v1.0.0 First commit. Includes UaTcpSessionChannel for 'opc.tcp' servers. Supports security up to Basic256Sha256. Automatically creates self-signed X509Certificate with 2048bit key.
-
 [1]: robot6.jpg  

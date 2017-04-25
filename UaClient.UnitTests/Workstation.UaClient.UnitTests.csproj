@@ -116,6 +116,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <Content Include="appSettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="project.json" />
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
@@ -123,9 +126,9 @@
     <Content Include="LICENSE.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UaClient.Net45\Workstation.UaClient.Net45.csproj">
-      <Project>{b3368b10-e55a-4776-ba72-9b783d11178f}</Project>
-      <Name>Workstation.UaClient.Net45</Name>
+    <ProjectReference Include="..\UaClient\Workstation.UaClient.csproj">
+      <Project>{04b8d717-4f15-4486-86e5-e33d8b8bf57d}</Project>
+      <Name>Workstation.UaClient</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
