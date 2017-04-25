@@ -37,7 +37,6 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
                 .UseDirectoryStore($"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Workstation.StatusHmi\\pki")
                 .UseIdentity(this.ShowSignInDialog)
                 .UseLoggerFactory(this.loggerFactory)
-                .Map("PLC1", StatusHmi.Properties.Settings.Default.EndpointUrl, SecurityPolicyUris.None)
                 .Build();
 
             this.application.Run();
@@ -50,7 +49,7 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 		...
     }
     
-    [Subscription(endpointName: "PLC1", publishingInterval: 500, keepAliveCount: 20)]
+    [Subscription(endpointUrl: "opc.tcp://localhost:26543", publishingInterval: 500, keepAliveCount: 20)]
     public class MainViewModel : SubscriptionBase
     {
         /// <summary>

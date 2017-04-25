@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -19,7 +19,7 @@ namespace Workstation.ServiceModel.Ua
         private Func<EndpointDescription, Task<IUserIdentity>> identityProvider;
         private ILoggerFactory loggerFactory;
         private UaApplicationOptions options;
-        private Dictionary<string, EndpointDescription> mappedEndpoints = new Dictionary<string, EndpointDescription>();
+        private List<MappedEndpoint> mappedEndpoints = new List<MappedEndpoint>();
 
         /// <summary>
         /// Specify the ApplicationUri.
@@ -114,7 +114,7 @@ namespace Workstation.ServiceModel.Ua
                 throw new InvalidOperationException("The identityProvider has already been specified.");
             }
 
-            this.identityProvider = async endpoint => identity;
+            this.identityProvider = endpoint => Task.FromResult(identity);
             return this;
         }
 
@@ -182,10 +182,10 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Substitute the <see cref="EndpointDescription"/> for the requested url.
+        /// Add a mapping between the requested url and the <see cref="EndpointDescription"/>.
         /// </summary>
         /// <param name="requestedUrl">The url requested.</param>
-        /// <param name="endpoint">The endpoint decription to use.</param>
+        /// <param name="endpoint">The endpoint description to use.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
         public UaApplicationBuilder Map(string requestedUrl, EndpointDescription endpoint)
         {
@@ -199,16 +199,16 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(endpoint));
             }
 
-            this.mappedEndpoints.Add(requestedUrl, endpoint);
+            this.mappedEndpoints.Add(new MappedEndpoint { RequestedUrl = requestedUrl, Endpoint = endpoint });
             return this;
         }
 
         /// <summary>
-        /// Substitute the endpoint url for the requested url. The most secure <see cref="EndpointDescription"/> with matching SecurityPolicyUri will be selected.
+        /// Add a mapping between the requested url and the <see cref="EndpointDescription"/>.
         /// </summary>
         /// <param name="requestedUrl">The url requested.</param>
         /// <param name="endpointUrl">The endpoint url to use.</param>
-        /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
+        /// <param name="securityPolicyUri">Optionally, the securityPolicyUri to use.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
         public UaApplicationBuilder Map(string requestedUrl, string endpointUrl, string securityPolicyUri = null)
         {
@@ -222,13 +222,27 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(endpointUrl));
             }
 
-            this.mappedEndpoints.Add(requestedUrl, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri });
+            this.mappedEndpoints.Add(new MappedEndpoint { RequestedUrl = requestedUrl, Endpoint = new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri } });
             return this;
         }
 
         /// <summary>
-        /// Substitute the endpoint url for the requested url. The most secure <see cref="EndpointDescription"/> will be selected.
+        /// Add a mapping between the requested url and the <see cref="EndpointDescription"/>.
         /// </summary>
+        /// <remarks>
+        /// Provide a appSettings.json file containing:
+        /// {
+        ///   "Maps": [
+        ///     {
+        ///       "requestedUrl": "opc.tcp://localhost:26543",
+        ///       "endpoint": {
+        ///         "endpointUrl": "opc.tcp://andrew-think:26543",
+        ///         "securityPolicyUri": "http://opcfoundation.org/UA/SecurityPolicy#None"
+        ///       }
+        ///     }
+        ///   ]
+        /// }
+        /// </remarks>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
         public UaApplicationBuilder Map(IConfiguration configuration)
@@ -238,9 +252,13 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            foreach (var kvp in configuration.AsEnumerable())
+            var maps = configuration.GetSection("Maps").Get<MappedEndpoint[]>();
+            if (maps != null)
             {
-                this.mappedEndpoints.Add(kvp.Key, new EndpointDescription { EndpointUrl = kvp.Value } );
+                foreach (var map in maps)
+                {
+                    this.mappedEndpoints.Add(map);
+                }
             }
 
             return this;

@@ -13,22 +13,20 @@
     <PackageTags>opc, opc-ua, iiot</PackageTags>
     <RepositoryUrl>https://github.com/convertersystems/opc-ua-client</RepositoryUrl>
     <Copyright>Copyright ©  2017 Converter Systems LLC.</Copyright>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.4' ">
     <DefineConstants>$(DefineConstants);NETSTANDARD1_4</DefineConstants>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-  </PropertyGroup>
-
+  
   <ItemGroup>
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
   
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="1.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.1" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.1.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.0" />

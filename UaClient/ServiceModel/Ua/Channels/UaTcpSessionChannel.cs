@@ -602,21 +602,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
-        /// <inheritdoc/>
-        protected override async Task OnAbortAsync(CancellationToken token)
-        {
-            if (this.Socket != null && this.Socket.Connected)
-            {
-                try
-                {
-                    await this.CloseSessionAsync(new CloseSessionRequest { DeleteSubscriptions = true }).ConfigureAwait(false);
-                }
-                catch { }
-            }
-
-            await base.OnAbortAsync(token).ConfigureAwait(false);
-        }
-
         /// <summary>
         /// Handle PublishResponse message.
         /// </summary>
@@ -650,7 +635,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     publishRequest = new PublishRequest
                     {
                         RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint },
-                        SubscriptionAcknowledgements = new[] { new SubscriptionAcknowledgement { SequenceNumber = publishResponse.NotificationMessage.SequenceNumber, SubscriptionId = publishResponse.SubscriptionId } }
+                        SubscriptionAcknowledgements = publishResponse.NotificationMessage.NotificationData != null ? new[] { new SubscriptionAcknowledgement { SequenceNumber = publishResponse.NotificationMessage.SequenceNumber, SubscriptionId = publishResponse.SubscriptionId } } : new SubscriptionAcknowledgement[0]
                     };
                 }
                 catch (ServiceResultException ex)

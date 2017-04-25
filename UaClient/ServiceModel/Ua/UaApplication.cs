@@ -40,7 +40,7 @@ namespace Workstation.ServiceModel.Ua
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>> identityProvider,
-            IDictionary<string, EndpointDescription> mappedEndpoints,
+            IEnumerable<MappedEndpoint> mappedEndpoints,
             ILoggerFactory loggerFactory = null,
             UaApplicationOptions options = null)
         {
@@ -62,7 +62,7 @@ namespace Workstation.ServiceModel.Ua
             this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
             this.UserIdentityProvider = identityProvider;
-            this.MappedEndpoints = new ReadOnlyDictionary<string, EndpointDescription>(mappedEndpoints);
+            this.MappedEndpoints = mappedEndpoints;
             this.LoggerFactory = loggerFactory;
             this.Options = options ?? new UaApplicationOptions();
 
@@ -93,7 +93,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the mapped endpoints.
         /// </summary>
-        public IReadOnlyDictionary<string, EndpointDescription> MappedEndpoints { get; }
+        public IEnumerable<MappedEndpoint> MappedEndpoints { get; }
 
         /// <summary>
         /// Gets the logger factory.
@@ -219,7 +219,12 @@ namespace Workstation.ServiceModel.Ua
             await this.CheckSuspension(token).ConfigureAwait(false);
 
             EndpointDescription endpoint;
-            if (!this.MappedEndpoints.TryGetValue(endpointUrl, out endpoint))
+            var mappedEndpoint = this.MappedEndpoints?.LastOrDefault(m => m.RequestedUrl == endpointUrl);
+            if (mappedEndpoint != null)
+            {
+                endpoint = mappedEndpoint.Endpoint;
+            }
+            else
             {
                 endpoint = new EndpointDescription { EndpointUrl = endpointUrl };
             }

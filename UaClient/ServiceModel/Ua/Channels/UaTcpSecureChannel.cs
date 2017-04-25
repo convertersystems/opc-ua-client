@@ -597,17 +597,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected override async Task OnAbortAsync(CancellationToken token = default(CancellationToken))
         {
             this.channelCts?.Cancel();
-            if (this.Socket != null && this.Socket.Connected)
-            {
-                var request = new CloseSecureChannelRequest();
-                this.TimestampHeader(request);
-                try
-                {
-                    await this.SendRequestAsync(new ServiceOperation(request)).ConfigureAwait(false);
-                }
-                catch { }
-            }
-
             await base.OnAbortAsync(token).ConfigureAwait(false);
         }
 

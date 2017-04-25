@@ -11,12 +11,14 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
+using Microsoft.Extensions.Configuration;
 
 namespace Workstation.UaClient.UnitTests
 {
     [TestClass]
     public class UnitTest1
     {
+        //private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
         // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
         // private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
         private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
@@ -233,6 +235,11 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task TestSubscription()
         {
+            var config = new ConfigurationBuilder()
+               .SetBasePath(Directory.GetCurrentDirectory())
+               .AddJsonFile("appSettings.json", true)
+               .Build();
+
             var app = new UaApplicationBuilder()
                 .UseApplicationUri($"urn:{Dns.GetHostName()}:Workstation.UaClient.UnitTests")
                 .UseDirectoryStore(Path.Combine(
@@ -241,7 +248,7 @@ namespace Workstation.UaClient.UnitTests
                     "pki"))
                 .UseIdentity(new UserNameIdentity("root", "secret"))
                 .UseLoggerFactory(this.loggerFactory)
-                .Map("PLC1", EndpointUrl)
+                .Map(config)
                 .Build();
 
             app.Run();
@@ -259,7 +266,7 @@ namespace Workstation.UaClient.UnitTests
             Assert.IsTrue(sub.CurrentTimeQueue.Count > 0, "CurrentTimeQueue");
         }
 
-        [Subscription(endpointUrl: "PLC1", publishingInterval: 500, keepAliveCount: 20)]
+        [Subscription(endpointUrl: "opc.tcp://localhost:26543", publishingInterval: 500, keepAliveCount: 20)]
         private class MySubscription : SubscriptionBase
         {
             /// <summary>
