@@ -57,28 +57,30 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadCertificateInvalid = 0x80120000u;
 		/// <summary>An error occurred verifying security.</summary>
         public const uint BadSecurityChecksFailed = 0x80130000u;
-		/// <summary>The Certificate has expired or is not yet valid.</summary>
+		/// <summary>The certificate has expired or is not yet valid.</summary>
         public const uint BadCertificateTimeInvalid = 0x80140000u;
-		/// <summary>An Issuer Certificate has expired or is not yet valid.</summary>
+		/// <summary>An issuer certificate has expired or is not yet valid.</summary>
         public const uint BadCertificateIssuerTimeInvalid = 0x80150000u;
-		/// <summary>The HostName used to connect to a Server does not match a HostName in the Certificate.</summary>
+		/// <summary>The HostName used to connect to a server does not match a HostName in the certificate.</summary>
         public const uint BadCertificateHostNameInvalid = 0x80160000u;
-		/// <summary>The URI specified in the ApplicationDescription does not match the URI in the Certificate.</summary>
+		/// <summary>The URI specified in the ApplicationDescription does not match the URI in the certificate.</summary>
         public const uint BadCertificateUriInvalid = 0x80170000u;
-		/// <summary>The Certificate may not be used for the requested operation.</summary>
+		/// <summary>The certificate may not be used for the requested operation.</summary>
         public const uint BadCertificateUseNotAllowed = 0x80180000u;
-		/// <summary>The Issuer Certificate may not be used for the requested operation.</summary>
+		/// <summary>The issuer certificate may not be used for the requested operation.</summary>
         public const uint BadCertificateIssuerUseNotAllowed = 0x80190000u;
-		/// <summary>The Certificate is not trusted.</summary>
+		/// <summary>The certificate is not trusted.</summary>
         public const uint BadCertificateUntrusted = 0x801A0000u;
-		/// <summary>It was not possible to determine if the Certificate has been revoked.</summary>
+		/// <summary>It was not possible to determine if the certificate has been revoked.</summary>
         public const uint BadCertificateRevocationUnknown = 0x801B0000u;
-		/// <summary>It was not possible to determine if the Issuer Certificate has been revoked.</summary>
+		/// <summary>It was not possible to determine if the issuer certificate has been revoked.</summary>
         public const uint BadCertificateIssuerRevocationUnknown = 0x801C0000u;
-		/// <summary>The Certificate has been revoked.</summary>
+		/// <summary>The certificate has been revoked.</summary>
         public const uint BadCertificateRevoked = 0x801D0000u;
-		/// <summary>The Issuer Certificate has been revoked.</summary>
+		/// <summary>The issuer certificate has been revoked.</summary>
         public const uint BadCertificateIssuerRevoked = 0x801E0000u;
+		/// <summary>The certificate chain is incomplete.</summary>
+        public const uint BadCertificateChainIncomplete = 0x810D0000u;
 		/// <summary>User does not have permission to perform the requested operation.</summary>
         public const uint BadUserAccessDenied = 0x801F0000u;
 		/// <summary>The user identity token is not valid.</summary>
@@ -105,6 +107,14 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadTimestampsToReturnInvalid = 0x802B0000u;
 		/// <summary>The request was cancelled by the client.</summary>
         public const uint BadRequestCancelledByClient = 0x802C0000u;
+		/// <summary>Too many arguments were provided.</summary>
+        public const uint BadTooManyArguments = 0x80E50000u;
+		/// <summary>The server requires a license to operate in general or to perform a service or operation, but existing license is expired.</summary>
+        public const uint BadLicenseExpired = 0x810E0000u;
+		/// <summary>The server has limits on number of allowed operations / objects, based on installed licenses, and these limits where exceeded.</summary>
+        public const uint BadLicenseLimitsExceeded = 0x810F0000u;
+		/// <summary>The server does not have a license which is required to operate in general or to perform a service or operation.</summary>
+        public const uint BadLicenseNotAvailable = 0x81100000u;
 		/// <summary>The subscription was transferred to another session.</summary>
         public const uint GoodSubscriptionTransferred = 0x002D0000u;
 		/// <summary>The processing will complete asynchronously.</summary>
@@ -193,9 +203,9 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadSempahoreFileMissing = 0x80520000u;
 		/// <summary>The security token request type is not valid.</summary>
         public const uint BadRequestTypeInvalid = 0x80530000u;
-		/// <summary>The security mode does not meet the requirements set by the Server.</summary>
+		/// <summary>The security mode does not meet the requirements set by the server.</summary>
         public const uint BadSecurityModeRejected = 0x80540000u;
-		/// <summary>The security policy does not meet the requirements set by the Server.</summary>
+		/// <summary>The security policy does not meet the requirements set by the server.</summary>
         public const uint BadSecurityPolicyRejected = 0x80550000u;
 		/// <summary>The server has reached its maximum number of sessions.</summary>
         public const uint BadTooManySessions = 0x80560000u;
@@ -205,7 +215,7 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadApplicationSignatureInvalid = 0x80580000u;
 		/// <summary>The client did not provide at least one software certificate that is valid and meets the profile requirements for the server.</summary>
         public const uint BadNoValidCertificates = 0x80590000u;
-		/// <summary>The Server does not support changing the user identity assigned to the session.</summary>
+		/// <summary>The server does not support changing the user identity assigned to the session.</summary>
         public const uint BadIdentityChangeNotSupported = 0x80C60000u;
 		/// <summary>The request was cancelled by the client with the Cancel service.</summary>
         public const uint BadRequestCancelledByRequest = 0x805A0000u;
@@ -267,13 +277,15 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadNoMatch = 0x806F0000u;
 		/// <summary>The max age parameter is invalid.</summary>
         public const uint BadMaxAgeInvalid = 0x80700000u;
+		/// <summary>The operation is not permitted over the current secure channel.</summary>
+        public const uint BadSecurityModeInsufficient = 0x80E60000u;
 		/// <summary>The history details parameter is not valid.</summary>
         public const uint BadHistoryOperationInvalid = 0x80710000u;
 		/// <summary>The server does not support the requested operation.</summary>
         public const uint BadHistoryOperationUnsupported = 0x80720000u;
 		/// <summary>The defined timestamp to return was invalid.</summary>
         public const uint BadInvalidTimestampArgument = 0x80BD0000u;
-		/// <summary>The server not does support writing the combination of value, status and timestamps provided.</summary>
+		/// <summary>The server does not support writing the combination of value, status and timestamps provided.</summary>
         public const uint BadWriteNotSupported = 0x80730000u;
 		/// <summary>The value supplied for the attribute is not of the same type as the attribute's value.</summary>
         public const uint BadTypeMismatch = 0x80740000u;
@@ -291,7 +303,7 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadSequenceNumberUnknown = 0x807A0000u;
 		/// <summary>The requested notification message is no longer available.</summary>
         public const uint BadMessageNotAvailable = 0x807B0000u;
-		/// <summary>The Client of the current Session does not support one or more Profiles that are necessary for the Subscription.</summary>
+		/// <summary>The client of the current session does not support one or more Profiles that are necessary for the subscription.</summary>
         public const uint BadInsufficientClientProfile = 0x807C0000u;
 		/// <summary>The sub-state machine is not currently active.</summary>
         public const uint BadStateNotActive = 0x80BF0000u;
@@ -307,7 +319,7 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadTcpNotEnoughResources = 0x80810000u;
 		/// <summary>An internal error occurred.</summary>
         public const uint BadTcpInternalError = 0x80820000u;
-		/// <summary>The Server does not recognize the QueryString specified.</summary>
+		/// <summary>The server does not recognize the QueryString specified.</summary>
         public const uint BadTcpEndpointUrlInvalid = 0x80830000u;
 		/// <summary>The request could not be sent because of a network interruption.</summary>
         public const uint BadRequestInterrupted = 0x80840000u;
@@ -411,6 +423,22 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadAggregateConfigurationRejected = 0x80DA0000u;
 		/// <summary>The request pecifies fields which are not valid for the EventType or cannot be saved by the historian.</summary>
         public const uint GoodDataIgnored = 0x00D90000u;
+		/// <summary>The request was rejected by the server because it did not meet the criteria set by the server.</summary>
+        public const uint BadRequestNotAllowed = 0x80E40000u;
+		/// <summary>The value does not come from the real source and has been edited by the server.</summary>
+        public const uint GoodEdited = 0x00DC0000u;
+		/// <summary>There was an error in execution of these post-actions.</summary>
+        public const uint GoodPostActionFailed = 0x00DD0000u;
+		/// <summary>The related EngineeringUnit has been changed but the Variable Value is still provided based on the previous unit.</summary>
+        public const uint UncertainDominantValueChanged = 0x40DE0000u;
+		/// <summary>A dependent value has been changed but the change has not been applied to the device.</summary>
+        public const uint GoodDependentValueChanged = 0x00E00000u;
+		/// <summary>The related EngineeringUnit has been changed but this change has not been applied to the device. The Variable Value is still dependent on the previous unit but its status is currently Bad.</summary>
+        public const uint BadDominantValueChanged = 0x80E10000u;
+		/// <summary>A dependent value has been changed but the change has not been applied to the device. The quality of the dominant variable is uncertain.</summary>
+        public const uint UncertainDependentValueChanged = 0x40E20000u;
+		/// <summary>A dependent value has been changed but the change has not been applied to the device. The quality of the dominant variable is Bad.</summary>
+        public const uint BadDependentValueChanged = 0x80E30000u;
 		/// <summary>The communication layer has raised an event.</summary>
         public const uint GoodCommunicationEvent = 0x00A70000u;
 		/// <summary>The system is shutting down.</summary>
@@ -482,17 +510,18 @@ namespace Workstation.ServiceModel.Ua
 			[0x80110000]="The extension object cannot be (de)serialized because the data type id is not recognized.",
 			[0x80120000]="The certificate provided as a parameter is not valid.",
 			[0x80130000]="An error occurred verifying security.",
-			[0x80140000]="The Certificate has expired or is not yet valid.",
-			[0x80150000]="An Issuer Certificate has expired or is not yet valid.",
-			[0x80160000]="The HostName used to connect to a Server does not match a HostName in the Certificate.",
-			[0x80170000]="The URI specified in the ApplicationDescription does not match the URI in the Certificate.",
-			[0x80180000]="The Certificate may not be used for the requested operation.",
-			[0x80190000]="The Issuer Certificate may not be used for the requested operation.",
-			[0x801A0000]="The Certificate is not trusted.",
-			[0x801B0000]="It was not possible to determine if the Certificate has been revoked.",
-			[0x801C0000]="It was not possible to determine if the Issuer Certificate has been revoked.",
-			[0x801D0000]="The Certificate has been revoked.",
-			[0x801E0000]="The Issuer Certificate has been revoked.",
+			[0x80140000]="The certificate has expired or is not yet valid.",
+			[0x80150000]="An issuer certificate has expired or is not yet valid.",
+			[0x80160000]="The HostName used to connect to a server does not match a HostName in the certificate.",
+			[0x80170000]="The URI specified in the ApplicationDescription does not match the URI in the certificate.",
+			[0x80180000]="The certificate may not be used for the requested operation.",
+			[0x80190000]="The issuer certificate may not be used for the requested operation.",
+			[0x801A0000]="The certificate is not trusted.",
+			[0x801B0000]="It was not possible to determine if the certificate has been revoked.",
+			[0x801C0000]="It was not possible to determine if the issuer certificate has been revoked.",
+			[0x801D0000]="The certificate has been revoked.",
+			[0x801E0000]="The issuer certificate has been revoked.",
+			[0x810D0000]="The certificate chain is incomplete.",
 			[0x801F0000]="User does not have permission to perform the requested operation.",
 			[0x80200000]="The user identity token is not valid.",
 			[0x80210000]="The user identity token is valid but the server has rejected it.",
@@ -506,6 +535,10 @@ namespace Workstation.ServiceModel.Ua
 			[0x802A0000]="The header for the request is missing or invalid.",
 			[0x802B0000]="The timestamps to return parameter is invalid.",
 			[0x802C0000]="The request was cancelled by the client.",
+			[0x80E50000]="Too many arguments were provided.",
+			[0x810E0000]="The server requires a license to operate in general or to perform a service or operation, but existing license is expired.",
+			[0x810F0000]="The server has limits on number of allowed operations / objects, based on installed licenses, and these limits where exceeded.",
+			[0x81100000]="The server does not have a license which is required to operate in general or to perform a service or operation.",
 			[0x002D0000]="The subscription was transferred to another session.",
 			[0x002E0000]="The processing will complete asynchronously.",
 			[0x002F0000]="Sampling has slowed down due to resource limitations.",
@@ -550,13 +583,13 @@ namespace Workstation.ServiceModel.Ua
 			[0x80510000]="No DiscoveryUrl was specified.",
 			[0x80520000]="The semaphore file specified by the client is not valid.",
 			[0x80530000]="The security token request type is not valid.",
-			[0x80540000]="The security mode does not meet the requirements set by the Server.",
-			[0x80550000]="The security policy does not meet the requirements set by the Server.",
+			[0x80540000]="The security mode does not meet the requirements set by the server.",
+			[0x80550000]="The security policy does not meet the requirements set by the server.",
 			[0x80560000]="The server has reached its maximum number of sessions.",
 			[0x80570000]="The user token signature is missing or invalid.",
 			[0x80580000]="The signature generated with the client certificate is missing or invalid.",
 			[0x80590000]="The client did not provide at least one software certificate that is valid and meets the profile requirements for the server.",
-			[0x80C60000]="The Server does not support changing the user identity assigned to the session.",
+			[0x80C60000]="The server does not support changing the user identity assigned to the session.",
 			[0x805A0000]="The request was cancelled by the client with the Cancel service.",
 			[0x805B0000]="The parent node id does not to refer to a valid node.",
 			[0x805C0000]="The reference could not be created because it violates constraints imposed by the data model.",
@@ -587,10 +620,11 @@ namespace Workstation.ServiceModel.Ua
 			[0x806E0000]="The requested operation requires too many resources in the server.",
 			[0x806F0000]="The requested operation has no match to return.",
 			[0x80700000]="The max age parameter is invalid.",
+			[0x80E60000]="The operation is not permitted over the current secure channel.",
 			[0x80710000]="The history details parameter is not valid.",
 			[0x80720000]="The server does not support the requested operation.",
 			[0x80BD0000]="The defined timestamp to return was invalid.",
-			[0x80730000]="The server not does support writing the combination of value, status and timestamps provided.",
+			[0x80730000]="The server does not support writing the combination of value, status and timestamps provided.",
 			[0x80740000]="The value supplied for the attribute is not of the same type as the attribute's value.",
 			[0x80750000]="The method id does not refer to a method for the specified object.",
 			[0x80760000]="The client did not specify all of the input arguments for the method.",
@@ -599,7 +633,7 @@ namespace Workstation.ServiceModel.Ua
 			[0x80790000]="There is no subscription available for this session.",
 			[0x807A0000]="The sequence number is unknown to the server.",
 			[0x807B0000]="The requested notification message is no longer available.",
-			[0x807C0000]="The Client of the current Session does not support one or more Profiles that are necessary for the Subscription.",
+			[0x807C0000]="The client of the current session does not support one or more Profiles that are necessary for the subscription.",
 			[0x80BF0000]="The sub-state machine is not currently active.",
 			[0x807D0000]="The server cannot process the request because it is too busy.",
 			[0x807E0000]="The type of the message specified in the header invalid.",
@@ -607,7 +641,7 @@ namespace Workstation.ServiceModel.Ua
 			[0x80800000]="The size of the message specified in the header is too large.",
 			[0x80810000]="There are not enough resources to process the request.",
 			[0x80820000]="An internal error occurred.",
-			[0x80830000]="The Server does not recognize the QueryString specified.",
+			[0x80830000]="The server does not recognize the QueryString specified.",
 			[0x80840000]="The request could not be sent because of a network interruption.",
 			[0x80850000]="Timeout occurred while processing the request.",
 			[0x80860000]="The secure channel has been closed.",
@@ -659,6 +693,14 @@ namespace Workstation.ServiceModel.Ua
 			[0x80D60000]="The aggregate value could not be derived due to invalid data inputs.",
 			[0x80DA0000]="The aggregate configuration is not valid for specified node.",
 			[0x00D90000]="The request pecifies fields which are not valid for the EventType or cannot be saved by the historian.",
+			[0x80E40000]="The request was rejected by the server because it did not meet the criteria set by the server.",
+			[0x00DC0000]="The value does not come from the real source and has been edited by the server.",
+			[0x00DD0000]="There was an error in execution of these post-actions.",
+			[0x40DE0000]="The related EngineeringUnit has been changed but the Variable Value is still provided based on the previous unit.",
+			[0x00E00000]="A dependent value has been changed but the change has not been applied to the device.",
+			[0x80E10000]="The related EngineeringUnit has been changed but this change has not been applied to the device. The Variable Value is still dependent on the previous unit but its status is currently Bad.",
+			[0x40E20000]="A dependent value has been changed but the change has not been applied to the device. The quality of the dominant variable is uncertain.",
+			[0x80E30000]="A dependent value has been changed but the change has not been applied to the device. The quality of the dominant variable is Bad.",
 			[0x00A70000]="The communication layer has raised an event.",
 			[0x00A80000]="The system is shutting down.",
 			[0x00A90000]="The operation is not finished and needs to be called again.",

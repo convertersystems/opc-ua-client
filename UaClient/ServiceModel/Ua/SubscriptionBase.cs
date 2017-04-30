@@ -20,7 +20,7 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A base class that subscribes to receive data changes and events from an OPC UA server.
     /// </summary>
-    public abstract class SubscriptionBase : INotifyPropertyChanged, INotifyDataErrorInfo, ISetDataErrorInfo
+    public abstract class SubscriptionBase : INotifyPropertyChanged, INotifyDataErrorInfo, ISetDataErrorInfo, ICommunicationObject
     {
         private const double DefaultPublishingInterval = 1000f;
         private const uint DefaultKeepaliveCount = 30;
@@ -40,7 +40,7 @@ namespace Workstation.ServiceModel.Ua
         private uint keepAliveCount = DefaultKeepaliveCount;
         private uint lifetimeCount = 0u;
         private MonitoredItemBaseCollection monitoredItems = new MonitoredItemBaseCollection();
-        private CommunicationState state;
+        private CommunicationState state = CommunicationState.Created;
         private CancellationTokenSource stateMachineCts;
         private Task stateMachineTask;
 
@@ -49,17 +49,12 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public SubscriptionBase()
         {
-            if (UaApplication.Current == null)
-            {
-                throw new ArgumentNullException("UaApplication.Current");
-            }
-
             this.application = UaApplication.Current;
-            this.application.Completion.ContinueWith(t => this.stateMachineCts?.Cancel());
+            this.application?.Completion.ContinueWith(t => this.stateMachineCts?.Cancel());
+            this.logger = this.application?.LoggerFactory?.CreateLogger(this.GetType());
             this.errors = new ErrorsContainer<string>(p => this.ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(p)));
-            this.propertyChanged += this.OnPropertyChanged;
-            this.logger = this.application.LoggerFactory?.CreateLogger(this.GetType());
             this.progress = new Progress<CommunicationState>(s => this.State = s);
+            this.propertyChanged += this.OnPropertyChanged;
 
             // register the action to be run on the ui thread, if there is one.
             if (SynchronizationContext.Current != null)
@@ -186,7 +181,16 @@ namespace Workstation.ServiceModel.Ua
                 this.propertyChanged += value;
                 if (flag)
                 {
-                    this.Subscribe();
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await this.OpenAsync();
+                        }
+                        catch
+                        {
+                        }
+                    });
                 }
             }
 
@@ -195,7 +199,16 @@ namespace Workstation.ServiceModel.Ua
                 this.propertyChanged -= value;
                 if (this.propertyChanged.GetInvocationList().Length == 1)
                 {
-                    this.Unsubscribe();
+                    Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await this.CloseAsync(new CancellationTokenSource(2000).Token);
+                        }
+                        catch
+                        {
+                        }
+                    });
                 }
             }
         }
@@ -228,27 +241,37 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// This method is automatically called when an object starts listening to the PropertyChanged event.
         /// </summary>
-        protected virtual void Subscribe()
+        /// <param name="token">A cancellation token.</param>
+        /// <returns>A task.</returns>
+        public async Task OpenAsync(CancellationToken token = default(CancellationToken))
         {
-            if (this.stateMachineCts == null || this.stateMachineCts.IsCancellationRequested)
+            if (this.application != null && (this.stateMachineCts == null || this.stateMachineCts.IsCancellationRequested))
             {
                 this.stateMachineCts = new CancellationTokenSource();
                 this.stateMachineTask = Task.Run(() => this.StateMachineAsync(this.stateMachineCts.Token));
             }
         }
 
+        /// <inheritdoc/>
+        public async Task AbortAsync(CancellationToken token = default(CancellationToken))
+        {
+            if (this.stateMachineCts != null)
+            {
+                this.stateMachineCts.Cancel();
+            }
+        }
+
         /// <summary>
         /// This method is automatically called when all objects stop listening to the PropertyChanged event.
         /// </summary>
-        protected virtual void Unsubscribe()
+        /// <param name="token">A cancellation token.</param>
+        /// <returns>A task.</returns>
+        public async Task CloseAsync(CancellationToken token = default(CancellationToken))
         {
-            this.stateMachineCts.Cancel();
-            try
+            if (this.stateMachineCts != null)
             {
-                this.stateMachineTask.Wait(2000);
-            }
-            catch
-            {
+                this.stateMachineCts.Cancel();
+                await this.stateMachineTask.WithCancellation(token);
             }
         }
 

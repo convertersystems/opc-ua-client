@@ -11,7 +11,7 @@
 <#@ import namespace="System.Xml.Serialization" #>
 <#@ output extension="generated.cs" #>
 <# 
-var filename = this.Host.ResolvePath(@"References\Types.xsd");
+var filename = this.Host.ResolvePath(@"Schema\Types.xsd");
 var ns = new CodeNamespace();
 XmlReader reader = null;
 try

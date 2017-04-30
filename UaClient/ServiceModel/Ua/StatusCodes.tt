@@ -8,7 +8,7 @@
 <#@ import namespace="System.IO" #>
 <#@ output extension="generated.cs" #>
 <# 
-var filename = this.Host.ResolvePath(@"References\StatusCodes.csv");
+var filename = this.Host.ResolvePath(@"Schema\StatusCodes.csv");
 var comma = new[] { ',' };
 var fields = 
 	from l in File.ReadAllLines(filename)

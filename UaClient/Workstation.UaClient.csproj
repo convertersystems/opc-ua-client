@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
     <AssemblyName>Workstation.UaClient</AssemblyName>
     <RootNamespace>Workstation.UaClient</RootNamespace>
-    <Version>2.0.0-RC2</Version>
+    <Version>2.0.0-RC3</Version>
     <Authors>Andrew Cullen</Authors>
     <Company>Converter Systems LLC</Company>
     <PackageProjectUrl>https://github.com/convertersystems/opc-ua-client</PackageProjectUrl>
@@ -37,20 +37,47 @@
   <ItemGroup>
     <None Update="ServiceModel\Ua\AttributeIds.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>AttributeIds.generated.cs</LastGenOutput>
     </None>
     <None Update="ServiceModel\Ua\NodeIds.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>NodeIds.generated.cs</LastGenOutput>
     </None>
     <None Update="ServiceModel\Ua\StatusCodes.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>StatusCodes.generated.cs</LastGenOutput>
     </None>
     <None Update="ServiceModel\Ua\Types.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Types.generated.cs</LastGenOutput>
     </None>
   </ItemGroup>
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="ServiceModel\Ua\AttributeIds.generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>AttributeIds.tt</DependentUpon>
+    </Compile>
+    <Compile Update="ServiceModel\Ua\NodeIds.generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>NodeIds.tt</DependentUpon>
+    </Compile>
+    <Compile Update="ServiceModel\Ua\StatusCodes.generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>StatusCodes.tt</DependentUpon>
+    </Compile>
+    <Compile Update="ServiceModel\Ua\Types.generated.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Types.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
 
 </Project>

@@ -16,8 +16,17 @@ namespace Workstation.ServiceModel.Ua
 	public enum OpenFileMode {
 		Read=1,
 		Write=2,
-		EraseExisiting=4,
+		EraseExisting=4,
 		Append=8,
+	}
+	[DataTypeId(DataTypeIds.TrustListMasks)]
+	public enum TrustListMasks {
+		None=0,
+		TrustedCertificates=1,
+		TrustedCrls=2,
+		IssuerCertificates=4,
+		IssuerCrls=8,
+		All=15,
 	}
 	[DataTypeId(DataTypeIds.IdType)]
 	public enum IdType {
@@ -144,13 +153,6 @@ namespace Workstation.ServiceModel.Ua
 		ReferenceTypeInfo=3,
 		TargetInfo=60,
 	}
-	[DataTypeId(DataTypeIds.ComplianceLevel)]
-	public enum ComplianceLevel {
-		Untested=0,
-		Partial=1,
-		SelfTested=2,
-		Certified=3,
-	}
 	[DataTypeId(DataTypeIds.FilterOperator)]
 	public enum FilterOperator {
 		Equals=0,
@@ -178,6 +180,13 @@ namespace Workstation.ServiceModel.Ua
 		Server=1,
 		Both=2,
 		Neither=3,
+		Invalid=4,
+	}
+	[DataTypeId(DataTypeIds.DataChangeTrigger)]
+	public enum DataChangeTrigger {
+		Status=0,
+		StatusValue=1,
+		StatusValueTimestamp=2,
 	}
 	[DataTypeId(DataTypeIds.HistoryUpdateType)]
 	public enum HistoryUpdateType {
@@ -185,12 +194,6 @@ namespace Workstation.ServiceModel.Ua
 		Replace=2,
 		Update=3,
 		Delete=4,
-	}
-	[DataTypeId(DataTypeIds.DataChangeTrigger)]
-	public enum DataChangeTrigger {
-		Status=0,
-		StatusValue=1,
-		StatusValueTimestamp=2,
 	}
 	[DataTypeId(DataTypeIds.PerformUpdateType)]
 	public enum PerformUpdateType {
@@ -254,6 +257,34 @@ namespace Workstation.ServiceModel.Ua
 		Unknown=4,
 	}
 
+	[BinaryEncodingId(ObjectIds.TrustListDataType_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.TrustListDataType_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.TrustListDataType)]
+	public class TrustListDataType : IEncodable {
+		public UInt32 SpecifiedLists { get; set; }
+		public Byte[][] TrustedCertificates { get; set; }
+		public Byte[][] TrustedCrls { get; set; }
+		public Byte[][] IssuerCertificates { get; set; }
+		public Byte[][] IssuerCrls { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteUInt32("SpecifiedLists", SpecifiedLists);
+			encoder.WriteByteStringArray("TrustedCertificates", TrustedCertificates);
+			encoder.WriteByteStringArray("TrustedCrls", TrustedCrls);
+			encoder.WriteByteStringArray("IssuerCertificates", IssuerCertificates);
+			encoder.WriteByteStringArray("IssuerCrls", IssuerCrls);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			SpecifiedLists = decoder.ReadUInt32("SpecifiedLists");
+			TrustedCertificates = decoder.ReadByteStringArray("TrustedCertificates");
+			TrustedCrls = decoder.ReadByteStringArray("TrustedCrls");
+			IssuerCertificates = decoder.ReadByteStringArray("IssuerCertificates");
+			IssuerCrls = decoder.ReadByteStringArray("IssuerCrls");
+            decoder.PopNamespace();
+        }
+	}
 	[BinaryEncodingId(ObjectIds.Node_Encoding_DefaultBinary)]
 	[XmlEncodingId(ObjectIds.Node_Encoding_DefaultXml)]
 	[DataTypeId(DataTypeIds.Node)]
@@ -582,6 +613,38 @@ namespace Workstation.ServiceModel.Ua
             decoder.PopNamespace();
         }
 	}
+	[BinaryEncodingId(ObjectIds.OptionSet_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.OptionSet_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.OptionSet)]
+	public class OptionSet : IEncodable {
+		public Byte[] Value { get; set; }
+		public Byte[] ValidBits { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteByteString("Value", Value);
+			encoder.WriteByteString("ValidBits", ValidBits);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			Value = decoder.ReadByteString("Value");
+			ValidBits = decoder.ReadByteString("ValidBits");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.Union_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.Union_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.Union)]
+	public class Union : IEncodable {
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+	}
 	[BinaryEncodingId(ObjectIds.TimeZoneDataType_Encoding_DefaultBinary)]
 	[XmlEncodingId(ObjectIds.TimeZoneDataType_Encoding_DefaultXml)]
 	[DataTypeId(DataTypeIds.TimeZoneDataType)]
@@ -716,78 +779,6 @@ namespace Workstation.ServiceModel.Ua
             decoder.PopNamespace();
         }
 	}
-	[BinaryEncodingId(ObjectIds.DnsServiceRecord_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.DnsServiceRecord_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.DnsServiceRecord)]
-	public class DnsServiceRecord : IEncodable {
-		public String ServiceName { get; set; }
-		public String ServiceType { get; set; }
-		public String DnsName { get; set; }
-		public UInt16 Port { get; set; }
-		public String[] IpAddresses { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteString("ServiceName", ServiceName);
-			encoder.WriteString("ServiceType", ServiceType);
-			encoder.WriteString("DnsName", DnsName);
-			encoder.WriteUInt16("Port", Port);
-			encoder.WriteStringArray("IpAddresses", IpAddresses);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			ServiceName = decoder.ReadString("ServiceName");
-			ServiceType = decoder.ReadString("ServiceType");
-			DnsName = decoder.ReadString("DnsName");
-			Port = decoder.ReadUInt16("Port");
-			IpAddresses = decoder.ReadStringArray("IpAddresses");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.FindDnsServicesRequest_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.FindDnsServicesRequest_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.FindDnsServicesRequest)]
-	public class FindDnsServicesRequest : IServiceRequest {
-		public RequestHeader RequestHeader { get; set; }
-		public String EndpointUrl { get; set; }
-		public String[] ServiceNameFilters { get; set; }
-		public String[] ServiceTypeFilters { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteEncodable<RequestHeader>("RequestHeader", RequestHeader);
-			encoder.WriteString("EndpointUrl", EndpointUrl);
-			encoder.WriteStringArray("ServiceNameFilters", ServiceNameFilters);
-			encoder.WriteStringArray("ServiceTypeFilters", ServiceTypeFilters);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			RequestHeader = decoder.ReadEncodable<RequestHeader>("RequestHeader");
-			EndpointUrl = decoder.ReadString("EndpointUrl");
-			ServiceNameFilters = decoder.ReadStringArray("ServiceNameFilters");
-			ServiceTypeFilters = decoder.ReadStringArray("ServiceTypeFilters");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.FindDnsServicesResponse_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.FindDnsServicesResponse_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.FindDnsServicesResponse)]
-	public class FindDnsServicesResponse : IServiceResponse {
-		public ResponseHeader ResponseHeader { get; set; }
-		public DnsServiceRecord[] Services { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
-			encoder.WriteEncodableArray<DnsServiceRecord>("Services", Services);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			ResponseHeader = decoder.ReadEncodable<ResponseHeader>("ResponseHeader");
-			Services = decoder.ReadEncodableArray<DnsServiceRecord>("Services");
-            decoder.PopNamespace();
-        }
-	}
 	[BinaryEncodingId(ObjectIds.FindServersRequest_Encoding_DefaultBinary)]
 	[XmlEncodingId(ObjectIds.FindServersRequest_Encoding_DefaultXml)]
 	[DataTypeId(DataTypeIds.FindServersRequest)]
@@ -829,6 +820,78 @@ namespace Workstation.ServiceModel.Ua
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			ResponseHeader = decoder.ReadEncodable<ResponseHeader>("ResponseHeader");
 			Servers = decoder.ReadEncodableArray<ApplicationDescription>("Servers");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.ServerOnNetwork_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.ServerOnNetwork_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.ServerOnNetwork)]
+	public class ServerOnNetwork : IEncodable {
+		public UInt32 RecordId { get; set; }
+		public String ServerName { get; set; }
+		public String DiscoveryUrl { get; set; }
+		public String[] ServerCapabilities { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteUInt32("RecordId", RecordId);
+			encoder.WriteString("ServerName", ServerName);
+			encoder.WriteString("DiscoveryUrl", DiscoveryUrl);
+			encoder.WriteStringArray("ServerCapabilities", ServerCapabilities);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			RecordId = decoder.ReadUInt32("RecordId");
+			ServerName = decoder.ReadString("ServerName");
+			DiscoveryUrl = decoder.ReadString("DiscoveryUrl");
+			ServerCapabilities = decoder.ReadStringArray("ServerCapabilities");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.FindServersOnNetworkRequest_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.FindServersOnNetworkRequest_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.FindServersOnNetworkRequest)]
+	public class FindServersOnNetworkRequest : IServiceRequest {
+		public RequestHeader RequestHeader { get; set; }
+		public UInt32 StartingRecordId { get; set; }
+		public UInt32 MaxRecordsToReturn { get; set; }
+		public String[] ServerCapabilityFilter { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteEncodable<RequestHeader>("RequestHeader", RequestHeader);
+			encoder.WriteUInt32("StartingRecordId", StartingRecordId);
+			encoder.WriteUInt32("MaxRecordsToReturn", MaxRecordsToReturn);
+			encoder.WriteStringArray("ServerCapabilityFilter", ServerCapabilityFilter);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			RequestHeader = decoder.ReadEncodable<RequestHeader>("RequestHeader");
+			StartingRecordId = decoder.ReadUInt32("StartingRecordId");
+			MaxRecordsToReturn = decoder.ReadUInt32("MaxRecordsToReturn");
+			ServerCapabilityFilter = decoder.ReadStringArray("ServerCapabilityFilter");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.FindServersOnNetworkResponse_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.FindServersOnNetworkResponse_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.FindServersOnNetworkResponse)]
+	public class FindServersOnNetworkResponse : IServiceResponse {
+		public ResponseHeader ResponseHeader { get; set; }
+		public DateTime LastCounterResetTime { get; set; }
+		public ServerOnNetwork[] Servers { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
+			encoder.WriteDateTime("LastCounterResetTime", LastCounterResetTime);
+			encoder.WriteEncodableArray<ServerOnNetwork>("Servers", Servers);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			ResponseHeader = decoder.ReadEncodable<ResponseHeader>("ResponseHeader");
+			LastCounterResetTime = decoder.ReadDateTime("LastCounterResetTime");
+			Servers = decoder.ReadEncodableArray<ServerOnNetwork>("Servers");
             decoder.PopNamespace();
         }
 	}
@@ -1010,6 +1073,84 @@ namespace Workstation.ServiceModel.Ua
         public virtual void Decode(IDecoder decoder) {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			ResponseHeader = decoder.ReadEncodable<ResponseHeader>("ResponseHeader");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.DiscoveryConfiguration_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.DiscoveryConfiguration_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.DiscoveryConfiguration)]
+	public class DiscoveryConfiguration : IEncodable {
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.MdnsDiscoveryConfiguration_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.MdnsDiscoveryConfiguration_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.MdnsDiscoveryConfiguration)]
+	public class MdnsDiscoveryConfiguration : DiscoveryConfiguration {
+		public String MdnsServerName { get; set; }
+		public String[] ServerCapabilities { get; set; }
+        public override void Encode(IEncoder encoder) {
+			base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteString("MdnsServerName", MdnsServerName);
+			encoder.WriteStringArray("ServerCapabilities", ServerCapabilities);
+            encoder.PopNamespace();
+        }
+        public override void Decode(IDecoder decoder) {
+			base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			MdnsServerName = decoder.ReadString("MdnsServerName");
+			ServerCapabilities = decoder.ReadStringArray("ServerCapabilities");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.RegisterServer2Request_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.RegisterServer2Request_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.RegisterServer2Request)]
+	public class RegisterServer2Request : IServiceRequest {
+		public RequestHeader RequestHeader { get; set; }
+		public RegisteredServer Server { get; set; }
+		public ExtensionObject[] DiscoveryConfiguration { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteEncodable<RequestHeader>("RequestHeader", RequestHeader);
+			encoder.WriteEncodable<RegisteredServer>("Server", Server);
+			encoder.WriteExtensionObjectArray("DiscoveryConfiguration", DiscoveryConfiguration);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			RequestHeader = decoder.ReadEncodable<RequestHeader>("RequestHeader");
+			Server = decoder.ReadEncodable<RegisteredServer>("Server");
+			DiscoveryConfiguration = decoder.ReadExtensionObjectArray("DiscoveryConfiguration");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.RegisterServer2Response_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.RegisterServer2Response_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.RegisterServer2Response)]
+	public class RegisterServer2Response : IServiceResponse {
+		public ResponseHeader ResponseHeader { get; set; }
+		public StatusCode[] ConfigurationResults { get; set; }
+		public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
+			encoder.WriteStatusCodeArray("ConfigurationResults", ConfigurationResults);
+			encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			ResponseHeader = decoder.ReadEncodable<ResponseHeader>("ResponseHeader");
+			ConfigurationResults = decoder.ReadStatusCodeArray("ConfigurationResults");
+			DiagnosticInfos = decoder.ReadDiagnosticInfoArray("DiagnosticInfos");
             decoder.PopNamespace();
         }
 	}
@@ -2434,80 +2575,6 @@ namespace Workstation.ServiceModel.Ua
             decoder.PopNamespace();
         }
 	}
-	[BinaryEncodingId(ObjectIds.SupportedProfile_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.SupportedProfile_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.SupportedProfile)]
-	public class SupportedProfile : IEncodable {
-		public String OrganizationUri { get; set; }
-		public String ProfileId { get; set; }
-		public String ComplianceTool { get; set; }
-		public DateTime ComplianceDate { get; set; }
-		public ComplianceLevel ComplianceLevel { get; set; }
-		public String[] UnsupportedUnitIds { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteString("OrganizationUri", OrganizationUri);
-			encoder.WriteString("ProfileId", ProfileId);
-			encoder.WriteString("ComplianceTool", ComplianceTool);
-			encoder.WriteDateTime("ComplianceDate", ComplianceDate);
-			encoder.WriteEnumeration<ComplianceLevel>("ComplianceLevel", ComplianceLevel);
-			encoder.WriteStringArray("UnsupportedUnitIds", UnsupportedUnitIds);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			OrganizationUri = decoder.ReadString("OrganizationUri");
-			ProfileId = decoder.ReadString("ProfileId");
-			ComplianceTool = decoder.ReadString("ComplianceTool");
-			ComplianceDate = decoder.ReadDateTime("ComplianceDate");
-			ComplianceLevel = decoder.ReadEnumeration<ComplianceLevel>("ComplianceLevel");
-			UnsupportedUnitIds = decoder.ReadStringArray("UnsupportedUnitIds");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.SoftwareCertificate_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.SoftwareCertificate_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.SoftwareCertificate)]
-	public class SoftwareCertificate : IEncodable {
-		public String ProductName { get; set; }
-		public String ProductUri { get; set; }
-		public String VendorName { get; set; }
-		public Byte[] VendorProductCertificate { get; set; }
-		public String SoftwareVersion { get; set; }
-		public String BuildNumber { get; set; }
-		public DateTime BuildDate { get; set; }
-		public String IssuedBy { get; set; }
-		public DateTime IssueDate { get; set; }
-		public SupportedProfile[] SupportedProfiles { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteString("ProductName", ProductName);
-			encoder.WriteString("ProductUri", ProductUri);
-			encoder.WriteString("VendorName", VendorName);
-			encoder.WriteByteString("VendorProductCertificate", VendorProductCertificate);
-			encoder.WriteString("SoftwareVersion", SoftwareVersion);
-			encoder.WriteString("BuildNumber", BuildNumber);
-			encoder.WriteDateTime("BuildDate", BuildDate);
-			encoder.WriteString("IssuedBy", IssuedBy);
-			encoder.WriteDateTime("IssueDate", IssueDate);
-			encoder.WriteEncodableArray<SupportedProfile>("SupportedProfiles", SupportedProfiles);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			ProductName = decoder.ReadString("ProductName");
-			ProductUri = decoder.ReadString("ProductUri");
-			VendorName = decoder.ReadString("VendorName");
-			VendorProductCertificate = decoder.ReadByteString("VendorProductCertificate");
-			SoftwareVersion = decoder.ReadString("SoftwareVersion");
-			BuildNumber = decoder.ReadString("BuildNumber");
-			BuildDate = decoder.ReadDateTime("BuildDate");
-			IssuedBy = decoder.ReadString("IssuedBy");
-			IssueDate = decoder.ReadDateTime("IssueDate");
-			SupportedProfiles = decoder.ReadEncodableArray<SupportedProfile>("SupportedProfiles");
-            decoder.PopNamespace();
-        }
-	}
 	[BinaryEncodingId(ObjectIds.QueryDataDescription_Encoding_DefaultBinary)]
 	[XmlEncodingId(ObjectIds.QueryDataDescription_Encoding_DefaultXml)]
 	[DataTypeId(DataTypeIds.QueryDataDescription)]
@@ -3012,75 +3079,19 @@ namespace Workstation.ServiceModel.Ua
 	public class HistoryReadResult : IEncodable {
 		public StatusCode StatusCode { get; set; }
 		public Byte[] ContinuationPoint { get; set; }
-		public HistoryData HistoryData { get; set; }
+		public ExtensionObject HistoryData { get; set; }
         public virtual void Encode(IEncoder encoder) {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			encoder.WriteStatusCode("StatusCode", StatusCode);
 			encoder.WriteByteString("ContinuationPoint", ContinuationPoint);
-			encoder.WriteExtensionObject<HistoryData>("HistoryData", HistoryData);
+			encoder.WriteExtensionObject("HistoryData", HistoryData);
             encoder.PopNamespace();
         }
         public virtual void Decode(IDecoder decoder) {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			StatusCode = decoder.ReadStatusCode("StatusCode");
 			ContinuationPoint = decoder.ReadByteString("ContinuationPoint");
-			HistoryData = decoder.ReadExtensionObject<HistoryData>("HistoryData");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.HistoryData_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.HistoryData_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.HistoryData)]
-	public class HistoryData : IEncodable {
-		public DataValue[] DataValues { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteDataValueArray("DataValues", DataValues);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			DataValues = decoder.ReadDataValueArray("DataValues");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.HistoryModifiedData)]
-	public class HistoryModifiedData : HistoryData {
-		public ModificationInfo[] ModificationInfos { get; set; }
-        public override void Encode(IEncoder encoder) {
-			base.Encode(encoder);
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteEncodableArray<ModificationInfo>("ModificationInfos", ModificationInfos);
-            encoder.PopNamespace();
-        }
-        public override void Decode(IDecoder decoder) {
-			base.Decode(decoder);
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			ModificationInfos = decoder.ReadEncodableArray<ModificationInfo>("ModificationInfos");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.ModificationInfo)]
-	public class ModificationInfo : IEncodable {
-		public DateTime ModificationTime { get; set; }
-		public HistoryUpdateType UpdateType { get; set; }
-		public String UserName { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteDateTime("ModificationTime", ModificationTime);
-			encoder.WriteEnumeration<HistoryUpdateType>("UpdateType", UpdateType);
-			encoder.WriteString("UserName", UserName);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			ModificationTime = decoder.ReadDateTime("ModificationTime");
-			UpdateType = decoder.ReadEnumeration<HistoryUpdateType>("UpdateType");
-			UserName = decoder.ReadString("UserName");
+			HistoryData = decoder.ReadExtensionObject("HistoryData");
             decoder.PopNamespace();
         }
 	}
@@ -3315,6 +3326,62 @@ namespace Workstation.ServiceModel.Ua
 			Trigger = decoder.ReadEnumeration<DataChangeTrigger>("Trigger");
 			DeadbandType = decoder.ReadUInt32("DeadbandType");
 			DeadbandValue = decoder.ReadDouble("DeadbandValue");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryData_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryData_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryData)]
+	public class HistoryData : IEncodable {
+		public DataValue[] DataValues { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteDataValueArray("DataValues", DataValues);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			DataValues = decoder.ReadDataValueArray("DataValues");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryModifiedData)]
+	public class HistoryModifiedData : HistoryData {
+		public ModificationInfo[] ModificationInfos { get; set; }
+        public override void Encode(IEncoder encoder) {
+			base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteEncodableArray<ModificationInfo>("ModificationInfos", ModificationInfos);
+            encoder.PopNamespace();
+        }
+        public override void Decode(IDecoder decoder) {
+			base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			ModificationInfos = decoder.ReadEncodableArray<ModificationInfo>("ModificationInfos");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.ModificationInfo)]
+	public class ModificationInfo : IEncodable {
+		public DateTime ModificationTime { get; set; }
+		public HistoryUpdateType UpdateType { get; set; }
+		public String UserName { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteDateTime("ModificationTime", ModificationTime);
+			encoder.WriteEnumeration<HistoryUpdateType>("UpdateType", UpdateType);
+			encoder.WriteString("UserName", UserName);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			ModificationTime = decoder.ReadDateTime("ModificationTime");
+			UpdateType = decoder.ReadEnumeration<HistoryUpdateType>("UpdateType");
+			UserName = decoder.ReadString("UserName");
             decoder.PopNamespace();
         }
 	}

@@ -228,6 +228,74 @@ namespace Workstation.UaClient.UnitTests
             await channel.CloseAsync();
         }
 
+        [TestMethod]
+        public async Task ReadHistorical()
+        {
+            var channel = new UaTcpSessionChannel(
+                this.localDescription,
+                this.certificateStore,
+                null,
+                "opc.tcp://bculz-pc:53530/OPCUA/SimulationServer");
+
+            await channel.OpenAsync();
+            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            Console.WriteLine($"Activated session '{channel.SessionId}'.");
+
+            var historyReadRequest = new HistoryReadRequest
+            {
+                HistoryReadDetails = new ReadRawModifiedDetails
+                {
+                    StartTime = DateTime.UtcNow - TimeSpan.FromMinutes(10),
+                    EndTime = DateTime.UtcNow,
+                    ReturnBounds = true,
+                    IsReadModified = false
+                },
+                NodesToRead = new[]
+                {
+                    new HistoryReadValueId
+                    {
+                        NodeId = NodeId.Parse("ns=2;s=MyLevel")
+                    }
+                },
+            };
+            var historyReadResponse = await channel.HistoryReadAsync(historyReadRequest);
+            var result = historyReadResponse.Results[0];
+            Assert.IsTrue(StatusCode.IsGood(result.StatusCode));
+            Console.WriteLine($"HistoryRead response status code: {result.StatusCode}, HistoryData count: {((HistoryData)result.HistoryData.Body).DataValues.Length}.");
+
+            var historyReadRequest2 = new HistoryReadRequest
+            {
+                HistoryReadDetails = new ReadEventDetails
+                {
+                    StartTime = DateTime.UtcNow - TimeSpan.FromMinutes(10),
+                    EndTime = DateTime.UtcNow,
+                    Filter = new EventFilter // Use EventHelper to select all the fields of AlarmCondition.
+                    {
+                        SelectClauses = EventHelper.GetSelectClauses<AlarmCondition>()
+                    }
+                },
+                NodesToRead = new[]
+                {
+                    new HistoryReadValueId
+                    {
+                        NodeId = NodeId.Parse("ns=2;s=MyDevice")
+                    }
+                },
+            };
+            var historyReadResponse2 = await channel.HistoryReadAsync(historyReadRequest2);
+            var result2 = historyReadResponse2.Results[0];
+            Assert.IsTrue(StatusCode.IsGood(result2.StatusCode));
+            Console.WriteLine($"HistoryRead response status code: {result2.StatusCode}, HistoryEvent count: {((HistoryEvent)result2.HistoryData.Body).Events.Length}.");
+
+            // Use EventHelper to create AlarmConditions from the HistoryEventFieldList
+            var alarms = ((HistoryEvent)result2.HistoryData.Body).Events.Select(e => EventHelper.Deserialize<AlarmCondition>(e.EventFields));
+
+            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            await channel.CloseAsync();
+        }
+
         /// <summary>
         /// Tests connecting to endpoint and creating subscriptions.
         /// </summary>
