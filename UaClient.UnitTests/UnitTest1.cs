@@ -2,23 +2,25 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
-using Microsoft.Extensions.Configuration;
 
 namespace Workstation.UaClient.UnitTests
 {
     [TestClass]
     public class UnitTest1
     {
-        //private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
+        // private const string EndpointUrl = "opc.tcp://localhost:16664"; // open62541
+        // private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
         // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
         // private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
         private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.NodeServer.
@@ -62,7 +64,7 @@ namespace Workstation.UaClient.UnitTests
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
+            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, this.loggerFactory);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
             foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.Where(e => e.SecurityMode == MessageSecurityMode.None))
@@ -235,7 +237,7 @@ namespace Workstation.UaClient.UnitTests
                 this.localDescription,
                 this.certificateStore,
                 null,
-                "opc.tcp://bculz-pc:53530/OPCUA/SimulationServer");
+                EndpointUrl);
 
             await channel.OpenAsync();
             Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -322,11 +324,15 @@ namespace Workstation.UaClient.UnitTests
             app.Run();
 
             var sub = new MySubscription();
-            sub.PropertyChanged += (s, e) => { };
+            var d = new PropertyChangedEventHandler((s, e) => { });
+            sub.PropertyChanged += d;
 
             Console.WriteLine($"Created subscription.");
 
+            await Task.Delay(10000);
+            sub.PropertyChanged -= d;
             await Task.Delay(5000);
+
             app.Dispose();
 
             Assert.IsTrue(sub.CurrentTime != DateTime.MinValue, "CurrentTime");

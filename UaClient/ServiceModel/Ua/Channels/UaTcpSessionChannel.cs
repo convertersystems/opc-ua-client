@@ -28,10 +28,12 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const string RsaOaepKeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-oaep";
         public const int NonceLength = 32;
 
+        private readonly ILoggerFactory loggerFactory;
         private readonly ILogger logger;
         private readonly BroadcastBlock<PublishResponse> publishResponses;
         private readonly ActionBlock<PublishResponse> actionBlock;
         private readonly UaTcpSessionChannelOptions options;
+        private CancellationTokenSource stateMachineCts;
         private Task stateMachineTask;
 
         /// <summary>
@@ -54,9 +56,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             this.UserIdentityProvider = userIdentityProvider;
             this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
             this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
             this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
-            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.channelCts.Token });
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
         }
 
         /// <summary>
@@ -81,9 +85,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             this.UserIdentityProvider = userIdentityProvider;
             this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
             this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
             this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
-            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.channelCts.Token });
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
         }
 
         /// <summary>
@@ -154,7 +160,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnOpeningAsync(CancellationToken token)
+        protected override async Task OnOpeningAsync(CancellationToken token = default(CancellationToken))
         {
             if (this.RemoteEndpoint.Server == null)
             {
@@ -170,7 +176,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         EndpointUrl = endpointUrl,
                         ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
                     };
-                    var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest).ConfigureAwait(false);
+                    var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, this.loggerFactory).ConfigureAwait(false);
                     if (getEndpointsResponse.Endpoints == null || getEndpointsResponse.Endpoints.Length == 0)
                     {
                         throw new InvalidOperationException($"'{endpointUrl}' returned no endpoints.");
@@ -207,7 +213,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnOpenAsync(CancellationToken token)
+        protected override async Task OnOpenAsync(CancellationToken token = default(CancellationToken))
         {
             this.logger?.LogInformation($"Opening session channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
             this.logger?.LogInformation($"SecurityPolicy: '{this.RemoteEndpoint.SecurityPolicyUri}'.");
@@ -592,13 +598,21 @@ namespace Workstation.ServiceModel.Ua.Channels
             var linkToken = this.LinkTo(this.actionBlock, pr => pr.SubscriptionId == id);
 
             // start publishing.
-            this.stateMachineTask = Task.Run(() => this.StateMachineAsync(this.channelCts.Token));
+            this.stateMachineTask = Task.Run(() => this.StateMachineAsync(this.stateMachineCts.Token));
         }
 
         /// <inheritdoc/>
-        protected override async Task OnCloseAsync(CancellationToken token)
+        protected override Task OnClosingAsync(CancellationToken token = default(CancellationToken))
+        {
+            this.stateMachineCts.Cancel();
+            return base.OnClosingAsync(token);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task OnCloseAsync(CancellationToken token = default(CancellationToken))
         {
             await this.CloseSessionAsync(new CloseSessionRequest { DeleteSubscriptions = true }).ConfigureAwait(false);
+            await Task.Delay(1000).ConfigureAwait(false);
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
@@ -638,7 +652,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         SubscriptionAcknowledgements = publishResponse.NotificationMessage.NotificationData != null ? new[] { new SubscriptionAcknowledgement { SequenceNumber = publishResponse.NotificationMessage.SequenceNumber, SubscriptionId = publishResponse.SubscriptionId } } : new SubscriptionAcknowledgement[0]
                     };
                 }
-                catch (ServiceResultException ex)
+                catch (Exception ex)
                 {
                     if (token.IsCancellationRequested)
                     {

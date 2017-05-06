@@ -244,11 +244,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (this.pendingRequests.Post(operation))
                 {
-                    if (request is CloseSecureChannelRequest)
-                    {
-                        return null;
-                    }
-
                     return await operation.Task.ConfigureAwait(false);
                 }
 
@@ -560,7 +555,6 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             var openSecureChannelRequest = new OpenSecureChannelRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = this.options.TimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint, Timestamp = DateTime.UtcNow, RequestHandle = this.GetNextHandle() },
                 ClientProtocolVersion = ProtocolVersion,
                 RequestType = SecurityTokenRequestType.Issue,
                 SecurityMode = this.RemoteEndpoint.SecurityMode,
@@ -574,29 +568,26 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
             }
-
-            // Schedule token renewal.
-            this.tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken.RevisedLifetime);
         }
 
         /// <inheritdoc/>
         protected override async Task OnCloseAsync(CancellationToken token = default(CancellationToken))
         {
-            this.channelCts?.Cancel();
-            var request = new CloseSecureChannelRequest();
-            this.TimestampHeader(request);
             try
             {
-                await this.SendRequestAsync(new ServiceOperation(request)).ConfigureAwait(false);
+                var request = new CloseSecureChannelRequest { RequestHeader = new RequestHeader { TimeoutHint = 2000, ReturnDiagnostics = this.options.DiagnosticsHint } };
+                await this.RequestAsync(request).ConfigureAwait(false);
             }
-            catch { }
+            catch
+            {
+            }
+
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         protected override async Task OnAbortAsync(CancellationToken token = default(CancellationToken))
         {
-            this.channelCts?.Cancel();
             await base.OnAbortAsync(token).ConfigureAwait(false);
         }
 
@@ -642,12 +633,11 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private async Task SendRequestActionAsync(ServiceOperation operation)
         {
-            var token = this.channelCts.Token;
             try
             {
-                if (!operation.Task.IsCompleted)
+                if (operation.Task.Status == TaskStatus.WaitingForActivation)
                 {
-                    await this.SendRequestAsync(operation, token).ConfigureAwait(false);
+                    await this.SendRequestAsync(operation, this.channelCts.Token).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -1230,6 +1220,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     if (response == null)
                     {
                         // Null response indicates socket closed. This is expected when closing secure channel.
+                        this.channelCts.Cancel();
                         if (this.State == CommunicationState.Closed || this.State == CommunicationState.Closing)
                         {
                             return;
@@ -1251,6 +1242,36 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             tcs.TrySetResult(response);
                         }
+                        continue;
+                    }
+
+                    // TODO: remove when open62541 server corrected.
+                    if (header.RequestHandle == 0)
+                    {
+                        ServiceOperation tcs2 = null;
+                        if (response is OpenSecureChannelResponse)
+                        {
+                            tcs2 = this.pendingCompletions.OrderBy(k => k.Key).Select(k => k.Value).FirstOrDefault(o => o.Request is OpenSecureChannelRequest);
+                        }
+                        else if (response is CloseSecureChannelResponse)
+                        {
+                            tcs2 = this.pendingCompletions.OrderBy(k => k.Key).Select(k => k.Value).FirstOrDefault(o => o.Request is CloseSecureChannelRequest);
+                        }
+
+                        if (tcs2 != null)
+                        {
+                            ServiceOperation ignore;
+                            this.pendingCompletions.TryRemove(tcs2.Request.RequestHeader.RequestHandle, out ignore);
+                            if (StatusCode.IsBad(header.ServiceResult))
+                            {
+                                var ex = new ServiceResultException(new ServiceResult(header.ServiceResult, header.ServiceDiagnostics, header.StringTable));
+                                tcs2.TrySetException(ex);
+                            }
+                            else
+                            {
+                                tcs2.TrySetResult(response);
+                            }
+                        }
                     }
                 }
             }
@@ -1261,7 +1282,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        protected async Task<IServiceResponse> ReceiveResponseAsync(CancellationToken token = default(CancellationToken))
+        private async Task<IServiceResponse> ReceiveResponseAsync(CancellationToken token = default(CancellationToken))
         {
             await this.receivingSemaphore.WaitAsync(token).ConfigureAwait(false);
             try

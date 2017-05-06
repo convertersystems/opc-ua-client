@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,9 +17,9 @@ namespace Workstation.ServiceModel.Ua
         private UaTcpSecureChannel innerChannel;
         private SemaphoreSlim semaphore;
 
-        private UaTcpDiscoveryService(EndpointDescription remoteEndpoint)
+        private UaTcpDiscoveryService(EndpointDescription remoteEndpoint, ILoggerFactory loggerFactory = null, UaTcpSecureChannelOptions options = null)
         {
-            this.innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryService) }, null, remoteEndpoint);
+            this.innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryService) }, null, remoteEndpoint, loggerFactory, options);
             this.semaphore = new SemaphoreSlim(1);
         }
 
@@ -46,7 +47,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="request">a request.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<FindServersResponse> FindServersAsync(FindServersRequest request)
+        public static async Task<FindServersResponse> FindServersAsync(FindServersRequest request, ILoggerFactory loggerFactory = null, UaApplicationOptions options = null)
         {
             if (request == null)
             {
@@ -59,7 +60,9 @@ namespace Workstation.ServiceModel.Ua
                     EndpointUrl = request.EndpointUrl,
                     SecurityMode = MessageSecurityMode.None,
                     SecurityPolicyUri = SecurityPolicyUris.None
-                });
+                },
+                loggerFactory,
+                options);
             try
             {
                 await client.OpenAsync().ConfigureAwait(false);
@@ -78,8 +81,10 @@ namespace Workstation.ServiceModel.Ua
         /// This Service returns the Endpoints supported by a Server and all of the configuration information required to establish a SecureChannel and a Session.
         /// </summary>
         /// <param name="request">a request.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The secure channel options.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<GetEndpointsResponse> GetEndpointsAsync(GetEndpointsRequest request)
+        public static async Task<GetEndpointsResponse> GetEndpointsAsync(GetEndpointsRequest request, ILoggerFactory loggerFactory = null, UaApplicationOptions options = null)
         {
             if (request == null)
             {
@@ -92,7 +97,9 @@ namespace Workstation.ServiceModel.Ua
                     EndpointUrl = request.EndpointUrl,
                     SecurityMode = MessageSecurityMode.None,
                     SecurityPolicyUri = SecurityPolicyUris.None
-                });
+                },
+                loggerFactory,
+                options);
             try
             {
                 await client.OpenAsync().ConfigureAwait(false);

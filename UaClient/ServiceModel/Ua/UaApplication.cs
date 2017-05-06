@@ -44,6 +44,11 @@ namespace Workstation.ServiceModel.Ua
             ILoggerFactory loggerFactory = null,
             UaApplicationOptions options = null)
         {
+            if (localDescription == null)
+            {
+                throw new ArgumentNullException(nameof(localDescription));
+            }
+
             lock (globalLock)
             {
                 if (appInstance != null)
@@ -52,11 +57,6 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 appInstance = this;
-            }
-
-            if (localDescription == null)
-            {
-                throw new ArgumentNullException(nameof(localDescription));
             }
 
             this.LocalDescription = localDescription;
@@ -156,6 +156,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that suspends the communication channel.</returns>
         public async Task SuspendAsync()
         {
+            this.logger?.LogTrace($"UaApplication suspended.");
             if (this.suspensionTask.Task.IsCompleted)
             {
                 this.suspensionTask = new TaskCompletionSource<bool>();
@@ -182,6 +183,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         public void Run()
         {
+            this.logger?.LogTrace($"UaApplication running.");
             this.suspensionTask.TrySetResult(true);
         }
 
@@ -203,6 +205,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="UaTcpSessionChannel"/>.</returns>
         public async Task<UaTcpSessionChannel> GetChannelAsync(string endpointUrl, CancellationToken token = default(CancellationToken))
         {
+            this.logger?.LogTrace($"Begin getting UaTcpSessionChannel for {endpointUrl}");
             if (string.IsNullOrEmpty(endpointUrl))
             {
                 throw new ArgumentNullException(nameof(endpointUrl));
@@ -216,47 +219,62 @@ namespace Workstation.ServiceModel.Ua
 
         private async Task<UaTcpSessionChannel> CreateChannelAsync(string endpointUrl, CancellationToken token = default(CancellationToken))
         {
-            await this.CheckSuspension(token).ConfigureAwait(false);
-
-            EndpointDescription endpoint;
-            var mappedEndpoint = this.MappedEndpoints?.LastOrDefault(m => m.RequestedUrl == endpointUrl);
-            if (mappedEndpoint != null)
+            try
             {
-                endpoint = mappedEndpoint.Endpoint;
-            }
-            else
-            {
-                endpoint = new EndpointDescription { EndpointUrl = endpointUrl };
-            }
+                this.logger?.LogTrace($"Begin creating UaTcpSessionChannel for {endpointUrl}");
+                await this.CheckSuspension(token).ConfigureAwait(false);
 
-            var channel = new UaTcpSessionChannel(
-                this.LocalDescription,
-                this.CertificateStore,
-                this.UserIdentityProvider,
-                endpoint,
-                this.LoggerFactory,
-                this.Options);
-
-            channel.Faulted += (s, e) =>
-            {
-                var ch = (UaTcpSessionChannel)s;
-                try
+                EndpointDescription endpoint;
+                var mappedEndpoint = this.MappedEndpoints?.LastOrDefault(m => m.RequestedUrl == endpointUrl);
+                if (mappedEndpoint != null)
                 {
-                    ch.AbortAsync().Wait();
+                    endpoint = mappedEndpoint.Endpoint;
                 }
-                catch
+                else
                 {
+                    endpoint = new EndpointDescription { EndpointUrl = endpointUrl };
                 }
-            };
 
-            channel.Closing += (s, e) =>
+                var channel = new UaTcpSessionChannel(
+                    this.LocalDescription,
+                    this.CertificateStore,
+                    this.UserIdentityProvider,
+                    endpoint,
+                    this.LoggerFactory,
+                    this.Options);
+
+                channel.Faulted += (s, e) =>
+                {
+                    this.logger?.LogTrace($"Error creating UaTcpSessionChannel for {endpointUrl}. OnFaulted");
+                    var ch = (UaTcpSessionChannel)s;
+                    try
+                    {
+                        ch.AbortAsync().Wait();
+                    }
+                    catch
+                    {
+                    }
+                };
+
+                channel.Closing += (s, e) =>
+                {
+                    this.logger?.LogTrace($"Removing UaTcpSessionChannel for {endpointUrl} from channelMap.");
+                    Lazy<Task<UaTcpSessionChannel>> value;
+                    this.channelMap.TryRemove(endpointUrl, out value);
+                };
+
+                await channel.OpenAsync(token).ConfigureAwait(false);
+                this.logger?.LogTrace($"Success creating UaTcpSessionChannel for {endpointUrl}.");
+                return channel;
+
+            }
+            catch (Exception ex)
             {
+                this.logger?.LogTrace($"Error creating UaTcpSessionChannel for {endpointUrl}. {ex.Message}");
                 Lazy<Task<UaTcpSessionChannel>> value;
                 this.channelMap.TryRemove(endpointUrl, out value);
-            };
-
-            await channel.OpenAsync(token).ConfigureAwait(false);
-            return channel;
+                throw;
+            }
         }
     }
 }

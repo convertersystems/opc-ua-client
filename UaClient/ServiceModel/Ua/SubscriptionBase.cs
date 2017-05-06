@@ -20,7 +20,7 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A base class that subscribes to receive data changes and events from an OPC UA server.
     /// </summary>
-    public abstract class SubscriptionBase : INotifyPropertyChanged, INotifyDataErrorInfo, ISetDataErrorInfo, ICommunicationObject
+    public abstract class SubscriptionBase : INotifyPropertyChanged, INotifyDataErrorInfo, ISetDataErrorInfo
     {
         private const double DefaultPublishingInterval = 1000f;
         private const uint DefaultKeepaliveCount = 30;
@@ -35,12 +35,14 @@ namespace Workstation.ServiceModel.Ua
         private ErrorsContainer<string> errors;
         private PropertyChangedEventHandler propertyChanged;
         private UaApplication application;
-        private string endpointName;
+        private string endpointUrl;
         private double publishingInterval = DefaultPublishingInterval;
         private uint keepAliveCount = DefaultKeepaliveCount;
         private uint lifetimeCount = 0u;
         private MonitoredItemBaseCollection monitoredItems = new MonitoredItemBaseCollection();
         private CommunicationState state = CommunicationState.Created;
+        private volatile TaskCompletionSource<bool> whenSubscribed;
+        private volatile TaskCompletionSource<bool> whenUnsubscribed;
         private CancellationTokenSource stateMachineCts;
         private Task stateMachineTask;
 
@@ -55,6 +57,9 @@ namespace Workstation.ServiceModel.Ua
             this.errors = new ErrorsContainer<string>(p => this.ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(p)));
             this.progress = new Progress<CommunicationState>(s => this.State = s);
             this.propertyChanged += this.OnPropertyChanged;
+            this.whenSubscribed = new TaskCompletionSource<bool>();
+            this.whenUnsubscribed = new TaskCompletionSource<bool>();
+            this.whenUnsubscribed.TrySetResult(true);
 
             // register the action to be run on the ui thread, if there is one.
             if (SynchronizationContext.Current != null)
@@ -71,7 +76,7 @@ namespace Workstation.ServiceModel.Ua
             var sa = typeInfo.GetCustomAttribute<SubscriptionAttribute>();
             if (sa != null)
             {
-                this.endpointName = sa.EndpointUrl;
+                this.endpointUrl = sa.EndpointUrl;
                 this.publishingInterval = sa.PublishingInterval;
                 this.keepAliveCount = sa.KeepAliveCount;
                 this.lifetimeCount = sa.LifetimeCount;
@@ -170,6 +175,9 @@ namespace Workstation.ServiceModel.Ua
                     queueSize: mia.QueueSize,
                     discardOldest: mia.DiscardOldest));
             }
+
+            this.stateMachineCts = new CancellationTokenSource();
+            this.stateMachineTask = Task.Run(() => this.StateMachineAsync(this.stateMachineCts.Token));
         }
 
         /// <inheritdoc/>
@@ -181,16 +189,9 @@ namespace Workstation.ServiceModel.Ua
                 this.propertyChanged += value;
                 if (flag)
                 {
-                    Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await this.OpenAsync();
-                        }
-                        catch
-                        {
-                        }
-                    });
+                    this.whenUnsubscribed = new TaskCompletionSource<bool>();
+                    this.whenSubscribed.TrySetResult(true);
+
                 }
             }
 
@@ -199,16 +200,8 @@ namespace Workstation.ServiceModel.Ua
                 this.propertyChanged -= value;
                 if (this.propertyChanged.GetInvocationList().Length == 1)
                 {
-                    Task.Run(async () =>
-                    {
-                        try
-                        {
-                            await this.CloseAsync(new CancellationTokenSource(2000).Token);
-                        }
-                        catch
-                        {
-                        }
-                    });
+                    this.whenSubscribed = new TaskCompletionSource<bool>();
+                    this.whenUnsubscribed.TrySetResult(true);
                 }
             }
         }
@@ -235,43 +228,6 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 return this.innerChannel;
-            }
-        }
-
-        /// <summary>
-        /// This method is automatically called when an object starts listening to the PropertyChanged event.
-        /// </summary>
-        /// <param name="token">A cancellation token.</param>
-        /// <returns>A task.</returns>
-        public async Task OpenAsync(CancellationToken token = default(CancellationToken))
-        {
-            if (this.application != null && (this.stateMachineCts == null || this.stateMachineCts.IsCancellationRequested))
-            {
-                this.stateMachineCts = new CancellationTokenSource();
-                this.stateMachineTask = Task.Run(() => this.StateMachineAsync(this.stateMachineCts.Token));
-            }
-        }
-
-        /// <inheritdoc/>
-        public async Task AbortAsync(CancellationToken token = default(CancellationToken))
-        {
-            if (this.stateMachineCts != null)
-            {
-                this.stateMachineCts.Cancel();
-            }
-        }
-
-        /// <summary>
-        /// This method is automatically called when all objects stop listening to the PropertyChanged event.
-        /// </summary>
-        /// <param name="token">A cancellation token.</param>
-        /// <returns>A task.</returns>
-        public async Task CloseAsync(CancellationToken token = default(CancellationToken))
-        {
-            if (this.stateMachineCts != null)
-            {
-                this.stateMachineCts.Cancel();
-                await this.stateMachineTask.WithCancellation(token);
             }
         }
 
@@ -495,12 +451,14 @@ namespace Workstation.ServiceModel.Ua
         {
             while (!token.IsCancellationRequested)
             {
+                await this.whenSubscribed.Task;
+
                 this.progress.Report(CommunicationState.Opening);
 
                 try
                 {
                     // get a channel.
-                    this.innerChannel = await this.application.GetChannelAsync(this.endpointName, token);
+                    this.innerChannel = await this.application.GetChannelAsync(this.endpointUrl, token);
 
                     try
                     {
@@ -545,10 +503,12 @@ namespace Workstation.ServiceModel.Ua
 
                             this.progress.Report(CommunicationState.Opened);
 
-                            // wait here until channel is closing, or token cancelled.
+                            // wait here until channel is closing, unsubscribed or token cancelled.
                             try
                             {
-                                await this.WhenChannelClosingAsync(this.innerChannel, token);
+                                await Task.WhenAny(
+                                    this.WhenChannelClosingAsync(this.innerChannel, token),
+                                    this.whenUnsubscribed.Task);
                             }
                             catch
                             {

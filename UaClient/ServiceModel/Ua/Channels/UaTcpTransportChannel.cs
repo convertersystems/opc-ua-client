@@ -20,6 +20,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const uint DefaultMaxMessageSize = 16 * 1024 * 1024;
         public const uint DefaultMaxChunkCount = 4 * 1024;
         private const int MinBufferSize = 8 * 1024;
+        private const int ConnectTimeout = 5000;
         private static readonly Task CompletedTask = Task.FromResult(true);
 
         private readonly ILogger logger;
@@ -121,13 +122,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
-                catch (ObjectDisposedException)
+                catch (Exception)
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        return 0;
-                    }
-                    throw;
+                    return 0;
                 }
                 if (num == 0)
                 {
@@ -151,13 +148,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
-                catch (ObjectDisposedException)
+                catch (Exception)
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        return 0;
-                    }
-                    throw;
+                    return 0;
                 }
                 if (num == 0)
                 {
@@ -180,7 +173,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.tcpClient = new TcpClient { NoDelay = true };
             var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl);
-            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).ConfigureAwait(false);
+            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).WithTimeoutAfter(ConnectTimeout).ConfigureAwait(false);
             this.stream = this.tcpClient.GetStream();
 
             // send 'hello'.
