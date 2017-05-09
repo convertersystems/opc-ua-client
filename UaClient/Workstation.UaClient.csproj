@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard1.4;net45</TargetFrameworks>
     <AssemblyName>Workstation.UaClient</AssemblyName>
     <RootNamespace>Workstation.UaClient</RootNamespace>
-    <Version>2.0.0-RC4</Version>
+    <Version>2.0.0-RC5</Version>
     <Authors>Andrew Cullen</Authors>
     <Company>Converter Systems LLC</Company>
     <PackageProjectUrl>https://github.com/convertersystems/opc-ua-client</PackageProjectUrl>

@@ -213,8 +213,13 @@ namespace Workstation.ServiceModel.Ua
 
             await this.CheckSuspension(token).ConfigureAwait(false);
 
-            return await this.channelMap.GetOrAdd(endpointUrl, k => new Lazy<Task<UaTcpSessionChannel>>(() => this.CreateChannelAsync(k, token))).Value
-                .WithCancellation(token);
+            var ch = await this.channelMap
+                .GetOrAdd(endpointUrl, k => new Lazy<Task<UaTcpSessionChannel>>(() => Task.Run(() => this.CreateChannelAsync(k, token))))
+                .Value
+                .WithCancellation(token)
+                .ConfigureAwait(false);
+
+            return ch;
         }
 
         private async Task<UaTcpSessionChannel> CreateChannelAsync(string endpointUrl, CancellationToken token = default(CancellationToken))
