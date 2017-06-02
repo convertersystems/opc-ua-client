@@ -1,8 +1,8 @@
 ﻿{
   "dependencies": {
-    "Microsoft.Extensions.Configuration.Json": "1.1.1",
-    "Microsoft.Extensions.Logging": "1.1.1",
-    "Microsoft.Extensions.Logging.Debug": "1.1.1"
+    "Microsoft.Extensions.Configuration.Json": "1.1.2",
+    "Microsoft.Extensions.Logging": "1.1.2",
+    "Microsoft.Extensions.Logging.Debug": "1.1.2"
   },
   "frameworks": {
     ".NETFramework,Version=v4.6.1": {}
