@@ -6,16 +6,16 @@ using System.Collections.Generic;
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
-    /// Represents an acknowledgeable condition.
+    /// Represents an alarm condition.
     /// </summary>
     public class AlarmCondition : AcknowledgeableCondition
     {
-        public LocalizedText ActiveState { get; set; }
+        public bool ActiveState { get; set; }
 
         public override void Deserialize(Variant[] fields)
         {
             base.Deserialize(fields);
-            this.ActiveState = fields[12].GetValueOrDefault<LocalizedText>();
+            this.ActiveState = fields[12].GetValueOrDefault<bool>();
         }
 
         public override IEnumerable<SimpleAttributeOperand> GetSelectClauses()
@@ -25,7 +25,7 @@ namespace Workstation.ServiceModel.Ua
                 yield return clause;
             }
 
-            yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.AlarmConditionType), BrowsePath = new[] { new QualifiedName("ActiveState") }, AttributeId = AttributeIds.Value };
+            yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.AlarmConditionType), BrowsePath = new[] { new QualifiedName("ActiveState"), new QualifiedName("Id") }, AttributeId = AttributeIds.Value };
         }
     }
 }

@@ -10,15 +10,15 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class AcknowledgeableCondition : Condition
     {
-        public LocalizedText AckedState { get; set; }
+        public bool AckedState { get; set; }
 
-        public LocalizedText ConfirmedState { get; set; }
+        public bool ConfirmedState { get; set; }
 
         public override void Deserialize(Variant[] fields)
         {
             base.Deserialize(fields);
-            this.AckedState = fields[10].GetValueOrDefault<LocalizedText>();
-            this.ConfirmedState = fields[11].GetValueOrDefault<LocalizedText>();
+            this.AckedState = fields[10].GetValueOrDefault<bool>();
+            this.ConfirmedState = fields[11].GetValueOrDefault<bool>();
         }
 
         public override IEnumerable<SimpleAttributeOperand> GetSelectClauses()
@@ -28,8 +28,8 @@ namespace Workstation.ServiceModel.Ua
                 yield return clause;
             }
 
-            yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.AcknowledgeableConditionType), BrowsePath = new[] { new QualifiedName("AckedState") }, AttributeId = AttributeIds.Value };
-            yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.AcknowledgeableConditionType), BrowsePath = new[] { new QualifiedName("ConfirmedState") }, AttributeId = AttributeIds.Value };
+            yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.AcknowledgeableConditionType), BrowsePath = new[] { new QualifiedName("AckedState"), new QualifiedName("Id") }, AttributeId = AttributeIds.Value };
+            yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.AcknowledgeableConditionType), BrowsePath = new[] { new QualifiedName("ConfirmedState"), new QualifiedName("Id") }, AttributeId = AttributeIds.Value };
         }
     }
 }
