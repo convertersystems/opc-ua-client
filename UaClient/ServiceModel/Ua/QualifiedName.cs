@@ -56,7 +56,7 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 qname = new QualifiedName(name, ns);
-                return false;
+                return true;
             }
             catch (Exception)
             {

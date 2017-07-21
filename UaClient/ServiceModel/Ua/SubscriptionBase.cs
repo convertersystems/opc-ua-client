@@ -216,6 +216,72 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
+        /// Gets the current subscription Id.
+        /// </summary>
+        public uint SubscriptionId => this.state == CommunicationState.Opened ? this.subscriptionId : 0u;
+
+        /// <summary>
+        /// Requests a Refresh of all Conditions.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<StatusCode> ConditionRefresh()
+        {
+            if (this.State != CommunicationState.Opened)
+            {
+                return StatusCodes.BadServerNotConnected;
+            }
+
+            var response = await this.InnerChannel.CallAsync(new CallRequest
+            {
+                MethodsToCall = new[]
+                {
+                    new CallMethodRequest
+                    {
+                        ObjectId = NodeId.Parse(ObjectTypeIds.ConditionType),
+                        MethodId = NodeId.Parse(MethodIds.ConditionType_ConditionRefresh),
+                        InputArguments = new Variant[] { this.SubscriptionId }
+                    }
+                }
+            });
+
+            return response.Results[0].StatusCode;
+        }
+
+        /// <summary>
+        /// Acknowledges a condition.
+        /// </summary>
+        /// <param name="condition">an AcknowledgeableCondition.</param>
+        /// <param name="comment">a comment.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<StatusCode> Acknowledge(AcknowledgeableCondition condition, LocalizedText comment = null)
+        {
+            if (condition == null)
+            {
+                throw new ArgumentNullException(nameof(condition));
+            }
+
+            if (this.State != CommunicationState.Opened)
+            {
+                return StatusCodes.BadServerNotConnected;
+            }
+
+            var response = await this.InnerChannel.CallAsync(new CallRequest
+            {
+                MethodsToCall = new[]
+                {
+                    new CallMethodRequest
+                    {
+                        ObjectId = condition.ConditionId,
+                        MethodId = NodeId.Parse(MethodIds.AcknowledgeableConditionType_Acknowledge),
+                        InputArguments = new Variant[] { condition.EventId, comment } // ?? new LocalizedText(string.Empty) }
+                    }
+                }
+            });
+
+            return response.Results[0].StatusCode;
+        }
+
+        /// <summary>
         /// Gets the inner channel.
         /// </summary>
         protected UaTcpSessionChannel InnerChannel

@@ -11,18 +11,25 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class BaseEvent
     {
+        [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "EventId")]
         public byte[] EventId { get; set; }
 
+        [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "EventType")]
         public NodeId EventType { get; set; }
 
+        [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "SourceName")]
         public string SourceName { get; set; }
 
+        [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "Time")]
         public DateTime Time { get; set; }
 
+        [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "Message")]
         public LocalizedText Message { get; set; }
 
+        [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "Severity")]
         public ushort Severity { get; set; }
 
+        [Obsolete]
         public virtual void Deserialize(Variant[] fields)
         {
             this.EventId = fields[0].GetValueOrDefault<byte[]>();
@@ -33,6 +40,7 @@ namespace Workstation.ServiceModel.Ua
             this.Severity = fields[5].GetValueOrDefault<ushort>();
         }
 
+        [Obsolete]
         public virtual IEnumerable<SimpleAttributeOperand> GetSelectClauses()
         {
             yield return new SimpleAttributeOperand { TypeDefinitionId = NodeId.Parse(ObjectTypeIds.BaseEventType), BrowsePath = new[] { new QualifiedName("EventId") }, AttributeId = AttributeIds.Value };

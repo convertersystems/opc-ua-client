@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 
 namespace Workstation.ServiceModel.Ua
@@ -10,17 +11,21 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class AcknowledgeableCondition : Condition
     {
-        public bool AckedState { get; set; }
+        [EventField(typeDefinitionId: ObjectTypeIds.AcknowledgeableConditionType, browsePath: "AckedState/Id")]
+        public bool? AckedState { get; set; }
 
-        public bool ConfirmedState { get; set; }
+        [EventField(typeDefinitionId: ObjectTypeIds.AcknowledgeableConditionType, browsePath: "ConfirmedState/Id")]
+        public bool? ConfirmedState { get; set; }
 
+        [Obsolete]
         public override void Deserialize(Variant[] fields)
         {
             base.Deserialize(fields);
-            this.AckedState = fields[10].GetValueOrDefault<bool>();
-            this.ConfirmedState = fields[11].GetValueOrDefault<bool>();
+            this.AckedState = fields[10].GetValue() as bool?;
+            this.ConfirmedState = fields[11].GetValue() as bool?;
         }
 
+        [Obsolete]
         public override IEnumerable<SimpleAttributeOperand> GetSelectClauses()
         {
             foreach (var clause in base.GetSelectClauses())

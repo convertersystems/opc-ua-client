@@ -9,10 +9,10 @@ namespace Workstation.ServiceModel.Ua
     public static class VariantExtensions
     {
         /// <summary>
-        /// Gets the value of the Variant, or the default value for the type.
+        /// Gets the value of the Variant, or null.
         /// </summary>
         /// <param name="variant">The Variant.</param>
-        /// <returns>The value if an instance of the specified Type, otherwise the Type's default value.</returns>
+        /// <returns>The value if an instance of the specified Type, otherwise null.</returns>
         public static object GetValue(this Variant variant)
         {
             var value = variant.Value;
