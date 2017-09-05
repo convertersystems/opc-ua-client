@@ -46,7 +46,7 @@ namespace Workstation.ServiceModel.Ua
 
         public override string ToString()
         {
-            return $"{this.Value}; status: {this.StatusCode}; timestamp: {this.SourceTimestamp}";
+            return $"{this.Value}; status: {this.StatusCode}; ts: {this.SourceTimestamp}";
         }
     }
 }

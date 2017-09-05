@@ -51,13 +51,13 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets or sets gets a value that indicates the current state of the communication object.
         /// </summary>
-        /// <returns>A value from the <see cref="T:ConverterSystems.ServiceModel.Ua.CommunicationState" /> enumeration that indicates the current state of the object.</returns>
+        /// <returns>A value from the <see cref="T:Workstation.ServiceModel.Ua.CommunicationState" /> enumeration that indicates the current state of the object.</returns>
         public CommunicationState State { get; protected set; }
 
         /// <summary>
         /// Causes a communication object to transition immediately from its current state into the closing state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task AbortAsync(CancellationToken token = default(CancellationToken))
         {
@@ -106,7 +106,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Causes a communication object to transition from its current state into the closed state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task CloseAsync(CancellationToken token = default(CancellationToken))
         {
@@ -180,7 +180,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Causes a communication object to transition from the created state into the opened state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OpenAsync(CancellationToken token = default(CancellationToken))
         {
@@ -225,7 +225,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Causes a communication object to transition from its current state into the faulted state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected async Task FaultAsync(CancellationToken token = default(CancellationToken))
         {
@@ -256,7 +256,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Causes a communication object to transition from its current state into the faulted state.
         /// </summary>
         /// <param name="exception">The exception.</param>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected async Task FaultAsync(Exception exception, CancellationToken token = default(CancellationToken))
         {
@@ -267,21 +267,21 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Inserts processing on a communication object after it transitions to the closing state due to the invocation of the AbortAsync operation.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected abstract Task OnAbortAsync(CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Inserts processing on a communication object after it transitions to the closing state due to the invocation of the CloseAsync operation.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected abstract Task OnCloseAsync(CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Invoked during the transition of a communication object into the closed state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnClosedAsync(CancellationToken token = default(CancellationToken))
         {
@@ -313,7 +313,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Invoked during the transition of a communication object into the closing state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnClosingAsync(CancellationToken token = default(CancellationToken))
         {
@@ -344,7 +344,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Inserts processing on a communication object after it transitions to the faulted state due to the FaultAsync operation.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnFaulted(CancellationToken token = default(CancellationToken))
         {
@@ -374,14 +374,14 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Inserts processing on a communication object after it transitions into the opening state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected abstract Task OnOpenAsync(CancellationToken token = default(CancellationToken));
 
         /// <summary>
         /// Invoked during the transition of a communication object into the opened state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnOpenedAsync(CancellationToken token = default(CancellationToken))
         {
@@ -412,7 +412,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Invoked during the transition of a communication object into the opening state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual async Task OnOpeningAsync(CancellationToken token = default(CancellationToken))
         {

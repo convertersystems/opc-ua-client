@@ -227,8 +227,8 @@ string RenderMethodSuffix(CodeTypeReference type, List<CodeTypeDeclaration> know
 			return type.ArrayRank == 0 ? "ExtensionObject<NodeAttributes>" : "ExtensionObjectArray<NodeAttributes>";
 		case "FilterOperand":
 			return type.ArrayRank == 0 ? "ExtensionObject<FilterOperand>" : "ExtensionObjectArray<FilterOperand>";
-		case "HistoryData":
-			return type.ArrayRank == 0 ? "ExtensionObject<HistoryData>" : "ExtensionObjectArray<HistoryData>";
+		case "HistoryBase":
+			return type.ArrayRank == 0 ? "ExtensionObject<HistoryBase>" : "ExtensionObjectArray<HistoryBase>";
 		case "HistoryReadDetails":
 			return type.ArrayRank == 0 ? "ExtensionObject<HistoryReadDetails>" : "ExtensionObjectArray<HistoryReadDetails>";
 		case "MonitoringFilter":

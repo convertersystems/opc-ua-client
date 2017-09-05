@@ -34,7 +34,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (identifier == null)
             {
-                throw new ArgumentNullException("identifier");
+                throw new ArgumentNullException(nameof(identifier));
             }
 
             this.Identifier = identifier;
@@ -51,7 +51,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (identifier == null)
             {
-                throw new ArgumentNullException("identifier");
+                throw new ArgumentNullException(nameof(identifier));
             }
 
             this.NamespaceIndex = namespaceIndex;
@@ -68,7 +68,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (identifier == null)
             {
-                throw new ArgumentNullException("identifier");
+                throw new ArgumentNullException(nameof(identifier));
             }
 
             this.NamespaceIndex = namespaceIndex;
@@ -127,7 +127,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (ReferenceEquals(value, null))
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             ushort ns = value.NamespaceIndex;
@@ -135,7 +135,7 @@ namespace Workstation.ServiceModel.Ua
             if (namespaceUris != null && ns > 0 && ns < namespaceUris.Count)
             {
                 nsu = namespaceUris[ns];
-                ns = 0;
+                value.NamespaceIndex = 0;
             }
 
             return new ExpandedNodeId(value, nsu);

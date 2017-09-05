@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace Workstation.ServiceModel.Ua
@@ -107,42 +108,72 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(object value)
         {
-            this.Value = value;
             if (value == null)
             {
+                this.Value = null;
                 this.Type = VariantType.Null;
                 this.ArrayDimensions = null;
                 return;
             }
 
+            Type type = value.GetType();
             VariantType variantType;
+            if (typeMap.TryGetValue(type, out variantType))
+            {
+                this.Value = value;
+                this.Type = variantType;
+                this.ArrayDimensions = null;
+                return;
+            }
+
+            var encodable = value as IEncodable;
+            if (encodable != null)
+            {
+                this.Value = new ExtensionObject(encodable);
+                this.Type = VariantType.ExtensionObject;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             var array = value as Array;
             if (array != null)
             {
                 Type elemType = value.GetType().GetElementType();
-                if (elemType == null || !elemTypeMap.TryGetValue(elemType, out variantType))
+                if (elemType == null)
                 {
-                    throw new ArgumentOutOfRangeException("value", elemType, "Array element Type is unsupported.");
+                    throw new ArgumentOutOfRangeException(nameof(value), elemType, "Array element Type is unsupported.");
                 }
 
-                this.Type = variantType;
-                this.ArrayDimensions = new int[array.Rank];
-                for (int i = 0; i < array.Rank; i++)
+                if (elemTypeMap.TryGetValue(elemType, out variantType))
                 {
-                    this.ArrayDimensions[i] = array.GetLength(i);
+                    this.Value = array;
+                    this.Type = variantType;
+                    this.ArrayDimensions = new int[array.Rank];
+                    for (int i = 0; i < array.Rank; i++)
+                    {
+                        this.ArrayDimensions[i] = array.GetLength(i);
+                    }
+
+                    return;
                 }
 
-                return;
+                if (elemType.GetTypeInfo().ImplementedInterfaces.Contains(typeof(IEncodable)))
+                {
+                    this.Value = array.Cast<IEncodable>().Select(v => new ExtensionObject(v)).ToArray();
+                    this.Type = VariantType.ExtensionObject;
+                    this.ArrayDimensions = new int[array.Rank];
+                    for (int i = 0; i < array.Rank; i++)
+                    {
+                        this.ArrayDimensions[i] = array.GetLength(i);
+                    }
+
+                    return;
+                }
+
+                throw new ArgumentOutOfRangeException(nameof(value), elemType, "Array element Type is unsupported.");
             }
 
-            Type type = value.GetType();
-            if (type == null || !elemTypeMap.TryGetValue(type, out variantType))
-            {
-                throw new ArgumentOutOfRangeException("value", type, "Type is unsupported.");
-            }
-
-            this.Type = variantType;
-            this.ArrayDimensions = null;
+            throw new ArgumentOutOfRangeException(nameof(value), type, "Type is unsupported.");
         }
 
         public Variant(bool value)
@@ -295,6 +326,13 @@ namespace Workstation.ServiceModel.Ua
         public Variant(ExtensionObject value)
         {
             this.Value = value;
+            this.Type = VariantType.ExtensionObject;
+            this.ArrayDimensions = null;
+        }
+
+        public Variant(IEncodable value)
+        {
+            this.Value = new ExtensionObject(value);
             this.Type = VariantType.ExtensionObject;
             this.ArrayDimensions = null;
         }
@@ -559,6 +597,17 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
+        public Variant(IEncodable[] value)
+        {
+            this.Value = value.Select(v => new ExtensionObject(v)).ToArray();
+            this.Type = VariantType.ExtensionObject;
+            this.ArrayDimensions = new int[value.Rank];
+            for (int i = 0; i < value.Rank; i++)
+            {
+                this.ArrayDimensions[i] = value.GetLength(i);
+            }
+        }
+
         public Variant(Array value)
         {
             this.Value = value;
@@ -566,7 +615,7 @@ namespace Workstation.ServiceModel.Ua
             Type elemType = value.GetType().GetElementType();
             if (elemType == null || !elemTypeMap.TryGetValue(elemType, out varType))
             {
-                throw new ArgumentOutOfRangeException("value", elemType, "Array element type is unsupported.");
+                throw new ArgumentOutOfRangeException(nameof(value), elemType, "Array element type is unsupported.");
             }
 
             this.Type = varType;
@@ -868,7 +917,7 @@ namespace Workstation.ServiceModel.Ua
             return (Guid)value.Value;
         }
 
-        public static explicit operator byte[](Variant value)
+        public static explicit operator byte[] (Variant value)
         {
             return (byte[])value.Value;
         }
@@ -908,107 +957,107 @@ namespace Workstation.ServiceModel.Ua
             return (ExtensionObject)value.Value;
         }
 
-        public static explicit operator bool[](Variant value)
+        public static explicit operator bool[] (Variant value)
         {
             return (bool[])value.Value;
         }
 
-        public static explicit operator sbyte[](Variant value)
+        public static explicit operator sbyte[] (Variant value)
         {
             return (sbyte[])value.Value;
         }
 
-        public static explicit operator short[](Variant value)
+        public static explicit operator short[] (Variant value)
         {
             return (short[])value.Value;
         }
 
-        public static explicit operator ushort[](Variant value)
+        public static explicit operator ushort[] (Variant value)
         {
             return (ushort[])value.Value;
         }
 
-        public static explicit operator int[](Variant value)
+        public static explicit operator int[] (Variant value)
         {
             return (int[])value.Value;
         }
 
-        public static explicit operator uint[](Variant value)
+        public static explicit operator uint[] (Variant value)
         {
             return (uint[])value.Value;
         }
 
-        public static explicit operator long[](Variant value)
+        public static explicit operator long[] (Variant value)
         {
             return (long[])value.Value;
         }
 
-        public static explicit operator ulong[](Variant value)
+        public static explicit operator ulong[] (Variant value)
         {
             return (ulong[])value.Value;
         }
 
-        public static explicit operator float[](Variant value)
+        public static explicit operator float[] (Variant value)
         {
             return (float[])value.Value;
         }
 
-        public static explicit operator double[](Variant value)
+        public static explicit operator double[] (Variant value)
         {
             return (double[])value.Value;
         }
 
-        public static explicit operator string[](Variant value)
+        public static explicit operator string[] (Variant value)
         {
             return (string[])value.Value;
         }
 
-        public static explicit operator DateTime[](Variant value)
+        public static explicit operator DateTime[] (Variant value)
         {
             return (DateTime[])value.Value;
         }
 
-        public static explicit operator Guid[](Variant value)
+        public static explicit operator Guid[] (Variant value)
         {
             return (Guid[])value.Value;
         }
 
-        public static explicit operator byte[][](Variant value)
+        public static explicit operator byte[][] (Variant value)
         {
             return (byte[][])value.Value;
         }
 
-        public static explicit operator XElement[](Variant value)
+        public static explicit operator XElement[] (Variant value)
         {
             return (XElement[])value.Value;
         }
 
-        public static explicit operator NodeId[](Variant value)
+        public static explicit operator NodeId[] (Variant value)
         {
             return (NodeId[])value.Value;
         }
 
-        public static explicit operator ExpandedNodeId[](Variant value)
+        public static explicit operator ExpandedNodeId[] (Variant value)
         {
             return (ExpandedNodeId[])value.Value;
         }
 
-        public static explicit operator StatusCode[](Variant value)
+        public static explicit operator StatusCode[] (Variant value)
         {
             return (StatusCode[])value.Value;
         }
 
-        public static explicit operator QualifiedName[](Variant value)
+        public static explicit operator QualifiedName[] (Variant value)
         {
             return (QualifiedName[])value.Value;
         }
 
-        public static explicit operator LocalizedText[](Variant value)
+        public static explicit operator LocalizedText[] (Variant value)
         {
             return (LocalizedText[])value.Value;
         }
 
-        public static explicit operator ExtensionObject[](Variant value)
+        public static explicit operator ExtensionObject[] (Variant value)
         {
             return (ExtensionObject[])value.Value;
         }

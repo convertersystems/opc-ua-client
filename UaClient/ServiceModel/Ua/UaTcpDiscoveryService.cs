@@ -1,10 +1,10 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.ServiceModel.Ua
@@ -14,33 +14,26 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class UaTcpDiscoveryService : ICommunicationObject, IDisposable
     {
-        private UaTcpSecureChannel innerChannel;
-        private SemaphoreSlim semaphore;
+        private readonly UaTcpSecureChannel innerChannel;
+        private readonly SemaphoreSlim semaphore;
+        private readonly ILogger logger;
 
         private UaTcpDiscoveryService(EndpointDescription remoteEndpoint, ILoggerFactory loggerFactory = null, UaTcpSecureChannelOptions options = null)
         {
             this.innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryService) }, null, remoteEndpoint, loggerFactory, options);
             this.semaphore = new SemaphoreSlim(1);
+            this.logger = loggerFactory?.CreateLogger<UaTcpDiscoveryService>();
         }
 
         /// <summary>
         /// Gets the <see cref="EndpointDescription"/> of the remote application.
         /// </summary>
-        public EndpointDescription RemoteEndpoint
-        {
-            get { return this.innerChannel.RemoteEndpoint; }
-        }
+        public EndpointDescription RemoteEndpoint => this.innerChannel.RemoteEndpoint;
 
         /// <summary>
         /// Gets a value that indicates the current state of the communication object.
         /// </summary>
-        public CommunicationState State
-        {
-            get
-            {
-                return this.innerChannel.State;
-            }
-        }
+        public CommunicationState State => this.innerChannel.State;
 
         /// <summary>
         /// This Service returns the Servers known to a Server or Discovery Server.
@@ -51,7 +44,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             var client = new UaTcpDiscoveryService(
@@ -88,7 +81,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             var client = new UaTcpDiscoveryService(
@@ -117,7 +110,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Causes a communication object to transition immediately from its current state into the closing state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task AbortAsync(CancellationToken token = default(CancellationToken))
         {
@@ -135,7 +128,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Causes a communication object to transition from its current state into the closed state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task CloseAsync(CancellationToken token = default(CancellationToken))
         {
@@ -153,7 +146,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Causes a communication object to transition from the created state into the opened state.
         /// </summary>
-        /// <param name="token">The <see cref="T:ConverterSystems.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
+        /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OpenAsync(CancellationToken token = default(CancellationToken))
         {
@@ -168,11 +161,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
+        /// <inheritdoc/>
         void IDisposable.Dispose()
         {
             this.Dispose(true);
         }
 
+        /// <summary>
+        /// Release unmanaged resources
+        /// </summary>
+        /// <param name="disposing">True when disposing, otherwise finalizing.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -181,8 +179,9 @@ namespace Workstation.ServiceModel.Ua
                 {
                     this.CloseAsync().Wait(5000);
                 }
-                catch (Exception)
+                catch
                 {
+                    this.logger?.LogError("Error closing channel");
                 }
             }
         }

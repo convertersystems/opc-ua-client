@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 
 namespace Workstation.ServiceModel.Ua
@@ -22,11 +21,6 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A new array segment.</returns>
         public static ArraySegment<T> AsArraySegment<T>(this T[] array, int offset, int count)
         {
-            Debug.Assert(array != null);
-            Debug.Assert(offset >= 0);
-            Debug.Assert(offset <= array.Length);
-            Debug.Assert(count >= 0);
-            Debug.Assert(count <= array.Length - offset);
             return new ArraySegment<T>(array, offset, count);
         }
 
@@ -39,9 +33,6 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A new array segment.</returns>
         public static ArraySegment<T> AsArraySegment<T>(this T[] array, int offset = 0)
         {
-            Debug.Assert(array != null);
-            Debug.Assert(offset >= 0);
-            Debug.Assert(offset <= array.Length);
             return new ArraySegment<T>(array, offset, array.Length - offset);
         }
 
@@ -85,8 +76,6 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> Take<T>(this ArraySegment<T> segment, int count)
         {
-            Debug.Assert(count >= 0);
-            Debug.Assert(count <= segment.Count);
             return new ArraySegment<T>(segment.Array, segment.Offset, count);
         }
 
@@ -99,8 +88,6 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> Skip<T>(this ArraySegment<T> segment, int count)
         {
-            Debug.Assert(count >= 0);
-            Debug.Assert(count <= segment.Count);
             return new ArraySegment<T>(segment.Array, segment.Offset + count, segment.Count - count);
         }
 
@@ -114,10 +101,6 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> Slice<T>(this ArraySegment<T> segment, int skipCount, int takeCount)
         {
-            Debug.Assert(skipCount >= 0);
-            Debug.Assert(skipCount <= segment.Count);
-            Debug.Assert(takeCount >= 0);
-            Debug.Assert(takeCount <= segment.Count - skipCount);
             return new ArraySegment<T>(segment.Array, segment.Offset + skipCount, takeCount);
         }
 
@@ -130,8 +113,6 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> TakeLast<T>(this ArraySegment<T> segment, int count)
         {
-            Debug.Assert(count >= 0);
-            Debug.Assert(count <= segment.Count);
             return segment.Skip(segment.Count - count);
         }
 
@@ -144,8 +125,6 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> SkipLast<T>(this ArraySegment<T> segment, int count)
         {
-            Debug.Assert(count >= 0);
-            Debug.Assert(count <= segment.Count);
             return segment.Take(segment.Count - count);
         }
 
@@ -169,9 +148,6 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="arrayIndex">The index in the destination array at which to begin copying. Defaults to <c>0</c>. Must be greater than or equal to <c>0</c>.</param>
         public static void CopyTo<T>(this ArraySegment<T> segment, T[] array, int arrayIndex = 0)
         {
-            Debug.Assert(array != null);
-            Debug.Assert(arrayIndex >= 0);
-            Debug.Assert(segment.Count <= array.Length - arrayIndex);
             Array.Copy(segment.Array, segment.Offset, array, arrayIndex, segment.Count);
         }
 

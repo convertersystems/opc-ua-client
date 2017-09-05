@@ -24,7 +24,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private static readonly Task CompletedTask = Task.FromResult(true);
 
         private readonly ILogger logger;
-        private readonly UaTcpTransportChannelOptions options;
         private byte[] sendBuffer;
         private byte[] receiveBuffer;
         private Stream stream;
@@ -42,14 +41,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             UaTcpTransportChannelOptions options = null)
             : base(loggerFactory)
         {
-            if (remoteEndpoint == null)
-            {
-                throw new ArgumentNullException(nameof(remoteEndpoint));
-            }
-
-            this.RemoteEndpoint = remoteEndpoint;
-            this.options = options ?? new UaTcpTransportChannelOptions();
+            this.RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
             this.logger = loggerFactory?.CreateLogger<UaTcpTransportChannel>();
+            this.LocalReceiveBufferSize = options?.LocalReceiveBufferSize ?? DefaultBufferSize;
+            this.LocalSendBufferSize = options?.LocalSendBufferSize ?? DefaultBufferSize;
+            this.LocalMaxMessageSize = options?.LocalMaxMessageSize ?? DefaultMaxMessageSize;
+            this.LocalMaxChunkCount = options?.LocalMaxChunkCount ?? DefaultMaxChunkCount;
         }
 
         /// <summary>
@@ -58,29 +55,44 @@ namespace Workstation.ServiceModel.Ua.Channels
         public EndpointDescription RemoteEndpoint { get; }
 
         /// <summary>
-        /// Gets the transport channel options.
+        /// Gets the size of the receive buffer.
         /// </summary>
-        public UaTcpTransportChannelOptions UaTcpTransportChannelOptions { get; }
+        public uint LocalReceiveBufferSize { get; }
+
+        /// <summary>
+        /// Gets the size of the send buffer.
+        /// </summary>
+        public uint LocalSendBufferSize { get; }
+
+        /// <summary>
+        /// Gets the maximum total size of a message.
+        /// </summary>
+        public uint LocalMaxMessageSize { get; }
+
+        /// <summary>
+        /// Gets the maximum number of message chunks.
+        /// </summary>
+        public uint LocalMaxChunkCount { get; }
 
         /// <summary>
         /// Gets the size of the remote receive buffer.
         /// </summary>
-        public uint RemoteReceiveBufferSize { get; protected set; }
+        public uint RemoteReceiveBufferSize { get; private set; }
 
         /// <summary>
         /// Gets the size of the remote send buffer.
         /// </summary>
-        public uint RemoteSendBufferSize { get; protected set; }
+        public uint RemoteSendBufferSize { get; private set; }
 
         /// <summary>
         /// Gets the maximum size of a message that may be sent.
         /// </summary>
-        public uint RemoteMaxMessageSize { get; protected set; }
+        public uint RemoteMaxMessageSize { get; private set; }
 
         /// <summary>
         /// Gets the maximum number of message chunks that may be sent.
         /// </summary>
-        public uint RemoteMaxChunkCount { get; protected set; }
+        public uint RemoteMaxChunkCount { get; private set; }
 
         /// <summary>
         /// Gets the inner TCP socket.
@@ -126,6 +138,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     return 0;
                 }
+
                 if (num == 0)
                 {
                     return 0;
@@ -152,6 +165,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     return 0;
                 }
+
                 if (num == 0)
                 {
                     return 0;
@@ -184,10 +198,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                 encoder.WriteUInt32(null, UaTcpMessageTypes.HELF);
                 encoder.WriteUInt32(null, 0u);
                 encoder.WriteUInt32(null, ProtocolVersion);
-                encoder.WriteUInt32(null, this.options.LocalReceiveBufferSize);
-                encoder.WriteUInt32(null, this.options.LocalSendBufferSize);
-                encoder.WriteUInt32(null, this.options.LocalMaxMessageSize);
-                encoder.WriteUInt32(null, this.options.LocalMaxChunkCount);
+                encoder.WriteUInt32(null, this.LocalReceiveBufferSize);
+                encoder.WriteUInt32(null, this.LocalSendBufferSize);
+                encoder.WriteUInt32(null, this.LocalMaxMessageSize);
+                encoder.WriteUInt32(null, this.LocalMaxChunkCount);
                 encoder.WriteString(null, uri.ToString());
                 count = encoder.Position;
                 encoder.Position = 4;
@@ -236,6 +250,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     {
                         throw new ServiceResultException(statusCode, message);
                     }
+
                     throw new ServiceResultException(statusCode);
                 }
 

@@ -11,6 +11,7 @@ namespace Workstation.ServiceModel.Ua
 {
 	public static class DataTypeIds
 	{
+        public const string HistoryBase = "i=0";
         public const string Boolean = "i=1";
         public const string SByte = "i=2";
         public const string Byte = "i=3";
@@ -723,6 +724,8 @@ namespace Workstation.ServiceModel.Ua
 
 	public static class ObjectIds
 	{
+        public const string HistoryBase_Encoding_DefaultXml = "i=0";
+        public const string HistoryBase_Encoding_DefaultBinary = "i=0";
         public const string ModellingRule_Mandatory = "i=78";
         public const string ModellingRule_MandatoryShared = "i=79";
         public const string ModellingRule_Optional = "i=80";

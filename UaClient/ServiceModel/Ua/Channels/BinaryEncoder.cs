@@ -23,7 +23,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             this.stream = stream;
@@ -854,22 +854,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (value.BodyType == BodyType.Encodable)
             {
-                var type = value.Body.GetType();
-                ExpandedNodeId binaryEncodingId;
-                if (!UaTcpSecureChannel.TypeToBinaryEncodingIdDictionary.TryGetValue(type, out binaryEncodingId))
-                {
-                    // if type was not pre-registered then get the attribute, searching the base classes.
-                    var attr = type.GetTypeInfo().GetCustomAttributes<BinaryEncodingIdAttribute>(true).FirstOrDefault();
-                    if (attr == null)
-                    {
-                        throw new ServiceResultException(StatusCodes.BadDataTypeIdUnknown);
-                    }
-
-                    binaryEncodingId = attr.NodeId;
-                }
-
-                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.channel?.NamespaceUris));
-                this.WriteByte(null, 0x01);
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteByte(null, 0x01); // BodyType Encodable is encoded as ByteString.
                 var pos0 = this.writer.BaseStream.Position;
                 this.WriteInt32(null, -1);
                 var pos1 = this.writer.BaseStream.Position;
@@ -883,7 +869,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public void WriteExtensionObject<T>(string fieldName, T value)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             if (value == null)
             {
@@ -893,17 +879,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             var type = value.GetType();
-            ExpandedNodeId binaryEncodingId;
-            if (!UaTcpSecureChannel.TypeToBinaryEncodingIdDictionary.TryGetValue(type, out binaryEncodingId))
+            if (!UaTcpSecureChannel.TryGetBinaryEncodingIdFromType(type, out ExpandedNodeId binaryEncodingId))
             {
-                // if type was not pre-registered then get the attribute, searching the base classes.
-                var attr = type.GetTypeInfo().GetCustomAttributes<BinaryEncodingIdAttribute>(true).FirstOrDefault();
-                if (attr == null)
-                {
-                    throw new ServiceResultException(StatusCodes.BadDataTypeIdUnknown);
-                }
-
-                binaryEncodingId = attr.NodeId;
+                throw new ServiceResultException(StatusCodes.BadEncodingError);
             }
 
             this.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.channel?.NamespaceUris));
@@ -920,7 +898,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public void WriteEncodable<T>(string fieldName, T value)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             if (value == null)
             {
@@ -931,7 +909,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public void WriteEnumeration<T>(string fieldName, T value)
-            where T : IConvertible
+            where T : struct, IConvertible
         {
             this.WriteInt32(null, Convert.ToInt32(value, CultureInfo.InvariantCulture));
         }
@@ -1212,7 +1190,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public void WriteExtensionObjectArray<T>(string fieldName, T[] values)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1224,7 +1202,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public void WriteEncodableArray<T>(string fieldName, T[] values)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1236,7 +1214,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public void WriteEnumerationArray<T>(string fieldName, T[] values)
-            where T : IConvertible
+            where T : struct, IConvertible
         {
             if (this.TryWriteArrayLength(values))
             {

@@ -26,9 +26,9 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class DirectoryStore : ICertificateStore
     {
+        private readonly string pkiPath;
         private X509CertificateParser certParser = new X509CertificateParser();
         private SecureRandom rng = new SecureRandom();
-        private string pkiPath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DirectoryStore"/> class.
@@ -66,6 +66,7 @@ namespace Workstation.ServiceModel.Ua
             {
                 throw new ArgumentOutOfRangeException(nameof(applicationDescription), "Expecting ApplicationUri in the form of 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.");
             }
+
             string subjectName = null;
             string hostName = null;
             string appName = null;
@@ -317,6 +318,7 @@ namespace Workstation.ServiceModel.Ua
                     return true;
                 }
 
+                logger?.LogError($"Error validatingRemoteCertificate.");
                 this.StoreInRejectedFolder(target);
                 return false;
             }
@@ -327,6 +329,7 @@ namespace Workstation.ServiceModel.Ua
             }
             catch (Exception ex)
             {
+                logger?.LogError($"Error validatingRemoteCertificate. {ex.Message}");
                 this.StoreInRejectedFolder(target);
                 return false;
             }

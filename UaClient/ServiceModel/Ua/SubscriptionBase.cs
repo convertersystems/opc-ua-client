@@ -22,23 +22,19 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public abstract class SubscriptionBase : INotifyPropertyChanged, INotifyDataErrorInfo, ISetDataErrorInfo
     {
-        private const double DefaultPublishingInterval = 1000f;
-        private const uint DefaultKeepaliveCount = 30;
-        private const uint PublishTimeoutHint = 120 * 60 * 1000; // 2 hours
-
         private readonly ActionBlock<PublishResponse> actionBlock;
         private readonly IProgress<CommunicationState> progress;
         private readonly ILogger logger;
-        private volatile bool isPublishing = false;
+        private readonly UaApplication application;
+        private volatile bool isPublishing;
         private volatile UaTcpSessionChannel innerChannel;
-        private volatile uint subscriptionId = 0u;
+        private volatile uint subscriptionId;
         private ErrorsContainer<string> errors;
         private PropertyChangedEventHandler propertyChanged;
-        private UaApplication application;
         private string endpointUrl;
-        private double publishingInterval = DefaultPublishingInterval;
-        private uint keepAliveCount = DefaultKeepaliveCount;
-        private uint lifetimeCount = 0u;
+        private double publishingInterval = UaTcpSessionChannel.DefaultPublishingInterval;
+        private uint keepAliveCount = UaTcpSessionChannel.DefaultKeepaliveCount;
+        private uint lifetimeCount;
         private MonitoredItemBaseCollection monitoredItems = new MonitoredItemBaseCollection();
         private CommunicationState state = CommunicationState.Created;
         private volatile TaskCompletionSource<bool> whenSubscribed;
@@ -174,6 +170,7 @@ namespace Workstation.ServiceModel.Ua
                     filter: filter,
                     queueSize: mia.QueueSize,
                     discardOldest: mia.DiscardOldest));
+
             }
 
             this.stateMachineCts = new CancellationTokenSource();
@@ -536,7 +533,7 @@ namespace Workstation.ServiceModel.Ua
                             RequestedLifetimeCount = Math.Max(this.lifetimeCount, 3 * this.keepAliveCount),
                             PublishingEnabled = true
                         };
-                        var subscriptionResponse = await this.innerChannel.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(true);
+                        var subscriptionResponse = await this.innerChannel.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
 
                         // link up the dataflow blocks
                         var id = this.subscriptionId = subscriptionResponse.SubscriptionId;

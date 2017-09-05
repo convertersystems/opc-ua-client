@@ -80,7 +80,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (ReferenceEquals(value, null))
             {
-                throw new ArgumentNullException("value");
+                throw new ArgumentNullException(nameof(value));
             }
 
             ushort ns = value.NodeId.NamespaceIndex;

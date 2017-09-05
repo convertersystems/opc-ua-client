@@ -57,7 +57,7 @@ namespace Workstation.ServiceModel.Ua
         ExtensionObject ReadExtensionObject(string fieldName);
 
         T ReadExtensionObject<T>(string fieldName)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         DataValue ReadDataValue(string fieldName);
 
@@ -66,10 +66,10 @@ namespace Workstation.ServiceModel.Ua
         DiagnosticInfo ReadDiagnosticInfo(string fieldName);
 
         T ReadEncodable<T>(string fieldName)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         T ReadEnumeration<T>(string fieldName)
-            where T : IConvertible;
+            where T : struct, IConvertible;
 
         bool[] ReadBooleanArray(string fieldName);
 
@@ -116,7 +116,7 @@ namespace Workstation.ServiceModel.Ua
         ExtensionObject[] ReadExtensionObjectArray(string fieldName);
 
         T[] ReadExtensionObjectArray<T>(string fieldName)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         DataValue[] ReadDataValueArray(string fieldName);
 
@@ -125,9 +125,9 @@ namespace Workstation.ServiceModel.Ua
         DiagnosticInfo[] ReadDiagnosticInfoArray(string fieldName);
 
         T[] ReadEncodableArray<T>(string fieldName)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         T[] ReadEnumerationArray<T>(string fieldName)
-            where T : IConvertible;
+            where T : struct, IConvertible;
     }
 }

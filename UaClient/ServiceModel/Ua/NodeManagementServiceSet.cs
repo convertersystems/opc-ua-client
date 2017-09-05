@@ -19,7 +19,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (AddNodesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -35,7 +35,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (AddReferencesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -51,7 +51,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (DeleteNodesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -67,7 +67,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (DeleteReferencesResponse)await channel.RequestAsync(request).ConfigureAwait(false);

@@ -18,15 +18,27 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// </summary>
     public class UaTcpSessionChannel : UaTcpSecureChannel, ISourceBlock<PublishResponse>, IObservable<PublishResponse>
     {
+        /// <summary>
+        /// The default session timeout.
+        /// </summary>
         public const double DefaultSessionTimeout = 120 * 1000; // 2 minutes
+
+        /// <summary>
+        /// The default publishing interval.
+        /// </summary>
         public const double DefaultPublishingInterval = 1000f;
+
+        /// <summary>
+        /// The default keep alive count.
+        /// </summary>
         public const uint DefaultKeepaliveCount = 30;
-        public const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
-        // public const string RsaSha256Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
-        public const string RsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-        public const string RsaV15KeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-1_5";
-        public const string RsaOaepKeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-oaep";
-        public const int NonceLength = 32;
+
+        private const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+        private const string RsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+        private const string RsaV15KeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-1_5";
+        private const string RsaOaepKeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+        private const int NonceLength = 32;
+        private const uint PublishTimeoutHint = 10 * 60 * 1000; // 10 minutes
 
         private readonly ILoggerFactory loggerFactory;
         private readonly ILogger logger;
@@ -35,6 +47,62 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly UaTcpSessionChannelOptions options;
         private CancellationTokenSource stateMachineCts;
         private Task stateMachineTask;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
+        /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The session channel options.</param>
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            ICertificateStore certificateStore,
+            IUserIdentity userIdentity,
+            EndpointDescription remoteEndpoint,
+            ILoggerFactory loggerFactory = null,
+            UaTcpSessionChannelOptions options = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
+        {
+            this.UserIdentity = userIdentity;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
+        /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
+        /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The session channel options.</param>
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            ICertificateStore certificateStore,
+            IUserIdentity userIdentity,
+            string endpointUrl,
+            string securityPolicyUri = null,
+            ILoggerFactory loggerFactory = null,
+            UaTcpSessionChannelOptions options = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
+        {
+            this.UserIdentity = userIdentity;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
@@ -341,7 +409,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var issuedIdentity = (IssuedIdentity)this.UserIdentity;
-                byte[] plainText = Concat(issuedIdentity.TokenData, this.RemoteNonce);
+                int plainTextLength = issuedIdentity.TokenData.Length + this.RemoteNonce.Length;
                 IBufferedCipher encryptor;
                 byte[] cipherText;
                 int pos;
@@ -352,9 +420,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Basic128Rsa15:
                         encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
                         encryptor.Init(true, this.RemotePublicKey);
-                        cipherText = new byte[encryptor.GetOutputSize(4 + plainText.Length)];
-                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainText.Length), cipherText, 0);
-                        pos = encryptor.DoFinal(plainText, cipherText, pos);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
+                        pos = encryptor.ProcessBytes(issuedIdentity.TokenData, cipherText, pos);
+                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
                         identityToken = new IssuedIdentityToken
                         {
                             TokenData = cipherText,
@@ -368,9 +437,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Basic256Sha256:
                         encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
                         encryptor.Init(true, this.RemotePublicKey);
-                        cipherText = new byte[encryptor.GetOutputSize(4 + plainText.Length)];
-                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainText.Length), cipherText, 0);
-                        pos = encryptor.DoFinal(plainText, cipherText, pos);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
+                        pos = encryptor.ProcessBytes(issuedIdentity.TokenData, cipherText, pos);
+                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
                         identityToken = new IssuedIdentityToken
                         {
                             TokenData = cipherText,
@@ -391,7 +461,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 tokenSignature = new SignatureData();
-                plainText = null;
                 encryptor = null;
                 cipherText = null;
             }
@@ -591,7 +660,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 RequestedLifetimeCount = DefaultKeepaliveCount * 3,
                 PublishingEnabled = true,
             };
-            var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(true);
+            var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
 
             // link up the dataflow blocks
             var id = subscriptionResponse.SubscriptionId;

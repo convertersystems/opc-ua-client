@@ -14,13 +14,11 @@
     },
     "orderingRules": {
       "elementOrder": [
-        "kind",
         "constant",
-        "static",
         "readonly"
       ],
       "usingDirectivesPlacement": "outsideNamespace",
-      "systemUsingDirectivesFirst":  true 
+      "systemUsingDirectivesFirst": true
     }
   }
 }

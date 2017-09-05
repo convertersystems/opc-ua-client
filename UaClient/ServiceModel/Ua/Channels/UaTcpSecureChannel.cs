@@ -41,21 +41,28 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// </summary>
     public class UaTcpSecureChannel : UaTcpTransportChannel, IRequestChannel
     {
+        /// <summary>
+        /// The default timeout for requests.
+        /// </summary>
         public const uint DefaultTimeoutHint = 15 * 1000; // 15 seconds
+
+        /// <summary>
+        /// the default diagnostic flags for requests.
+        /// </summary>
         public const uint DefaultDiagnosticsHint = (uint)DiagnosticFlags.None;
-        public const uint PublishTimeoutHint = 10 * 60 * 1000; // 10 minutes
         private const int SequenceHeaderSize = 8;
         private const int TokenRequestedLifetime = 60 * 60 * 1000; // 60 minutes
 
+        private static readonly Dictionary<ExpandedNodeId, Type> BinaryEncodingIdToTypeDictionary = new Dictionary<ExpandedNodeId, Type>();
+        private static readonly Dictionary<Type, ExpandedNodeId> TypeToBinaryEncodingIdDictionary = new Dictionary<Type, ExpandedNodeId>();
         private static readonly NodeId OpenSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId CloseSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.CloseSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId ReadResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
         private static readonly NodeId PublishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
         private static readonly SecureRandom Rng = new SecureRandom();
 
-        protected readonly CancellationTokenSource channelCts;
+        private readonly CancellationTokenSource channelCts;
         private readonly ILogger logger;
-        private readonly UaTcpSecureChannelOptions options;
         private readonly SemaphoreSlim sendingSemaphore = new SemaphoreSlim(1, 1);
         private readonly SemaphoreSlim receivingSemaphore = new SemaphoreSlim(1, 1);
         private readonly ActionBlock<ServiceOperation> pendingRequests;
@@ -106,34 +113,6 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         static UaTcpSecureChannel()
         {
-            BinaryEncodingIdToTypeDictionary = new Dictionary<ExpandedNodeId, Type>();
-            TypeToBinaryEncodingIdDictionary = new Dictionary<Type, ExpandedNodeId>();
-            DataTypeIdToTypeDictionary = new Dictionary<ExpandedNodeId, Type>()
-            {
-                [ExpandedNodeId.Parse(DataTypeIds.Boolean)] = typeof(bool),
-                [ExpandedNodeId.Parse(DataTypeIds.SByte)] = typeof(sbyte),
-                [ExpandedNodeId.Parse(DataTypeIds.Byte)] = typeof(byte),
-                [ExpandedNodeId.Parse(DataTypeIds.Int16)] = typeof(short),
-                [ExpandedNodeId.Parse(DataTypeIds.UInt16)] = typeof(ushort),
-                [ExpandedNodeId.Parse(DataTypeIds.Int32)] = typeof(int),
-                [ExpandedNodeId.Parse(DataTypeIds.UInt32)] = typeof(uint),
-                [ExpandedNodeId.Parse(DataTypeIds.Int64)] = typeof(long),
-                [ExpandedNodeId.Parse(DataTypeIds.UInt64)] = typeof(ulong),
-                [ExpandedNodeId.Parse(DataTypeIds.Float)] = typeof(float),
-                [ExpandedNodeId.Parse(DataTypeIds.Double)] = typeof(double),
-                [ExpandedNodeId.Parse(DataTypeIds.String)] = typeof(string),
-                [ExpandedNodeId.Parse(DataTypeIds.DateTime)] = typeof(DateTime),
-                [ExpandedNodeId.Parse(DataTypeIds.Guid)] = typeof(Guid),
-                [ExpandedNodeId.Parse(DataTypeIds.ByteString)] = typeof(byte[]),
-                [ExpandedNodeId.Parse(DataTypeIds.XmlElement)] = typeof(XElement),
-                [ExpandedNodeId.Parse(DataTypeIds.NodeId)] = typeof(NodeId),
-                [ExpandedNodeId.Parse(DataTypeIds.ExpandedNodeId)] = typeof(ExpandedNodeId),
-                [ExpandedNodeId.Parse(DataTypeIds.StatusCode)] = typeof(StatusCode),
-                [ExpandedNodeId.Parse(DataTypeIds.QualifiedName)] = typeof(QualifiedName),
-                [ExpandedNodeId.Parse(DataTypeIds.LocalizedText)] = typeof(LocalizedText),
-                [ExpandedNodeId.Parse(DataTypeIds.Enumeration)] = typeof(int),
-                [ExpandedNodeId.Parse(DataTypeIds.UtcTime)] = typeof(DateTime),
-            };
             RegisterEncodables(typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly);
         }
 
@@ -153,14 +132,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             UaTcpSecureChannelOptions options = null)
             : base(remoteEndpoint, loggerFactory, options)
         {
-            if (localDescription == null)
-            {
-                throw new ArgumentNullException(nameof(localDescription));
-            }
-
-            this.LocalDescription = localDescription;
+            this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
             this.CertificateStore = certificateStore;
-            this.options = options ?? new UaTcpSecureChannelOptions();
+            this.TimeoutHint = options?.TimeoutHint ?? DefaultTimeoutHint;
+            this.DiagnosticsHint = options?.DiagnosticsHint ?? DefaultDiagnosticsHint;
 
             this.logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
             this.AuthenticationToken = null;
@@ -171,68 +146,157 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
         }
 
-        public static Dictionary<ExpandedNodeId, Type> BinaryEncodingIdToTypeDictionary { get; }
-
-        public static Dictionary<Type, ExpandedNodeId> TypeToBinaryEncodingIdDictionary { get; }
-
-        public static Dictionary<ExpandedNodeId, Type> DataTypeIdToTypeDictionary { get; }
-
+        /// <summary>
+        /// Gets the local description.
+        /// </summary>
         public ApplicationDescription LocalDescription { get; }
 
+        /// <summary>
+        /// Gets the certificate store.
+        /// </summary>
         public ICertificateStore CertificateStore { get; }
 
+        /// <summary>
+        /// Gets the default number of milliseconds that may elapse before an operation is cancelled by the service.
+        /// </summary>
+        public uint TimeoutHint { get; }
+
+        /// <summary>
+        /// Gets the default diagnostics flags to be requested by the service.
+        /// </summary>
+        public uint DiagnosticsHint { get; }
+
+        /// <summary>
+        /// Gets the local certificate.
+        /// </summary>
         protected byte[] LocalCertificate { get; private set; }
 
+        /// <summary>
+        /// Gets the remote certificate.
+        /// </summary>
         protected byte[] RemoteCertificate => this.RemoteEndpoint.ServerCertificate;
 
+        /// <summary>
+        /// Gets the local private key.
+        /// </summary>
         protected RsaKeyParameters LocalPrivateKey { get; private set; }
 
+        /// <summary>
+        /// Gets the remote public key.
+        /// </summary>
         protected RsaKeyParameters RemotePublicKey { get; private set; }
 
+        /// <summary>
+        /// Gets the local nonce.
+        /// </summary>
         protected byte[] LocalNonce { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the channel id.
+        /// </summary>
         public uint ChannelId { get; protected set; }
 
+        /// <summary>
+        /// Gets or sets the token id.
+        /// </summary>
         public uint TokenId { get; protected set; }
 
+        /// <summary>
+        /// Gets or sets the authentication token.
+        /// </summary>
         public NodeId AuthenticationToken { get; protected set; }
 
+        /// <summary>
+        /// Gets or sets the namespace uris.
+        /// </summary>
         public List<string> NamespaceUris { get; protected set; }
 
+        /// <summary>
+        /// Gets or sets the server uris.
+        /// </summary>
         public List<string> ServerUris { get; protected set; }
 
+        /// <summary>
+        /// Registers the public types that implement IEncodable from the assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
         public static void RegisterEncodables(Assembly assembly)
         {
             if (assembly == null)
             {
-                throw new ArgumentNullException("assembly");
+                throw new ArgumentNullException(nameof(assembly));
             }
 
-            var types = assembly.ExportedTypes.Where(t => t.GetTypeInfo().ImplementedInterfaces.Contains(typeof(IEncodable))).ToArray();
-            foreach (var type in types)
+            foreach (var type in assembly.ExportedTypes)
             {
                 RegisterEncodable(type);
             }
         }
 
-        public static void RegisterEncodable(Type type)
+        /// <summary>
+        /// Registers a type that implements IEncodable.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>The BinaryEncodingId.</returns>
+        public static ExpandedNodeId RegisterEncodable(Type type)
         {
-            var attr = type.GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-            if (attr != null)
+            ExpandedNodeId id = null;
+
+            var info = type.GetTypeInfo();
+            if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
             {
-                var binaryEncodingId = attr.NodeId;
-                BinaryEncodingIdToTypeDictionary.Add(binaryEncodingId, type);
-                TypeToBinaryEncodingIdDictionary.Add(type, binaryEncodingId);
+                var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                if (attr != null)
+                {
+                    id = attr.NodeId;
+                    BinaryEncodingIdToTypeDictionary[id] = type;
+                    TypeToBinaryEncodingIdDictionary[type] = id;
+                }
+
+                return id;
             }
 
-            var attr2 = type.GetTypeInfo().GetCustomAttribute<DataTypeIdAttribute>(false);
-            if (attr2 != null)
-            {
-                var dataTypeId = attr2.NodeId;
-                DataTypeIdToTypeDictionary.Add(dataTypeId, type);
-            }
+            return null;
         }
 
+        /// <summary>
+        /// Gets the system type associated with the BinaryEncodingId.
+        /// </summary>
+        /// <param name="binaryEncodingId">The BinaryEncodingId.</param>
+        /// <param name="type">The system type.</param>
+        /// <returns>True if successfull.</returns>
+        public static bool TryGetTypeFromBinaryEncodingId(ExpandedNodeId binaryEncodingId, out Type type)
+        {
+            return UaTcpSecureChannel.BinaryEncodingIdToTypeDictionary.TryGetValue(binaryEncodingId, out type);
+        }
+
+        /// <summary>
+        /// Gets the BinaryEncodingId associated with the system type.
+        /// </summary>
+        /// <param name="type">The system type.</param>
+        /// <param name="binaryEncodingId">The BinaryEncodingId.</param>
+        /// <returns>True if successfull.</returns>
+        public static bool TryGetBinaryEncodingIdFromType(Type type, out ExpandedNodeId binaryEncodingId)
+        {
+            if (!UaTcpSecureChannel.TypeToBinaryEncodingIdDictionary.TryGetValue(type, out binaryEncodingId))
+            {
+                binaryEncodingId = UaTcpSecureChannel.RegisterEncodable(type);
+                if (binaryEncodingId == null)
+                {
+                    throw new ServiceResultException(StatusCodes.BadEncodingError);
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Sends a <see cref="T:Workstation.ServiceModel.Ua.IServiceRequest"/> to the server.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public virtual async Task<IServiceResponse> RequestAsync(IServiceRequest request)
         {
             this.ThrowIfClosedOrNotOpening();
@@ -240,7 +304,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var operation = new ServiceOperation(request);
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader.TimeoutHint))
             using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.channelCts.Token))
-            using (var registration = linkedCts.Token.Register(this.CancelRequest, operation, false))
+            using (var registration = linkedCts.Token.Register(o => ((ServiceOperation)o).TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)), operation, false))
             {
                 if (this.pendingRequests.Post(operation))
                 {
@@ -249,29 +313,6 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 throw new ServiceResultException(StatusCodes.BadSecureChannelClosed);
             }
-        }
-
-        protected static byte[] Concat(byte[] a, byte[] b)
-        {
-            if (a == null && b == null)
-            {
-                return new byte[0];
-            }
-
-            if (a == null)
-            {
-                return b;
-            }
-
-            if (b == null)
-            {
-                return a;
-            }
-
-            var result = new byte[a.Length + b.Length];
-            Buffer.BlockCopy(a, 0, result, 0, a.Length);
-            Buffer.BlockCopy(b, 0, result, a.Length, b.Length);
-            return result;
         }
 
         /// <inheritdoc/>
@@ -407,7 +448,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.serverSigningKey = new byte[this.symSignatureKeySize];
                 this.serverEncryptingKey = new byte[this.symEncryptionKeySize];
                 this.serverInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.encryptionBuffer = new byte[this.options.LocalSendBufferSize];
+                this.encryptionBuffer = new byte[this.LocalSendBufferSize];
                 this.thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
             }
             else if (this.RemoteEndpoint.SecurityMode == MessageSecurityMode.Sign)
@@ -514,7 +555,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.serverSigningKey = new byte[this.symSignatureKeySize];
                 this.serverEncryptingKey = new byte[this.symEncryptionKeySize];
                 this.serverInitializationVector = new byte[this.symEncryptionBlockSize];
-                this.encryptionBuffer = new byte[this.options.LocalSendBufferSize];
+                this.encryptionBuffer = new byte[this.LocalSendBufferSize];
                 this.thumbprintDigest = DigestUtilities.GetDigest("SHA-1");
             }
             else if (this.RemoteEndpoint.SecurityMode == MessageSecurityMode.None)
@@ -548,8 +589,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             token.ThrowIfCancellationRequested();
 
-            this.sendBuffer = new byte[this.options.LocalSendBufferSize];
-            this.receiveBuffer = new byte[this.options.LocalReceiveBufferSize];
+            this.sendBuffer = new byte[this.LocalSendBufferSize];
+            this.receiveBuffer = new byte[this.LocalReceiveBufferSize];
 
             this.receiveResponsesTask = this.ReceiveResponsesAsync(this.channelCts.Token);
 
@@ -575,11 +616,12 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             try
             {
-                var request = new CloseSecureChannelRequest { RequestHeader = new RequestHeader { TimeoutHint = 2000, ReturnDiagnostics = this.options.DiagnosticsHint } };
+                var request = new CloseSecureChannelRequest { RequestHeader = new RequestHeader { TimeoutHint = 2000, ReturnDiagnostics = this.DiagnosticsHint } };
                 await this.RequestAsync(request).ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
+                this.logger?.LogError($"Error closing secure channel. {ex.Message}");
             }
 
             await base.OnCloseAsync(token).ConfigureAwait(false);
@@ -591,6 +633,14 @@ namespace Workstation.ServiceModel.Ua.Channels
             await base.OnAbortAsync(token).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Calculate the pseudo random function.
+        /// </summary>
+        /// <param name="secret">The secret.</param>
+        /// <param name="seed">The seed.</param>
+        /// <param name="sizeBytes">The size in bytes.</param>
+        /// <param name="securityPolicyUri">The securityPolicyUri.</param>
+        /// <returns>A array of bytes.</returns>
         private static byte[] CalculatePSHA(byte[] secret, byte[] seed, int sizeBytes, string securityPolicyUri)
         {
             IDigest digest;
@@ -628,9 +678,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                 mac.DoFinal(buf2, 0);
                 Array.Copy(buf2, 0, output, size * i, Math.Min(size, output.Length - (size * i)));
             }
+
             return output;
         }
 
+        /// <summary>
+        /// Send service request on transport channel.
+        /// </summary>
+        /// <param name="operation">A service operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendRequestActionAsync(ServiceOperation operation)
         {
             try
@@ -647,6 +703,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Send service request on transport channel.
+        /// </summary>
+        /// <param name="operation">A service operation.</param>
+        /// <param name="token">A cancellation token</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendRequestAsync(ServiceOperation operation, CancellationToken token = default(CancellationToken))
         {
             await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
@@ -663,8 +725,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     {
                         RequestHeader = new RequestHeader
                         {
-                            TimeoutHint = this.options.TimeoutHint,
-                            ReturnDiagnostics = this.options.DiagnosticsHint,
+                            TimeoutHint = this.TimeoutHint,
+                            ReturnDiagnostics = this.DiagnosticsHint,
                             Timestamp = DateTime.UtcNow,
                             RequestHandle = this.GetNextHandle(),
                             AuthenticationToken = this.AuthenticationToken
@@ -709,6 +771,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Send open secure channel service request on transport channel.
+        /// </summary>
+        /// <param name="request">A service request</param>
+        /// <param name="token">A cancellation token</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendOpenSecureChannelRequestAsync");
@@ -880,6 +948,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Send close secure channel request on transport channel.
+        /// </summary>
+        /// <param name="request">A service request</param>
+        /// <param name="token">A cancellation token</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendCloseSecureChannelRequestAsync");
@@ -1042,6 +1116,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Send service request on transport channel.
+        /// </summary>
+        /// <param name="request">A service request</param>
+        /// <param name="token">A cancellation token</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
             var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendServiceRequestAsync");
@@ -1051,7 +1131,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 ExpandedNodeId binaryEncodingId;
                 if (!TypeToBinaryEncodingIdDictionary.TryGetValue(request.GetType(), out binaryEncodingId))
                 {
-                    throw new ServiceResultException(StatusCodes.BadDataTypeIdUnknown);
+                    throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }
 
                 bodyEncoder.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.NamespaceUris));
@@ -1210,6 +1290,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Start a task to receive service responses from transport channel.
+        /// </summary>
+        /// <param name="token">A cancellation token</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task ReceiveResponsesAsync(CancellationToken token = default(CancellationToken))
         {
             try
@@ -1242,6 +1327,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             tcs.TrySetResult(response);
                         }
+
                         continue;
                     }
 
@@ -1282,6 +1368,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Receive next service response from transport channel.
+        /// </summary>
+        /// <param name="token">A cancellation token</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task<IServiceResponse> ReceiveResponseAsync(CancellationToken token = default(CancellationToken))
         {
             await this.receivingSemaphore.WaitAsync(token).ConfigureAwait(false);
@@ -1289,7 +1380,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 token.ThrowIfCancellationRequested();
                 this.ThrowIfClosedOrNotOpening();
-                uint sequenceNumber;
+                uint sequenceNum;
                 uint requestId;
                 int paddingHeaderSize;
                 int plainHeaderSize;
@@ -1306,12 +1397,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                     do
                     {
                         chunkCount++;
-                        if (this.options.LocalMaxChunkCount > 0 && chunkCount > this.options.LocalMaxChunkCount)
+                        if (this.LocalMaxChunkCount > 0 && chunkCount > this.LocalMaxChunkCount)
                         {
                             throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                         }
 
-                        var count = await this.ReceiveAsync(this.receiveBuffer, 0, (int)this.options.LocalReceiveBufferSize, token).ConfigureAwait(false);
+                        var count = await this.ReceiveAsync(this.receiveBuffer, 0, (int)this.LocalReceiveBufferSize, token).ConfigureAwait(false);
                         if (count == 0)
                         {
                             return null;
@@ -1385,7 +1476,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     }
 
                                     // read sequence header
-                                    sequenceNumber = decoder.ReadUInt32(null);
+                                    sequenceNum = decoder.ReadUInt32(null);
                                     requestId = decoder.ReadUInt32(null);
 
                                     // body
@@ -1456,7 +1547,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     }
 
                                     // sequence header
-                                    sequenceNumber = decoder.ReadUInt32(null);
+                                    sequenceNum = decoder.ReadUInt32(null);
                                     requestId = decoder.ReadUInt32(null);
 
                                     // body
@@ -1492,13 +1583,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     {
                                         throw new ServiceResultException(statusCode, message);
                                     }
+
                                     throw new ServiceResultException(statusCode);
 
                                 default:
                                     throw new ServiceResultException(StatusCodes.BadUnknownResponse);
                             }
 
-                            if (this.options.LocalMaxMessageSize > 0 && bodyStream.Position > this.options.LocalMaxMessageSize)
+                            if (this.LocalMaxMessageSize > 0 && bodyStream.Position > this.LocalMaxMessageSize)
                             {
                                 throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                             }
@@ -1589,17 +1681,25 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Update request header with current time.
+        /// </summary>
+        /// <param name="request">The service request.</param>
         private void TimestampHeader(IServiceRequest request)
         {
             if (request.RequestHeader == null)
             {
-                request.RequestHeader = new RequestHeader { TimeoutHint = this.options.TimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint, Timestamp = DateTime.UtcNow };
+                request.RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint, Timestamp = DateTime.UtcNow };
                 return;
             }
 
             request.RequestHeader.Timestamp = DateTime.UtcNow;
         }
 
+        /// <summary>
+        /// Get next request handle.
+        /// </summary>
+        /// <returns>A request handle.</returns>
         private uint GetNextHandle()
         {
             unchecked
@@ -1631,6 +1731,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Get next sequence number for chunk.
+        /// </summary>
+        /// <returns>The next sequence number.</returns>
         private uint GetNextSequenceNumber()
         {
             unchecked
@@ -1639,17 +1743,16 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Get next random nonce of requested length.
+        /// </summary>
+        /// <param name="length">The requested length.</param>
+        /// <returns>An nonce of requested length.</returns>
         protected byte[] GetNextNonce(int length)
         {
             var nonce = new byte[length];
             Rng.NextBytes(nonce);
             return nonce;
-        }
-
-        private void CancelRequest(object o)
-        {
-            var operation = (ServiceOperation)o;
-            operation.TrySetException(this.GetPendingException() ?? new ServiceResultException(StatusCodes.BadRequestTimeout));
         }
     }
 }

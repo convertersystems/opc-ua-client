@@ -70,7 +70,7 @@ namespace Workstation.ServiceModel.Ua
             QualifiedName value;
             if (!QualifiedName.TryParse(s, out value))
             {
-                throw new ArgumentException("Unable to parse QualifiedName.", "s");
+                throw new ArgumentException("Unable to parse QualifiedName.", nameof(s));
             }
 
             return value;

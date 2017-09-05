@@ -35,7 +35,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (WriteResponse)await client.RequestAsync(request).ConfigureAwait(false);
@@ -51,7 +51,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (HistoryReadResponse)await client.RequestAsync(request).ConfigureAwait(false);
@@ -67,7 +67,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (HistoryUpdateResponse)await client.RequestAsync(request).ConfigureAwait(false);

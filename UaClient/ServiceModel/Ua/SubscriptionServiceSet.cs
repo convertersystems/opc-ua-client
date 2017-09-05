@@ -19,7 +19,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (CreateSubscriptionResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -35,7 +35,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (ModifySubscriptionResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -51,7 +51,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (SetPublishingModeResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -67,7 +67,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (PublishResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -83,7 +83,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (RepublishResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -99,7 +99,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (TransferSubscriptionsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -115,7 +115,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (DeleteSubscriptionsResponse)await channel.RequestAsync(request).ConfigureAwait(false);

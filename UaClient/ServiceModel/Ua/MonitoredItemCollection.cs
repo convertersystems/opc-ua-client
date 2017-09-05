@@ -83,7 +83,7 @@ namespace Workstation.ServiceModel.Ua
             return new MonitoredItemBaseCollection();
         }
 
-        public static explicit operator MonitoredItemBase[] (MonitoredItemBaseCollection values)
+        public static explicit operator MonitoredItemBase[](MonitoredItemBaseCollection values)
         {
             if (values != null)
             {

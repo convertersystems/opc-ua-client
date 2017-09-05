@@ -363,12 +363,12 @@ namespace Microsoft.IO
                 this.CheckDisposed();
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException("value", "value must be non-negative");
+                    throw new ArgumentOutOfRangeException(nameof(value), "value must be non-negative");
                 }
 
                 if (value > MaxStreamLength)
                 {
-                    throw new ArgumentOutOfRangeException("value", "value cannot be more than " + MaxStreamLength);
+                    throw new ArgumentOutOfRangeException(nameof(value), "value cannot be more than " + MaxStreamLength);
                 }
 
                 this.position = (int)value;

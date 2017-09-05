@@ -182,18 +182,18 @@ namespace Workstation.ServiceModel.Ua
 		Neither=3,
 		Invalid=4,
 	}
-	[DataTypeId(DataTypeIds.DataChangeTrigger)]
-	public enum DataChangeTrigger {
-		Status=0,
-		StatusValue=1,
-		StatusValueTimestamp=2,
-	}
 	[DataTypeId(DataTypeIds.HistoryUpdateType)]
 	public enum HistoryUpdateType {
 		Insert=1,
 		Replace=2,
 		Update=3,
 		Delete=4,
+	}
+	[DataTypeId(DataTypeIds.DataChangeTrigger)]
+	public enum DataChangeTrigger {
+		Status=0,
+		StatusValue=1,
+		StatusValueTimestamp=2,
 	}
 	[DataTypeId(DataTypeIds.PerformUpdateType)]
 	public enum PerformUpdateType {
@@ -3079,19 +3079,124 @@ namespace Workstation.ServiceModel.Ua
 	public class HistoryReadResult : IEncodable {
 		public StatusCode StatusCode { get; set; }
 		public Byte[] ContinuationPoint { get; set; }
-		public ExtensionObject HistoryData { get; set; }
+		public HistoryBase HistoryData { get; set; }
         public virtual void Encode(IEncoder encoder) {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			encoder.WriteStatusCode("StatusCode", StatusCode);
 			encoder.WriteByteString("ContinuationPoint", ContinuationPoint);
-			encoder.WriteExtensionObject("HistoryData", HistoryData);
+			encoder.WriteExtensionObject<HistoryBase>("HistoryData", HistoryData);
             encoder.PopNamespace();
         }
         public virtual void Decode(IDecoder decoder) {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			StatusCode = decoder.ReadStatusCode("StatusCode");
 			ContinuationPoint = decoder.ReadByteString("ContinuationPoint");
-			HistoryData = decoder.ReadExtensionObject("HistoryData");
+			HistoryData = decoder.ReadExtensionObject<HistoryBase>("HistoryData");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryBase_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryBase_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryBase)]
+	public class HistoryBase : IEncodable {
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryEvent_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryEvent_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryEvent)]
+	public class HistoryEvent : HistoryBase {
+		public HistoryEventFieldList[] Events { get; set; }
+        public override void Encode(IEncoder encoder) {
+			base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteEncodableArray<HistoryEventFieldList>("Events", Events);
+            encoder.PopNamespace();
+        }
+        public override void Decode(IDecoder decoder) {
+			base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			Events = decoder.ReadEncodableArray<HistoryEventFieldList>("Events");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryEventFieldList_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryEventFieldList_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryEventFieldList)]
+	public class HistoryEventFieldList : IEncodable {
+		public Variant[] EventFields { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteVariantArray("EventFields", EventFields);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			EventFields = decoder.ReadVariantArray("EventFields");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryData_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryData_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryData)]
+	public class HistoryData : HistoryBase {
+		public DataValue[] DataValues { get; set; }
+        public override void Encode(IEncoder encoder) {
+			base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteDataValueArray("DataValues", DataValues);
+            encoder.PopNamespace();
+        }
+        public override void Decode(IDecoder decoder) {
+			base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			DataValues = decoder.ReadDataValueArray("DataValues");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryModifiedData)]
+	public class HistoryModifiedData : HistoryData {
+		public ModificationInfo[] ModificationInfos { get; set; }
+        public override void Encode(IEncoder encoder) {
+			base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteEncodableArray<ModificationInfo>("ModificationInfos", ModificationInfos);
+            encoder.PopNamespace();
+        }
+        public override void Decode(IDecoder decoder) {
+			base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			ModificationInfos = decoder.ReadEncodableArray<ModificationInfo>("ModificationInfos");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.ModificationInfo)]
+	public class ModificationInfo : IEncodable {
+		public DateTime ModificationTime { get; set; }
+		public HistoryUpdateType UpdateType { get; set; }
+		public String UserName { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteDateTime("ModificationTime", ModificationTime);
+			encoder.WriteEnumeration<HistoryUpdateType>("UpdateType", UpdateType);
+			encoder.WriteString("UserName", UserName);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			ModificationTime = decoder.ReadDateTime("ModificationTime");
+			UpdateType = decoder.ReadEnumeration<HistoryUpdateType>("UpdateType");
+			UserName = decoder.ReadString("UserName");
             decoder.PopNamespace();
         }
 	}
@@ -3326,94 +3431,6 @@ namespace Workstation.ServiceModel.Ua
 			Trigger = decoder.ReadEnumeration<DataChangeTrigger>("Trigger");
 			DeadbandType = decoder.ReadUInt32("DeadbandType");
 			DeadbandValue = decoder.ReadDouble("DeadbandValue");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.HistoryData_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.HistoryData_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.HistoryData)]
-	public class HistoryData : IEncodable {
-		public DataValue[] DataValues { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteDataValueArray("DataValues", DataValues);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			DataValues = decoder.ReadDataValueArray("DataValues");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.HistoryModifiedData_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.HistoryModifiedData)]
-	public class HistoryModifiedData : HistoryData {
-		public ModificationInfo[] ModificationInfos { get; set; }
-        public override void Encode(IEncoder encoder) {
-			base.Encode(encoder);
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteEncodableArray<ModificationInfo>("ModificationInfos", ModificationInfos);
-            encoder.PopNamespace();
-        }
-        public override void Decode(IDecoder decoder) {
-			base.Decode(decoder);
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			ModificationInfos = decoder.ReadEncodableArray<ModificationInfo>("ModificationInfos");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.ModificationInfo_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.ModificationInfo)]
-	public class ModificationInfo : IEncodable {
-		public DateTime ModificationTime { get; set; }
-		public HistoryUpdateType UpdateType { get; set; }
-		public String UserName { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteDateTime("ModificationTime", ModificationTime);
-			encoder.WriteEnumeration<HistoryUpdateType>("UpdateType", UpdateType);
-			encoder.WriteString("UserName", UserName);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			ModificationTime = decoder.ReadDateTime("ModificationTime");
-			UpdateType = decoder.ReadEnumeration<HistoryUpdateType>("UpdateType");
-			UserName = decoder.ReadString("UserName");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.HistoryEvent_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.HistoryEvent_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.HistoryEvent)]
-	public class HistoryEvent : IEncodable {
-		public HistoryEventFieldList[] Events { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteEncodableArray<HistoryEventFieldList>("Events", Events);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			Events = decoder.ReadEncodableArray<HistoryEventFieldList>("Events");
-            decoder.PopNamespace();
-        }
-	}
-	[BinaryEncodingId(ObjectIds.HistoryEventFieldList_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.HistoryEventFieldList_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.HistoryEventFieldList)]
-	public class HistoryEventFieldList : IEncodable {
-		public Variant[] EventFields { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteVariantArray("EventFields", EventFields);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			EventFields = decoder.ReadVariantArray("EventFields");
             decoder.PopNamespace();
         }
 	}

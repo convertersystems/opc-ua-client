@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Xml;
 using System.Xml.Linq;
 
 namespace Workstation.ServiceModel.Ua.Channels
@@ -20,7 +21,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if (stream == null)
             {
-                throw new ArgumentNullException("stream");
+                throw new ArgumentNullException(nameof(stream));
             }
 
             this.stream = stream;
@@ -148,7 +149,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return null;
             }
 
-            return XElement.Parse(this.encoding.GetString(array, 0, array.Length));
+            try
+            {
+                return XElement.Parse(this.encoding.GetString(array, 0, array.Length).TrimEnd('\0'));
+            }
+            catch (XmlException)
+            {
+                return null;
+            }
         }
 
         public NodeId ReadNodeId(string fieldName)
@@ -192,10 +200,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             string nsu = null;
             uint svr = 0;
             byte b = this.reader.ReadByte();
-            switch (b)
+            switch (b & 0x0F)
             {
                 case 0x00:
-                    nodeId = new NodeId(this.reader.ReadByte());
+                    nodeId = new NodeId(this.reader.ReadByte(), ns);
                     break;
 
                 case 0x01:
@@ -607,21 +615,22 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             NodeId nodeId = this.ReadNodeId(null);
             byte b = this.reader.ReadByte();
-            if (b == 1)
+            if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
             {
                 ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
-                Type type2;
-                if (UaTcpSecureChannel.BinaryEncodingIdToTypeDictionary.TryGetValue(binaryEncodingId, out type2))
+
+                if (UaTcpSecureChannel.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out Type type))
                 {
                     var len = this.ReadInt32(null);
-                    var encodable = Activator.CreateInstance(type2) as IEncodable;
+                    var encodable = Activator.CreateInstance(type) as IEncodable;
                     encodable.Decode(this);
-                    return new ExtensionObject(encodable);
+                    return new ExtensionObject(encodable, binaryEncodingId);
                 }
 
                 return new ExtensionObject(this.ReadByteString(null), binaryEncodingId);
             }
-            else if (b == 2)
+
+            if (b == (byte)BodyType.XmlElement)
             {
                 ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
                 return new ExtensionObject(this.ReadXElement(null), xmlEncodingId);
@@ -631,26 +640,21 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public T ReadExtensionObject<T>(string fieldName)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             NodeId nodeId = this.ReadNodeId(null);
             byte b = this.reader.ReadByte();
             if (b == 1)
             {
                 ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
-                Type type2;
-                if (!UaTcpSecureChannel.BinaryEncodingIdToTypeDictionary.TryGetValue(binaryEncodingId, out type2))
-                {
-                    throw new ServiceResultException(StatusCodes.BadDataTypeIdUnknown);
-                }
 
-                if (!typeof(T).GetTypeInfo().IsAssignableFrom(type2.GetTypeInfo()))
+                if (!UaTcpSecureChannel.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out Type type))
                 {
                     throw new ServiceResultException(StatusCodes.BadDecodingError);
                 }
 
                 var len = this.ReadInt32(null);
-                var encodable = Activator.CreateInstance(type2) as IEncodable;
+                var encodable = Activator.CreateInstance(type) as IEncodable;
                 encodable.Decode(this);
                 return (T)encodable;
             }
@@ -661,7 +665,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public T ReadEncodable<T>(string fieldName)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             var value = Activator.CreateInstance<T>();
             value.Decode(this);
@@ -669,7 +673,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public T ReadEnumeration<T>(string fieldName)
-            where T : IConvertible
+            where T : struct, IConvertible
         {
             return (T)Enum.ToObject(typeof(T), this.ReadInt32(null));
         }
@@ -1100,7 +1104,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public T[] ReadExtensionObjectArray<T>(string fieldName)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1118,7 +1122,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public T[] ReadEncodableArray<T>(string fieldName)
-            where T : IEncodable
+            where T : class, IEncodable
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1136,7 +1140,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         public T[] ReadEnumerationArray<T>(string fieldName)
-            where T : IConvertible
+            where T : struct, IConvertible
         {
             int num = this.ReadArrayLength();
             if (num == -1)

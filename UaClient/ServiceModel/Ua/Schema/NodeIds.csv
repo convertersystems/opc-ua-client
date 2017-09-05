@@ -1,3 +1,6 @@
+HistoryBase,0,DataType
+HistoryBase_Encoding_DefaultXml,0,Object
+HistoryBase_Encoding_DefaultBinary,0,Object
 Boolean,1,DataType
 SByte,2,DataType
 Byte,3,DataType

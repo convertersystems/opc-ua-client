@@ -199,3 +199,4 @@ FakesAssemblies/
 *.opt
 /UaClient/Workstation.UaClient.xml
 project.lock.json
+/UaClient.UnitTests/UnitTest1 - Copy.cs

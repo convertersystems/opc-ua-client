@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="UnitTest1 - Copy.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="stylecop.json" />
   </ItemGroup>
 

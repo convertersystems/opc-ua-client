@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.12
+VisualStudioVersion = 15.0.26730.8
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Workstation.UaClient.UnitTests", "UaClient.UnitTests\Workstation.UaClient.UnitTests.csproj", "{8994DA00-5CE1-461F-963C-43F7CFC6864E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Workstation.UaClient.UnitTests", "UaClient.UnitTests\Workstation.UaClient.UnitTests.csproj", "{8994DA00-5CE1-461F-963C-43F7CFC6864E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A8EFACC3-6790-4CB0-8067-BE7574C94F09}"
 	ProjectSection(SolutionItems) = preProject
@@ -61,5 +61,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {74A9B17D-6375-49B4-9A35-B4C99D77C538}
 	EndGlobalSection
 EndGlobal

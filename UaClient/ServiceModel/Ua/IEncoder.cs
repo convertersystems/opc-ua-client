@@ -57,7 +57,7 @@ namespace Workstation.ServiceModel.Ua
         void WriteExtensionObject(string fieldName, ExtensionObject value);
 
         void WriteExtensionObject<T>(string fieldName, T value)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         void WriteDataValue(string fieldName, DataValue value);
 
@@ -66,10 +66,10 @@ namespace Workstation.ServiceModel.Ua
         void WriteDiagnosticInfo(string fieldName, DiagnosticInfo value);
 
         void WriteEncodable<T>(string fieldName, T value)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         void WriteEnumeration<T>(string fieldName, T value)
-            where T : IConvertible;
+            where T : struct, IConvertible;
 
         void WriteBooleanArray(string fieldName, bool[] values);
 
@@ -116,7 +116,7 @@ namespace Workstation.ServiceModel.Ua
         void WriteExtensionObjectArray(string fieldName, ExtensionObject[] values);
 
         void WriteExtensionObjectArray<T>(string fieldName, T[] values)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         void WriteDataValueArray(string fieldName, DataValue[] values);
 
@@ -125,9 +125,9 @@ namespace Workstation.ServiceModel.Ua
         void WriteDiagnosticInfoArray(string fieldName, DiagnosticInfo[] values);
 
         void WriteEncodableArray<T>(string fieldName, T[] values)
-            where T : IEncodable;
+            where T : class, IEncodable;
 
         void WriteEnumerationArray<T>(string fieldName, T[] values)
-            where T : IConvertible;
+            where T : struct, IConvertible;
     }
 }

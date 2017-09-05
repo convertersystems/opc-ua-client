@@ -19,7 +19,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (CreateMonitoredItemsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -35,7 +35,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (ModifyMonitoredItemsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -51,7 +51,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (SetMonitoringModeResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -67,7 +67,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (SetTriggeringResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -83,7 +83,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (DeleteMonitoredItemsResponse)await channel.RequestAsync(request).ConfigureAwait(false);

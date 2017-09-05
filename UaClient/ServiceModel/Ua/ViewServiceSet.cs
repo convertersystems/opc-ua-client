@@ -67,7 +67,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (RegisterNodesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
@@ -83,7 +83,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (request == null)
             {
-                throw new ArgumentNullException("request");
+                throw new ArgumentNullException(nameof(request));
             }
 
             return (UnregisterNodesResponse)await channel.RequestAsync(request).ConfigureAwait(false);
