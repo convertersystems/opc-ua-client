@@ -14,28 +14,25 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class UaApplicationBuilder
     {
+        private readonly List<MappedEndpoint> mappedEndpoints = new List<MappedEndpoint>();
+        private readonly List<Action<UaApplicationOptions>> configureOptionsActions = new List<Action<UaApplicationOptions>>();
+        private readonly List<Action<ILoggerFactory>> configureLoggerFactoryActions = new List<Action<ILoggerFactory>>();
         private ApplicationDescription localDescription;
         private ICertificateStore certificateStore;
         private Func<EndpointDescription, Task<IUserIdentity>> identityProvider;
         private ILoggerFactory loggerFactory;
         private UaApplicationOptions options;
-        private List<MappedEndpoint> mappedEndpoints = new List<MappedEndpoint>();
 
         /// <summary>
         /// Specify the ApplicationUri.
         /// </summary>
         /// <param name="uri">A uri in the form of 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseApplicationUri(string uri)
+        public UaApplicationBuilder SetApplicationUri(string uri)
         {
             if (string.IsNullOrEmpty(uri))
             {
                 throw new ArgumentNullException(nameof(uri));
-            }
-
-            if (this.localDescription != null)
-            {
-                throw new InvalidOperationException("The localDescription has already been specified.");
             }
 
             string appName = null;
@@ -75,22 +72,17 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Specify the path to the directory-based Certificate store. Directory will be created if it does not exist.
+        /// Specify the directory-based Certificate store. Directory will be created if it does not exist.
         /// </summary>
         /// <param name="path">The path to the local pki directory.</param>
         /// <param name="acceptAllRemoteCertificates">Set true to accept all remote certificates.</param>
         /// <param name="createLocalCertificateIfNotExist">Set true to create a local certificate and private key, if the files do not exist.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseDirectoryStore(string path, bool acceptAllRemoteCertificates = true, bool createLocalCertificateIfNotExist = true)
+        public UaApplicationBuilder SetDirectoryStore(string path, bool acceptAllRemoteCertificates = true, bool createLocalCertificateIfNotExist = true)
         {
             if (string.IsNullOrEmpty(path))
             {
                 throw new ArgumentNullException(nameof(path));
-            }
-
-            if (this.certificateStore != null)
-            {
-                throw new InvalidOperationException("The certificateStore has already been specified.");
             }
 
             this.certificateStore = new DirectoryStore(path, acceptAllRemoteCertificates, createLocalCertificateIfNotExist);
@@ -98,20 +90,15 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Use the <see cref="IUserIdentity"/>.
+        /// Specify the <see cref="IUserIdentity"/>.
         /// </summary>
         /// <param name="identity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseIdentity(IUserIdentity identity)
+        public UaApplicationBuilder SetIdentity(IUserIdentity identity)
         {
             if (identity == null)
             {
                 throw new ArgumentNullException(nameof(identity));
-            }
-
-            if (this.identityProvider != null)
-            {
-                throw new InvalidOperationException("The identityProvider has already been specified.");
             }
 
             this.identityProvider = endpoint => Task.FromResult(identity);
@@ -119,23 +106,13 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Specify the function that provides the <see cref="IUserIdentity"/>.
+        /// Specify the <see cref="IUserIdentity"/>.
         /// </summary>
         /// <param name="identityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseIdentity(Func<EndpointDescription, Task<IUserIdentity>> identityProvider)
+        public UaApplicationBuilder SetIdentity(Func<EndpointDescription, Task<IUserIdentity>> identityProvider)
         {
-            if (identityProvider == null)
-            {
-                throw new ArgumentNullException(nameof(identityProvider));
-            }
-
-            if (this.identityProvider != null)
-            {
-                throw new InvalidOperationException("The IdentityProvider has already been specified.");
-            }
-
-            this.identityProvider = identityProvider;
+            this.identityProvider = identityProvider ?? throw new ArgumentNullException(nameof(identityProvider));
             return this;
         }
 
@@ -144,50 +121,52 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseLoggerFactory(ILoggerFactory loggerFactory)
+        public UaApplicationBuilder SetLoggerFactory(ILoggerFactory loggerFactory)
         {
-            if (loggerFactory == null)
-            {
-                throw new ArgumentNullException(nameof(loggerFactory));
-            }
+            this.loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
+            return this;
+        }
 
-            if (this.loggerFactory != null)
-            {
-                throw new InvalidOperationException("The loggerFactory has already been specified.");
-            }
-
-            this.loggerFactory = loggerFactory;
+        /// <summary>
+        /// Configure the <see cref="ILoggerFactory"/>.
+        /// </summary>
+        /// <param name="configureDelegate">A delegate that configures the LogggerFactory.</param>
+        /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
+        public UaApplicationBuilder ConfigureLoggerFactory(Action<ILoggerFactory> configureDelegate)
+        {
+            this.configureLoggerFactoryActions.Add(configureDelegate ?? throw new ArgumentNullException(nameof(configureDelegate)));
             return this;
         }
 
         /// <summary>
         /// Specify the <see cref="UaApplicationOptions"/>.
         /// </summary>
-        /// <param name="options">The options.</param>
+        /// <param name="options">The <see cref="UaApplicationOptions"/>.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder UseOptions(UaApplicationOptions options)
+        public UaApplicationBuilder SetOptions(UaApplicationOptions options)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            if (this.options != null)
-            {
-                throw new InvalidOperationException("The options has already been specified.");
-            }
-
-            this.options = options;
+            this.options = options ?? throw new ArgumentNullException(nameof(options));
             return this;
         }
 
         /// <summary>
-        /// Add a mapping between the requested url and the <see cref="EndpointDescription"/>.
+        /// Configure the <see cref="UaApplicationOptions"/>.
+        /// </summary>
+        /// <param name="configureDelegate">A delegate that configures the options.</param>
+        /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
+        public UaApplicationBuilder ConfigureOptions(Action<UaApplicationOptions> configureDelegate)
+        {
+            this.configureOptionsActions.Add(configureDelegate ?? throw new ArgumentNullException(nameof(configureDelegate)));
+            return this;
+        }
+
+        /// <summary>
+        /// Add a mapping between the requested url and corresponding <see cref="EndpointDescription"/>.
         /// </summary>
         /// <param name="requestedUrl">The url requested.</param>
         /// <param name="endpoint">The endpoint description to use.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder Map(string requestedUrl, EndpointDescription endpoint)
+        public UaApplicationBuilder AddMappedEndpoint(string requestedUrl, EndpointDescription endpoint)
         {
             if (string.IsNullOrEmpty(requestedUrl))
             {
@@ -204,13 +183,13 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Add a mapping between the requested url and the <see cref="EndpointDescription"/>.
+        /// Add a mapping between the requested url and corresponding <see cref="EndpointDescription"/>.
         /// </summary>
         /// <param name="requestedUrl">The url requested.</param>
         /// <param name="endpointUrl">The endpoint url to use.</param>
         /// <param name="securityPolicyUri">Optionally, the securityPolicyUri to use.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder Map(string requestedUrl, string endpointUrl, string securityPolicyUri = null)
+        public UaApplicationBuilder AddMappedEndpoint(string requestedUrl, string endpointUrl, string securityPolicyUri = null)
         {
             if (string.IsNullOrEmpty(requestedUrl))
             {
@@ -227,17 +206,17 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
-        /// Add a mapping between the requested url and the <see cref="EndpointDescription"/>.
+        /// Adds mappings between requested urls and corresponding <see cref="EndpointDescription"/>s.
         /// </summary>
         /// <remarks>
         /// Provide a appSettings.json file containing:
         /// {
-        ///   "Maps": [
+        ///   "MappedEndpoints": [
         ///     {
-        ///       "requestedUrl": "opc.tcp://localhost:26543",
-        ///       "endpoint": {
-        ///         "endpointUrl": "opc.tcp://andrew-think:26543",
-        ///         "securityPolicyUri": "http://opcfoundation.org/UA/SecurityPolicy#None"
+        ///       "RequestedUrl": "opc.tcp://localhost:26543",
+        ///       "Endpoint": {
+        ///         "EndpointUrl": "opc.tcp://andrew-think:26543",
+        ///         "SecurityPolicyUri": "http://opcfoundation.org/UA/SecurityPolicy#None"
         ///       }
         ///     }
         ///   ]
@@ -245,14 +224,14 @@ namespace Workstation.ServiceModel.Ua
         /// </remarks>
         /// <param name="configuration">The configuration.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder Map(IConfiguration configuration)
+        public UaApplicationBuilder AddMappedEndpoints(IConfiguration configuration)
         {
             if (configuration == null)
             {
                 throw new ArgumentNullException(nameof(configuration));
             }
 
-            var maps = configuration.GetSection("Maps").Get<MappedEndpoint[]>();
+            var maps = configuration.GetSection("MappedEndpoints").Get<MappedEndpoint[]>();
             if (maps != null)
             {
                 foreach (var map in maps)
@@ -275,13 +254,25 @@ namespace Workstation.ServiceModel.Ua
                 throw new InvalidOperationException("An ApplicationUri or ApplicationDescription must be specified.");
             }
 
+            var loggerFactory = this.loggerFactory ?? new LoggerFactory();
+            foreach (var action in this.configureLoggerFactoryActions)
+            {
+                action(loggerFactory);
+            }
+
+            var options = this.options ?? new UaApplicationOptions();
+            foreach (var action in this.configureOptionsActions)
+            {
+                action(options);
+            }
+
             return new UaApplication(
                 this.localDescription,
                 this.certificateStore,
                 this.identityProvider,
                 this.mappedEndpoints,
-                this.loggerFactory,
-                this.options);
+                loggerFactory,
+                options);
         }
     }
 }

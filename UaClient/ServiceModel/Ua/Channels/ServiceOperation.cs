@@ -8,10 +8,10 @@ namespace Workstation.ServiceModel.Ua.Channels
     public class ServiceOperation : TaskCompletionSource<IServiceResponse>
     {
         public ServiceOperation(IServiceRequest request)
-#if NETSTANDARD1_4
-            : base(request, TaskCreationOptions.RunContinuationsAsynchronously)
-#else
+#if NET45
             : base(request)
+#else
+            : base(request, TaskCreationOptions.RunContinuationsAsynchronously)
 #endif
         {
         }

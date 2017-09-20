@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Workstation.ServiceModel.Ua.Channels;
+using System.ComponentModel;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -63,7 +63,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="PublishRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="PublishResponse"/>.</returns>
-        public static async Task<PublishResponse> PublishAsync(this IRequestChannel channel, PublishRequest request)
+        internal static async Task<PublishResponse> PublishAsync(this IRequestChannel channel, PublishRequest request)
         {
             if (request == null)
             {
@@ -79,7 +79,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="RepublishRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="RepublishResponse"/>.</returns>
-        public static async Task<RepublishResponse> RepublishAsync(this IRequestChannel channel, RepublishRequest request)
+        internal static async Task<RepublishResponse> RepublishAsync(this IRequestChannel channel, RepublishRequest request)
         {
             if (request == null)
             {

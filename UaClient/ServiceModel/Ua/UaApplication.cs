@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,16 +48,6 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(localDescription));
             }
 
-            lock (globalLock)
-            {
-                if (appInstance != null)
-                {
-                    throw new InvalidOperationException("You can only create a single instance of this type.");
-                }
-
-                appInstance = this;
-            }
-
             this.LocalDescription = localDescription;
             this.CertificateStore = certificateStore;
             this.UserIdentityProvider = identityProvider;
@@ -68,6 +57,16 @@ namespace Workstation.ServiceModel.Ua
 
             this.logger = loggerFactory?.CreateLogger<UaApplication>();
             this.channelMap = new ConcurrentDictionary<string, Lazy<Task<UaTcpSessionChannel>>>();
+
+            lock (globalLock)
+            {
+                if (appInstance != null)
+                {
+                    throw new InvalidOperationException("You can only create a single instance of this type.");
+                }
+
+                appInstance = this;
+            }
         }
 
         /// <summary>

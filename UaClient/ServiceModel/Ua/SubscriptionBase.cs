@@ -46,10 +46,19 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="SubscriptionBase"/> class.
         /// </summary>
         public SubscriptionBase()
+            : this(UaApplication.Current)
         {
-            this.application = UaApplication.Current;
-            this.application?.Completion.ContinueWith(t => this.stateMachineCts?.Cancel());
-            this.logger = this.application?.LoggerFactory?.CreateLogger(this.GetType());
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SubscriptionBase"/> class.
+        /// </summary>
+        /// <param name="application">The UaApplication.</param>
+        public SubscriptionBase(UaApplication application)
+        {
+            this.application = application ?? throw new ArgumentNullException(nameof(application));
+            this.application.Completion.ContinueWith(t => this.stateMachineCts?.Cancel());
+            this.logger = this.application.LoggerFactory?.CreateLogger(this.GetType());
             this.errors = new ErrorsContainer<string>(p => this.ErrorsChanged?.Invoke(this, new DataErrorsChangedEventArgs(p)));
             this.progress = new Progress<CommunicationState>(s => this.State = s);
             this.propertyChanged += this.OnPropertyChanged;
@@ -221,27 +230,14 @@ namespace Workstation.ServiceModel.Ua
         /// Requests a Refresh of all Conditions.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<StatusCode> ConditionRefresh()
+        public async Task<StatusCode> ConditionRefreshAsync()
         {
             if (this.State != CommunicationState.Opened)
             {
                 return StatusCodes.BadServerNotConnected;
             }
 
-            var response = await this.InnerChannel.CallAsync(new CallRequest
-            {
-                MethodsToCall = new[]
-                {
-                    new CallMethodRequest
-                    {
-                        ObjectId = NodeId.Parse(ObjectTypeIds.ConditionType),
-                        MethodId = NodeId.Parse(MethodIds.ConditionType_ConditionRefresh),
-                        InputArguments = new Variant[] { this.SubscriptionId }
-                    }
-                }
-            });
-
-            return response.Results[0].StatusCode;
+            return await this.InnerChannel.ConditionRefreshAsync(this.SubscriptionId);
         }
 
         /// <summary>
@@ -250,7 +246,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="condition">an AcknowledgeableCondition.</param>
         /// <param name="comment">a comment.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<StatusCode> Acknowledge(AcknowledgeableCondition condition, LocalizedText comment = null)
+        public async Task<StatusCode> AcknowledgeAsync(AcknowledgeableCondition condition, LocalizedText comment = null)
         {
             if (condition == null)
             {
@@ -262,20 +258,7 @@ namespace Workstation.ServiceModel.Ua
                 return StatusCodes.BadServerNotConnected;
             }
 
-            var response = await this.InnerChannel.CallAsync(new CallRequest
-            {
-                MethodsToCall = new[]
-                {
-                    new CallMethodRequest
-                    {
-                        ObjectId = condition.ConditionId,
-                        MethodId = NodeId.Parse(MethodIds.AcknowledgeableConditionType_Acknowledge),
-                        InputArguments = new Variant[] { condition.EventId, comment } // ?? new LocalizedText(string.Empty) }
-                    }
-                }
-            });
-
-            return response.Results[0].StatusCode;
+            return await this.InnerChannel.AcknowledgeAsync(condition, comment);
         }
 
         /// <summary>

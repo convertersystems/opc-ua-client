@@ -60,6 +60,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private static readonly NodeId ReadResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
         private static readonly NodeId PublishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
         private static readonly SecureRandom Rng = new SecureRandom();
+        private static readonly RecyclableMemoryStreamManager StreamManager = new RecyclableMemoryStreamManager();
 
         private readonly CancellationTokenSource channelCts;
         private readonly ILogger logger;
@@ -343,8 +344,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                 if (this.LocalCertificate == null && this.CertificateStore != null)
                 {
                     var tuple = await this.CertificateStore.GetLocalCertificateAsync(this.LocalDescription, this.logger);
-                    this.LocalCertificate = tuple.Item1.GetEncoded();
-                    this.LocalPrivateKey = tuple.Item2;
+                    this.LocalCertificate = tuple.Certificate.GetEncoded();
+                    this.LocalPrivateKey = tuple.Key;
                 }
 
                 if (this.LocalPrivateKey == null)
@@ -456,8 +457,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                 if (this.LocalCertificate == null && this.CertificateStore != null)
                 {
                     var tuple = await this.CertificateStore.GetLocalCertificateAsync(this.LocalDescription, this.logger);
-                    this.LocalCertificate = tuple.Item1.GetEncoded();
-                    this.LocalPrivateKey = tuple.Item2;
+                    this.LocalCertificate = tuple.Certificate.GetEncoded();
+                    this.LocalPrivateKey = tuple.Key;
                 }
 
                 if (this.LocalPrivateKey == null)
@@ -779,7 +780,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendOpenSecureChannelRequestAsync");
+            var bodyStream = StreamManager.GetStream("SendOpenSecureChannelRequestAsync");
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
@@ -956,7 +957,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendCloseSecureChannelRequestAsync");
+            var bodyStream = StreamManager.GetStream("SendCloseSecureChannelRequestAsync");
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
@@ -1124,7 +1125,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
-            var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("SendServiceRequestAsync");
+            var bodyStream = StreamManager.GetStream("SendServiceRequestAsync");
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
@@ -1387,7 +1388,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 int bodySize;
                 int paddingSize;
 
-                var bodyStream = RecyclableMemoryStreamManager.Default.GetStream("ReceiveResponseAsync");
+                var bodyStream = StreamManager.GetStream("ReceiveResponseAsync");
                 var bodyDecoder = new BinaryDecoder(bodyStream, this);
                 try
                 {

@@ -20,7 +20,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="applicationDescription">The application description.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The local certificate and private key.</returns>
-        Task<Tuple<X509Certificate, RsaKeyParameters>> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger);
+        Task<(X509Certificate Certificate, RsaKeyParameters Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger);
 
         /// <summary>
         /// Validates the remote certificate.

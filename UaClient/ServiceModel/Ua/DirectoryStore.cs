@@ -59,7 +59,7 @@ namespace Workstation.ServiceModel.Ua
         public bool CreateLocalCertificateIfNotExist { get; }
 
         /// <inheritdoc/>
-        public async Task<Tuple<X509Certificate, RsaKeyParameters>> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger = null)
+        public async Task<(X509Certificate Certificate, RsaKeyParameters Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger = null)
         {
             string applicationUri = applicationDescription.ApplicationUri;
             if (string.IsNullOrEmpty(applicationUri))
@@ -159,12 +159,12 @@ namespace Workstation.ServiceModel.Ua
             if (crt != null && key != null)
             {
                 logger?.LogTrace($"Found certificate with subject alt name '{applicationUri}'.");
-                return new Tuple<X509Certificate, RsaKeyParameters>(crt, key);
+                return (crt, key);
             }
 
             if (!this.CreateLocalCertificateIfNotExist)
             {
-                return null;
+                return (null, null);
             }
 
             // Create new certificate
@@ -256,7 +256,7 @@ namespace Workstation.ServiceModel.Ua
                 pemwriter.WriteObject(crt);
             }
 
-            return new Tuple<X509Certificate, RsaKeyParameters>(crt, key);
+            return (crt, key);
         }
 
         /// <inheritdoc/>

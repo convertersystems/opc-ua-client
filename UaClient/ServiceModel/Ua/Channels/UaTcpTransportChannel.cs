@@ -265,10 +265,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc/>
         protected override Task OnCloseAsync(CancellationToken token)
         {
-#if NETSTANDARD1_4
-            this.tcpClient?.Dispose();
-#else
+#if NET45
             this.tcpClient?.Close();
+#else
+            this.tcpClient?.Dispose();
 #endif
             return CompletedTask;
         }
@@ -276,10 +276,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc/>
         protected override Task OnAbortAsync(CancellationToken token)
         {
-#if NETSTANDARD1_4
-            this.tcpClient?.Dispose();
-#else
+#if NET45
             this.tcpClient?.Close();
+#else
+            this.tcpClient?.Dispose();
 #endif
             return CompletedTask;
         }

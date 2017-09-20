@@ -111,5 +111,59 @@ namespace Workstation.ServiceModel.Ua
                 throw new TimeoutException();
             }
         }
+
+        /// <summary>
+        /// Requests a Refresh of all Conditions.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="subscriptionId">The subscriptionId.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public static async Task<StatusCode> ConditionRefreshAsync(this IRequestChannel channel, uint subscriptionId)
+        {
+            var response = await channel.CallAsync(new CallRequest
+            {
+                MethodsToCall = new[]
+                {
+                    new CallMethodRequest
+                    {
+                        ObjectId = NodeId.Parse(ObjectTypeIds.ConditionType),
+                        MethodId = NodeId.Parse(MethodIds.ConditionType_ConditionRefresh),
+                        InputArguments = new Variant[] { subscriptionId }
+                    }
+                }
+            });
+
+            return response.Results[0].StatusCode;
+        }
+
+        /// <summary>
+        /// Acknowledges a condition.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <param name="condition">an AcknowledgeableCondition.</param>
+        /// <param name="comment">a comment.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public static async Task<StatusCode> AcknowledgeAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText comment = null)
+        {
+            if (condition == null)
+            {
+                throw new ArgumentNullException(nameof(condition));
+            }
+
+            var response = await channel.CallAsync(new CallRequest
+            {
+                MethodsToCall = new[]
+                {
+                    new CallMethodRequest
+                    {
+                        ObjectId = condition.ConditionId,
+                        MethodId = NodeId.Parse(MethodIds.AcknowledgeableConditionType_Acknowledge),
+                        InputArguments = new Variant[] { condition.EventId, comment } // ?? new LocalizedText(string.Empty) }
+                    }
+                }
+            });
+
+            return response.Results[0].StatusCode;
+        }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -9,16 +10,13 @@ using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
-using System.Collections.Generic;
 
 namespace Workstation.UaClient.UnitTests
 {
@@ -26,10 +24,10 @@ namespace Workstation.UaClient.UnitTests
     public class UnitTest1
     {
         // private const string EndpointUrl = "opc.tcp://localhost:16664"; // open62541
-        private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
+        // private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
         // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
         // private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        // private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.RobotServer.
+        private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.RobotServer.
         // private const string EndpointUrl = "opc.tcp://192.168.0.11:4840"; // the endpoint of the Siemens 1500 PLC.
 
         private readonly ILoggerFactory loggerFactory;
@@ -74,7 +72,7 @@ namespace Workstation.UaClient.UnitTests
             var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, this.loggerFactory);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
-            foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.Where(e => e.SecurityMode == MessageSecurityMode.None))
+            foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.Where(e => e.SecurityPolicyUri == SecurityPolicyUris.None))
             {
                 foreach (var selectedTokenPolicy in selectedEndpoint.UserIdentityTokens)
                 {
@@ -299,20 +297,22 @@ namespace Workstation.UaClient.UnitTests
         [TestMethod]
         public async Task TestSubscription()
         {
+            // Read 'appSettings.json' for endpoint configuration
             var config = new ConfigurationBuilder()
-               .SetBasePath(Directory.GetCurrentDirectory())
-               .AddJsonFile("appSettings.json", true)
-               .Build();
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appSettings.json", true)
+                .Build();
 
             var app = new UaApplicationBuilder()
-                .UseApplicationUri($"urn:{Dns.GetHostName()}:Workstation.UaClient.UnitTests")
-                .UseDirectoryStore(Path.Combine(
+                .SetApplicationUri($"urn:{Dns.GetHostName()}:Workstation.UaClient.UnitTests")
+                .SetDirectoryStore(Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "Workstation.UaClient.UnitTests",
                     "pki"))
-                .UseIdentity(new UserNameIdentity("root", "secret"))
-                .UseLoggerFactory(this.loggerFactory)
-                .Map(config)
+                .SetIdentity(new UserNameIdentity("root", "secret"))
+                .AddMappedEndpoints(config)
+                .SetLoggerFactory(this.loggerFactory)
+                .ConfigureOptions(o => o.SessionTimeout = 30000)
                 .Build();
 
             app.Run();
@@ -327,7 +327,6 @@ namespace Workstation.UaClient.UnitTests
 
             await Task.Delay(5000);
 
-            //Console.WriteLine(sub.StructuresWorkOrder2);
             sub.PropertyChanged -= d;
             await Task.Delay(5000);
 
@@ -336,7 +335,6 @@ namespace Workstation.UaClient.UnitTests
             Assert.IsTrue(sub.CurrentTime != DateTime.MinValue, "CurrentTime");
             Assert.IsTrue(sub.CurrentTimeAsDataValue != null, "CurrentTimeAsDataValue");
             Assert.IsTrue(sub.CurrentTimeQueue.Count > 0, "CurrentTimeQueue");
-
         }
 
         [Subscription(endpointUrl: "opc.tcp://localhost:48010", publishingInterval: 500, keepAliveCount: 20)]
@@ -371,6 +369,11 @@ namespace Workstation.UaClient.UnitTests
             /// </summary>
             [MonitoredItem(nodeId: "i=2258")]
             public ObservableQueue<DataValue> CurrentTimeQueue { get; } = new ObservableQueue<DataValue>(capacity: 16, isFixedSize: true);
+        }
+
+        public class MapsOptions
+        {
+            public MappedEndpoint[] Maps { get; set; }
         }
 
         [TestMethod]
@@ -564,7 +567,7 @@ namespace Workstation.UaClient.UnitTests
             await channel.OpenAsync();
 
             var rds = new List<ReferenceDescription>();
-            var browseRequest = new BrowseRequest { NodesToBrowse = new[] { new BrowseDescription { NodeId = ExpandedNodeId.ToNodeId(ExpandedNodeId.Parse(ObjectIds.RootFolder), channel.NamespaceUris), ReferenceTypeId = NodeId.Parse(ReferenceTypeIds.HierarchicalReferences), ResultMask = (uint)BrowseResultMask.TargetInfo, NodeClassMask = (uint)NodeClass.Unspecified, BrowseDirection = BrowseDirection.Forward, IncludeSubtypes = true } }, RequestedMaxReferencesPerNode = 1000};
+            var browseRequest = new BrowseRequest { NodesToBrowse = new[] { new BrowseDescription { NodeId = ExpandedNodeId.ToNodeId(ExpandedNodeId.Parse(ObjectIds.RootFolder), channel.NamespaceUris), ReferenceTypeId = NodeId.Parse(ReferenceTypeIds.HierarchicalReferences), ResultMask = (uint)BrowseResultMask.TargetInfo, NodeClassMask = (uint)NodeClass.Unspecified, BrowseDirection = BrowseDirection.Forward, IncludeSubtypes = true } }, RequestedMaxReferencesPerNode = 1000 };
             var browseResponse = await channel.BrowseAsync(browseRequest).ConfigureAwait(false);
             rds.AddRange(browseResponse.Results.Where(result => result.References != null).SelectMany(result => result.References));
             var continuationPoints = browseResponse.Results.Select(br => br.ContinuationPoint).Where(cp => cp != null).ToArray();
@@ -577,6 +580,7 @@ namespace Workstation.UaClient.UnitTests
             }
 
             Assert.IsTrue(rds.Count == 3);
+
             Console.WriteLine($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }

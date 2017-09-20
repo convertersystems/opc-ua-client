@@ -23,7 +23,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="dataChangeTrigger">the properties that trigger a data change.</param>
         /// <param name="deadbandType">the type of deadband calculation.</param>
         /// <param name="deadbandValue">the deadband value.</param>
-        public MonitoredItemAttribute(string nodeId = null, uint attributeId = AttributeIds.Value, string indexRange = null, int samplingInterval = -1, uint queueSize = 0, bool discardOldest = true, DataChangeTrigger dataChangeTrigger = DataChangeTrigger.StatusValue, DeadbandType deadbandType = DeadbandType.None, double deadbandValue = 0.0)
+        public MonitoredItemAttribute(string nodeId, uint attributeId = AttributeIds.Value, string indexRange = null, int samplingInterval = -1, uint queueSize = 0, bool discardOldest = true, DataChangeTrigger dataChangeTrigger = DataChangeTrigger.StatusValue, DeadbandType deadbandType = DeadbandType.None, double deadbandValue = 0.0)
         {
             this.NodeId = nodeId;
             this.AttributeId = attributeId;
