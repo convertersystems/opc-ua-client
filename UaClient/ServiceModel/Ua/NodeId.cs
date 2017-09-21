@@ -135,7 +135,6 @@ namespace Workstation.ServiceModel.Ua
             if (namespaceUris != null && ns > 0 && ns < namespaceUris.Count)
             {
                 nsu = namespaceUris[ns];
-                value.NamespaceIndex = 0;
             }
 
             return new ExpandedNodeId(value, nsu);
