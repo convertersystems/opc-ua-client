@@ -22,21 +22,16 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
 ```
     public partial class App : Application
     {
-        private ILoggerFactory loggerFactory;
         private UaApplication application;
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Setup a logger.
-            this.loggerFactory = new LoggerFactory();
-            this.loggerFactory.AddDebug(LogLevel.Trace);
-
             // Build and run an OPC UA application instance.
             this.application = new UaApplicationBuilder()
-                .UseApplicationUri($"urn:{Dns.GetHostName()}:Workstation.StatusHmi")
-                .UseDirectoryStore($"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Workstation.StatusHmi\\pki")
-                .UseIdentity(this.ShowSignInDialog)
-                .UseLoggerFactory(this.loggerFactory)
+                .SetApplicationUri($"urn:{Dns.GetHostName()}:Workstation.StatusHmi")
+                .SetDirectoryStore($"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\Workstation.StatusHmi\\pki")
+                .SetIdentity(this.ShowSignInDialog)
+                .ConfigureLoggerFactory(o => o.AddDebug(LogLevel.Trace))
                 .Build();
 
             this.application.Run();
@@ -44,7 +39,6 @@ Get the companion Visual Studio extension 'Workstation.UaBrowser' and you can:
             // Create and show the main view.
             var view = new MainView();
             view.Show();
-            base.OnStartup(e);
         }
 		...
     }
