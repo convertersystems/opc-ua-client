@@ -10,6 +10,8 @@ namespace Workstation.ServiceModel.Ua
 {
     public sealed class ExpandedNodeId : IEquatable<ExpandedNodeId>
     {
+        public static readonly ExpandedNodeId Null = new ExpandedNodeId(0);
+
         public ExpandedNodeId(uint identifier, string namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
@@ -40,7 +42,7 @@ namespace Workstation.ServiceModel.Ua
 
         public ExpandedNodeId(NodeId identifier, string namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = identifier;
+            this.NodeId = identifier.Clone();
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }

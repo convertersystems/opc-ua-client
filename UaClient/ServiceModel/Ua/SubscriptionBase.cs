@@ -108,7 +108,7 @@ namespace Workstation.ServiceModel.Ua
                     this.monitoredItems.Add(new DataValueMonitoredItem(
                         target: this,
                         property: propertyInfo,
-                        nodeId: NodeId.Parse(mia.NodeId),
+                        nodeId: ExpandedNodeId.Parse(mia.NodeId),
                         indexRange: mia.IndexRange,
                         attributeId: mia.AttributeId,
                         samplingInterval: mia.SamplingInterval,
@@ -123,7 +123,7 @@ namespace Workstation.ServiceModel.Ua
                     this.monitoredItems.Add(new EventMonitoredItem(
                         target: this,
                         property: propertyInfo,
-                        nodeId: NodeId.Parse(mia.NodeId),
+                        nodeId: ExpandedNodeId.Parse(mia.NodeId),
                         indexRange: mia.IndexRange,
                         attributeId: mia.AttributeId,
                         samplingInterval: mia.SamplingInterval,
@@ -138,7 +138,7 @@ namespace Workstation.ServiceModel.Ua
                     this.monitoredItems.Add(new DataValueQueueMonitoredItem(
                         target: this,
                         property: propertyInfo,
-                        nodeId: NodeId.Parse(mia.NodeId),
+                        nodeId: ExpandedNodeId.Parse(mia.NodeId),
                         indexRange: mia.IndexRange,
                         attributeId: mia.AttributeId,
                         samplingInterval: mia.SamplingInterval,
@@ -157,7 +157,7 @@ namespace Workstation.ServiceModel.Ua
                         typeof(EventQueueMonitoredItem<>).MakeGenericType(elemType),
                         this,
                         propertyInfo,
-                        NodeId.Parse(mia.NodeId),
+                        ExpandedNodeId.Parse(mia.NodeId),
                         mia.AttributeId,
                         mia.IndexRange,
                         MonitoringMode.Reporting,
@@ -172,7 +172,7 @@ namespace Workstation.ServiceModel.Ua
                 this.monitoredItems.Add(new ValueMonitoredItem(
                     target: this,
                     property: propertyInfo,
-                    nodeId: NodeId.Parse(mia.NodeId),
+                    nodeId: ExpandedNodeId.Parse(mia.NodeId),
                     indexRange: mia.IndexRange,
                     attributeId: mia.AttributeId,
                     samplingInterval: mia.SamplingInterval,
@@ -433,7 +433,7 @@ namespace Workstation.ServiceModel.Ua
                     StatusCode statusCode;
                     var writeRequest = new WriteRequest
                     {
-                        NodesToWrite = new[] { new WriteValue { NodeId = item.NodeId, AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value } }
+                        NodesToWrite = new[] { new WriteValue { NodeId = ExpandedNodeId.ToNodeId(item.NodeId, this.InnerChannel.NamespaceUris), AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value } }
                     };
                     try
                     {
@@ -528,7 +528,7 @@ namespace Workstation.ServiceModel.Ua
                             var items = this.monitoredItems.ToList();
                             if (items.Count > 0)
                             {
-                                var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = m.NodeId, AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
+                                var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = ExpandedNodeId.ToNodeId(m.NodeId, this.InnerChannel.NamespaceUris), AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
                                 var itemsRequest = new CreateMonitoredItemsRequest
                                 {
                                     SubscriptionId = id,

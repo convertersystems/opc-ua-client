@@ -20,7 +20,7 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="MonitoredItemBase"/> class.
         /// </summary>
         /// <param name="name">the key.</param>
-        /// <param name="nodeId">the NodeId to monitor.</param>
+        /// <param name="nodeId">the ExpandedNodeId to monitor.</param>
         /// <param name="attributeId">the attribute to monitor.</param>
         /// <param name="indexRange">the range of array indexes to monitor.</param>
         /// <param name="monitoringMode">the monitoring mode.</param>
@@ -28,7 +28,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="filter">the properties that trigger a notification.</param>
         /// <param name="queueSize">the length of the queue used by the server to buffer values.</param>
         /// <param name="discardOldest">a value indicating whether to discard the oldest entries in the queue when it is full.</param>
-        public MonitoredItemBase(string name, NodeId nodeId, uint attributeId = AttributeIds.Value, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
+        public MonitoredItemBase(string name, ExpandedNodeId nodeId, uint attributeId = AttributeIds.Value, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -58,9 +58,9 @@ namespace Workstation.ServiceModel.Ua
         public string Name { get; }
 
         /// <summary>
-        /// Gets the NodeId to monitor.
+        /// Gets the ExpandedNodeId to monitor.
         /// </summary>
-        public NodeId NodeId { get; }
+        public ExpandedNodeId NodeId { get; }
 
         /// <summary>
         /// Gets the attribute to monitor.
@@ -126,7 +126,7 @@ namespace Workstation.ServiceModel.Ua
     {
         private StatusCode statusCode;
 
-        public DataValueMonitoredItem(object target, PropertyInfo property, NodeId nodeId, uint attributeId = 13, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
+        public DataValueMonitoredItem(object target, PropertyInfo property, ExpandedNodeId nodeId, uint attributeId = 13, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
             : base(property.Name, nodeId, attributeId, indexRange, monitoringMode, samplingInterval, filter, queueSize, discardOldest)
         {
             if (target == null)
@@ -217,7 +217,7 @@ namespace Workstation.ServiceModel.Ua
     {
         private StatusCode statusCode;
 
-        public ValueMonitoredItem(object target, PropertyInfo property, NodeId nodeId, uint attributeId = 13, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
+        public ValueMonitoredItem(object target, PropertyInfo property, ExpandedNodeId nodeId, uint attributeId = 13, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
             : base(property.Name, nodeId, attributeId, indexRange, monitoringMode, samplingInterval, filter, queueSize, discardOldest)
         {
             if (target == null)
@@ -308,7 +308,7 @@ namespace Workstation.ServiceModel.Ua
     {
         private StatusCode statusCode;
 
-        public DataValueQueueMonitoredItem(object target, PropertyInfo property, NodeId nodeId, uint attributeId = 13, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
+        public DataValueQueueMonitoredItem(object target, PropertyInfo property, ExpandedNodeId nodeId, uint attributeId = 13, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
             : base(property.Name, nodeId, attributeId, indexRange, monitoringMode, samplingInterval, filter, queueSize, discardOldest)
         {
             if (target == null)
@@ -393,7 +393,7 @@ namespace Workstation.ServiceModel.Ua
     {
         private StatusCode statusCode;
 
-        public EventMonitoredItem(object target, PropertyInfo property, NodeId nodeId, uint attributeId = 12, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
+        public EventMonitoredItem(object target, PropertyInfo property, ExpandedNodeId nodeId, uint attributeId = 12, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
             : base(property.Name, nodeId, attributeId, indexRange, monitoringMode, samplingInterval, filter, queueSize, discardOldest)
         {
             if (target == null)
@@ -479,7 +479,7 @@ namespace Workstation.ServiceModel.Ua
     {
         private StatusCode statusCode;
 
-        public EventQueueMonitoredItem(object target, PropertyInfo property, NodeId nodeId, uint attributeId = 12, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
+        public EventQueueMonitoredItem(object target, PropertyInfo property, ExpandedNodeId nodeId, uint attributeId = 12, string indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter filter = null, uint queueSize = 0, bool discardOldest = true)
             : base(property.Name, nodeId, attributeId, indexRange, monitoringMode, samplingInterval, filter, queueSize, discardOldest)
         {
             if (target == null)

@@ -371,11 +371,6 @@ namespace Workstation.UaClient.UnitTests
             public ObservableQueue<DataValue> CurrentTimeQueue { get; } = new ObservableQueue<DataValue>(capacity: 16, isFixedSize: true);
         }
 
-        public class MapsOptions
-        {
-            public MappedEndpoint[] Maps { get; set; }
-        }
-
         [TestMethod]
         public async Task StackTest()
         {

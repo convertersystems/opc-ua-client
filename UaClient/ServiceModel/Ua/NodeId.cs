@@ -72,15 +72,15 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.NamespaceIndex = namespaceIndex;
-            this.Identifier = identifier.Clone();
+            this.Identifier = identifier;
             this.IdType = IdType.Opaque;
         }
 
-        public ushort NamespaceIndex { get; private set; }
+        public ushort NamespaceIndex { get; }
 
-        public object Identifier { get; private set; }
+        public object Identifier { get; }
 
-        public IdType IdType { get; private set; }
+        public IdType IdType { get; }
 
         public static bool operator ==(NodeId a, NodeId b)
         {
@@ -135,9 +135,27 @@ namespace Workstation.ServiceModel.Ua
             if (namespaceUris != null && ns > 0 && ns < namespaceUris.Count)
             {
                 nsu = namespaceUris[ns];
+
+                switch (value.IdType)
+                {
+                    case IdType.Numeric:
+                        return new ExpandedNodeId((uint)value.Identifier, nsu);
+
+                    case IdType.String:
+                        return new ExpandedNodeId((string)value.Identifier, nsu);
+
+                    case IdType.Guid:
+                        return new ExpandedNodeId((Guid)value.Identifier, nsu);
+
+                    case IdType.Opaque:
+                        return new ExpandedNodeId((byte[])value.Identifier, nsu);
+
+                    default:
+                        throw new InvalidOperationException();
+                }
             }
 
-            return new ExpandedNodeId(value, nsu);
+            return new ExpandedNodeId(value);
         }
 
         public static bool TryParse(string s, out NodeId value)
@@ -211,8 +229,17 @@ namespace Workstation.ServiceModel.Ua
                     return new NodeId((string)this.Identifier, this.NamespaceIndex);
                 case IdType.Guid:
                     return new NodeId((Guid)this.Identifier, this.NamespaceIndex);
+                case IdType.Opaque:
+                    var source = (byte[])this.Identifier;
+                    var clone = new byte[source.Length];
+                    for (int i = 0; i < source.Length; i++)
+                    {
+                        clone[i] = source[i];
+                    }
+
+                    return new NodeId(clone, this.NamespaceIndex);
                 default:
-                    return new NodeId((byte[])this.Identifier, this.NamespaceIndex);
+                    throw new InvalidOperationException();
             }
         }
 
