@@ -17,6 +17,7 @@ namespace Workstation.ServiceModel.Ua
         private readonly List<MappedEndpoint> mappedEndpoints = new List<MappedEndpoint>();
         private readonly List<Action<UaApplicationOptions>> configureOptionsActions = new List<Action<UaApplicationOptions>>();
         private readonly List<Action<ILoggerFactory>> configureLoggerFactoryActions = new List<Action<ILoggerFactory>>();
+        private readonly List<Type> additionalTypes = new List<Type>();
         private ApplicationDescription localDescription;
         private ICertificateStore certificateStore;
         private Func<EndpointDescription, Task<IUserIdentity>> identityProvider;
@@ -244,6 +245,17 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
+        /// Adds any additional types to be registered with encoder.
+        /// </summary>
+        /// <param name="types">Types to be registered with the encoder.</param>
+        /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
+        public UaApplicationBuilder AddTypes(params Type[] types)
+        {
+            this.additionalTypes.AddRange(types);
+            return this;
+        }
+
+        /// <summary>
         /// Build the <see cref="UaApplication"/>
         /// </summary>
         /// <returns>The  <see cref="UaApplication"/></returns>
@@ -272,7 +284,8 @@ namespace Workstation.ServiceModel.Ua
                 this.identityProvider,
                 this.mappedEndpoints,
                 loggerFactory,
-                options);
+                options,
+                this.additionalTypes);
         }
     }
 }

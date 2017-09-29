@@ -219,30 +219,6 @@ namespace Workstation.ServiceModel.Ua
             return value;
         }
 
-        public NodeId Clone()
-        {
-            switch (this.IdType)
-            {
-                case IdType.Numeric:
-                    return new NodeId((uint)this.Identifier, this.NamespaceIndex);
-                case IdType.String:
-                    return new NodeId((string)this.Identifier, this.NamespaceIndex);
-                case IdType.Guid:
-                    return new NodeId((Guid)this.Identifier, this.NamespaceIndex);
-                case IdType.Opaque:
-                    var source = (byte[])this.Identifier;
-                    var clone = new byte[source.Length];
-                    for (int i = 0; i < source.Length; i++)
-                    {
-                        clone[i] = source[i];
-                    }
-
-                    return new NodeId(clone, this.NamespaceIndex);
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
-
         public override bool Equals(object o)
         {
             if (o is NodeId)
@@ -261,7 +237,7 @@ namespace Workstation.ServiceModel.Ua
         public override int GetHashCode()
         {
             int result = this.NamespaceIndex.GetHashCode();
-            result = (31 * result) + this.Identifier.GetHashCode();
+            result = (397 * result) ^ this.Identifier.GetHashCode();
             return result;
         }
 

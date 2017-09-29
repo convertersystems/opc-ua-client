@@ -42,7 +42,7 @@ namespace Workstation.ServiceModel.Ua
 
         public ExpandedNodeId(NodeId identifier, string namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = identifier.Clone();
+            this.NodeId = identifier;
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
@@ -170,11 +170,6 @@ namespace Workstation.ServiceModel.Ua
             return value;
         }
 
-        public ExpandedNodeId Clone()
-        {
-            return new ExpandedNodeId(this.NodeId.Clone(), this.NamespaceUri, this.ServerIndex);
-        }
-
         public override bool Equals(object o)
         {
             if (o is ExpandedNodeId)
@@ -193,8 +188,8 @@ namespace Workstation.ServiceModel.Ua
         public override int GetHashCode()
         {
             int result = this.NodeId.GetHashCode();
-            result = (31 * result) + (this.NamespaceUri != null ? this.NamespaceUri.GetHashCode() : 0);
-            result = (31 * result) + (int)(this.ServerIndex ^ ((long)((ulong)this.ServerIndex >> 32)));
+            result = (397 * result) ^ (this.NamespaceUri != null ? this.NamespaceUri.GetHashCode() : 0);
+            result = (397 * result) ^ (int)this.ServerIndex;
             return result;
         }
 

@@ -1159,6 +1159,13 @@
   </xs:complexType>
   <xs:element name="DiscoveryConfiguration" type="tns:DiscoveryConfiguration" />
 
+  <xs:complexType name="ListOfDiscoveryConfiguration">
+    <xs:sequence>
+      <xs:element name="DiscoveryConfiguration" type="tns:DiscoveryConfiguration" minOccurs="0" maxOccurs="unbounded" nillable="true" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ListOfDiscoveryConfiguration" type="tns:ListOfDiscoveryConfiguration" nillable="true"></xs:element>
+
   <xs:complexType name="MdnsDiscoveryConfiguration">
     <xs:annotation>
       <xs:documentation>The discovery information needed for mDNS registration.</xs:documentation>
@@ -1178,7 +1185,7 @@
     <xs:sequence>
       <xs:element name="RequestHeader" type="tns:RequestHeader" minOccurs="0" nillable="true" />
       <xs:element name="Server" type="tns:RegisteredServer" minOccurs="0" nillable="true" />
-      <xs:element name="DiscoveryConfiguration" type="ua:ListOfExtensionObject" minOccurs="0" nillable="true" />
+      <xs:element name="DiscoveryConfiguration" type="ua:ListOfDiscoveryConfiguration" minOccurs="0" nillable="true" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="RegisterServer2Request" type="tns:RegisterServer2Request" />

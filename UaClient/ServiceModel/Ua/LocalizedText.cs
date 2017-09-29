@@ -68,7 +68,7 @@ namespace Workstation.ServiceModel.Ua
         public override int GetHashCode()
         {
             int result = this.Locale != null ? this.Locale.GetHashCode() : 0;
-            result = (31 * result) + (this.Text != null ? this.Text.GetHashCode() : 0);
+            result = (397 * result) ^ (this.Text != null ? this.Text.GetHashCode() : 0);
             return result;
         }
 

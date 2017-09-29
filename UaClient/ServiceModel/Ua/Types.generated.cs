@@ -1116,19 +1116,19 @@ namespace Workstation.ServiceModel.Ua
 	public class RegisterServer2Request : IServiceRequest {
 		public RequestHeader RequestHeader { get; set; }
 		public RegisteredServer Server { get; set; }
-		public ExtensionObject[] DiscoveryConfiguration { get; set; }
+		public DiscoveryConfiguration[] DiscoveryConfiguration { get; set; }
         public virtual void Encode(IEncoder encoder) {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			encoder.WriteEncodable<RequestHeader>("RequestHeader", RequestHeader);
 			encoder.WriteEncodable<RegisteredServer>("Server", Server);
-			encoder.WriteExtensionObjectArray("DiscoveryConfiguration", DiscoveryConfiguration);
+			encoder.WriteExtensionObjectArray<DiscoveryConfiguration>("DiscoveryConfiguration", DiscoveryConfiguration);
             encoder.PopNamespace();
         }
         public virtual void Decode(IDecoder decoder) {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
 			RequestHeader = decoder.ReadEncodable<RequestHeader>("RequestHeader");
 			Server = decoder.ReadEncodable<RegisteredServer>("Server");
-			DiscoveryConfiguration = decoder.ReadExtensionObjectArray("DiscoveryConfiguration");
+			DiscoveryConfiguration = decoder.ReadExtensionObjectArray<DiscoveryConfiguration>("DiscoveryConfiguration");
             decoder.PopNamespace();
         }
 	}
@@ -3073,28 +3073,6 @@ namespace Workstation.ServiceModel.Ua
             decoder.PopNamespace();
         }
 	}
-	[BinaryEncodingId(ObjectIds.HistoryReadResult_Encoding_DefaultBinary)]
-	[XmlEncodingId(ObjectIds.HistoryReadResult_Encoding_DefaultXml)]
-	[DataTypeId(DataTypeIds.HistoryReadResult)]
-	public class HistoryReadResult : IEncodable {
-		public StatusCode StatusCode { get; set; }
-		public Byte[] ContinuationPoint { get; set; }
-		public HistoryBase HistoryData { get; set; }
-        public virtual void Encode(IEncoder encoder) {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			encoder.WriteStatusCode("StatusCode", StatusCode);
-			encoder.WriteByteString("ContinuationPoint", ContinuationPoint);
-			encoder.WriteExtensionObject<HistoryBase>("HistoryData", HistoryData);
-            encoder.PopNamespace();
-        }
-        public virtual void Decode(IDecoder decoder) {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-			StatusCode = decoder.ReadStatusCode("StatusCode");
-			ContinuationPoint = decoder.ReadByteString("ContinuationPoint");
-			HistoryData = decoder.ReadExtensionObject<HistoryBase>("HistoryData");
-            decoder.PopNamespace();
-        }
-	}
 	[BinaryEncodingId(ObjectIds.HistoryBase_Encoding_DefaultBinary)]
 	[XmlEncodingId(ObjectIds.HistoryBase_Encoding_DefaultXml)]
 	[DataTypeId(DataTypeIds.HistoryBase)]
@@ -3197,6 +3175,28 @@ namespace Workstation.ServiceModel.Ua
 			ModificationTime = decoder.ReadDateTime("ModificationTime");
 			UpdateType = decoder.ReadEnumeration<HistoryUpdateType>("UpdateType");
 			UserName = decoder.ReadString("UserName");
+            decoder.PopNamespace();
+        }
+	}
+	[BinaryEncodingId(ObjectIds.HistoryReadResult_Encoding_DefaultBinary)]
+	[XmlEncodingId(ObjectIds.HistoryReadResult_Encoding_DefaultXml)]
+	[DataTypeId(DataTypeIds.HistoryReadResult)]
+	public class HistoryReadResult : IEncodable {
+		public StatusCode StatusCode { get; set; }
+		public Byte[] ContinuationPoint { get; set; }
+		public HistoryBase HistoryData { get; set; }
+        public virtual void Encode(IEncoder encoder) {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			encoder.WriteStatusCode("StatusCode", StatusCode);
+			encoder.WriteByteString("ContinuationPoint", ContinuationPoint);
+			encoder.WriteExtensionObject<HistoryBase>("HistoryData", HistoryData);
+            encoder.PopNamespace();
+        }
+        public virtual void Decode(IDecoder decoder) {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+			StatusCode = decoder.ReadStatusCode("StatusCode");
+			ContinuationPoint = decoder.ReadByteString("ContinuationPoint");
+			HistoryData = decoder.ReadExtensionObject<HistoryBase>("HistoryData");
             decoder.PopNamespace();
         }
 	}

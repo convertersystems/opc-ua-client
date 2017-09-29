@@ -53,8 +53,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const int SequenceHeaderSize = 8;
         private const int TokenRequestedLifetime = 60 * 60 * 1000; // 60 minutes
 
-        private static readonly Dictionary<ExpandedNodeId, Type> BinaryEncodingIdToTypeDictionary = new Dictionary<ExpandedNodeId, Type>();
-        private static readonly Dictionary<Type, ExpandedNodeId> TypeToBinaryEncodingIdDictionary = new Dictionary<Type, ExpandedNodeId>();
+        private static readonly Dictionary<NodeId, Type> BinaryEncodingIdToTypeDictionary = new Dictionary<NodeId, Type>();
+        private static readonly Dictionary<Type, NodeId> TypeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>();
         private static readonly NodeId OpenSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId CloseSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.CloseSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId ReadResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
@@ -69,6 +69,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly ActionBlock<ServiceOperation> pendingRequests;
         private readonly ConcurrentDictionary<uint, ServiceOperation> pendingCompletions;
         private readonly X509CertificateParser certificateParser = new X509CertificateParser();
+        private readonly Dictionary<NodeId, Type> encodingIdToTypeDictionary;
+        private readonly Dictionary<Type, NodeId> typeToBinaryEncodingIdDictionary;
 
         private int handle;
         private int sequenceNumber;
@@ -114,7 +116,25 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         static UaTcpSecureChannel()
         {
-            RegisterEncodables(typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly);
+            foreach (var type in typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly.ExportedTypes)
+            {
+                var info = type.GetTypeInfo();
+                if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
+                {
+                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                    if (attr != null)
+                    {
+                        var id = ExpandedNodeId.ToNodeId(attr.NodeId, null);
+                        BinaryEncodingIdToTypeDictionary[id] = type;
+                        TypeToBinaryEncodingIdDictionary[type] = id;
+                    }
+                }
+            }
+
+            //TypeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>()
+            //{
+            //    { typeof(Argument), NodeId.Parse(ObjectIds.Argument_Encoding_DefaultBinary) },
+            //};
         }
 
         /// <summary>
@@ -125,26 +145,33 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The remote endpoint</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The secure channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSecureChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
             EndpointDescription remoteEndpoint,
             ILoggerFactory loggerFactory = null,
-            UaTcpSecureChannelOptions options = null)
+            UaTcpSecureChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
             : base(remoteEndpoint, loggerFactory, options)
         {
             this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
             this.CertificateStore = certificateStore;
             this.TimeoutHint = options?.TimeoutHint ?? DefaultTimeoutHint;
             this.DiagnosticsHint = options?.DiagnosticsHint ?? DefaultDiagnosticsHint;
+            this.AdditionalTypes = additionalTypes;
 
             this.logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
+
             this.AuthenticationToken = null;
             this.NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
             this.ServerUris = new List<string>();
             this.channelCts = new CancellationTokenSource();
             this.pendingRequests = new ActionBlock<ServiceOperation>(t => this.SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
             this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
+
+            this.encodingIdToTypeDictionary = new Dictionary<NodeId, Type>(BinaryEncodingIdToTypeDictionary);
+            this.typeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>(TypeToBinaryEncodingIdDictionary);
         }
 
         /// <summary>
@@ -166,6 +193,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Gets the default diagnostics flags to be requested by the service.
         /// </summary>
         public uint DiagnosticsHint { get; }
+
+        /// <summary>
+        /// Gets any additional types to be registered with encoder.
+        /// </summary>
+        public IEnumerable<Type> AdditionalTypes { get; }
 
         /// <summary>
         /// Gets the local certificate.
@@ -218,58 +250,16 @@ namespace Workstation.ServiceModel.Ua.Channels
         public List<string> ServerUris { get; protected set; }
 
         /// <summary>
-        /// Registers the public types that implement IEncodable from the assembly.
+        /// Gets the system type associated with the encodingId.
         /// </summary>
-        /// <param name="assembly">The assembly.</param>
-        public static void RegisterEncodables(Assembly assembly)
-        {
-            if (assembly == null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
-
-            foreach (var type in assembly.ExportedTypes)
-            {
-                RegisterEncodable(type);
-            }
-        }
-
-        /// <summary>
-        /// Registers a type that implements IEncodable.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <returns>The BinaryEncodingId.</returns>
-        public static ExpandedNodeId RegisterEncodable(Type type)
-        {
-            ExpandedNodeId id = null;
-
-            var info = type.GetTypeInfo();
-            if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
-            {
-                var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-                if (attr != null)
-                {
-                    id = attr.NodeId;
-                    BinaryEncodingIdToTypeDictionary[id] = type;
-                    TypeToBinaryEncodingIdDictionary[type] = id;
-                }
-
-                return id;
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Gets the system type associated with the BinaryEncodingId.
-        /// </summary>
-        /// <param name="binaryEncodingId">The BinaryEncodingId.</param>
+        /// <param name="encodingId">The encodingId.</param>
         /// <param name="type">The system type.</param>
         /// <returns>True if successfull.</returns>
-        public static bool TryGetTypeFromBinaryEncodingId(ExpandedNodeId binaryEncodingId, out Type type)
+        public bool TryGetTypeFromEncodingId(NodeId encodingId, out Type type)
         {
-            return UaTcpSecureChannel.BinaryEncodingIdToTypeDictionary.TryGetValue(binaryEncodingId, out type);
+            return this.encodingIdToTypeDictionary.TryGetValue(encodingId, out type);
         }
+
 
         /// <summary>
         /// Gets the BinaryEncodingId associated with the system type.
@@ -277,20 +267,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="type">The system type.</param>
         /// <param name="binaryEncodingId">The BinaryEncodingId.</param>
         /// <returns>True if successfull.</returns>
-        public static bool TryGetBinaryEncodingIdFromType(Type type, out ExpandedNodeId binaryEncodingId)
+        public bool TryGetBinaryEncodingIdFromType(Type type, out NodeId binaryEncodingId)
         {
-            if (!UaTcpSecureChannel.TypeToBinaryEncodingIdDictionary.TryGetValue(type, out binaryEncodingId))
-            {
-                binaryEncodingId = UaTcpSecureChannel.RegisterEncodable(type);
-                if (binaryEncodingId == null)
-                {
-                    throw new ServiceResultException(StatusCodes.BadEncodingError);
-                }
-
-                return false;
-            }
-
-            return true;
+            return this.typeToBinaryEncodingIdDictionary.TryGetValue(type, out binaryEncodingId);
         }
 
         /// <summary>
@@ -609,6 +588,30 @@ namespace Workstation.ServiceModel.Ua.Channels
             if (openSecureChannelResponse.ServerProtocolVersion < ProtocolVersion)
             {
                 throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
+            }
+        }
+
+        /// <inheritdoc/>
+        protected override async Task OnOpenedAsync(CancellationToken token = default(CancellationToken))
+        {
+            await base.OnOpenedAsync(token);
+
+            if (this.AdditionalTypes != null)
+            {
+                foreach (var type in this.AdditionalTypes)
+                {
+                    var info = type.GetTypeInfo();
+                    if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
+                    {
+                        var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                        if (attr != null)
+                        {
+                            var id = ExpandedNodeId.ToNodeId(attr.NodeId, this.NamespaceUris);
+                            this.encodingIdToTypeDictionary[id] = type;
+                            this.typeToBinaryEncodingIdDictionary[type] = id;
+                        }
+                    }
+                }
             }
         }
 
@@ -1129,13 +1132,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                ExpandedNodeId binaryEncodingId;
-                if (!TypeToBinaryEncodingIdDictionary.TryGetValue(request.GetType(), out binaryEncodingId))
+                if (!this.TryGetBinaryEncodingIdFromType(request.GetType(), out NodeId binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }
 
-                bodyEncoder.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.NamespaceUris));
+                bodyEncoder.WriteNodeId(null, binaryEncodingId);
                 request.Encode(bodyEncoder);
                 bodyStream.Position = 0;
                 if (this.RemoteMaxMessageSize > 0 && bodyStream.Length > this.RemoteMaxMessageSize)
@@ -1618,8 +1620,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     else
                     {
                         // find node in dictionary
-                        Type type2;
-                        if (!BinaryEncodingIdToTypeDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, this.NamespaceUris), out type2))
+                        if (!this.TryGetTypeFromEncodingId(nodeId, out Type type2))
                         {
                             throw new ServiceResultException(StatusCodes.BadEncodingError, "NodeId not registered in dictionary.");
                         }

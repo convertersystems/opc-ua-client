@@ -26,8 +26,8 @@ namespace Workstation.UaClient.UnitTests
         // private const string EndpointUrl = "opc.tcp://localhost:16664"; // open62541
         // private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
         // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
-        // private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.RobotServer.
+        private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
+        // private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.RobotServer.
         // private const string EndpointUrl = "opc.tcp://192.168.0.11:4840"; // the endpoint of the Siemens 1500 PLC.
 
         private readonly ILoggerFactory loggerFactory;
@@ -317,8 +317,6 @@ namespace Workstation.UaClient.UnitTests
 
             app.Run();
 
-            UaTcpSecureChannel.RegisterEncodables(Assembly.GetExecutingAssembly());
-
             var sub = new MySubscription();
             var d = new PropertyChangedEventHandler((s, e) => { });
             sub.PropertyChanged += d;
@@ -378,7 +376,8 @@ namespace Workstation.UaClient.UnitTests
                 this.localDescription,
                 this.certificateStore,
                 new AnonymousIdentity(),
-                EndpointUrl);
+                EndpointUrl,
+                loggerFactory: this.loggerFactory);
 
             await channel.OpenAsync();
             Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -466,7 +465,8 @@ namespace Workstation.UaClient.UnitTests
                 this.localDescription,
                 this.certificateStore,
                 new UserNameIdentity("root", "secret"),
-                EndpointUrl);
+                EndpointUrl,
+                loggerFactory: this.loggerFactory);
 
             await channel1.OpenAsync();
             Console.WriteLine($"Opened session with endpoint '{channel1.RemoteEndpoint.EndpointUrl}'.");
@@ -580,5 +580,73 @@ namespace Workstation.UaClient.UnitTests
             await channel.CloseAsync();
         }
 
+        [TestMethod]
+        public async Task VectorAdd()
+        {
+            var channel = new UaTcpSessionChannel(
+                this.localDescription,
+                this.certificateStore,
+                new AnonymousIdentity(),
+                "opc.tcp://localhost:48010",
+                SecurityPolicyUris.None,
+                loggerFactory: this.loggerFactory,
+                additionalTypes: new[] { typeof(Vector) });
+
+            await channel.OpenAsync();
+
+            Console.WriteLine("4 - Call VectorAdd method with structure arguments.");
+            var v1 = new Vector { X = 1.0, Y = 2.0, Z = 3.0 };
+            var v2 = new Vector { X = 1.0, Y = 2.0, Z = 3.0 };
+            var request = new CallRequest
+            {
+                MethodsToCall = new[] {
+                    new CallMethodRequest
+                    {
+                        ObjectId = NodeId.Parse("ns=2;s=Demo.Method"),
+                        MethodId = NodeId.Parse("ns=2;s=Demo.Method.VectorAdd"),
+                        InputArguments = new [] { new ExtensionObject(v1), new ExtensionObject(v2) }.ToVariantArray()
+                    }
+                }
+            };
+            var response = await channel.CallAsync(request);
+            var result  = response.Results[0].OutputArguments[0].GetValueOrDefault<Vector>();
+
+            Console.WriteLine($"  {v1}");
+            Console.WriteLine($"+ {v2}");
+            Console.WriteLine(@"  ------------------");
+            Console.WriteLine($"  {result}");
+
+            Assert.IsTrue(result.Z == 6.0);
+
+            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            await channel.CloseAsync();
+        }
+
+        [DataTypeId("nsu=http://www.unifiedautomation.com/DemoServer/;i=3002")]
+        [BinaryEncodingId("nsu=http://www.unifiedautomation.com/DemoServer/;i=5054")]
+        public class Vector : Structure
+        {
+            public double X { get; set; }
+
+            public double Y { get; set; }
+
+            public double Z { get; set; }
+
+            public override void Encode(IEncoder encoder)
+            {
+                encoder.WriteDouble("X", this.X);
+                encoder.WriteDouble("Y", this.Y);
+                encoder.WriteDouble("Z", this.Z);
+            }
+
+            public override void Decode(IDecoder decoder)
+            {
+                this.X = decoder.ReadDouble("X");
+                this.Y = decoder.ReadDouble("Y");
+                this.Z = decoder.ReadDouble("Z");
+            }
+
+            public override string ToString() => $"{{ X={this.X}; Y={this.Y}; Z={this.Z}; }}";
+        }
     }
 }

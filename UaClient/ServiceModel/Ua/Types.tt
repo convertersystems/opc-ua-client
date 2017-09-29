@@ -237,6 +237,8 @@ string RenderMethodSuffix(CodeTypeReference type, List<CodeTypeDeclaration> know
 			return type.ArrayRank == 0 ? "ExtensionObject<MonitoringFilterResult>" : "ExtensionObjectArray<MonitoringFilterResult>";
 		case "NotificationData":
 			return type.ArrayRank == 0 ? "ExtensionObject<NotificationData>" : "ExtensionObjectArray<NotificationData>";
+		case "DiscoveryConfiguration":
+			return type.ArrayRank == 0 ? "ExtensionObject<DiscoveryConfiguration>" : "ExtensionObjectArray<DiscoveryConfiguration>";
 
 		default:
 			if(knownEnums.Any(tt=>tt.Name == name))

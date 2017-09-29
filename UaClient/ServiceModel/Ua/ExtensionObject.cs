@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
-using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -43,13 +42,7 @@ namespace Workstation.ServiceModel.Ua
         {
             this.Body = body;
             this.BodyType = body != null ? BodyType.Encodable : BodyType.None;
-            var type = body.GetType();
-            if (!UaTcpSecureChannel.TryGetBinaryEncodingIdFromType(type, out ExpandedNodeId binaryEncodingId))
-            {
-                throw new ServiceResultException(StatusCodes.BadEncodingError);
-            }
-
-            this.TypeId = binaryEncodingId;
+            this.TypeId = body.GetType().GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(false)?.NodeId;
         }
 
         public object Body { get; }

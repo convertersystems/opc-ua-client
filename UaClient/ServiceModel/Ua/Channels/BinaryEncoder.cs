@@ -879,12 +879,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             var type = value.GetType();
-            if (!UaTcpSecureChannel.TryGetBinaryEncodingIdFromType(type, out ExpandedNodeId binaryEncodingId))
+            if (!this.channel.TryGetBinaryEncodingIdFromType(type, out NodeId binaryEncodingId))
             {
                 throw new ServiceResultException(StatusCodes.BadEncodingError);
             }
 
-            this.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.channel?.NamespaceUris));
+            this.WriteNodeId(null, binaryEncodingId);
             this.WriteByte(null, 0x01);
             var pos0 = this.writer.BaseStream.Position;
             this.WriteInt32(null, -1);

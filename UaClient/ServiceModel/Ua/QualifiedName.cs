@@ -94,7 +94,7 @@ namespace Workstation.ServiceModel.Ua
         public override int GetHashCode()
         {
             int result = this.NamespaceIndex.GetHashCode();
-            result = (31 * result) + (this.Name != null ? this.Name.GetHashCode() : 0);
+            result = (397 * result) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
             return result;
         }
 

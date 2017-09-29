@@ -96,7 +96,7 @@ namespace Workstation.ServiceModel.Ua
 
         public override int GetHashCode()
         {
-            return (int)(this.Value ^ ((long)((ulong)this.Value >> 32)));
+            return this.Value.GetHashCode();
         }
 
         public override string ToString()

@@ -10,6 +10,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
+using System.Collections.Generic;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
@@ -57,14 +58,16 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
             IUserIdentity userIdentity,
             EndpointDescription remoteEndpoint,
             ILoggerFactory loggerFactory = null,
-            UaTcpSessionChannelOptions options = null)
-            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, additionalTypes)
         {
             this.UserIdentity = userIdentity;
             this.options = options ?? new UaTcpSessionChannelOptions();
@@ -85,6 +88,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
@@ -92,8 +96,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             string endpointUrl,
             string securityPolicyUri = null,
             ILoggerFactory loggerFactory = null,
-            UaTcpSessionChannelOptions options = null)
-            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
         {
             this.UserIdentity = userIdentity;
             this.options = options ?? new UaTcpSessionChannelOptions();
@@ -113,14 +118,16 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             EndpointDescription remoteEndpoint,
             ILoggerFactory loggerFactory = null,
-            UaTcpSessionChannelOptions options = null)
-            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, additionalTypes)
         {
             this.UserIdentityProvider = userIdentityProvider;
             this.options = options ?? new UaTcpSessionChannelOptions();
@@ -141,6 +148,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
@@ -148,8 +156,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             string endpointUrl,
             string securityPolicyUri = null,
             ILoggerFactory loggerFactory = null,
-            UaTcpSessionChannelOptions options = null)
-            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
         {
             this.UserIdentityProvider = userIdentityProvider;
             this.options = options ?? new UaTcpSessionChannelOptions();
