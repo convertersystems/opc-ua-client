@@ -645,7 +645,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             NodeId nodeId = this.ReadNodeId(null);
             byte b = this.reader.ReadByte();
-            if (b == 1)
+            if (b == (byte)BodyType.ByteString)
             {
                 if (!this.channel.TryGetTypeFromEncodingId(nodeId, out Type type))
                 {

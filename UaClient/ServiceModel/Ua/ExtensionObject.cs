@@ -19,30 +19,54 @@ namespace Workstation.ServiceModel.Ua
     {
         public ExtensionObject(byte[] body, ExpandedNodeId typeId)
         {
+            if (body == null)
+            {
+                this.BodyType = BodyType.None;
+                return;
+            }
+
             this.Body = body;
-            this.BodyType = body != null ? BodyType.ByteString : BodyType.None;
+            this.BodyType = BodyType.ByteString;
             this.TypeId = typeId;
         }
 
         public ExtensionObject(XElement body, ExpandedNodeId typeId)
         {
+            if (body == null)
+            {
+                this.BodyType = BodyType.None;
+                return;
+            }
+
             this.Body = body;
-            this.BodyType = body != null ? BodyType.XmlElement : BodyType.None;
+            this.BodyType = BodyType.XmlElement;
             this.TypeId = typeId;
         }
 
         public ExtensionObject(IEncodable body, ExpandedNodeId typeId)
         {
+            if (body == null)
+            {
+                this.BodyType = BodyType.None;
+                return;
+            }
+
             this.Body = body;
-            this.BodyType = body != null ? BodyType.Encodable : BodyType.None;
+            this.BodyType = BodyType.Encodable;
             this.TypeId = typeId;
         }
 
         public ExtensionObject(IEncodable body)
         {
+            if (body == null)
+            {
+                this.BodyType = BodyType.None;
+                return;
+            }
+
             this.Body = body;
-            this.BodyType = body != null ? BodyType.Encodable : BodyType.None;
-            this.TypeId = body.GetType().GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(false)?.NodeId;
+            this.BodyType = BodyType.Encodable;
+            this.TypeId = body.GetType().GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(false)?.NodeId ?? throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
         }
 
         public object Body { get; }
