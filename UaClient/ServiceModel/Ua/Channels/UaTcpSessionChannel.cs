@@ -477,8 +477,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             // if UserIdentity type is X509Identity
             else if (this.UserIdentity is X509Identity)
             {
-                throw new NotImplementedException("A user identity of X509Identity is not implemented.");
-                /*
                 var tokenPolicy = this.RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t.TokenType == UserTokenType.Certificate);
                 if (tokenPolicy == null)
                 {
@@ -486,41 +484,36 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var x509Identity = (X509Identity)this.UserIdentity;
-                identityToken = new X509IdentityToken { CertificateData = x509Identity.Certificate?.RawData, PolicyId = tokenPolicy.PolicyId };
+                identityToken = new X509IdentityToken { CertificateData = x509Identity.Certificate?.GetEncoded(), PolicyId = tokenPolicy.PolicyId };
+
                 var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? this.RemoteEndpoint.SecurityPolicyUri;
                 switch (secPolicyUri)
                 {
+
                     case SecurityPolicyUris.Basic128Rsa15:
                     case SecurityPolicyUris.Basic256:
-                        var asymSigningKey = x509Identity.Certificate?.GetRSAPrivateKey();
-                        if (asymSigningKey != null)
+                        signer = SignerUtilities.GetSigner("SHA-1withRSA");
+                        signer.Init(true, x509Identity.PrivateKey);
+                        signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
+                        signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce.Length);
+                        tokenSignature = new SignatureData
                         {
-                            dataToSign = Concat(this.RemoteEndpoint.ServerCertificate, this.RemoteNonce);
-                            tokenSignature = new SignatureData
-                            {
-                                Signature = asymSigningKey.SignData(dataToSign, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1),
-                                Algorithm = RsaSha1Signature,
-                            };
-                            break;
-                        }
+                            Signature = signer.GenerateSignature(),
+                            Algorithm = RsaSha1Signature,
+                        };
 
-                        tokenSignature = new SignatureData();
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
-                        var asymSigningKey256 = x509Identity.Certificate?.GetRSAPrivateKey();
-                        if (asymSigningKey256 != null)
+                        signer = SignerUtilities.GetSigner("SHA-256withRSA");
+                        signer.Init(true, x509Identity.PrivateKey);
+                        signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
+                        signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce.Length);
+                        tokenSignature = new SignatureData
                         {
-                            dataToSign = Concat(this.RemoteEndpoint.ServerCertificate, this.RemoteNonce);
-                            tokenSignature = new SignatureData
-                            {
-                                Signature = asymSigningKey256.SignData(dataToSign, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1),
-                                Algorithm = RsaSha256Signature,
-                            };
-                            break;
-                        }
-
-                        tokenSignature = new SignatureData();
+                            Signature = signer.GenerateSignature(),
+                            Algorithm = RsaSha256Signature,
+                        };
                         break;
 
                     default:
@@ -528,8 +521,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         break;
                 }
 
-                dataToSign = null;
-                */
+                signer = null;
             }
 
             // if UserIdentity type is UserNameIdentity

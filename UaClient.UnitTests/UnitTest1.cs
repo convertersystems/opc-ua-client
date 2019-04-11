@@ -15,6 +15,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.X509;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
@@ -27,14 +31,16 @@ namespace Workstation.UaClient.UnitTests
         // private const string EndpointUrl = "opc.tcp://localhost:16664"; // open62541
         // private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
         // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
-        private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
+        // private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
         // private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.RobotServer.
         // private const string EndpointUrl = "opc.tcp://192.168.0.11:4840"; // the endpoint of the Siemens 1500 PLC.
+        private const string EndpointUrl = "opc.tcp://ANDREW-X1:55555"; // the endpoint of the Beeond server.
 
         private readonly ILoggerFactory loggerFactory;
         private readonly ILogger<UnitTest1> logger;
         private readonly ApplicationDescription localDescription;
         private readonly ICertificateStore certificateStore;
+        private readonly X509Identity x509Identity;
 
         public UnitTest1()
         {
@@ -49,11 +55,45 @@ namespace Workstation.UaClient.UnitTests
                 ApplicationType = ApplicationType.Client
             };
 
-            this.certificateStore = new DirectoryStore(
-                Path.Combine(
+            var pkiPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "Workstation.UaClient.UnitTests",
-                    "pki"));
+                    "pki");
+            this.certificateStore = new DirectoryStore(pkiPath);
+
+            // read x509Identity
+            var userCert = default(X509Certificate);
+            var userKey = default(RsaKeyParameters);
+
+            var certParser = new X509CertificateParser();
+            var userCertInfo = new FileInfo(Path.Combine(pkiPath, "user", "certs", "ctt_usrT.der"));
+            if (userCertInfo.Exists)
+            {
+                using (var crtStream = userCertInfo.OpenRead())
+                {
+                    var c = certParser.ReadCertificate(crtStream);
+                    if (c != null)
+                    {
+                        userCert = c;
+                    }
+                }
+            }
+            var userKeyInfo = new FileInfo(Path.Combine(pkiPath, "user", "private", "ctt_usrT.pem"));
+            if (userKeyInfo.Exists)
+            {
+                using (var keyStream = new StreamReader(userKeyInfo.OpenRead()))
+                {
+                    var keyReader = new PemReader(keyStream);
+                    var keyPair = keyReader.ReadObject() as AsymmetricCipherKeyPair;
+                    if (keyPair != null)
+                    {
+                        userKey = keyPair.Private as RsaKeyParameters;
+                    }
+                }
+            }
+            if (userCert != null && userKey != null) {
+                x509Identity = new X509Identity(userCert, userKey);
+            }
         }
 
         /// <summary>
@@ -135,6 +175,10 @@ namespace Workstation.UaClient.UnitTests
                     IUserIdentity selectedUserIdentity;
                     switch (selectedTokenPolicy.TokenType)
                     {
+                        case UserTokenType.Certificate:
+                            selectedUserIdentity = this.x509Identity;
+                            break;
+
                         case UserTokenType.UserName:
                             selectedUserIdentity = new UserNameIdentity("root", "secret");
                             break;
@@ -229,7 +273,7 @@ namespace Workstation.UaClient.UnitTests
 
             var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus), AttributeId = AttributeIds.Value } } };
             var readResult = await channel.ReadAsync(readRequest);
-            var serverStatus =  readResult.Results[0].GetValueOrDefault<ServerStatusDataType>();
+            var serverStatus = readResult.Results[0].GetValueOrDefault<ServerStatusDataType>();
 
             Console.WriteLine("Server status:");
             Console.WriteLine("  ProductName: {0}", serverStatus.BuildInfo.ProductName);
