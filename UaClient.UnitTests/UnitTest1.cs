@@ -31,10 +31,9 @@ namespace Workstation.UaClient.UnitTests
         // private const string EndpointUrl = "opc.tcp://localhost:16664"; // open62541
         // private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
         // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
-        // private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
+        private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
         // private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.RobotServer.
         // private const string EndpointUrl = "opc.tcp://192.168.0.11:4840"; // the endpoint of the Siemens 1500 PLC.
-        private const string EndpointUrl = "opc.tcp://ANDREW-X1:55555"; // the endpoint of the Beeond server.
 
         private readonly ILoggerFactory loggerFactory;
         private readonly ILogger<UnitTest1> logger;
@@ -799,64 +798,6 @@ namespace Workstation.UaClient.UnitTests
             Console.WriteLine($"Closing session '{channel2.SessionId}'.");
             await channel2.CloseAsync();
         }
-
-        /// <summary>
-        /// Tests result of session timeout causes server to close socket.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
-        [ExpectedException(typeof(ServiceResultException), "The session id is not valid.")]
-        public async Task SessionTimeoutCausesFault()
-        {
-            // discover available endpoints of server.
-            var getEndpointsRequest = new GetEndpointsRequest
-            {
-                EndpointUrl = EndpointUrl,
-                ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
-            };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
-            var selectedEndpoint = getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel).Last();
-
-            var selectedTokenType = selectedEndpoint.UserIdentityTokens[0].TokenType;
-            IUserIdentity selectedUserIdentity;
-            switch (selectedTokenType)
-            {
-                case UserTokenType.UserName:
-                    selectedUserIdentity = new UserNameIdentity("root", "secret");
-                    break;
-
-                default:
-                    selectedUserIdentity = new AnonymousIdentity();
-                    break;
-            }
-
-            var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
-                selectedUserIdentity,
-                selectedEndpoint,
-                loggerFactory: this.loggerFactory,
-                options: new UaTcpSessionChannelOptions { SessionTimeout = 10000 });
-
-            await channel.OpenAsync();
-            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
-
-            // server should close session due to inactivity
-            await Task.Delay(20000);
-
-            // should throw exception
-            var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus_CurrentTime), AttributeId = AttributeIds.Value } } };
-            await channel.ReadAsync(readRequest);
-
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
-            await channel.CloseAsync();
-        }
-
-
 
     }
 }
