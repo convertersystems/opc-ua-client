@@ -9,8 +9,8 @@
 // ------------------------------------------------------------------------------
 namespace Workstation.ServiceModel.Ua
 {
-	public static class AttributeIds
-	{
+    public static class AttributeIds
+    {
         public const uint NodeId = 1u;
         public const uint NodeClass = 2u;
         public const uint BrowseName = 3u;
@@ -33,5 +33,5 @@ namespace Workstation.ServiceModel.Ua
         public const uint Historizing = 20u;
         public const uint Executable = 21u;
         public const uint UserExecutable = 22u;
-	}
+    }
 }
