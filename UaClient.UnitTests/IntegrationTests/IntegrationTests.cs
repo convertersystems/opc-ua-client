@@ -12,9 +12,9 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.OpenSsl;
@@ -22,11 +22,11 @@ using Org.BouncyCastle.X509;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
+using Xunit;
 
-namespace Workstation.UaClient.UnitTests
+namespace Workstation.UaClient.IntegrationTests
 {
-    [TestClass]
-    public class UnitTest1
+    public class IntegrationTests
     {
         // private const string EndpointUrl = "opc.tcp://localhost:16664"; // open62541
         // private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
@@ -36,16 +36,16 @@ namespace Workstation.UaClient.UnitTests
         // private const string EndpointUrl = "opc.tcp://192.168.0.11:4840"; // the endpoint of the Siemens 1500 PLC.
 
         private readonly ILoggerFactory loggerFactory;
-        private readonly ILogger<UnitTest1> logger;
+        private readonly ILogger<IntegrationTests> logger;
         private readonly ApplicationDescription localDescription;
         private readonly ICertificateStore certificateStore;
         private readonly X509Identity x509Identity;
 
-        public UnitTest1()
+        public IntegrationTests()
         {
             this.loggerFactory = new LoggerFactory();
             this.loggerFactory.AddDebug(LogLevel.Trace);
-            this.logger = this.loggerFactory?.CreateLogger<UnitTest1>();
+            this.logger = this.loggerFactory?.CreateLogger<IntegrationTests>();
 
             this.localDescription = new ApplicationDescription
             {
@@ -99,7 +99,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests endpoint with no security and with no Certificate.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task ConnnectToEndpointsWithNoSecurityAndWithNoCertificate()
         {
             // discover available endpoints of server.
@@ -154,7 +154,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests all combinations of endpoint security and user identity types supported by the server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task ConnnectToAllEndpoints()
         {
             // discover available endpoints of server.
@@ -213,7 +213,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests browsing the Objects folder.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task BrowseObjects()
         {
             var channel = new UaTcpSessionChannel(
@@ -239,7 +239,9 @@ namespace Workstation.UaClient.UnitTests
                 continuationPoints = browseNextResponse.Results.Select(br => br.ContinuationPoint).Where(cp => cp != null).ToArray();
             }
 
-            Assert.IsTrue(rds.Count > 0);
+            rds
+                .Should().NotBeEmpty();
+
             Console.WriteLine("+ Objects, 0:Objects, Object");
             foreach (var rd in rds)
             {
@@ -254,7 +256,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests read server status.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task Read()
         {
             var channel = new UaTcpSessionChannel(
@@ -289,7 +291,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests polling the current time.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task Polling()
         {
             var channel = new UaTcpSessionChannel(
@@ -321,7 +323,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests creating a subscription and monitoring current time.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task TestSubscription()
         {
             var channel = new UaTcpSessionChannel(
@@ -391,14 +393,15 @@ namespace Workstation.UaClient.UnitTests
             Console.WriteLine($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
 
-            Assert.IsTrue(numOfResponses > 0);
+            numOfResponses
+                .Should().BeGreaterThan(0);
         }
 
         /// <summary>
         /// Tests calling a method of the UACPPServer.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task VectorAdd()
         {
             var channel = new UaTcpSessionChannel(
@@ -437,7 +440,8 @@ namespace Workstation.UaClient.UnitTests
             Console.WriteLine($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
 
-            Assert.IsTrue(result.Z == 6.0);
+            result.Z
+                .Should().Be(6.0);
         }
 
         [DataTypeId("nsu=http://www.unifiedautomation.com/DemoServer/;i=3002")]
@@ -471,7 +475,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests reading the historical data of the UACPPServer.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task ReadHistorical()
         {
             var channel = new UaTcpSessionChannel(
@@ -506,7 +510,8 @@ namespace Workstation.UaClient.UnitTests
             };
             var historyReadResponse = await channel.HistoryReadAsync(historyReadRequest);
             var result = historyReadResponse.Results[0];
-            Assert.IsTrue(StatusCode.IsGood(result.StatusCode));
+            StatusCode.IsGood(result.StatusCode)
+                .Should().BeTrue();
             Console.WriteLine($"HistoryRead response status code: {result.StatusCode}, HistoryData count: {((HistoryData)result.HistoryData).DataValues.Length}.");
 
             if (false) // UaCPPserver does not appear to store event history.  
@@ -532,7 +537,8 @@ namespace Workstation.UaClient.UnitTests
                 };
                 var historyReadResponse2 = await channel.HistoryReadAsync(historyReadRequest2);
                 var result2 = historyReadResponse2.Results[0];
-                Assert.IsTrue(StatusCode.IsGood(result2.StatusCode));
+                StatusCode.IsGood(result2.StatusCode)
+                    .Should().BeTrue();
                 Console.WriteLine($"HistoryRead response status code: {result2.StatusCode}, HistoryEvent count: {((HistoryEvent)result2.HistoryData).Events.Length}.");
 
                 // Use EventHelper to create AlarmConditions from the HistoryEventFieldList
@@ -546,7 +552,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests connecting to endpoint and creating a subscription based view model.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task TestViewModel()
         {
             // Read 'appSettings.json' for endpoint configuration
@@ -581,9 +587,12 @@ namespace Workstation.UaClient.UnitTests
             vm.PropertyChanged -= d;
             app.Dispose();
 
-            Assert.IsTrue(vm.CurrentTime != DateTime.MinValue, "CurrentTime");
-            Assert.IsTrue(vm.CurrentTimeAsDataValue != null, "CurrentTimeAsDataValue");
-            Assert.IsTrue(vm.CurrentTimeQueue.Count > 0, "CurrentTimeQueue");
+            vm.CurrentTime
+                .Should().NotBe(DateTime.MinValue);
+            vm.CurrentTimeAsDataValue
+                .Should().NotBeNull();
+            vm.CurrentTimeQueue
+                .Should().NotBeEmpty();
         }
 
         [Subscription(endpointUrl: "opc.tcp://localhost:48010", publishingInterval: 500, keepAliveCount: 20)]
@@ -620,7 +629,7 @@ namespace Workstation.UaClient.UnitTests
             public ObservableQueue<DataValue> CurrentTimeQueue { get; } = new ObservableQueue<DataValue>(capacity: 16, isFixedSize: true);
         }
 
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task StackTest()
         {
             var channel = new UaTcpSessionChannel(
@@ -693,7 +702,8 @@ namespace Workstation.UaClient.UnitTests
                 var readResponse = await channel.ReadAsync(readRequest);
                 foreach (var result in readResponse.Results)
                 {
-                    Assert.IsTrue(StatusCode.IsGood(result.StatusCode));
+                    StatusCode.IsGood(result.StatusCode)
+                        .Should().BeTrue();
                     var obj = result.GetValue();
                 }
             }
@@ -709,7 +719,7 @@ namespace Workstation.UaClient.UnitTests
         /// Tests result of transfer subscription from channel1 to channel2.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [TestMethod]
+        [Fact(Skip = "Only run this with a running opc test server")]
         public async Task TransferSubscription()
         {
             var channel1 = new UaTcpSessionChannel(
@@ -788,7 +798,8 @@ namespace Workstation.UaClient.UnitTests
             };
             var transferResult = await channel2.TransferSubscriptionsAsync(transferRequest);
 
-            Assert.IsTrue(StatusCode.IsGood(transferResult.Results[0].StatusCode));
+            StatusCode.IsGood(transferResult.Results[0].StatusCode)
+                .Should().BeTrue();
 
             await Task.Delay(3000);
 
