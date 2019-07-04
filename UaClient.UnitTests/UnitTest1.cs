@@ -167,7 +167,8 @@ namespace Workstation.UaClient.UnitTests
             var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
-            foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel))
+            foreach (var selectedEndpoint in getEndpointsResponse.Endpoints
+                .OrderBy(e => e.SecurityLevel))
             {
                 foreach (var selectedTokenPolicy in selectedEndpoint.UserIdentityTokens)
                 {

@@ -345,6 +345,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         verifier = SignerUtilities.GetSigner("SHA-256withRSA");
                         verifier.Init(false, this.RemotePublicKey);
                         verifier.BlockUpdate(localCertificate, 0, localCertificate.Length);
@@ -385,6 +386,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     break;
 
                 case SecurityPolicyUris.Basic256Sha256:
+                case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                     signer = SignerUtilities.GetSigner("SHA-256withRSA");
                     signer.Init(true, this.LocalPrivateKey);
                     signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
@@ -444,7 +446,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Basic256:
                     case SecurityPolicyUris.Basic256Sha256:
-                        encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
+                        encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
                         encryptor.Init(true, this.RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
@@ -505,6 +508,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         signer = SignerUtilities.GetSigner("SHA-256withRSA");
                         signer.Init(true, x509Identity.PrivateKey);
                         signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
@@ -562,6 +566,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Basic256:
                     case SecurityPolicyUris.Basic256Sha256:
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
                         encryptor.Init(true, this.RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
