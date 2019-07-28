@@ -16,7 +16,6 @@ namespace Workstation.ServiceModel.Ua.Channels
     {
         private readonly ILogger logger;
         private bool aborted;
-        private bool closeCalled;
         private bool onClosingCalled;
         private bool onClosedCalled;
         private bool onOpeningCalled;
@@ -119,8 +118,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     this.State = CommunicationState.Closing;
                 }
-
-                this.closeCalled = true;
             }
             finally
             {
