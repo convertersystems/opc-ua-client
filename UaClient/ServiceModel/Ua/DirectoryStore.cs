@@ -260,11 +260,11 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <inheritdoc/>
-        public async Task<bool> ValidateRemoteCertificateAsync(X509Certificate target, ILogger logger = null)
+        public Task<bool> ValidateRemoteCertificateAsync(X509Certificate target, ILogger logger = null)
         {
             if (this.AcceptAllRemoteCertificates)
             {
-                return true;
+                return Task.FromResult(true);
             }
 
             var trustedCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
@@ -315,12 +315,12 @@ namespace Workstation.ServiceModel.Ua
                 IX509Store trustedCertStore = X509StoreFactory.Create("Certificate/Collection", new X509CollectionStoreParameters(trustedCerts));
                 if (trustedCertStore.GetMatches(selector).Count > 0)
                 {
-                    return true;
+                    return Task.FromResult(true);
                 }
 
                 logger?.LogError($"Error validatingRemoteCertificate.");
                 this.StoreInRejectedFolder(target);
-                return false;
+                return Task.FromResult(false);
             }
 
             try
@@ -331,10 +331,10 @@ namespace Workstation.ServiceModel.Ua
             {
                 logger?.LogError($"Error validatingRemoteCertificate. {ex.Message}");
                 this.StoreInRejectedFolder(target);
-                return false;
+                return Task.FromResult(false);
             }
 
-            return true;
+            return Task.FromResult(true);
         }
 
         private static PkixCertPathBuilderResult VerifyCertificate(X509Certificate target, Org.BouncyCastle.Utilities.Collections.HashSet trustedRootCerts, Org.BouncyCastle.Utilities.Collections.HashSet intermediateCerts)
