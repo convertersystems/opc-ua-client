@@ -35,21 +35,32 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(0);
         }
 
-        public static IEnumerable<QualifiedName> QualifiedNames { get; } = new[]
+        public static IEnumerable<Func<QualifiedName>> QualifiedNames { get; } = new Func<QualifiedName>[]
         {
-            new QualifiedName("A"),
-            new QualifiedName("B"),
-            new QualifiedName("A", 2),
-            new QualifiedName("B", 2),
+            () => new QualifiedName("A"),
+            () => new QualifiedName("B"),
+            () => new QualifiedName("A", 2),
+            () => new QualifiedName("B", 2),
+        };
+
+        public static IEnumerable<object[]> ValueEqualityData =>
+            from a in QualifiedNames.Select((f, i) => (id: f(), index: i))
+            from b in QualifiedNames.Select((f, i) => (id: f(), index: i))
+            select new object[] { a.id, b.id, a.index == b.index };
+
+        public static IEnumerable<object[]> ReferenceEqualityData
+        {
+            get
+            {
+                var list = QualifiedNames.Select((f, i) => (id: f(), index: i)).ToList();
+                return from a in list
+                       from b in list
+                       select new object[] { a.id, b.id, a.index == b.index };
+            }
         }
-        .ToList();
 
-        public static IEnumerable<object[]> EqualityData =>
-            from a in QualifiedNames.Select((n, i) => (name: n, index: i))
-            from b in QualifiedNames.Select((n, i) => (name: n, index: i))
-            select new object[] { a.name, b.name, a.index == b.index };
-
-        [MemberData(nameof(EqualityData))]
+        [MemberData(nameof(ValueEqualityData))]
+        [MemberData(nameof(ReferenceEqualityData))]
         [Theory]
         public void Equality(QualifiedName a, QualifiedName b, bool shouldBeEqual)
         {

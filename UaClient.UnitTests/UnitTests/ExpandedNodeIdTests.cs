@@ -161,35 +161,46 @@ namespace Workstation.UaClient.UnitTests
                 .Should().BeFalse();
         }
 
-        public static IEnumerable<ExpandedNodeId> ExpandedNodeIds { get; } = new[]
+        public static IEnumerable<Func<ExpandedNodeId>> ExpandedNodeIds { get; } = new Func<ExpandedNodeId>[]
             {
-                new ExpandedNodeId(Guid.NewGuid()),
-                new ExpandedNodeId(Guid.NewGuid()),
-                new ExpandedNodeId("1"),
-                new ExpandedNodeId("2"),
-                new ExpandedNodeId("2", null, 4),
-                new ExpandedNodeId("1", "namespace"),
-                new ExpandedNodeId("2", "namespace"),
-                new ExpandedNodeId("2", "namespace", 4),
-                new ExpandedNodeId(1),
-                new ExpandedNodeId(2),
-                new ExpandedNodeId(1, "namespace"),
-                new ExpandedNodeId(2, "namespace"),
-                new ExpandedNodeId(new byte [] {1, 2}),
-                new ExpandedNodeId(new byte [] {1, 2, 3}),
-                new ExpandedNodeId(new byte [] {1, 2}, "namespace", 2),
-                new ExpandedNodeId(new byte [] {1, 2}, "namespace"),
-                null,
-                ExpandedNodeId.Null
+                () => new ExpandedNodeId(Guid.Parse("28fc4ae1-9eb0-49fc-93a9-7a6ae34ba151")),
+                () => new ExpandedNodeId(Guid.Parse("77628a5c-a82a-43a1-838f-cfdbd037d15f")),
+                () => new ExpandedNodeId("1"),
+                () => new ExpandedNodeId("2"),
+                () => new ExpandedNodeId("2", null, 4),
+                () => new ExpandedNodeId("1", "namespace"),
+                () => new ExpandedNodeId("2", "namespace"),
+                () => new ExpandedNodeId("2", "namespace", 4),
+                () => new ExpandedNodeId(1),
+                () => new ExpandedNodeId(2),
+                () => new ExpandedNodeId(1, "namespace"),
+                () => new ExpandedNodeId(2, "namespace"),
+                () => new ExpandedNodeId(new byte [] {1, 2}),
+                () => new ExpandedNodeId(new byte [] {1, 2, 3}),
+                () => new ExpandedNodeId(new byte [] {1, 2}, "namespace", 2),
+                () => new ExpandedNodeId(new byte [] {1, 2}, "namespace"),
+                () => null,
+                () => ExpandedNodeId.Null
+            };
+
+        public static IEnumerable<object[]> ValueEqualityData =>
+            from a in ExpandedNodeIds.Select((f, i) => (id: f(), index: i))
+            from b in ExpandedNodeIds.Select((f, i) => (id: f(), index: i))
+            select new object[] { a.id, b.id, a.index == b.index };
+
+        public static IEnumerable<object[]> ReferenceEqualityData
+        {
+            get
+            {
+                var list = ExpandedNodeIds.Select((f, i) => (id: f(), index: i)).ToList();
+                return from a in list
+                       from b in list
+                       select new object[] { a.id, b.id, a.index == b.index };
             }
-            .ToList();
+        }
 
-        public static IEnumerable<object[]> EqualityData =>
-            from a in ExpandedNodeIds.Select((n, i) => (id: n, index: i))
-            from b in ExpandedNodeIds.Select((n, i) => (id: n, index: i))
-            select new object[] { a.id, b.id, a.index == b.index};
-
-        [MemberData(nameof(EqualityData))]
+        [MemberData(nameof(ValueEqualityData))]
+        [MemberData(nameof(ReferenceEqualityData))]
         [Theory]
         public void Equality(ExpandedNodeId a, ExpandedNodeId b, bool shouldBeEqual)
         {
@@ -201,7 +212,7 @@ namespace Workstation.UaClient.UnitTests
 
 
         public static IEnumerable<object[]> ParseData
-            => ExpandedNodeIds.Where(n => n != null).Select(n => new object[] { n.ToString(), n});
+            => ExpandedNodeIds.Select(f => f()).Where(n => n != null).Select(n => new object[] { n.ToString(), n});
 
         [MemberData(nameof(ParseData))]
         [Theory]
