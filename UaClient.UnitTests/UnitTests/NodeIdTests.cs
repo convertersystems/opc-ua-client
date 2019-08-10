@@ -93,33 +93,44 @@ namespace Workstation.UaClient.UnitTests
                 .Should().BeFalse();
         }
 
-        public static IEnumerable<NodeId> NodeIds { get; } = new[]
+        public static IEnumerable<Func<NodeId>> NodeIds { get; } = new Func<NodeId>[]
             {
-                new NodeId(Guid.NewGuid()),
-                new NodeId(Guid.NewGuid()),
-                new NodeId("1"),
-                new NodeId("2"),
-                new NodeId("1", 4),
-                new NodeId("2", 4),
-                new NodeId(1),
-                new NodeId(2),
-                new NodeId(1, 4),
-                new NodeId(2, 4),
-                new NodeId(new byte [] {1, 2}),
-                new NodeId(new byte [] {1, 2, 3}),
-                new NodeId(new byte [] {1, 2}, 4),
-                new NodeId(new byte [] {1, 2, 3}, 4),
-                null,
-                NodeId.Null
-            }
-            .ToList();
+                () => new NodeId(new Guid("d0c133bc-470d-40ae-a871-981376c0c762")),
+                () => new NodeId(new Guid("23c76470-5796-4164-b6e2-c071847f9ea0")),
+                () => new NodeId("1"),
+                () => new NodeId("2"),
+                () => new NodeId("1", 4),
+                () => new NodeId("2", 4),
+                () => new NodeId(1),
+                () => new NodeId(2),
+                () => new NodeId(1, 4),
+                () => new NodeId(2, 4),
+                () => new NodeId(new byte [] {1, 2}),
+                () => new NodeId(new byte [] {1, 2, 3}),
+                () => new NodeId(new byte [] {1, 2}, 4),
+                () => new NodeId(new byte [] {1, 2, 3}, 4),
+                () => null,
+                () => NodeId.Null
+            };
 
-        public static IEnumerable<object[]> EqualityData =>
-            from a in NodeIds.Select((n, i) => (id: n, index: i))
-            from b in NodeIds.Select((n, i) => (id: n, index: i))
+        public static IEnumerable<object[]> ValueEqualityData =>
+            from a in NodeIds.Select((f, i) => (id: f(), index: i))
+            from b in NodeIds.Select((f, i) => (id: f(), index: i))
             select new object[] { a.id, b.id, a.index == b.index};
 
-        [MemberData(nameof(EqualityData))]
+        public static IEnumerable<object[]> ReferenceEqualityData
+        {
+            get
+            {
+                var list = NodeIds.Select((f, i) => (id: f(), index: i)).ToList();
+                return from a in list
+                    from b in list
+                    select new object[] { a.id, b.id, a.index == b.index };
+            }
+        }
+
+        [MemberData(nameof(ValueEqualityData))]
+        [MemberData(nameof(ReferenceEqualityData))]
         [Theory]
         public void Equality(NodeId a, NodeId b, bool shouldBeEqual)
         {
@@ -130,7 +141,7 @@ namespace Workstation.UaClient.UnitTests
         }
 
         public static IEnumerable<object[]> ParseData
-            => NodeIds.Where(n => n != null).Select(n => new object[] { n.ToString(), n});
+            => NodeIds.Select(f => f()).Where(n => n != null).Select(n => new object[] { n.ToString(), n});
 
         [MemberData(nameof(ParseData))]
         [Theory]
