@@ -262,6 +262,27 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <summary>
+        /// Confirms a condition.
+        /// </summary>
+        /// <param name="condition">an AcknowledgeableCondition.</param>
+        /// <param name="comment">a comment.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<StatusCode> ConfirmAsync(AcknowledgeableCondition condition, LocalizedText comment = null)
+        {
+            if (condition == null)
+            {
+                throw new ArgumentNullException(nameof(condition));
+            }
+
+            if (this.State != CommunicationState.Opened)
+            {
+                return StatusCodes.BadServerNotConnected;
+            }
+
+            return await this.InnerChannel.ConfirmAsync(condition, comment);
+        }
+        
+        /// <summary>
         /// Gets the inner channel.
         /// </summary>
         protected UaTcpSessionChannel InnerChannel

@@ -8,11 +8,11 @@
     <Authors>Andrew Cullen</Authors>
     <Company>Converter Systems LLC</Company>
     <PackageProjectUrl>https://github.com/convertersystems/opc-ua-client</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/convertersystems/opc-ua-client/blob/master/UaClient/LICENSE.txt</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <Description>A library to browse, read, write and subscribe to the live data published by the OPC UA servers on your network.</Description>
     <PackageTags>opc, opc-ua, iiot</PackageTags>
     <RepositoryUrl>https://github.com/convertersystems/opc-ua-client</RepositoryUrl>
-    <Copyright>Copyright ©  2018 Converter Systems LLC.</Copyright>
+    <Copyright>Copyright ©  2019 Converter Systems LLC.</Copyright>
     <AssemblyVersion>2.3.0.0</AssemblyVersion>
     <AssemblyTitle>Workstation.UaClient ($(TargetFramework))</AssemblyTitle>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
@@ -21,10 +21,15 @@
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
     <IncludeSymbols>true</IncludeSymbols>
     <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="ServiceModel\Ua\Schema\NodeIdsEdited.csv" />
+    <None Include="..\LICENSE.txt">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

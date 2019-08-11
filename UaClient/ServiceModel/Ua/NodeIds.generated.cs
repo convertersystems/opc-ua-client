@@ -9,8 +9,8 @@
 // ------------------------------------------------------------------------------
 namespace Workstation.ServiceModel.Ua
 {
-	public static class DataTypeIds
-	{
+    public static class DataTypeIds
+    {
         public const string HistoryBase = "i=0";
         public const string Boolean = "i=1";
         public const string SByte = "i=2";
@@ -309,10 +309,10 @@ namespace Workstation.ServiceModel.Ua
         public const string DateString = "i=12881";
         public const string DiscoveryConfiguration = "i=12890";
         public const string MdnsDiscoveryConfiguration = "i=12891";
-	}
+    }
 
-	public static class MethodIds
-	{
+    public static class MethodIds
+    {
         public const string ProgramStateMachineType_Start = "i=2426";
         public const string ProgramStateMachineType_Suspend = "i=2427";
         public const string ProgramStateMachineType_Resume = "i=2428";
@@ -720,10 +720,10 @@ namespace Workstation.ServiceModel.Ua
         public const string Server_Namespaces_OPCUANamespaceUri_NamespaceFile_GetPosition = "i=15206";
         public const string Server_Namespaces_OPCUANamespaceUri_NamespaceFile_SetPosition = "i=15209";
         public const string Server_Namespaces_OPCUANamespaceUri_NamespaceFile_ExportNamespace = "i=15211";
-	}
+    }
 
-	public static class ObjectIds
-	{
+    public static class ObjectIds
+    {
         public const string HistoryBase_Encoding_DefaultXml = "i=0";
         public const string HistoryBase_Encoding_DefaultBinary = "i=0";
         public const string ModellingRule_Mandatory = "i=78";
@@ -1338,10 +1338,10 @@ namespace Workstation.ServiceModel.Ua
         public const string ServerConfiguration_CertificateGroups_DefaultApplicationGroup = "i=14156";
         public const string Server_Namespaces_OPCUANamespaceUri = "i=15182";
         public const string Server_Namespaces_OPCUANamespaceUri_NamespaceFile = "i=15190";
-	}
+    }
 
-	public static class ObjectTypeIds
-	{
+    public static class ObjectTypeIds
+    {
         public const string BaseObjectType = "i=58";
         public const string FolderType = "i=61";
         public const string DataTypeSystemType = "i=75";
@@ -1463,10 +1463,10 @@ namespace Workstation.ServiceModel.Ua
         public const string CertificateExpirationAlarmType = "i=13225";
         public const string FileDirectoryType = "i=13353";
         public const string CertificateGroupFolderType = "i=13813";
-	}
+    }
 
-	public static class ReferenceTypeIds
-	{
+    public static class ReferenceTypeIds
+    {
         public const string References = "i=31";
         public const string NonHierarchicalReferences = "i=32";
         public const string HierarchicalReferences = "i=33";
@@ -1494,10 +1494,10 @@ namespace Workstation.ServiceModel.Ua
         public const string HasTrueSubState = "i=9004";
         public const string HasFalseSubState = "i=9005";
         public const string HasCondition = "i=9006";
-	}
+    }
 
-	public static class VariableIds
-	{
+    public static class VariableIds
+    {
         public const string DataTypeDescriptionType_DataTypeVersion = "i=104";
         public const string DataTypeDescriptionType_DictionaryFragment = "i=105";
         public const string DataTypeDictionaryType_DataTypeVersion = "i=106";
@@ -5743,10 +5743,10 @@ namespace Workstation.ServiceModel.Ua
         public const string Server_Namespaces_OPCUANamespaceUri_NamespaceFile_GetPosition_InputArguments = "i=15207";
         public const string Server_Namespaces_OPCUANamespaceUri_NamespaceFile_GetPosition_OutputArguments = "i=15208";
         public const string Server_Namespaces_OPCUANamespaceUri_NamespaceFile_SetPosition_InputArguments = "i=15210";
-	}
+    }
 
-	public static class VariableTypeIds
-	{
+    public static class VariableTypeIds
+    {
         public const string BaseVariableType = "i=62";
         public const string BaseDataVariableType = "i=63";
         public const string PropertyType = "i=68";
@@ -5784,6 +5784,6 @@ namespace Workstation.ServiceModel.Ua
         public const string ImageItemType = "i=12047";
         public const string CubeItemType = "i=12057";
         public const string NDimensionArrayItemType = "i=12068";
-	}
+    }
 
 }
