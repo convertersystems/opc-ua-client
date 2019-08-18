@@ -100,6 +100,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private bool symIsSigned;
         private bool symIsEncrypted;
         private int symSignatureKeySize;
+        private int nonceSize;
         private byte[] sendBuffer;
         private byte[] receiveBuffer;
 
@@ -361,6 +362,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.symSignatureKeySize = 16;
                         this.symEncryptionBlockSize = 16;
                         this.symEncryptionKeySize = 16;
+                        this.nonceSize = 16;
                         break;
 
                     case SecurityPolicyUris.Basic256:
@@ -385,6 +387,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.symSignatureKeySize = 24;
                         this.symEncryptionBlockSize = 16;
                         this.symEncryptionKeySize = 32;
+                        this.nonceSize = 32;
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
@@ -409,6 +412,57 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.symSignatureKeySize = 32;
                         this.symEncryptionBlockSize = 16;
                         this.symEncryptionKeySize = 32;
+                        this.nonceSize = 32;
+                        break;
+
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
+
+                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSA");
+                        this.asymSigner.Init(true, this.LocalPrivateKey);
+                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSA");
+                        this.asymVerifier.Init(false, this.RemotePublicKey);
+                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        this.asymEncryptor.Init(true, this.RemotePublicKey);
+                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
+                        this.symSigner = new HMac(new Sha256Digest());
+                        this.symVerifier = new HMac(new Sha256Digest());
+                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
+                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
+                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 42, 1);
+                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 42, 1);
+                        this.symSignatureSize = 32;
+                        this.symSignatureKeySize = 32;
+                        this.symEncryptionBlockSize = 16;
+                        this.symEncryptionKeySize = 16;
+                        this.nonceSize = 32;
+                        break;
+
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+
+                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymSigner.Init(true, this.LocalPrivateKey);
+                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymVerifier.Init(false, this.RemotePublicKey);
+                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymEncryptor.Init(true, this.RemotePublicKey);
+                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
+                        this.symSigner = new HMac(new Sha256Digest());
+                        this.symVerifier = new HMac(new Sha256Digest());
+                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
+                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
+                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 66, 1);
+                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 66, 1);
+                        this.symSignatureSize = 32;
+                        this.symSignatureKeySize = 32;
+                        this.symEncryptionBlockSize = 16;
+                        this.symEncryptionKeySize = 32;
+                        this.nonceSize = 32;
                         break;
 
                     default:
@@ -472,6 +526,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.symSignatureKeySize = 16;
                         this.symEncryptionBlockSize = 16;
                         this.symEncryptionKeySize = 16;
+                        this.nonceSize = 16;
                         break;
 
                     case SecurityPolicyUris.Basic256:
@@ -494,6 +549,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.symSignatureKeySize = 24;
                         this.symEncryptionBlockSize = 16;
                         this.symEncryptionKeySize = 32;
+                        this.nonceSize = 32;
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
@@ -516,6 +572,55 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.symSignatureKeySize = 32;
                         this.symEncryptionBlockSize = 16;
                         this.symEncryptionKeySize = 32;
+                        this.nonceSize = 32;
+                        break;
+
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
+
+                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSA");
+                        this.asymSigner.Init(true, this.LocalPrivateKey);
+                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSA");
+                        this.asymVerifier.Init(false, this.RemotePublicKey);
+                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        this.asymEncryptor.Init(true, this.RemotePublicKey);
+                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
+                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
+                        this.symSigner = new HMac(new Sha256Digest());
+                        this.symVerifier = new HMac(new Sha256Digest());
+                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
+                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
+                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 42, 1);
+                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 42, 1);
+                        this.symSignatureSize = 32;
+                        this.symSignatureKeySize = 32;
+                        this.symEncryptionBlockSize = 16;
+                        this.symEncryptionKeySize = 16;
+                        this.nonceSize = 32;
+                        break;
+
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+
+                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymSigner.Init(true, this.LocalPrivateKey);
+                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymVerifier.Init(false, this.RemotePublicKey);
+                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymEncryptor.Init(true, this.RemotePublicKey);
+                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
+                        this.symSigner = new HMac(new Sha256Digest());
+                        this.symVerifier = new HMac(new Sha256Digest());
+                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
+                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
+                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 66, 1);
+                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 66, 1);
+                        this.symSignatureSize = 32;
+                        this.symSignatureKeySize = 32;
+                        this.symEncryptionBlockSize = 16;
+                        this.symEncryptionKeySize = 32;
+                        this.nonceSize = 32;
                         break;
 
                     default:
@@ -554,6 +659,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.symSignatureKeySize = 0;
                 this.symEncryptionBlockSize = 1;
                 this.symEncryptionKeySize = 0;
+                this.nonceSize = 0;
                 this.encryptionBuffer = null;
             }
             else
@@ -579,7 +685,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 ClientProtocolVersion = ProtocolVersion,
                 RequestType = SecurityTokenRequestType.Issue,
                 SecurityMode = this.RemoteEndpoint.SecurityMode,
-                ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce(this.symEncryptionKeySize) : null,
+                ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce(this.nonceSize) : null,
                 RequestedLifetime = TokenRequestedLifetime
             };
 
@@ -620,7 +726,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             try
             {
-                var request = new CloseSecureChannelRequest { RequestHeader = new RequestHeader { TimeoutHint = 2000, ReturnDiagnostics = this.DiagnosticsHint } };
+                var request = new CloseSecureChannelRequest { RequestHeader = new RequestHeader { TimeoutHint = this.TimeoutHint, ReturnDiagnostics = this.DiagnosticsHint } };
                 await this.RequestAsync(request).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -656,6 +762,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                     break;
 
                 case SecurityPolicyUris.Basic256Sha256:
+                case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
+                case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                     digest = new Sha256Digest();
                     break;
 
@@ -738,7 +846,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         ClientProtocolVersion = ProtocolVersion,
                         RequestType = SecurityTokenRequestType.Renew,
                         SecurityMode = this.RemoteEndpoint.SecurityMode,
-                        ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce(this.symEncryptionKeySize) : null,
+                        ClientNonce = this.symIsSigned ? this.LocalNonce = this.GetNextNonce(this.nonceSize) : null,
                         RequestedLifetime = TokenRequestedLifetime
                     };
                     this.logger?.LogTrace($"Sending {openSecureChannelRequest.GetType().Name}, Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
@@ -758,6 +866,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 else if (request is CloseSecureChannelRequest)
                 {
                     await this.SendCloseSecureChannelRequestAsync((CloseSecureChannelRequest)request, token).ConfigureAwait(false);
+                    operation.TrySetResult(new CloseSecureChannelResponse { ResponseHeader = new ResponseHeader { RequestHandle = ((CloseSecureChannelRequest)request).RequestHeader.RequestHandle, Timestamp = DateTime.UtcNow } });
                 }
                 else
                 {

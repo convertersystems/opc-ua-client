@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29020.237
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Workstation.UaClient.UnitTests", "UaClient.UnitTests\Workstation.UaClient.UnitTests.csproj", "{8994DA00-5CE1-461F-963C-43F7CFC6864E}"
 EndProject

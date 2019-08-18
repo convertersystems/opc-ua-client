@@ -36,8 +36,10 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         private const string RsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+        private const string RsaPssSha256Signature = @"http://opcfoundation.org/UA/security/rsa-pss-sha2-256";
         private const string RsaV15KeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-1_5";
         private const string RsaOaepKeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+        private const string RsaOaepSha256KeyWrap = @"http://opcfoundation.org/UA/security/rsa-oaep-sha2-256";
         private const int NonceLength = 32;
         private const uint PublishTimeoutHint = 10 * 60 * 1000; // 10 minutes
 
@@ -345,7 +347,16 @@ namespace Workstation.ServiceModel.Ua.Channels
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         verifier = SignerUtilities.GetSigner("SHA-256withRSA");
+                        verifier.Init(false, this.RemotePublicKey);
+                        verifier.BlockUpdate(localCertificate, 0, localCertificate.Length);
+                        verifier.BlockUpdate(localNonce, 0, localNonce.Length);
+                        verified = verifier.VerifySignature(createSessionResponse.ServerSignature.Signature);
+                        break;
+
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+                        verifier = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
                         verifier.Init(false, this.RemotePublicKey);
                         verifier.BlockUpdate(localCertificate, 0, localCertificate.Length);
                         verifier.BlockUpdate(localNonce, 0, localNonce.Length);
@@ -385,6 +396,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     break;
 
                 case SecurityPolicyUris.Basic256Sha256:
+                case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                     signer = SignerUtilities.GetSigner("SHA-256withRSA");
                     signer.Init(true, this.LocalPrivateKey);
                     signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
@@ -393,6 +405,19 @@ namespace Workstation.ServiceModel.Ua.Channels
                     {
                         Signature = signer.GenerateSignature(),
                         Algorithm = RsaSha256Signature,
+                    };
+
+                    break;
+
+                case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+                    signer = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                    signer.Init(true, this.LocalPrivateKey);
+                    signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
+                    signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce.Length);
+                    clientSignature = new SignatureData
+                    {
+                        Signature = signer.GenerateSignature(),
+                        Algorithm = RsaPssSha256Signature,
                     };
 
                     break;
@@ -444,7 +469,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Basic256:
                     case SecurityPolicyUris.Basic256Sha256:
-                        encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
+                        encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
                         encryptor.Init(true, this.RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
@@ -454,6 +480,22 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             TokenData = cipherText,
                             EncryptionAlgorithm = RsaOaepKeyWrap,
+                            PolicyId = tokenPolicy.PolicyId
+                        };
+
+                        break;
+
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+                        encryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        encryptor.Init(true, this.RemotePublicKey);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
+                        pos = encryptor.ProcessBytes(issuedIdentity.TokenData, cipherText, pos);
+                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        identityToken = new IssuedIdentityToken
+                        {
+                            TokenData = cipherText,
+                            EncryptionAlgorithm = RsaOaepSha256KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 
@@ -505,7 +547,20 @@ namespace Workstation.ServiceModel.Ua.Channels
                         break;
 
                     case SecurityPolicyUris.Basic256Sha256:
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         signer = SignerUtilities.GetSigner("SHA-256withRSA");
+                        signer.Init(true, x509Identity.PrivateKey);
+                        signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
+                        signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce.Length);
+                        tokenSignature = new SignatureData
+                        {
+                            Signature = signer.GenerateSignature(),
+                            Algorithm = RsaSha256Signature,
+                        };
+                        break;
+
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+                        signer = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
                         signer.Init(true, x509Identity.PrivateKey);
                         signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate.Length);
                         signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce.Length);
@@ -562,6 +617,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Basic256:
                     case SecurityPolicyUris.Basic256Sha256:
+                    case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
                         encryptor.Init(true, this.RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
@@ -573,6 +629,23 @@ namespace Workstation.ServiceModel.Ua.Channels
                             UserName = userNameIdentity.UserName,
                             Password = cipherText,
                             EncryptionAlgorithm = RsaOaepKeyWrap,
+                            PolicyId = tokenPolicy.PolicyId
+                        };
+
+                        break;
+
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+                        encryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        encryptor.Init(true, this.RemotePublicKey);
+                        cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
+                        pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
+                        pos = encryptor.ProcessBytes(passwordBytes, cipherText, pos);
+                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        identityToken = new UserNameIdentityToken
+                        {
+                            UserName = userNameIdentity.UserName,
+                            Password = cipherText,
+                            EncryptionAlgorithm = RsaOaepSha256KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 

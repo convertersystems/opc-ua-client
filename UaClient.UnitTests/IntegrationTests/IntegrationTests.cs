@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -43,8 +44,11 @@ namespace Workstation.UaClient.IntegrationTests
 
         public IntegrationTests()
         {
-            this.loggerFactory = new LoggerFactory();
-            this.loggerFactory.AddDebug(LogLevel.Trace);
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddLogging(builder => builder.AddDebug());
+
+            var serviceProvider = serviceCollection.BuildServiceProvider();
+            this.loggerFactory = serviceProvider.GetService<ILoggerFactory>();
             this.logger = this.loggerFactory?.CreateLogger<IntegrationTests>();
 
             this.localDescription = new ApplicationDescription
@@ -97,9 +101,10 @@ namespace Workstation.UaClient.IntegrationTests
 
         /// <summary>
         /// Tests endpoint with no security and with no Certificate.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task ConnnectToEndpointsWithNoSecurityAndWithNoCertificate()
         {
             // discover available endpoints of server.
@@ -108,7 +113,7 @@ namespace Workstation.UaClient.IntegrationTests
                 EndpointUrl = EndpointUrl,
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+            logger.LogInformation($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
             var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, this.loggerFactory);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
@@ -139,12 +144,12 @@ namespace Workstation.UaClient.IntegrationTests
                         loggerFactory: this.loggerFactory);
 
                     await channel.OpenAsync();
-                    Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-                    Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-                    Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-                    Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
+                    logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                    logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+                    logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+                    logger.LogInformation($"UserIdentityToken: '{channel.UserIdentity}'.");
 
-                    Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                    logger.LogInformation($"Closing session '{channel.SessionId}'.");
                     await channel.CloseAsync();
                 }
             }
@@ -152,9 +157,10 @@ namespace Workstation.UaClient.IntegrationTests
 
         /// <summary>
         /// Tests all combinations of endpoint security and user identity types supported by the server.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task ConnnectToAllEndpoints()
         {
             // discover available endpoints of server.
@@ -163,11 +169,12 @@ namespace Workstation.UaClient.IntegrationTests
                 EndpointUrl = EndpointUrl,
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
-            Console.WriteLine($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+            logger.LogInformation($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
             var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
-            foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.OrderBy(e => e.SecurityLevel))
+            foreach (var selectedEndpoint in getEndpointsResponse.Endpoints
+                .OrderBy(e => e.SecurityLevel))
             {
                 foreach (var selectedTokenPolicy in selectedEndpoint.UserIdentityTokens)
                 {
@@ -198,12 +205,12 @@ namespace Workstation.UaClient.IntegrationTests
                         loggerFactory: this.loggerFactory);
 
                     await channel.OpenAsync();
-                    Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-                    Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-                    Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-                    Console.WriteLine($"UserIdentityToken: '{channel.UserIdentity}'.");
+                    logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                    logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+                    logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+                    logger.LogInformation($"UserIdentityToken: '{channel.UserIdentity}'.");
 
-                    Console.WriteLine($"Closing session '{channel.SessionId}'.");
+                    logger.LogInformation($"Closing session '{channel.SessionId}'.");
                     await channel.CloseAsync();
                 }
             }
@@ -211,9 +218,10 @@ namespace Workstation.UaClient.IntegrationTests
 
         /// <summary>
         /// Tests browsing the Objects folder.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task BrowseObjects()
         {
             var channel = new UaTcpSessionChannel(
@@ -242,21 +250,22 @@ namespace Workstation.UaClient.IntegrationTests
             rds
                 .Should().NotBeEmpty();
 
-            Console.WriteLine("+ Objects, 0:Objects, Object");
+            logger.LogInformation("+ Objects, 0:Objects, Object");
             foreach (var rd in rds)
             {
-                Console.WriteLine("   + {0}, {1}, {2}", rd.DisplayName, rd.BrowseName, rd.NodeClass);
+                logger.LogInformation("   + {0}, {1}, {2}", rd.DisplayName, rd.BrowseName, rd.NodeClass);
             }
 
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
 
         /// <summary>
         /// Tests read server status.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task Read()
         {
             var channel = new UaTcpSessionChannel(
@@ -267,31 +276,32 @@ namespace Workstation.UaClient.IntegrationTests
                 loggerFactory: this.loggerFactory);
 
             await channel.OpenAsync();
-            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
+            logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            logger.LogInformation($"Activated session '{channel.SessionId}'.");
 
             var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus), AttributeId = AttributeIds.Value } } };
             var readResult = await channel.ReadAsync(readRequest);
             var serverStatus = readResult.Results[0].GetValueOrDefault<ServerStatusDataType>();
 
-            Console.WriteLine("Server status:");
-            Console.WriteLine("  ProductName: {0}", serverStatus.BuildInfo.ProductName);
-            Console.WriteLine("  SoftwareVersion: {0}", serverStatus.BuildInfo.SoftwareVersion);
-            Console.WriteLine("  ManufacturerName: {0}", serverStatus.BuildInfo.ManufacturerName);
-            Console.WriteLine("  State: {0}", serverStatus.State);
-            Console.WriteLine("  CurrentTime: {0}", serverStatus.CurrentTime);
+            logger.LogInformation("Server status:");
+            logger.LogInformation("  ProductName: {0}", serverStatus.BuildInfo.ProductName);
+            logger.LogInformation("  SoftwareVersion: {0}", serverStatus.BuildInfo.SoftwareVersion);
+            logger.LogInformation("  ManufacturerName: {0}", serverStatus.BuildInfo.ManufacturerName);
+            logger.LogInformation("  State: {0}", serverStatus.State);
+            logger.LogInformation("  CurrentTime: {0}", serverStatus.CurrentTime);
 
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
 
         /// <summary>
         /// Tests polling the current time.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task Polling()
         {
             var channel = new UaTcpSessionChannel(
@@ -302,28 +312,29 @@ namespace Workstation.UaClient.IntegrationTests
                 loggerFactory: this.loggerFactory);
 
             await channel.OpenAsync();
-            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
+            logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            logger.LogInformation($"Activated session '{channel.SessionId}'.");
 
 
             var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus_CurrentTime), AttributeId = AttributeIds.Value } } };
             for (int i = 0; i < 10; i++)
             {
                 var readResult = await channel.ReadAsync(readRequest);
-                Console.WriteLine("Read {0}", readResult.Results[0].GetValueOrDefault<DateTime>());
+                logger.LogInformation("Read {0}", readResult.Results[0].GetValueOrDefault<DateTime>());
                 await Task.Delay(1000);
             }
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
 
         /// <summary>
         /// Tests creating a subscription and monitoring current time.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task TestSubscription()
         {
             var channel = new UaTcpSessionChannel(
@@ -334,10 +345,10 @@ namespace Workstation.UaClient.IntegrationTests
                 loggerFactory: this.loggerFactory);
 
             await channel.OpenAsync();
-            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
+            logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            logger.LogInformation($"Activated session '{channel.SessionId}'.");
 
             var req = new CreateSubscriptionRequest
             {
@@ -348,7 +359,7 @@ namespace Workstation.UaClient.IntegrationTests
             };
             var res = await channel.CreateSubscriptionAsync(req);
             var id = res.SubscriptionId;
-            Console.WriteLine($"Created subscription '{id}'.");
+            logger.LogInformation($"Created subscription '{id}'.");
 
             var req2 = new CreateMonitoredItemsRequest
             {
@@ -366,7 +377,7 @@ namespace Workstation.UaClient.IntegrationTests
             };
             var res2 = await channel.CreateMonitoredItemsAsync(req2);
 
-            Console.WriteLine("Subscribe to PublishResponse stream.");
+            logger.LogInformation("Subscribe to PublishResponse stream.");
             var numOfResponses = 0;
             var token = channel.Where(pr => pr.SubscriptionId == id).Subscribe(
                 pr =>
@@ -379,18 +390,18 @@ namespace Workstation.UaClient.IntegrationTests
                     {
                         foreach (var min in dcn.MonitoredItems)
                         {
-                            Console.WriteLine($"sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
+                            logger.LogInformation($"sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
                         }
                     }
                 },
                 ex =>
                 {
-                    Console.WriteLine("Exception in publish response handler: {0}", ex.GetBaseException().Message);
+                    logger.LogInformation("Exception in publish response handler: {0}", ex.GetBaseException().Message);
                 });
 
             await Task.Delay(5000);
 
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
 
             numOfResponses
@@ -399,9 +410,10 @@ namespace Workstation.UaClient.IntegrationTests
 
         /// <summary>
         /// Tests calling a method of the UACPPServer.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task VectorAdd()
         {
             var channel = new UaTcpSessionChannel(
@@ -415,7 +427,7 @@ namespace Workstation.UaClient.IntegrationTests
 
             await channel.OpenAsync();
 
-            Console.WriteLine("4 - Call VectorAdd method with structure arguments.");
+            logger.LogInformation("4 - Call VectorAdd method with structure arguments.");
             var v1 = new Vector { X = 1.0, Y = 2.0, Z = 3.0 };
             var v2 = new Vector { X = 1.0, Y = 2.0, Z = 3.0 };
             var request = new CallRequest
@@ -432,12 +444,12 @@ namespace Workstation.UaClient.IntegrationTests
             var response = await channel.CallAsync(request);
             var result = response.Results[0].OutputArguments[0].GetValueOrDefault<Vector>();
 
-            Console.WriteLine($"  {v1}");
-            Console.WriteLine($"+ {v2}");
-            Console.WriteLine(@"  ------------------");
-            Console.WriteLine($"  {result}");
+            logger.LogInformation($"  {v1}");
+            logger.LogInformation($"+ {v2}");
+            logger.LogInformation(@"  ------------------");
+            logger.LogInformation($"  {result}");
 
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
 
             result.Z
@@ -473,9 +485,10 @@ namespace Workstation.UaClient.IntegrationTests
 
         /// <summary>
         /// Tests reading the historical data of the UACPPServer.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task ReadHistorical()
         {
             var channel = new UaTcpSessionChannel(
@@ -486,10 +499,10 @@ namespace Workstation.UaClient.IntegrationTests
                 loggerFactory: this.loggerFactory);
 
             await channel.OpenAsync();
-            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
+            logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            logger.LogInformation($"Activated session '{channel.SessionId}'.");
 
             var historyReadRequest = new HistoryReadRequest
             {
@@ -512,7 +525,7 @@ namespace Workstation.UaClient.IntegrationTests
             var result = historyReadResponse.Results[0];
             StatusCode.IsGood(result.StatusCode)
                 .Should().BeTrue();
-            Console.WriteLine($"HistoryRead response status code: {result.StatusCode}, HistoryData count: {((HistoryData)result.HistoryData).DataValues.Length}.");
+            logger.LogInformation($"HistoryRead response status code: {result.StatusCode}, HistoryData count: {((HistoryData)result.HistoryData).DataValues.Length}.");
 
             if (false) // UaCPPserver does not appear to store event history.  
             {
@@ -539,20 +552,21 @@ namespace Workstation.UaClient.IntegrationTests
                 var result2 = historyReadResponse2.Results[0];
                 StatusCode.IsGood(result2.StatusCode)
                     .Should().BeTrue();
-                Console.WriteLine($"HistoryRead response status code: {result2.StatusCode}, HistoryEvent count: {((HistoryEvent)result2.HistoryData).Events.Length}.");
+                logger.LogInformation($"HistoryRead response status code: {result2.StatusCode}, HistoryEvent count: {((HistoryEvent)result2.HistoryData).Events.Length}.");
 
                 // Use EventHelper to create AlarmConditions from the HistoryEventFieldList
                 var alarms = ((HistoryEvent)result2.HistoryData).Events.Select(e => EventHelper.Deserialize<AlarmCondition>(e.EventFields));
             }
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
 
         /// <summary>
         /// Tests connecting to endpoint and creating a subscription based view model.
+        /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task TestViewModel()
         {
             // Read 'appSettings.json' for endpoint configuration
@@ -580,7 +594,7 @@ namespace Workstation.UaClient.IntegrationTests
             var d = new PropertyChangedEventHandler((s, e) => { });
             vm.PropertyChanged += d;
 
-            Console.WriteLine($"Created subscription.");
+            logger.LogInformation($"Created subscription.");
 
             await Task.Delay(5000);
 
@@ -629,7 +643,7 @@ namespace Workstation.UaClient.IntegrationTests
             public ObservableQueue<DataValue> CurrentTimeQueue { get; } = new ObservableQueue<DataValue>(capacity: 16, isFixedSize: true);
         }
 
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task StackTest()
         {
             var channel = new UaTcpSessionChannel(
@@ -640,10 +654,10 @@ namespace Workstation.UaClient.IntegrationTests
                 loggerFactory: this.loggerFactory);
 
             await channel.OpenAsync();
-            Console.WriteLine($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
-            Console.WriteLine($"Activated session '{channel.SessionId}'.");
+            logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+            logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+            logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+            logger.LogInformation($"Activated session '{channel.SessionId}'.");
 
             var readRequest = new ReadRequest
             {
@@ -709,9 +723,9 @@ namespace Workstation.UaClient.IntegrationTests
             }
 
             sw.Stop();
-            Console.WriteLine($"{sw.ElapsedMilliseconds} ms");
+            logger.LogInformation($"{sw.ElapsedMilliseconds} ms");
 
-            Console.WriteLine($"Closing session '{channel.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
 
@@ -719,7 +733,7 @@ namespace Workstation.UaClient.IntegrationTests
         /// Tests result of transfer subscription from channel1 to channel2.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
-        [Fact(Skip = "Only run this with a running opc test server")]
+        [Fact]
         public async Task TransferSubscription()
         {
             var channel1 = new UaTcpSessionChannel(
@@ -730,10 +744,10 @@ namespace Workstation.UaClient.IntegrationTests
                 loggerFactory: this.loggerFactory);
 
             await channel1.OpenAsync();
-            Console.WriteLine($"Opened session with endpoint '{channel1.RemoteEndpoint.EndpointUrl}'.");
-            Console.WriteLine($"SecurityPolicy: '{channel1.RemoteEndpoint.SecurityPolicyUri}'.");
-            Console.WriteLine($"SecurityMode: '{channel1.RemoteEndpoint.SecurityMode}'.");
-            Console.WriteLine($"Activated session '{channel1.SessionId}'.");
+            logger.LogInformation($"Opened session with endpoint '{channel1.RemoteEndpoint.EndpointUrl}'.");
+            logger.LogInformation($"SecurityPolicy: '{channel1.RemoteEndpoint.SecurityPolicyUri}'.");
+            logger.LogInformation($"SecurityMode: '{channel1.RemoteEndpoint.SecurityMode}'.");
+            logger.LogInformation($"Activated session '{channel1.SessionId}'.");
 
             // create the keep alive subscription.
             var subscriptionRequest = new CreateSubscriptionRequest
@@ -754,7 +768,7 @@ namespace Workstation.UaClient.IntegrationTests
                 {
                     foreach (var min in dcn.MonitoredItems)
                     {
-                        Console.WriteLine($"channel: 1; sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
+                        logger.LogInformation($"channel: 1; sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
                     }
                 }
             });
@@ -786,7 +800,7 @@ namespace Workstation.UaClient.IntegrationTests
                 {
                     foreach (var min in dcn.MonitoredItems)
                     {
-                        Console.WriteLine($"channel: 2; sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
+                        logger.LogInformation($"channel: 2; sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
                     }
                 }
             });
@@ -803,10 +817,10 @@ namespace Workstation.UaClient.IntegrationTests
 
             await Task.Delay(3000);
 
-            Console.WriteLine($"Closing session '{channel1.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel1.SessionId}'.");
             await channel1.CloseAsync();
 
-            Console.WriteLine($"Closing session '{channel2.SessionId}'.");
+            logger.LogInformation($"Closing session '{channel2.SessionId}'.");
             await channel2.CloseAsync();
         }
 
