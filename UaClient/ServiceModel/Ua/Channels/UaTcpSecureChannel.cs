@@ -440,6 +440,31 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.nonceSize = 32;
                         break;
 
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+
+                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymSigner.Init(true, this.LocalPrivateKey);
+                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymVerifier.Init(false, this.RemotePublicKey);
+                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymEncryptor.Init(true, this.RemotePublicKey);
+                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
+                        this.symSigner = new HMac(new Sha256Digest());
+                        this.symVerifier = new HMac(new Sha256Digest());
+                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
+                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
+                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 66, 1);
+                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 66, 1);
+                        this.symSignatureSize = 32;
+                        this.symSignatureKeySize = 32;
+                        this.symEncryptionBlockSize = 16;
+                        this.symEncryptionKeySize = 32;
+                        this.nonceSize = 32;
+                        break;
+
                     default:
                         throw new ServiceResultException(StatusCodes.BadSecurityPolicyRejected);
                 }
@@ -570,6 +595,31 @@ namespace Workstation.ServiceModel.Ua.Channels
                         this.symSignatureKeySize = 32;
                         this.symEncryptionBlockSize = 16;
                         this.symEncryptionKeySize = 16;
+                        this.nonceSize = 32;
+                        break;
+
+                    case SecurityPolicyUris.Aes256_Sha256_RsaPss:
+
+                        this.asymSigner = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymSigner.Init(true, this.LocalPrivateKey);
+                        this.asymVerifier = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
+                        this.asymVerifier.Init(false, this.RemotePublicKey);
+                        this.asymEncryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymEncryptor.Init(true, this.RemotePublicKey);
+                        this.asymDecryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
+                        this.asymDecryptor.Init(false, this.LocalPrivateKey);
+                        this.symSigner = new HMac(new Sha256Digest());
+                        this.symVerifier = new HMac(new Sha256Digest());
+                        this.symEncryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.symDecryptor = CipherUtilities.GetCipher("AES/CBC/NoPadding");
+                        this.asymLocalKeySize = this.LocalPrivateKey.Modulus.BitLength;
+                        this.asymRemoteKeySize = this.RemotePublicKey.Modulus.BitLength;
+                        this.asymLocalPlainTextBlockSize = Math.Max((this.asymLocalKeySize / 8) - 66, 1);
+                        this.asymRemotePlainTextBlockSize = Math.Max((this.asymRemoteKeySize / 8) - 66, 1);
+                        this.symSignatureSize = 32;
+                        this.symSignatureKeySize = 32;
+                        this.symEncryptionBlockSize = 16;
+                        this.symEncryptionKeySize = 32;
                         this.nonceSize = 32;
                         break;
 
@@ -713,6 +763,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 case SecurityPolicyUris.Basic256Sha256:
                 case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
+                case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                     digest = new Sha256Digest();
                     break;
 
