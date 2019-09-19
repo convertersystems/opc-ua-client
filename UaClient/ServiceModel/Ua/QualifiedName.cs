@@ -46,7 +46,7 @@ namespace Workstation.ServiceModel.Ua
         {
             try
             {
-                string[] ss = s.Split(new[] { ':' }, 2);
+                string[] ss = s.Split(new[] { ';' }, 2);
                 ushort ns = 0;
                 string name = s;
                 if (ss.Length > 1)
