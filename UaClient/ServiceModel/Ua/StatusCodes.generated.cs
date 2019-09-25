@@ -13,7 +13,7 @@ namespace Workstation.ServiceModel.Ua
 
     public static class StatusCodes
     {
-        /// <summary>The result was successful.</summary>
+        /// <summary>The operation completed successfully.</summary>
         public const uint Good = 0x00000000u;
         /// <summary>An unexpected error occurred.</summary>
         public const uint BadUnexpectedError = 0x80010000u;
@@ -498,7 +498,7 @@ namespace Workstation.ServiceModel.Ua
 
         static Dictionary<uint, string> DefaultMessages = new Dictionary<uint, string>()
         {
-            [0x00000000]="The result was successful.",
+            [0x00000000]="The operation completed successfully.",
             [0x80010000]="An unexpected error occurred.",
             [0x80020000]="An internal error occurred as a result of a programming or configuration error.",
             [0x80030000]="Not enough memory to complete the operation.",
