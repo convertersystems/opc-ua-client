@@ -5,11 +5,13 @@
 <#@ import namespace="System.Collections.Generic" #>
 <#@ assembly name="System.Xml.dll" #>
 <#@ import namespace="System.Xml" #>
+<#@ import namespace="System.Xml" #>
 <#@ import namespace="System.IO" #>
 <#@ output extension="generated.cs" #>
 <# 
 var filename = this.Host.ResolvePath(@"Schema\StatusCodes.csv");
 var comma = new[] { ',' };
+var quote = new[] { '\"' };
 var fields = 
     from l in File.ReadAllLines(filename)
     let s = l.Split(comma, 3)
@@ -30,8 +32,10 @@ namespace Workstation.ServiceModel.Ua
 
     public static class StatusCodes
     {
+        /// <summary>The result was successful.</summary>
+        public const uint Good = 0x00000000u;
 <# foreach (var f in fields) { #>
-        /// <summary><#= f.Message #></summary>
+        /// <summary><#= f.Message.Trim(quote) #></summary>
         public const uint <#= f.Name #> = <#= f.Value #>u;
 <# } #>
 
@@ -47,8 +51,9 @@ namespace Workstation.ServiceModel.Ua
 
         static Dictionary<uint, string> DefaultMessages = new Dictionary<uint, string>()
         {
+            [0x00000000]="The result was successful.",
 <# foreach (var f in fields) { #>
-            [<#= f.Value #>]="<#= f.Message #>",
+            [<#= f.Value #>]=<#= f.Message #>,
 <# } #>
         };
 

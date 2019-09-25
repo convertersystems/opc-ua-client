@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Workstation.UaClient</AssemblyName>
     <RootNamespace>Workstation</RootNamespace>
-    <Version>2.4.0</Version>
+    <Version>2.5.0</Version>
     <Authors>Andrew Cullen</Authors>
     <Company>Converter Systems LLC</Company>
     <PackageProjectUrl>https://github.com/convertersystems/opc-ua-client</PackageProjectUrl>
@@ -13,10 +13,10 @@
     <PackageTags>opc, opc-ua, iiot</PackageTags>
     <RepositoryUrl>https://github.com/convertersystems/opc-ua-client</RepositoryUrl>
     <Copyright>Copyright ©  2019 Converter Systems LLC.</Copyright>
-    <AssemblyVersion>2.4.0.0</AssemblyVersion>
+    <AssemblyVersion>2.5.0.0</AssemblyVersion>
     <AssemblyTitle>Workstation.UaClient ($(TargetFramework))</AssemblyTitle>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <FileVersion>2.4.0.0</FileVersion>
+    <FileVersion>2.5.0.0</FileVersion>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
     <IncludeSymbols>true</IncludeSymbols>
@@ -35,12 +35,12 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="1.2.2" />
     <PackageReference Include="Portable.BouncyCastle" Version="1.8.5" />
-    <PackageReference Include="System.Reactive" Version="4.1.5" />
-    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.9.0" />
+    <PackageReference Include="System.Reactive" Version="4.1.6" />
+    <PackageReference Include="System.Threading.Tasks.Dataflow" Version="4.10.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

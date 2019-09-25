@@ -13,6 +13,8 @@ namespace Workstation.ServiceModel.Ua
 
     public static class StatusCodes
     {
+        /// <summary>The result was successful.</summary>
+        public const uint Good = 0x00000000u;
         /// <summary>An unexpected error occurred.</summary>
         public const uint BadUnexpectedError = 0x80010000u;
         /// <summary>An internal error occurred as a result of a programming or configuration error.</summary>
@@ -57,6 +59,8 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadCertificateInvalid = 0x80120000u;
         /// <summary>An error occurred verifying security.</summary>
         public const uint BadSecurityChecksFailed = 0x80130000u;
+        /// <summary>The certificate does not meet the requirements of the security policy.</summary>
+        public const uint BadCertificatePolicyCheckFailed = 0x81140000u;
         /// <summary>The certificate has expired or is not yet valid.</summary>
         public const uint BadCertificateTimeInvalid = 0x80140000u;
         /// <summary>An issuer certificate has expired or is not yet valid.</summary>
@@ -171,7 +175,7 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadEventFilterInvalid = 0x80470000u;
         /// <summary>The content filter is not valid.</summary>
         public const uint BadContentFilterInvalid = 0x80480000u;
-        /// <summary>An unregognized operator was provided in a filter.</summary>
+        /// <summary>An unrecognized operator was provided in a filter.</summary>
         public const uint BadFilterOperatorInvalid = 0x80C10000u;
         /// <summary>A valid operator was provided, but the server does not provide support for this filter operator.</summary>
         public const uint BadFilterOperatorUnsupported = 0x80C20000u;
@@ -187,12 +191,14 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadContinuationPointInvalid = 0x804A0000u;
         /// <summary>The operation could not be processed because all continuation points have been allocated.</summary>
         public const uint BadNoContinuationPoints = 0x804B0000u;
-        /// <summary>The operation could not be processed because all continuation points have been allocated.</summary>
+        /// <summary>The reference type id does not refer to a valid reference type node.</summary>
         public const uint BadReferenceTypeIdInvalid = 0x804C0000u;
         /// <summary>The browse direction is not valid.</summary>
         public const uint BadBrowseDirectionInvalid = 0x804D0000u;
         /// <summary>The node is not part of the view.</summary>
         public const uint BadNodeNotInView = 0x804E0000u;
+        /// <summary>The number was not accepted because of a numeric overflow.</summary>
+        public const uint BadNumericOverflow = 0x81120000u;
         /// <summary>The ServerUri is not a valid URI.</summary>
         public const uint BadServerUriInvalid = 0x804F0000u;
         /// <summary>No ServerName was specified.</summary>
@@ -293,7 +299,9 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadMethodInvalid = 0x80750000u;
         /// <summary>The client did not specify all of the input arguments for the method.</summary>
         public const uint BadArgumentsMissing = 0x80760000u;
-        /// <summary>The server has reached its  maximum number of subscriptions.</summary>
+        /// <summary>The executable attribute does not allow the execution of the method.</summary>
+        public const uint BadNotExecutable = 0x81110000u;
+        /// <summary>The server has reached its maximum number of subscriptions.</summary>
         public const uint BadTooManySubscriptions = 0x80770000u;
         /// <summary>The server has reached the maximum number of queued publish requests.</summary>
         public const uint BadTooManyPublishRequests = 0x80780000u;
@@ -307,6 +315,8 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadInsufficientClientProfile = 0x807C0000u;
         /// <summary>The sub-state machine is not currently active.</summary>
         public const uint BadStateNotActive = 0x80BF0000u;
+        /// <summary>An equivalent rule already exists.</summary>
+        public const uint BadAlreadyExists = 0x81150000u;
         /// <summary>The server cannot process the request because it is too busy.</summary>
         public const uint BadTcpServerTooBusy = 0x807D0000u;
         /// <summary>The type of the message specified in the header invalid.</summary>
@@ -421,10 +431,12 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadAggregateInvalidInputs = 0x80D60000u;
         /// <summary>The aggregate configuration is not valid for specified node.</summary>
         public const uint BadAggregateConfigurationRejected = 0x80DA0000u;
-        /// <summary>The request pecifies fields which are not valid for the EventType or cannot be saved by the historian.</summary>
+        /// <summary>The request specifies fields which are not valid for the EventType or cannot be saved by the historian.</summary>
         public const uint GoodDataIgnored = 0x00D90000u;
         /// <summary>The request was rejected by the server because it did not meet the criteria set by the server.</summary>
         public const uint BadRequestNotAllowed = 0x80E40000u;
+        /// <summary>The request has not been processed by the server yet.</summary>
+        public const uint BadRequestNotComplete = 0x81130000u;
         /// <summary>The value does not come from the real source and has been edited by the server.</summary>
         public const uint GoodEdited = 0x00DC0000u;
         /// <summary>There was an error in execution of these post-actions.</summary>
@@ -473,8 +485,6 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadSyntaxError = 0x80B60000u;
         /// <summary>The operation could not be finished because all available connections are in use.</summary>
         public const uint BadMaxConnectionsReached = 0x80B70000u;
-        /// <summary>The operation completed successfully.</summary>
-        public const uint Good = 0x00000000u;
 
         public static string GetDefaultMessage(uint statusCode)
         {
@@ -488,6 +498,7 @@ namespace Workstation.ServiceModel.Ua
 
         static Dictionary<uint, string> DefaultMessages = new Dictionary<uint, string>()
         {
+            [0x00000000]="The result was successful.",
             [0x80010000]="An unexpected error occurred.",
             [0x80020000]="An internal error occurred as a result of a programming or configuration error.",
             [0x80030000]="Not enough memory to complete the operation.",
@@ -510,6 +521,7 @@ namespace Workstation.ServiceModel.Ua
             [0x80110000]="The extension object cannot be (de)serialized because the data type id is not recognized.",
             [0x80120000]="The certificate provided as a parameter is not valid.",
             [0x80130000]="An error occurred verifying security.",
+            [0x81140000]="The certificate does not meet the requirements of the security policy.",
             [0x80140000]="The certificate has expired or is not yet valid.",
             [0x80150000]="An issuer certificate has expired or is not yet valid.",
             [0x80160000]="The HostName used to connect to a server does not match a HostName in the certificate.",
@@ -567,7 +579,7 @@ namespace Workstation.ServiceModel.Ua
             [0x80460000]="A mandatory structured parameter was missing or null.",
             [0x80470000]="The event filter is not valid.",
             [0x80480000]="The content filter is not valid.",
-            [0x80C10000]="An unregognized operator was provided in a filter.",
+            [0x80C10000]="An unrecognized operator was provided in a filter.",
             [0x80C20000]="A valid operator was provided, but the server does not provide support for this filter operator.",
             [0x80C30000]="The number of operands provided for the filter operator was less then expected for the operand provided.",
             [0x80490000]="The operand used in a content filter is not valid.",
@@ -575,9 +587,10 @@ namespace Workstation.ServiceModel.Ua
             [0x80C50000]="The referenced literal is not a valid value.",
             [0x804A0000]="The continuation point provide is longer valid.",
             [0x804B0000]="The operation could not be processed because all continuation points have been allocated.",
-            [0x804C0000]="The operation could not be processed because all continuation points have been allocated.",
+            [0x804C0000]="The reference type id does not refer to a valid reference type node.",
             [0x804D0000]="The browse direction is not valid.",
             [0x804E0000]="The node is not part of the view.",
+            [0x81120000]="The number was not accepted because of a numeric overflow.",
             [0x804F0000]="The ServerUri is not a valid URI.",
             [0x80500000]="No ServerName was specified.",
             [0x80510000]="No DiscoveryUrl was specified.",
@@ -628,13 +641,15 @@ namespace Workstation.ServiceModel.Ua
             [0x80740000]="The value supplied for the attribute is not of the same type as the attribute's value.",
             [0x80750000]="The method id does not refer to a method for the specified object.",
             [0x80760000]="The client did not specify all of the input arguments for the method.",
-            [0x80770000]="The server has reached its  maximum number of subscriptions.",
+            [0x81110000]="The executable attribute does not allow the execution of the method.",
+            [0x80770000]="The server has reached its maximum number of subscriptions.",
             [0x80780000]="The server has reached the maximum number of queued publish requests.",
             [0x80790000]="There is no subscription available for this session.",
             [0x807A0000]="The sequence number is unknown to the server.",
             [0x807B0000]="The requested notification message is no longer available.",
             [0x807C0000]="The client of the current session does not support one or more Profiles that are necessary for the subscription.",
             [0x80BF0000]="The sub-state machine is not currently active.",
+            [0x81150000]="An equivalent rule already exists.",
             [0x807D0000]="The server cannot process the request because it is too busy.",
             [0x807E0000]="The type of the message specified in the header invalid.",
             [0x807F0000]="The SecureChannelId and/or TokenId are not currently in use.",
@@ -692,8 +707,9 @@ namespace Workstation.ServiceModel.Ua
             [0x80D50000]="The requested Aggregate is not support by the server.",
             [0x80D60000]="The aggregate value could not be derived due to invalid data inputs.",
             [0x80DA0000]="The aggregate configuration is not valid for specified node.",
-            [0x00D90000]="The request pecifies fields which are not valid for the EventType or cannot be saved by the historian.",
+            [0x00D90000]="The request specifies fields which are not valid for the EventType or cannot be saved by the historian.",
             [0x80E40000]="The request was rejected by the server because it did not meet the criteria set by the server.",
+            [0x81130000]="The request has not been processed by the server yet.",
             [0x00DC0000]="The value does not come from the real source and has been edited by the server.",
             [0x00DD0000]="There was an error in execution of these post-actions.",
             [0x40DE0000]="The related EngineeringUnit has been changed but the Variable Value is still provided based on the previous unit.",
@@ -718,7 +734,6 @@ namespace Workstation.ServiceModel.Ua
             [0x80B50000]="Non blocking behaviour is required and the operation would block.",
             [0x80B60000]="A value had an invalid syntax.",
             [0x80B70000]="The operation could not be finished because all available connections are in use.",
-            [0x00000000]="The operation completed successfully.",
         };
 
     }

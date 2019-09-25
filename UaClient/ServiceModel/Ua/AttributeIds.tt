@@ -29,7 +29,7 @@ namespace Workstation.ServiceModel.Ua
     public static class AttributeIds
     {
 <# foreach (var f in fields) { #>
-        public const uint <#= f.Name #> = <#= f.Value #>u;
+		public const uint <#= f.Name #> = <#= f.Value #>u;
 <# } #>
     }
 }

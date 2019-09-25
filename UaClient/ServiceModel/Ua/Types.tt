@@ -10,7 +10,7 @@
 <#@ import namespace="System.Xml.Schema" #>
 <#@ import namespace="System.Xml.Serialization" #>
 <#@ output extension="generated.cs" #>
-<# 
+<#  
 var filename = this.Host.ResolvePath(@"Schema\Types.xsd");
 var ns = new CodeNamespace();
 XmlReader reader = null;
@@ -241,6 +241,8 @@ string RenderMethodSuffix(CodeTypeReference type, List<CodeTypeDeclaration> know
             return type.ArrayRank == 0 ? "ExtensionObject<HistoryBase>" : "ExtensionObjectArray<HistoryBase>";
         case "HistoryReadDetails":
             return type.ArrayRank == 0 ? "ExtensionObject<HistoryReadDetails>" : "ExtensionObjectArray<HistoryReadDetails>";
+		case "HistoryUpdateDetails":
+            return type.ArrayRank == 0 ? "ExtensionObject<HistoryUpdateDetails>" : "ExtensionObjectArray<HistoryUpdateDetails>";
         case "MonitoringFilter":
             return type.ArrayRank == 0 ? "ExtensionObject<MonitoringFilter>" : "ExtensionObjectArray<MonitoringFilter>";
         case "MonitoringFilterResult":
@@ -250,6 +252,31 @@ string RenderMethodSuffix(CodeTypeReference type, List<CodeTypeDeclaration> know
         case "DiscoveryConfiguration":
             return type.ArrayRank == 0 ? "ExtensionObject<DiscoveryConfiguration>" : "ExtensionObjectArray<DiscoveryConfiguration>";
 
+		case "PublishedDataSetSourceDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<PublishedDataSetSourceDataType>" : "ExtensionObjectArray<PublishedDataSetSourceDataType>";
+		case "DataSetWriterTransportDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<DataSetWriterTransportDataType>" : "ExtensionObjectArray<DataSetWriterTransportDataType>";
+		case "DataSetWriterMessageDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<DataSetWriterMessageDataType>" : "ExtensionObjectArray<DataSetWriterMessageDataType>";
+		case "WriterGroupTransportDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<WriterGroupTransportDataType>" : "ExtensionObjectArray<WriterGroupTransportDataType>";
+		case "WriterGroupMessageDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<WriterGroupMessageDataType>" : "ExtensionObjectArray<WriterGroupMessageDataType>";
+		case "NetworkAddressDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<NetworkAddressDataType>" : "ExtensionObjectArray<NetworkAddressDataType>";
+		case "ConnectionTransportDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<ConnectionTransportDataType>" : "ExtensionObjectArray<ConnectionTransportDataType>";
+		case "ReaderGroupTransportDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<ReaderGroupTransportDataType>" : "ExtensionObjectArray<ReaderGroupTransportDataType>";
+		case "ReaderGroupMessageDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<ReaderGroupMessageDataType>" : "ExtensionObjectArray<ReaderGroupMessageDataType>";
+		case "DataSetReaderTransportDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<DataSetReaderTransportDataType>" : "ExtensionObjectArray<DataSetReaderTransportDataType>";
+		case "DataSetReaderMessageDataType":
+            return type.ArrayRank == 0 ? "ExtensionObject<DataSetReaderMessageDataType>" : "ExtensionObjectArray<DataSetReaderMessageDataType>";
+		case "DataTypeDefinition":
+            return type.ArrayRank == 0 ? "ExtensionObject<DataTypeDefinition>" : "ExtensionObjectArray<DataTypeDefinition>";
+			
         default:
             if(knownEnums.Any(tt=>tt.Name == name))
             {

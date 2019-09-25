@@ -94,7 +94,8 @@ namespace Workstation.UaClient.IntegrationTests
                     }
                 }
             }
-            if (userCert != null && userKey != null) {
+            if (userCert != null && userKey != null)
+            {
                 x509Identity = new X509Identity(userCert, userKey);
             }
         }
@@ -379,25 +380,30 @@ namespace Workstation.UaClient.IntegrationTests
 
             logger.LogInformation("Subscribe to PublishResponse stream.");
             var numOfResponses = 0;
-            var token = channel.Where(pr => pr.SubscriptionId == id).Subscribe(
-                pr =>
-                {
-                    numOfResponses++;
 
-                    // loop thru all the data change notifications
-                    var dcns = pr.NotificationMessage.NotificationData.OfType<DataChangeNotification>();
-                    foreach (var dcn in dcns)
-                    {
-                        foreach (var min in dcn.MonitoredItems)
-                        {
-                            logger.LogInformation($"sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
-                        }
-                    }
-                },
-                ex =>
+            void onPublish(PublishResponse pr)
+            {
+                numOfResponses++;
+
+                // loop thru all the data change notifications and log them.
+                var dcns = pr.NotificationMessage.NotificationData.OfType<DataChangeNotification>();
+                foreach (var dcn in dcns)
                 {
-                    logger.LogInformation("Exception in publish response handler: {0}", ex.GetBaseException().Message);
-                });
+                    foreach (var min in dcn.MonitoredItems)
+                    {
+                        logger.LogInformation($"sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
+                    }
+                }
+            }
+
+            void onPublishError(Exception ex)
+            {
+                logger.LogInformation("Exception in publish response handler: {0}", ex.GetBaseException().Message);
+            }
+
+            var token = channel
+                .Where(pr => pr.SubscriptionId == id)
+                .Subscribe(onPublish, onPublishError);
 
             await Task.Delay(5000);
 
@@ -590,15 +596,16 @@ namespace Workstation.UaClient.IntegrationTests
             app.Run();
 
             var vm = new MyViewModel();
-            // simulate a view <-> view-model
-            var d = new PropertyChangedEventHandler((s, e) => { });
-            vm.PropertyChanged += d;
+
+            void onPropertyChanged(object s, PropertyChangedEventArgs e) { }
+
+            vm.PropertyChanged += onPropertyChanged; // simulate xaml binding
 
             logger.LogInformation($"Created subscription.");
 
             await Task.Delay(5000);
 
-            vm.PropertyChanged -= d;
+            vm.PropertyChanged -= onPropertyChanged; // simulate un-binding
             app.Dispose();
 
             vm.CurrentTime
@@ -760,18 +767,27 @@ namespace Workstation.UaClient.IntegrationTests
             var subscriptionResponse = await channel1.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
             var id = subscriptionResponse.SubscriptionId;
 
-            var token = channel1.Where(pr => pr.SubscriptionId == id).Subscribe(pr =>
+            void onPublish(PublishResponse pr)
             {
-                // loop thru all the data change notifications
+                // loop thru all the data change notifications and log them.
                 var dcns = pr.NotificationMessage.NotificationData.OfType<DataChangeNotification>();
                 foreach (var dcn in dcns)
                 {
                     foreach (var min in dcn.MonitoredItems)
                     {
-                        logger.LogInformation($"channel: 1; sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
+                        logger.LogInformation($"sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
                     }
                 }
-            });
+            }
+
+            void onPublishError(Exception ex)
+            {
+                logger.LogInformation("Exception in publish response handler: {0}", ex.GetBaseException().Message);
+            }
+
+            var token = channel1
+                .Where(pr => pr.SubscriptionId == id)
+                .Subscribe(onPublish, onPublishError);
 
             var itemsRequest = new CreateMonitoredItemsRequest
             {
@@ -792,18 +808,10 @@ namespace Workstation.UaClient.IntegrationTests
                 EndpointUrl);
 
             await channel2.OpenAsync();
-            var token2 = channel2.Where(pr => pr.SubscriptionId == id).Subscribe(pr =>
-            {
-                // loop thru all the data change notifications
-                var dcns = pr.NotificationMessage.NotificationData.OfType<DataChangeNotification>();
-                foreach (var dcn in dcns)
-                {
-                    foreach (var min in dcn.MonitoredItems)
-                    {
-                        logger.LogInformation($"channel: 2; sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
-                    }
-                }
-            });
+
+            var token2 = channel2
+                .Where(pr => pr.SubscriptionId == id)
+                .Subscribe(onPublish, onPublishError);
 
             var transferRequest = new TransferSubscriptionsRequest
             {
@@ -814,6 +822,7 @@ namespace Workstation.UaClient.IntegrationTests
 
             StatusCode.IsGood(transferResult.Results[0].StatusCode)
                 .Should().BeTrue();
+            logger.LogInformation($"Transfered subscriptions to new client.");
 
             await Task.Delay(3000);
 
