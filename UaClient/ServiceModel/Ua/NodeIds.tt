@@ -31,6 +31,7 @@ namespace Workstation.ServiceModel.Ua
 <# foreach (var f in fields.Where(ff=>ff.Type=="DataType")) { #>
         public const string <#= f.Name #> = "i=<#= f.Value #>";
 <# } #>
+        public const string HistoryBase = "i=99999";
     }
 
     public static class MethodIds
@@ -45,6 +46,8 @@ namespace Workstation.ServiceModel.Ua
 <# foreach (var f in fields.Where(ff=>ff.Type=="Object")) { #>
         public const string <#= f.Name #> = "i=<#= f.Value #>";
 <# } #>
+        public const string HistoryBase_Encoding_DefaultBinary = "i=99998";
+        public const string HistoryBase_Encoding_DefaultXml = "i=99997";
     }
 
     public static class ObjectTypeIds

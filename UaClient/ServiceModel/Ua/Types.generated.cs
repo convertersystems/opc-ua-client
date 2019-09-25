@@ -12,6 +12,15 @@ namespace Workstation.ServiceModel.Ua
     using System;
     using System.Xml.Linq;
 
+    [DataTypeId(DataTypeIds.MessageSecurityMode)]
+    public enum MessageSecurityMode
+    {
+        Invalid=0,
+        None=1,
+        Sign=2,
+        SignAndEncrypt=3,
+    }
+
     [DataTypeId(DataTypeIds.OpenFileMode)]
     public enum OpenFileMode
     {
@@ -19,6 +28,17 @@ namespace Workstation.ServiceModel.Ua
         Write=2,
         EraseExisting=4,
         Append=8,
+    }
+
+    [DataTypeId(DataTypeIds.IdentityCriteriaType)]
+    public enum IdentityCriteriaType
+    {
+        UserName=1,
+        Thumbprint=2,
+        Role=3,
+        GroupId=4,
+        Anonymous=5,
+        AuthenticatedUser=6,
     }
 
     [DataTypeId(DataTypeIds.TrustListMasks)]
@@ -30,6 +50,107 @@ namespace Workstation.ServiceModel.Ua
         IssuerCertificates=4,
         IssuerCrls=8,
         All=15,
+    }
+
+    [DataTypeId(DataTypeIds.StructureType)]
+    public enum StructureType
+    {
+        Structure=0,
+        StructureWithOptionalFields=1,
+        Union=2,
+    }
+
+    [DataTypeId(DataTypeIds.PubSubState)]
+    public enum PubSubState
+    {
+        Disabled=0,
+        Paused=1,
+        Operational=2,
+        Error=3,
+    }
+
+    [DataTypeId(DataTypeIds.FilterOperator)]
+    public enum FilterOperator
+    {
+        Equals=0,
+        IsNull=1,
+        GreaterThan=2,
+        LessThan=3,
+        GreaterThanOrEqual=4,
+        LessThanOrEqual=5,
+        Like=6,
+        Not=7,
+        Between=8,
+        InList=9,
+        And=10,
+        Or=11,
+        Cast=12,
+        InView=13,
+        OfType=14,
+        RelatedTo=15,
+        BitwiseAnd=16,
+        BitwiseOr=17,
+    }
+
+    [DataTypeId(DataTypeIds.BrokerTransportQualityOfService)]
+    public enum BrokerTransportQualityOfService
+    {
+        NotSpecified=0,
+        BestEffort=1,
+        AtLeastOnce=2,
+        AtMostOnce=3,
+        ExactlyOnce=4,
+    }
+
+    [DataTypeId(DataTypeIds.ApplicationType)]
+    public enum ApplicationType
+    {
+        Server=0,
+        Client=1,
+        ClientAndServer=2,
+        DiscoveryServer=3,
+    }
+
+    [DataTypeId(DataTypeIds.UserTokenType)]
+    public enum UserTokenType
+    {
+        Anonymous=0,
+        UserName=1,
+        Certificate=2,
+        IssuedToken=3,
+    }
+
+    [DataTypeId(DataTypeIds.OverrideValueHandling)]
+    public enum OverrideValueHandling
+    {
+        Disabled=0,
+        LastUsableValue=1,
+        OverrideValue=2,
+    }
+
+    [DataTypeId(DataTypeIds.DataSetOrderingType)]
+    public enum DataSetOrderingType
+    {
+        Undefined=0,
+        AscendingWriterId=1,
+        AscendingWriterIdSingle=2,
+    }
+
+    [DataTypeId(DataTypeIds.DiagnosticsLevel)]
+    public enum DiagnosticsLevel
+    {
+        Basic=0,
+        Advanced=1,
+        Info=2,
+        Log=3,
+        Debug=4,
+    }
+
+    [DataTypeId(DataTypeIds.PubSubDiagnosticsCounterClassification)]
+    public enum PubSubDiagnosticsCounterClassification
+    {
+        Information=0,
+        Error=1,
     }
 
     [DataTypeId(DataTypeIds.IdType)]
@@ -53,33 +174,6 @@ namespace Workstation.ServiceModel.Ua
         ReferenceType=32,
         DataType=64,
         View=128,
-    }
-
-    [DataTypeId(DataTypeIds.ApplicationType)]
-    public enum ApplicationType
-    {
-        Server=0,
-        Client=1,
-        ClientAndServer=2,
-        DiscoveryServer=3,
-    }
-
-    [DataTypeId(DataTypeIds.MessageSecurityMode)]
-    public enum MessageSecurityMode
-    {
-        Invalid=0,
-        None=1,
-        Sign=2,
-        SignAndEncrypt=3,
-    }
-
-    [DataTypeId(DataTypeIds.UserTokenType)]
-    public enum UserTokenType
-    {
-        Anonymous=0,
-        UserName=1,
-        Certificate=2,
-        IssuedToken=3,
     }
 
     [DataTypeId(DataTypeIds.SecurityTokenRequestType)]
@@ -115,43 +209,18 @@ namespace Workstation.ServiceModel.Ua
         ValueRank=524288,
         WriteMask=1048576,
         Value=2097152,
-        All=4194303,
-        BaseNode=1335396,
-        Object=1335524,
-        ObjectTypeOrDataType=1337444,
-        Variable=4026999,
-        VariableType=3958902,
-        Method=1466724,
-        ReferenceType=1371236,
-        View=1335532,
-    }
-
-    [DataTypeId(DataTypeIds.AttributeWriteMask)]
-    public enum AttributeWriteMask
-    {
-        None=0,
-        AccessLevel=1,
-        ArrayDimensions=2,
-        BrowseName=4,
-        ContainsNoLoops=8,
-        DataType=16,
-        Description=32,
-        DisplayName=64,
-        EventNotifier=128,
-        Executable=256,
-        Historizing=512,
-        InverseName=1024,
-        IsAbstract=2048,
-        MinimumSamplingInterval=4096,
-        NodeClass=8192,
-        NodeId=16384,
-        Symmetric=32768,
-        UserAccessLevel=65536,
-        UserExecutable=131072,
-        UserWriteMask=262144,
-        ValueRank=524288,
-        WriteMask=1048576,
-        ValueForVariableType=2097152,
+        DataTypeDefinition=4194304,
+        RolePermissions=8388608,
+        AccessRestrictions=16777216,
+        All=33554431,
+        BaseNode=26501220,
+        Object=26501348,
+        ObjectType=26503268,
+        Variable=26571383,
+        VariableType=28600438,
+        Method=26632548,
+        ReferenceType=26537060,
+        View=26501356,
     }
 
     [DataTypeId(DataTypeIds.BrowseDirection)]
@@ -160,6 +229,7 @@ namespace Workstation.ServiceModel.Ua
         Forward=0,
         Inverse=1,
         Both=2,
+        Invalid=3,
     }
 
     [DataTypeId(DataTypeIds.BrowseResultMask)]
@@ -175,29 +245,6 @@ namespace Workstation.ServiceModel.Ua
         All=63,
         ReferenceTypeInfo=3,
         TargetInfo=60,
-    }
-
-    [DataTypeId(DataTypeIds.FilterOperator)]
-    public enum FilterOperator
-    {
-        Equals=0,
-        IsNull=1,
-        GreaterThan=2,
-        LessThan=3,
-        GreaterThanOrEqual=4,
-        LessThanOrEqual=5,
-        Like=6,
-        Not=7,
-        Between=8,
-        InList=9,
-        And=10,
-        Or=11,
-        Cast=12,
-        InView=13,
-        OfType=14,
-        RelatedTo=15,
-        BitwiseAnd=16,
-        BitwiseOr=17,
     }
 
     [DataTypeId(DataTypeIds.TimestampsToReturn)]
@@ -298,10 +345,309 @@ namespace Workstation.ServiceModel.Ua
     public enum ExceptionDeviationFormat
     {
         AbsoluteValue=0,
-        PercentOfRange=1,
-        PercentOfValue=2,
+        PercentOfValue=1,
+        PercentOfRange=2,
         PercentOfEURange=3,
         Unknown=4,
+    }
+
+    [BinaryEncodingId(ObjectIds.KeyValuePair_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.KeyValuePair_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.KeyValuePair)]
+    public class KeyValuePair : IEncodable
+    {
+        public QualifiedName Key { get; set; }
+        public Variant Value { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteQualifiedName("Key", Key);
+            encoder.WriteVariant("Value", Value);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Key = decoder.ReadQualifiedName("Key");
+            Value = decoder.ReadVariant("Value");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.EndpointType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.EndpointType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.EndpointType)]
+    public class EndpointType : IEncodable
+    {
+        public String EndpointUrl { get; set; }
+        public MessageSecurityMode SecurityMode { get; set; }
+        public String SecurityPolicyUri { get; set; }
+        public String TransportProfileUri { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("EndpointUrl", EndpointUrl);
+            encoder.WriteEnumeration<MessageSecurityMode>("SecurityMode", SecurityMode);
+            encoder.WriteString("SecurityPolicyUri", SecurityPolicyUri);
+            encoder.WriteString("TransportProfileUri", TransportProfileUri);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            EndpointUrl = decoder.ReadString("EndpointUrl");
+            SecurityMode = decoder.ReadEnumeration<MessageSecurityMode>("SecurityMode");
+            SecurityPolicyUri = decoder.ReadString("SecurityPolicyUri");
+            TransportProfileUri = decoder.ReadString("TransportProfileUri");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.RationalNumber_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.RationalNumber_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.RationalNumber)]
+    public class RationalNumber : IEncodable
+    {
+        public Int32 Numerator { get; set; }
+        public UInt32 Denominator { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteInt32("Numerator", Numerator);
+            encoder.WriteUInt32("Denominator", Denominator);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Numerator = decoder.ReadInt32("Numerator");
+            Denominator = decoder.ReadUInt32("Denominator");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.Vector_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.Vector_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.Vector)]
+    public class Vector : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ThreeDVector_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ThreeDVector_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ThreeDVector)]
+    public class ThreeDVector : Vector
+    {
+        public Double X { get; set; }
+        public Double Y { get; set; }
+        public Double Z { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteDouble("X", X);
+            encoder.WriteDouble("Y", Y);
+            encoder.WriteDouble("Z", Z);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            X = decoder.ReadDouble("X");
+            Y = decoder.ReadDouble("Y");
+            Z = decoder.ReadDouble("Z");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.CartesianCoordinates_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.CartesianCoordinates_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.CartesianCoordinates)]
+    public class CartesianCoordinates : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ThreeDCartesianCoordinates_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ThreeDCartesianCoordinates_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ThreeDCartesianCoordinates)]
+    public class ThreeDCartesianCoordinates : CartesianCoordinates
+    {
+        public Double X { get; set; }
+        public Double Y { get; set; }
+        public Double Z { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteDouble("X", X);
+            encoder.WriteDouble("Y", Y);
+            encoder.WriteDouble("Z", Z);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            X = decoder.ReadDouble("X");
+            Y = decoder.ReadDouble("Y");
+            Z = decoder.ReadDouble("Z");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.Orientation_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.Orientation_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.Orientation)]
+    public class Orientation : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ThreeDOrientation_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ThreeDOrientation_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ThreeDOrientation)]
+    public class ThreeDOrientation : Orientation
+    {
+        public Double A { get; set; }
+        public Double B { get; set; }
+        public Double C { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteDouble("A", A);
+            encoder.WriteDouble("B", B);
+            encoder.WriteDouble("C", C);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            A = decoder.ReadDouble("A");
+            B = decoder.ReadDouble("B");
+            C = decoder.ReadDouble("C");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.Frame_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.Frame_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.Frame)]
+    public class Frame : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ThreeDFrame_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ThreeDFrame_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ThreeDFrame)]
+    public class ThreeDFrame : Frame
+    {
+        public ThreeDCartesianCoordinates CartesianCoordinates { get; set; }
+        public ThreeDOrientation Orientation { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodable<ThreeDCartesianCoordinates>("CartesianCoordinates", CartesianCoordinates);
+            encoder.WriteEncodable<ThreeDOrientation>("Orientation", Orientation);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            CartesianCoordinates = decoder.ReadEncodable<ThreeDCartesianCoordinates>("CartesianCoordinates");
+            Orientation = decoder.ReadEncodable<ThreeDOrientation>("Orientation");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.IdentityMappingRuleType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.IdentityMappingRuleType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.IdentityMappingRuleType)]
+    public class IdentityMappingRuleType : IEncodable
+    {
+        public IdentityCriteriaType CriteriaType { get; set; }
+        public String Criteria { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEnumeration<IdentityCriteriaType>("CriteriaType", CriteriaType);
+            encoder.WriteString("Criteria", Criteria);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            CriteriaType = decoder.ReadEnumeration<IdentityCriteriaType>("CriteriaType");
+            Criteria = decoder.ReadString("Criteria");
+            decoder.PopNamespace();
+        }
     }
 
     [BinaryEncodingId(ObjectIds.TrustListDataType_Encoding_DefaultBinary)]
@@ -338,6 +684,2014 @@ namespace Workstation.ServiceModel.Ua
         }
     }
 
+    [BinaryEncodingId(ObjectIds.DecimalDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DecimalDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DecimalDataType)]
+    public class DecimalDataType : IEncodable
+    {
+        public Int16 Scale { get; set; }
+        public Byte[] Value { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteInt16("Scale", Scale);
+            encoder.WriteByteString("Value", Value);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Scale = decoder.ReadInt16("Scale");
+            Value = decoder.ReadByteString("Value");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataTypeSchemaHeader_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataTypeSchemaHeader_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataTypeSchemaHeader)]
+    public class DataTypeSchemaHeader : IEncodable
+    {
+        public String[] Namespaces { get; set; }
+        public StructureDescription[] StructureDataTypes { get; set; }
+        public EnumDescription[] EnumDataTypes { get; set; }
+        public SimpleTypeDescription[] SimpleDataTypes { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteStringArray("Namespaces", Namespaces);
+            encoder.WriteEncodableArray<StructureDescription>("StructureDataTypes", StructureDataTypes);
+            encoder.WriteEncodableArray<EnumDescription>("EnumDataTypes", EnumDataTypes);
+            encoder.WriteEncodableArray<SimpleTypeDescription>("SimpleDataTypes", SimpleDataTypes);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Namespaces = decoder.ReadStringArray("Namespaces");
+            StructureDataTypes = decoder.ReadEncodableArray<StructureDescription>("StructureDataTypes");
+            EnumDataTypes = decoder.ReadEncodableArray<EnumDescription>("EnumDataTypes");
+            SimpleDataTypes = decoder.ReadEncodableArray<SimpleTypeDescription>("SimpleDataTypes");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.StructureDescription_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.StructureDescription_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.StructureDescription)]
+    public class StructureDescription : DataTypeDescription
+    {
+        public StructureDefinition StructureDefinition { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodable<StructureDefinition>("StructureDefinition", StructureDefinition);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            StructureDefinition = decoder.ReadEncodable<StructureDefinition>("StructureDefinition");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.StructureDefinition_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.StructureDefinition_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.StructureDefinition)]
+    public class StructureDefinition : DataTypeDefinition
+    {
+        public NodeId DefaultEncodingId { get; set; }
+        public NodeId BaseDataType { get; set; }
+        public StructureType StructureType { get; set; }
+        public StructureField[] Fields { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("DefaultEncodingId", DefaultEncodingId);
+            encoder.WriteNodeId("BaseDataType", BaseDataType);
+            encoder.WriteEnumeration<StructureType>("StructureType", StructureType);
+            encoder.WriteEncodableArray<StructureField>("Fields", Fields);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            DefaultEncodingId = decoder.ReadNodeId("DefaultEncodingId");
+            BaseDataType = decoder.ReadNodeId("BaseDataType");
+            StructureType = decoder.ReadEnumeration<StructureType>("StructureType");
+            Fields = decoder.ReadEncodableArray<StructureField>("Fields");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.StructureField_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.StructureField_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.StructureField)]
+    public class StructureField : IEncodable
+    {
+        public String Name { get; set; }
+        public LocalizedText Description { get; set; }
+        public NodeId DataType { get; set; }
+        public Int32 ValueRank { get; set; }
+        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32 MaxStringLength { get; set; }
+        public Boolean IsOptional { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteLocalizedText("Description", Description);
+            encoder.WriteNodeId("DataType", DataType);
+            encoder.WriteInt32("ValueRank", ValueRank);
+            encoder.WriteUInt32Array("ArrayDimensions", ArrayDimensions);
+            encoder.WriteUInt32("MaxStringLength", MaxStringLength);
+            encoder.WriteBoolean("IsOptional", IsOptional);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            Description = decoder.ReadLocalizedText("Description");
+            DataType = decoder.ReadNodeId("DataType");
+            ValueRank = decoder.ReadInt32("ValueRank");
+            ArrayDimensions = decoder.ReadUInt32Array("ArrayDimensions");
+            MaxStringLength = decoder.ReadUInt32("MaxStringLength");
+            IsOptional = decoder.ReadBoolean("IsOptional");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataTypeDefinition_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataTypeDefinition_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataTypeDefinition)]
+    public class DataTypeDefinition : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.EnumDefinition_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.EnumDefinition_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.EnumDefinition)]
+    public class EnumDefinition : DataTypeDefinition
+    {
+        public EnumField[] Fields { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodableArray<EnumField>("Fields", Fields);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Fields = decoder.ReadEncodableArray<EnumField>("Fields");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.EnumField_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.EnumField_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.EnumField)]
+    public class EnumField : EnumValueType
+    {
+        public String Name { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.EnumValueType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.EnumValueType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.EnumValueType)]
+    public class EnumValueType : IEncodable
+    {
+        public Int64 Value { get; set; }
+        public LocalizedText DisplayName { get; set; }
+        public LocalizedText Description { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteInt64("Value", Value);
+            encoder.WriteLocalizedText("DisplayName", DisplayName);
+            encoder.WriteLocalizedText("Description", Description);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Value = decoder.ReadInt64("Value");
+            DisplayName = decoder.ReadLocalizedText("DisplayName");
+            Description = decoder.ReadLocalizedText("Description");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataTypeDescription_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataTypeDescription_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataTypeDescription)]
+    public class DataTypeDescription : IEncodable
+    {
+        public NodeId DataTypeId { get; set; }
+        public QualifiedName Name { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("DataTypeId", DataTypeId);
+            encoder.WriteQualifiedName("Name", Name);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            DataTypeId = decoder.ReadNodeId("DataTypeId");
+            Name = decoder.ReadQualifiedName("Name");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.SimpleTypeDescription_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.SimpleTypeDescription_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.SimpleTypeDescription)]
+    public class SimpleTypeDescription : DataTypeDescription
+    {
+        public NodeId BaseDataType { get; set; }
+        public Byte BuiltInType { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("BaseDataType", BaseDataType);
+            encoder.WriteByte("BuiltInType", BuiltInType);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            BaseDataType = decoder.ReadNodeId("BaseDataType");
+            BuiltInType = decoder.ReadByte("BuiltInType");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.EnumDescription_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.EnumDescription_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.EnumDescription)]
+    public class EnumDescription : DataTypeDescription
+    {
+        public EnumDefinition EnumDefinition { get; set; }
+        public Byte BuiltInType { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodable<EnumDefinition>("EnumDefinition", EnumDefinition);
+            encoder.WriteByte("BuiltInType", BuiltInType);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            EnumDefinition = decoder.ReadEncodable<EnumDefinition>("EnumDefinition");
+            BuiltInType = decoder.ReadByte("BuiltInType");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataSetMetaDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataSetMetaDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataSetMetaDataType)]
+    public class DataSetMetaDataType : DataTypeSchemaHeader
+    {
+        public String Name { get; set; }
+        public LocalizedText Description { get; set; }
+        public FieldMetaData[] Fields { get; set; }
+        public Guid DataSetClassId { get; set; }
+        public ConfigurationVersionDataType ConfigurationVersion { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteLocalizedText("Description", Description);
+            encoder.WriteEncodableArray<FieldMetaData>("Fields", Fields);
+            encoder.WriteGuid("DataSetClassId", DataSetClassId);
+            encoder.WriteEncodable<ConfigurationVersionDataType>("ConfigurationVersion", ConfigurationVersion);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            Description = decoder.ReadLocalizedText("Description");
+            Fields = decoder.ReadEncodableArray<FieldMetaData>("Fields");
+            DataSetClassId = decoder.ReadGuid("DataSetClassId");
+            ConfigurationVersion = decoder.ReadEncodable<ConfigurationVersionDataType>("ConfigurationVersion");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.FieldMetaData_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.FieldMetaData_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.FieldMetaData)]
+    public class FieldMetaData : IEncodable
+    {
+        public String Name { get; set; }
+        public LocalizedText Description { get; set; }
+        public UInt16 FieldFlags { get; set; }
+        public Byte BuiltInType { get; set; }
+        public NodeId DataType { get; set; }
+        public Int32 ValueRank { get; set; }
+        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32 MaxStringLength { get; set; }
+        public Guid DataSetFieldId { get; set; }
+        public KeyValuePair[] Properties { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteLocalizedText("Description", Description);
+            encoder.WriteUInt16("FieldFlags", FieldFlags);
+            encoder.WriteByte("BuiltInType", BuiltInType);
+            encoder.WriteNodeId("DataType", DataType);
+            encoder.WriteInt32("ValueRank", ValueRank);
+            encoder.WriteUInt32Array("ArrayDimensions", ArrayDimensions);
+            encoder.WriteUInt32("MaxStringLength", MaxStringLength);
+            encoder.WriteGuid("DataSetFieldId", DataSetFieldId);
+            encoder.WriteEncodableArray<KeyValuePair>("Properties", Properties);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            Description = decoder.ReadLocalizedText("Description");
+            FieldFlags = decoder.ReadUInt16("FieldFlags");
+            BuiltInType = decoder.ReadByte("BuiltInType");
+            DataType = decoder.ReadNodeId("DataType");
+            ValueRank = decoder.ReadInt32("ValueRank");
+            ArrayDimensions = decoder.ReadUInt32Array("ArrayDimensions");
+            MaxStringLength = decoder.ReadUInt32("MaxStringLength");
+            DataSetFieldId = decoder.ReadGuid("DataSetFieldId");
+            Properties = decoder.ReadEncodableArray<KeyValuePair>("Properties");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ConfigurationVersionDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ConfigurationVersionDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ConfigurationVersionDataType)]
+    public class ConfigurationVersionDataType : IEncodable
+    {
+        public UInt32 MajorVersion { get; set; }
+        public UInt32 MinorVersion { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("MajorVersion", MajorVersion);
+            encoder.WriteUInt32("MinorVersion", MinorVersion);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            MajorVersion = decoder.ReadUInt32("MajorVersion");
+            MinorVersion = decoder.ReadUInt32("MinorVersion");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.UABinaryFileDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.UABinaryFileDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.UABinaryFileDataType)]
+    public class UABinaryFileDataType : DataTypeSchemaHeader
+    {
+        public String SchemaLocation { get; set; }
+        public KeyValuePair[] FileHeader { get; set; }
+        public Variant Body { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("SchemaLocation", SchemaLocation);
+            encoder.WriteEncodableArray<KeyValuePair>("FileHeader", FileHeader);
+            encoder.WriteVariant("Body", Body);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            SchemaLocation = decoder.ReadString("SchemaLocation");
+            FileHeader = decoder.ReadEncodableArray<KeyValuePair>("FileHeader");
+            Body = decoder.ReadVariant("Body");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PublishedDataSetDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PublishedDataSetDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PublishedDataSetDataType)]
+    public class PublishedDataSetDataType : IEncodable
+    {
+        public String Name { get; set; }
+        public String[] DataSetFolder { get; set; }
+        public DataSetMetaDataType DataSetMetaData { get; set; }
+        public KeyValuePair[] ExtensionFields { get; set; }
+        public PublishedDataSetSourceDataType DataSetSource { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteStringArray("DataSetFolder", DataSetFolder);
+            encoder.WriteEncodable<DataSetMetaDataType>("DataSetMetaData", DataSetMetaData);
+            encoder.WriteEncodableArray<KeyValuePair>("ExtensionFields", ExtensionFields);
+            encoder.WriteExtensionObject<PublishedDataSetSourceDataType>("DataSetSource", DataSetSource);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            DataSetFolder = decoder.ReadStringArray("DataSetFolder");
+            DataSetMetaData = decoder.ReadEncodable<DataSetMetaDataType>("DataSetMetaData");
+            ExtensionFields = decoder.ReadEncodableArray<KeyValuePair>("ExtensionFields");
+            DataSetSource = decoder.ReadExtensionObject<PublishedDataSetSourceDataType>("DataSetSource");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PublishedDataSetSourceDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PublishedDataSetSourceDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PublishedDataSetSourceDataType)]
+    public class PublishedDataSetSourceDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PublishedEventsDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PublishedEventsDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PublishedEventsDataType)]
+    public class PublishedEventsDataType : PublishedDataSetSourceDataType
+    {
+        public NodeId EventNotifier { get; set; }
+        public SimpleAttributeOperand[] SelectedFields { get; set; }
+        public ContentFilter Filter { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("EventNotifier", EventNotifier);
+            encoder.WriteEncodableArray<SimpleAttributeOperand>("SelectedFields", SelectedFields);
+            encoder.WriteEncodable<ContentFilter>("Filter", Filter);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            EventNotifier = decoder.ReadNodeId("EventNotifier");
+            SelectedFields = decoder.ReadEncodableArray<SimpleAttributeOperand>("SelectedFields");
+            Filter = decoder.ReadEncodable<ContentFilter>("Filter");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.SimpleAttributeOperand_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.SimpleAttributeOperand_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.SimpleAttributeOperand)]
+    public class SimpleAttributeOperand : FilterOperand
+    {
+        public NodeId TypeDefinitionId { get; set; }
+        public QualifiedName[] BrowsePath { get; set; }
+        public UInt32 AttributeId { get; set; }
+        public String IndexRange { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("TypeDefinitionId", TypeDefinitionId);
+            encoder.WriteQualifiedNameArray("BrowsePath", BrowsePath);
+            encoder.WriteUInt32("AttributeId", AttributeId);
+            encoder.WriteString("IndexRange", IndexRange);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            TypeDefinitionId = decoder.ReadNodeId("TypeDefinitionId");
+            BrowsePath = decoder.ReadQualifiedNameArray("BrowsePath");
+            AttributeId = decoder.ReadUInt32("AttributeId");
+            IndexRange = decoder.ReadString("IndexRange");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.FilterOperand_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.FilterOperand_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.FilterOperand)]
+    public class FilterOperand : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.AttributeOperand_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.AttributeOperand_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.AttributeOperand)]
+    public class AttributeOperand : FilterOperand
+    {
+        public NodeId NodeId { get; set; }
+        public String Alias { get; set; }
+        public RelativePath BrowsePath { get; set; }
+        public UInt32 AttributeId { get; set; }
+        public String IndexRange { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("NodeId", NodeId);
+            encoder.WriteString("Alias", Alias);
+            encoder.WriteEncodable<RelativePath>("BrowsePath", BrowsePath);
+            encoder.WriteUInt32("AttributeId", AttributeId);
+            encoder.WriteString("IndexRange", IndexRange);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            NodeId = decoder.ReadNodeId("NodeId");
+            Alias = decoder.ReadString("Alias");
+            BrowsePath = decoder.ReadEncodable<RelativePath>("BrowsePath");
+            AttributeId = decoder.ReadUInt32("AttributeId");
+            IndexRange = decoder.ReadString("IndexRange");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.RelativePath_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.RelativePath_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.RelativePath)]
+    public class RelativePath : IEncodable
+    {
+        public RelativePathElement[] Elements { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodableArray<RelativePathElement>("Elements", Elements);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Elements = decoder.ReadEncodableArray<RelativePathElement>("Elements");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.RelativePathElement_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.RelativePathElement_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.RelativePathElement)]
+    public class RelativePathElement : IEncodable
+    {
+        public NodeId ReferenceTypeId { get; set; }
+        public Boolean IsInverse { get; set; }
+        public Boolean IncludeSubtypes { get; set; }
+        public QualifiedName TargetName { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("ReferenceTypeId", ReferenceTypeId);
+            encoder.WriteBoolean("IsInverse", IsInverse);
+            encoder.WriteBoolean("IncludeSubtypes", IncludeSubtypes);
+            encoder.WriteQualifiedName("TargetName", TargetName);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            ReferenceTypeId = decoder.ReadNodeId("ReferenceTypeId");
+            IsInverse = decoder.ReadBoolean("IsInverse");
+            IncludeSubtypes = decoder.ReadBoolean("IncludeSubtypes");
+            TargetName = decoder.ReadQualifiedName("TargetName");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.LiteralOperand_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.LiteralOperand_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.LiteralOperand)]
+    public class LiteralOperand : FilterOperand
+    {
+        public Variant Value { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteVariant("Value", Value);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Value = decoder.ReadVariant("Value");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ElementOperand_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ElementOperand_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ElementOperand)]
+    public class ElementOperand : FilterOperand
+    {
+        public UInt32 Index { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("Index", Index);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Index = decoder.ReadUInt32("Index");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ContentFilter_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ContentFilter_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ContentFilter)]
+    public class ContentFilter : IEncodable
+    {
+        public ContentFilterElement[] Elements { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodableArray<ContentFilterElement>("Elements", Elements);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Elements = decoder.ReadEncodableArray<ContentFilterElement>("Elements");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ContentFilterElement_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ContentFilterElement_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ContentFilterElement)]
+    public class ContentFilterElement : IEncodable
+    {
+        public FilterOperator FilterOperator { get; set; }
+        public FilterOperand[] FilterOperands { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEnumeration<FilterOperator>("FilterOperator", FilterOperator);
+            encoder.WriteExtensionObjectArray<FilterOperand>("FilterOperands", FilterOperands);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            FilterOperator = decoder.ReadEnumeration<FilterOperator>("FilterOperator");
+            FilterOperands = decoder.ReadExtensionObjectArray<FilterOperand>("FilterOperands");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PublishedDataItemsDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PublishedDataItemsDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PublishedDataItemsDataType)]
+    public class PublishedDataItemsDataType : PublishedDataSetSourceDataType
+    {
+        public PublishedVariableDataType[] PublishedData { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodableArray<PublishedVariableDataType>("PublishedData", PublishedData);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            PublishedData = decoder.ReadEncodableArray<PublishedVariableDataType>("PublishedData");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PublishedVariableDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PublishedVariableDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PublishedVariableDataType)]
+    public class PublishedVariableDataType : IEncodable
+    {
+        public NodeId PublishedVariable { get; set; }
+        public UInt32 AttributeId { get; set; }
+        public Double SamplingIntervalHint { get; set; }
+        public UInt32 DeadbandType { get; set; }
+        public Double DeadbandValue { get; set; }
+        public String IndexRange { get; set; }
+        public Variant SubstituteValue { get; set; }
+        public QualifiedName[] MetaDataProperties { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("PublishedVariable", PublishedVariable);
+            encoder.WriteUInt32("AttributeId", AttributeId);
+            encoder.WriteDouble("SamplingIntervalHint", SamplingIntervalHint);
+            encoder.WriteUInt32("DeadbandType", DeadbandType);
+            encoder.WriteDouble("DeadbandValue", DeadbandValue);
+            encoder.WriteString("IndexRange", IndexRange);
+            encoder.WriteVariant("SubstituteValue", SubstituteValue);
+            encoder.WriteQualifiedNameArray("MetaDataProperties", MetaDataProperties);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            PublishedVariable = decoder.ReadNodeId("PublishedVariable");
+            AttributeId = decoder.ReadUInt32("AttributeId");
+            SamplingIntervalHint = decoder.ReadDouble("SamplingIntervalHint");
+            DeadbandType = decoder.ReadUInt32("DeadbandType");
+            DeadbandValue = decoder.ReadDouble("DeadbandValue");
+            IndexRange = decoder.ReadString("IndexRange");
+            SubstituteValue = decoder.ReadVariant("SubstituteValue");
+            MetaDataProperties = decoder.ReadQualifiedNameArray("MetaDataProperties");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataSetWriterDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataSetWriterDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataSetWriterDataType)]
+    public class DataSetWriterDataType : IEncodable
+    {
+        public String Name { get; set; }
+        public Boolean Enabled { get; set; }
+        public UInt16 DataSetWriterId { get; set; }
+        public UInt32 DataSetFieldContentMask { get; set; }
+        public UInt32 KeyFrameCount { get; set; }
+        public String DataSetName { get; set; }
+        public KeyValuePair[] DataSetWriterProperties { get; set; }
+        public DataSetWriterTransportDataType TransportSettings { get; set; }
+        public DataSetWriterMessageDataType MessageSettings { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteBoolean("Enabled", Enabled);
+            encoder.WriteUInt16("DataSetWriterId", DataSetWriterId);
+            encoder.WriteUInt32("DataSetFieldContentMask", DataSetFieldContentMask);
+            encoder.WriteUInt32("KeyFrameCount", KeyFrameCount);
+            encoder.WriteString("DataSetName", DataSetName);
+            encoder.WriteEncodableArray<KeyValuePair>("DataSetWriterProperties", DataSetWriterProperties);
+            encoder.WriteExtensionObject<DataSetWriterTransportDataType>("TransportSettings", TransportSettings);
+            encoder.WriteExtensionObject<DataSetWriterMessageDataType>("MessageSettings", MessageSettings);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            Enabled = decoder.ReadBoolean("Enabled");
+            DataSetWriterId = decoder.ReadUInt16("DataSetWriterId");
+            DataSetFieldContentMask = decoder.ReadUInt32("DataSetFieldContentMask");
+            KeyFrameCount = decoder.ReadUInt32("KeyFrameCount");
+            DataSetName = decoder.ReadString("DataSetName");
+            DataSetWriterProperties = decoder.ReadEncodableArray<KeyValuePair>("DataSetWriterProperties");
+            TransportSettings = decoder.ReadExtensionObject<DataSetWriterTransportDataType>("TransportSettings");
+            MessageSettings = decoder.ReadExtensionObject<DataSetWriterMessageDataType>("MessageSettings");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataSetWriterTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataSetWriterTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataSetWriterTransportDataType)]
+    public class DataSetWriterTransportDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.BrokerDataSetWriterTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.BrokerDataSetWriterTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.BrokerDataSetWriterTransportDataType)]
+    public class BrokerDataSetWriterTransportDataType : DataSetWriterTransportDataType
+    {
+        public String QueueName { get; set; }
+        public String ResourceUri { get; set; }
+        public String AuthenticationProfileUri { get; set; }
+        public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
+        public String MetaDataQueueName { get; set; }
+        public Double MetaDataUpdateTime { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("QueueName", QueueName);
+            encoder.WriteString("ResourceUri", ResourceUri);
+            encoder.WriteString("AuthenticationProfileUri", AuthenticationProfileUri);
+            encoder.WriteEnumeration<BrokerTransportQualityOfService>("RequestedDeliveryGuarantee", RequestedDeliveryGuarantee);
+            encoder.WriteString("MetaDataQueueName", MetaDataQueueName);
+            encoder.WriteDouble("MetaDataUpdateTime", MetaDataUpdateTime);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            QueueName = decoder.ReadString("QueueName");
+            ResourceUri = decoder.ReadString("ResourceUri");
+            AuthenticationProfileUri = decoder.ReadString("AuthenticationProfileUri");
+            RequestedDeliveryGuarantee = decoder.ReadEnumeration<BrokerTransportQualityOfService>("RequestedDeliveryGuarantee");
+            MetaDataQueueName = decoder.ReadString("MetaDataQueueName");
+            MetaDataUpdateTime = decoder.ReadDouble("MetaDataUpdateTime");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataSetWriterMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataSetWriterMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataSetWriterMessageDataType)]
+    public class DataSetWriterMessageDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.JsonDataSetWriterMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.JsonDataSetWriterMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.JsonDataSetWriterMessageDataType)]
+    public class JsonDataSetWriterMessageDataType : DataSetWriterMessageDataType
+    {
+        public UInt32 DataSetMessageContentMask { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("DataSetMessageContentMask", DataSetMessageContentMask);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            DataSetMessageContentMask = decoder.ReadUInt32("DataSetMessageContentMask");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.UadpDataSetWriterMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.UadpDataSetWriterMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.UadpDataSetWriterMessageDataType)]
+    public class UadpDataSetWriterMessageDataType : DataSetWriterMessageDataType
+    {
+        public UInt32 DataSetMessageContentMask { get; set; }
+        public UInt16 ConfiguredSize { get; set; }
+        public UInt16 NetworkMessageNumber { get; set; }
+        public UInt16 DataSetOffset { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("DataSetMessageContentMask", DataSetMessageContentMask);
+            encoder.WriteUInt16("ConfiguredSize", ConfiguredSize);
+            encoder.WriteUInt16("NetworkMessageNumber", NetworkMessageNumber);
+            encoder.WriteUInt16("DataSetOffset", DataSetOffset);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            DataSetMessageContentMask = decoder.ReadUInt32("DataSetMessageContentMask");
+            ConfiguredSize = decoder.ReadUInt16("ConfiguredSize");
+            NetworkMessageNumber = decoder.ReadUInt16("NetworkMessageNumber");
+            DataSetOffset = decoder.ReadUInt16("DataSetOffset");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PubSubGroupDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PubSubGroupDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PubSubGroupDataType)]
+    public class PubSubGroupDataType : IEncodable
+    {
+        public String Name { get; set; }
+        public Boolean Enabled { get; set; }
+        public MessageSecurityMode SecurityMode { get; set; }
+        public String SecurityGroupId { get; set; }
+        public EndpointDescription[] SecurityKeyServices { get; set; }
+        public UInt32 MaxNetworkMessageSize { get; set; }
+        public KeyValuePair[] GroupProperties { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteBoolean("Enabled", Enabled);
+            encoder.WriteEnumeration<MessageSecurityMode>("SecurityMode", SecurityMode);
+            encoder.WriteString("SecurityGroupId", SecurityGroupId);
+            encoder.WriteEncodableArray<EndpointDescription>("SecurityKeyServices", SecurityKeyServices);
+            encoder.WriteUInt32("MaxNetworkMessageSize", MaxNetworkMessageSize);
+            encoder.WriteEncodableArray<KeyValuePair>("GroupProperties", GroupProperties);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            Enabled = decoder.ReadBoolean("Enabled");
+            SecurityMode = decoder.ReadEnumeration<MessageSecurityMode>("SecurityMode");
+            SecurityGroupId = decoder.ReadString("SecurityGroupId");
+            SecurityKeyServices = decoder.ReadEncodableArray<EndpointDescription>("SecurityKeyServices");
+            MaxNetworkMessageSize = decoder.ReadUInt32("MaxNetworkMessageSize");
+            GroupProperties = decoder.ReadEncodableArray<KeyValuePair>("GroupProperties");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.EndpointDescription_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.EndpointDescription_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.EndpointDescription)]
+    public class EndpointDescription : IEncodable
+    {
+        public String EndpointUrl { get; set; }
+        public ApplicationDescription Server { get; set; }
+        public Byte[] ServerCertificate { get; set; }
+        public MessageSecurityMode SecurityMode { get; set; }
+        public String SecurityPolicyUri { get; set; }
+        public UserTokenPolicy[] UserIdentityTokens { get; set; }
+        public String TransportProfileUri { get; set; }
+        public Byte SecurityLevel { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("EndpointUrl", EndpointUrl);
+            encoder.WriteEncodable<ApplicationDescription>("Server", Server);
+            encoder.WriteByteString("ServerCertificate", ServerCertificate);
+            encoder.WriteEnumeration<MessageSecurityMode>("SecurityMode", SecurityMode);
+            encoder.WriteString("SecurityPolicyUri", SecurityPolicyUri);
+            encoder.WriteEncodableArray<UserTokenPolicy>("UserIdentityTokens", UserIdentityTokens);
+            encoder.WriteString("TransportProfileUri", TransportProfileUri);
+            encoder.WriteByte("SecurityLevel", SecurityLevel);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            EndpointUrl = decoder.ReadString("EndpointUrl");
+            Server = decoder.ReadEncodable<ApplicationDescription>("Server");
+            ServerCertificate = decoder.ReadByteString("ServerCertificate");
+            SecurityMode = decoder.ReadEnumeration<MessageSecurityMode>("SecurityMode");
+            SecurityPolicyUri = decoder.ReadString("SecurityPolicyUri");
+            UserIdentityTokens = decoder.ReadEncodableArray<UserTokenPolicy>("UserIdentityTokens");
+            TransportProfileUri = decoder.ReadString("TransportProfileUri");
+            SecurityLevel = decoder.ReadByte("SecurityLevel");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ApplicationDescription_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ApplicationDescription_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ApplicationDescription)]
+    public class ApplicationDescription : IEncodable
+    {
+        public String ApplicationUri { get; set; }
+        public String ProductUri { get; set; }
+        public LocalizedText ApplicationName { get; set; }
+        public ApplicationType ApplicationType { get; set; }
+        public String GatewayServerUri { get; set; }
+        public String DiscoveryProfileUri { get; set; }
+        public String[] DiscoveryUrls { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("ApplicationUri", ApplicationUri);
+            encoder.WriteString("ProductUri", ProductUri);
+            encoder.WriteLocalizedText("ApplicationName", ApplicationName);
+            encoder.WriteEnumeration<ApplicationType>("ApplicationType", ApplicationType);
+            encoder.WriteString("GatewayServerUri", GatewayServerUri);
+            encoder.WriteString("DiscoveryProfileUri", DiscoveryProfileUri);
+            encoder.WriteStringArray("DiscoveryUrls", DiscoveryUrls);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            ApplicationUri = decoder.ReadString("ApplicationUri");
+            ProductUri = decoder.ReadString("ProductUri");
+            ApplicationName = decoder.ReadLocalizedText("ApplicationName");
+            ApplicationType = decoder.ReadEnumeration<ApplicationType>("ApplicationType");
+            GatewayServerUri = decoder.ReadString("GatewayServerUri");
+            DiscoveryProfileUri = decoder.ReadString("DiscoveryProfileUri");
+            DiscoveryUrls = decoder.ReadStringArray("DiscoveryUrls");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.UserTokenPolicy_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.UserTokenPolicy_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.UserTokenPolicy)]
+    public class UserTokenPolicy : IEncodable
+    {
+        public String PolicyId { get; set; }
+        public UserTokenType TokenType { get; set; }
+        public String IssuedTokenType { get; set; }
+        public String IssuerEndpointUrl { get; set; }
+        public String SecurityPolicyUri { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("PolicyId", PolicyId);
+            encoder.WriteEnumeration<UserTokenType>("TokenType", TokenType);
+            encoder.WriteString("IssuedTokenType", IssuedTokenType);
+            encoder.WriteString("IssuerEndpointUrl", IssuerEndpointUrl);
+            encoder.WriteString("SecurityPolicyUri", SecurityPolicyUri);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            PolicyId = decoder.ReadString("PolicyId");
+            TokenType = decoder.ReadEnumeration<UserTokenType>("TokenType");
+            IssuedTokenType = decoder.ReadString("IssuedTokenType");
+            IssuerEndpointUrl = decoder.ReadString("IssuerEndpointUrl");
+            SecurityPolicyUri = decoder.ReadString("SecurityPolicyUri");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ReaderGroupDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ReaderGroupDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ReaderGroupDataType)]
+    public class ReaderGroupDataType : PubSubGroupDataType
+    {
+        public ReaderGroupTransportDataType TransportSettings { get; set; }
+        public ReaderGroupMessageDataType MessageSettings { get; set; }
+        public DataSetReaderDataType[] DataSetReaders { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteExtensionObject<ReaderGroupTransportDataType>("TransportSettings", TransportSettings);
+            encoder.WriteExtensionObject<ReaderGroupMessageDataType>("MessageSettings", MessageSettings);
+            encoder.WriteEncodableArray<DataSetReaderDataType>("DataSetReaders", DataSetReaders);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            TransportSettings = decoder.ReadExtensionObject<ReaderGroupTransportDataType>("TransportSettings");
+            MessageSettings = decoder.ReadExtensionObject<ReaderGroupMessageDataType>("MessageSettings");
+            DataSetReaders = decoder.ReadEncodableArray<DataSetReaderDataType>("DataSetReaders");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ReaderGroupTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ReaderGroupTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ReaderGroupTransportDataType)]
+    public class ReaderGroupTransportDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ReaderGroupMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ReaderGroupMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ReaderGroupMessageDataType)]
+    public class ReaderGroupMessageDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataSetReaderDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataSetReaderDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataSetReaderDataType)]
+    public class DataSetReaderDataType : IEncodable
+    {
+        public String Name { get; set; }
+        public Boolean Enabled { get; set; }
+        public Variant PublisherId { get; set; }
+        public UInt16 WriterGroupId { get; set; }
+        public UInt16 DataSetWriterId { get; set; }
+        public DataSetMetaDataType DataSetMetaData { get; set; }
+        public UInt32 DataSetFieldContentMask { get; set; }
+        public Double MessageReceiveTimeout { get; set; }
+        public UInt32 KeyFrameCount { get; set; }
+        public String HeaderLayoutUri { get; set; }
+        public MessageSecurityMode SecurityMode { get; set; }
+        public String SecurityGroupId { get; set; }
+        public EndpointDescription[] SecurityKeyServices { get; set; }
+        public KeyValuePair[] DataSetReaderProperties { get; set; }
+        public DataSetReaderTransportDataType TransportSettings { get; set; }
+        public DataSetReaderMessageDataType MessageSettings { get; set; }
+        public SubscribedDataSetDataType SubscribedDataSet { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteBoolean("Enabled", Enabled);
+            encoder.WriteVariant("PublisherId", PublisherId);
+            encoder.WriteUInt16("WriterGroupId", WriterGroupId);
+            encoder.WriteUInt16("DataSetWriterId", DataSetWriterId);
+            encoder.WriteEncodable<DataSetMetaDataType>("DataSetMetaData", DataSetMetaData);
+            encoder.WriteUInt32("DataSetFieldContentMask", DataSetFieldContentMask);
+            encoder.WriteDouble("MessageReceiveTimeout", MessageReceiveTimeout);
+            encoder.WriteUInt32("KeyFrameCount", KeyFrameCount);
+            encoder.WriteString("HeaderLayoutUri", HeaderLayoutUri);
+            encoder.WriteEnumeration<MessageSecurityMode>("SecurityMode", SecurityMode);
+            encoder.WriteString("SecurityGroupId", SecurityGroupId);
+            encoder.WriteEncodableArray<EndpointDescription>("SecurityKeyServices", SecurityKeyServices);
+            encoder.WriteEncodableArray<KeyValuePair>("DataSetReaderProperties", DataSetReaderProperties);
+            encoder.WriteExtensionObject<DataSetReaderTransportDataType>("TransportSettings", TransportSettings);
+            encoder.WriteExtensionObject<DataSetReaderMessageDataType>("MessageSettings", MessageSettings);
+            encoder.WriteEncodable<SubscribedDataSetDataType>("SubscribedDataSet", SubscribedDataSet);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            Enabled = decoder.ReadBoolean("Enabled");
+            PublisherId = decoder.ReadVariant("PublisherId");
+            WriterGroupId = decoder.ReadUInt16("WriterGroupId");
+            DataSetWriterId = decoder.ReadUInt16("DataSetWriterId");
+            DataSetMetaData = decoder.ReadEncodable<DataSetMetaDataType>("DataSetMetaData");
+            DataSetFieldContentMask = decoder.ReadUInt32("DataSetFieldContentMask");
+            MessageReceiveTimeout = decoder.ReadDouble("MessageReceiveTimeout");
+            KeyFrameCount = decoder.ReadUInt32("KeyFrameCount");
+            HeaderLayoutUri = decoder.ReadString("HeaderLayoutUri");
+            SecurityMode = decoder.ReadEnumeration<MessageSecurityMode>("SecurityMode");
+            SecurityGroupId = decoder.ReadString("SecurityGroupId");
+            SecurityKeyServices = decoder.ReadEncodableArray<EndpointDescription>("SecurityKeyServices");
+            DataSetReaderProperties = decoder.ReadEncodableArray<KeyValuePair>("DataSetReaderProperties");
+            TransportSettings = decoder.ReadExtensionObject<DataSetReaderTransportDataType>("TransportSettings");
+            MessageSettings = decoder.ReadExtensionObject<DataSetReaderMessageDataType>("MessageSettings");
+            SubscribedDataSet = decoder.ReadEncodable<SubscribedDataSetDataType>("SubscribedDataSet");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataSetReaderTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataSetReaderTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataSetReaderTransportDataType)]
+    public class DataSetReaderTransportDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.BrokerDataSetReaderTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.BrokerDataSetReaderTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.BrokerDataSetReaderTransportDataType)]
+    public class BrokerDataSetReaderTransportDataType : DataSetReaderTransportDataType
+    {
+        public String QueueName { get; set; }
+        public String ResourceUri { get; set; }
+        public String AuthenticationProfileUri { get; set; }
+        public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
+        public String MetaDataQueueName { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("QueueName", QueueName);
+            encoder.WriteString("ResourceUri", ResourceUri);
+            encoder.WriteString("AuthenticationProfileUri", AuthenticationProfileUri);
+            encoder.WriteEnumeration<BrokerTransportQualityOfService>("RequestedDeliveryGuarantee", RequestedDeliveryGuarantee);
+            encoder.WriteString("MetaDataQueueName", MetaDataQueueName);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            QueueName = decoder.ReadString("QueueName");
+            ResourceUri = decoder.ReadString("ResourceUri");
+            AuthenticationProfileUri = decoder.ReadString("AuthenticationProfileUri");
+            RequestedDeliveryGuarantee = decoder.ReadEnumeration<BrokerTransportQualityOfService>("RequestedDeliveryGuarantee");
+            MetaDataQueueName = decoder.ReadString("MetaDataQueueName");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DataSetReaderMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DataSetReaderMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DataSetReaderMessageDataType)]
+    public class DataSetReaderMessageDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.JsonDataSetReaderMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.JsonDataSetReaderMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.JsonDataSetReaderMessageDataType)]
+    public class JsonDataSetReaderMessageDataType : DataSetReaderMessageDataType
+    {
+        public UInt32 NetworkMessageContentMask { get; set; }
+        public UInt32 DataSetMessageContentMask { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("NetworkMessageContentMask", NetworkMessageContentMask);
+            encoder.WriteUInt32("DataSetMessageContentMask", DataSetMessageContentMask);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            NetworkMessageContentMask = decoder.ReadUInt32("NetworkMessageContentMask");
+            DataSetMessageContentMask = decoder.ReadUInt32("DataSetMessageContentMask");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.UadpDataSetReaderMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.UadpDataSetReaderMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.UadpDataSetReaderMessageDataType)]
+    public class UadpDataSetReaderMessageDataType : DataSetReaderMessageDataType
+    {
+        public UInt32 GroupVersion { get; set; }
+        public UInt16 NetworkMessageNumber { get; set; }
+        public UInt16 DataSetOffset { get; set; }
+        public Guid DataSetClassId { get; set; }
+        public UInt32 NetworkMessageContentMask { get; set; }
+        public UInt32 DataSetMessageContentMask { get; set; }
+        public Double PublishingInterval { get; set; }
+        public Double ReceiveOffset { get; set; }
+        public Double ProcessingOffset { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("GroupVersion", GroupVersion);
+            encoder.WriteUInt16("NetworkMessageNumber", NetworkMessageNumber);
+            encoder.WriteUInt16("DataSetOffset", DataSetOffset);
+            encoder.WriteGuid("DataSetClassId", DataSetClassId);
+            encoder.WriteUInt32("NetworkMessageContentMask", NetworkMessageContentMask);
+            encoder.WriteUInt32("DataSetMessageContentMask", DataSetMessageContentMask);
+            encoder.WriteDouble("PublishingInterval", PublishingInterval);
+            encoder.WriteDouble("ReceiveOffset", ReceiveOffset);
+            encoder.WriteDouble("ProcessingOffset", ProcessingOffset);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            GroupVersion = decoder.ReadUInt32("GroupVersion");
+            NetworkMessageNumber = decoder.ReadUInt16("NetworkMessageNumber");
+            DataSetOffset = decoder.ReadUInt16("DataSetOffset");
+            DataSetClassId = decoder.ReadGuid("DataSetClassId");
+            NetworkMessageContentMask = decoder.ReadUInt32("NetworkMessageContentMask");
+            DataSetMessageContentMask = decoder.ReadUInt32("DataSetMessageContentMask");
+            PublishingInterval = decoder.ReadDouble("PublishingInterval");
+            ReceiveOffset = decoder.ReadDouble("ReceiveOffset");
+            ProcessingOffset = decoder.ReadDouble("ProcessingOffset");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.SubscribedDataSetDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.SubscribedDataSetDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.SubscribedDataSetDataType)]
+    public class SubscribedDataSetDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.SubscribedDataSetMirrorDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.SubscribedDataSetMirrorDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.SubscribedDataSetMirrorDataType)]
+    public class SubscribedDataSetMirrorDataType : SubscribedDataSetDataType
+    {
+        public String ParentNodeName { get; set; }
+        public RolePermissionType[] RolePermissions { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("ParentNodeName", ParentNodeName);
+            encoder.WriteEncodableArray<RolePermissionType>("RolePermissions", RolePermissions);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            ParentNodeName = decoder.ReadString("ParentNodeName");
+            RolePermissions = decoder.ReadEncodableArray<RolePermissionType>("RolePermissions");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.RolePermissionType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.RolePermissionType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.RolePermissionType)]
+    public class RolePermissionType : IEncodable
+    {
+        public NodeId RoleId { get; set; }
+        public UInt32 Permissions { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("RoleId", RoleId);
+            encoder.WriteUInt32("Permissions", Permissions);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            RoleId = decoder.ReadNodeId("RoleId");
+            Permissions = decoder.ReadUInt32("Permissions");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.TargetVariablesDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.TargetVariablesDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.TargetVariablesDataType)]
+    public class TargetVariablesDataType : SubscribedDataSetDataType
+    {
+        public FieldTargetDataType[] TargetVariables { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodableArray<FieldTargetDataType>("TargetVariables", TargetVariables);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            TargetVariables = decoder.ReadEncodableArray<FieldTargetDataType>("TargetVariables");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.FieldTargetDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.FieldTargetDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.FieldTargetDataType)]
+    public class FieldTargetDataType : IEncodable
+    {
+        public Guid DataSetFieldId { get; set; }
+        public String ReceiverIndexRange { get; set; }
+        public NodeId TargetNodeId { get; set; }
+        public UInt32 AttributeId { get; set; }
+        public String WriteIndexRange { get; set; }
+        public OverrideValueHandling OverrideValueHandling { get; set; }
+        public Variant OverrideValue { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteGuid("DataSetFieldId", DataSetFieldId);
+            encoder.WriteString("ReceiverIndexRange", ReceiverIndexRange);
+            encoder.WriteNodeId("TargetNodeId", TargetNodeId);
+            encoder.WriteUInt32("AttributeId", AttributeId);
+            encoder.WriteString("WriteIndexRange", WriteIndexRange);
+            encoder.WriteEnumeration<OverrideValueHandling>("OverrideValueHandling", OverrideValueHandling);
+            encoder.WriteVariant("OverrideValue", OverrideValue);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            DataSetFieldId = decoder.ReadGuid("DataSetFieldId");
+            ReceiverIndexRange = decoder.ReadString("ReceiverIndexRange");
+            TargetNodeId = decoder.ReadNodeId("TargetNodeId");
+            AttributeId = decoder.ReadUInt32("AttributeId");
+            WriteIndexRange = decoder.ReadString("WriteIndexRange");
+            OverrideValueHandling = decoder.ReadEnumeration<OverrideValueHandling>("OverrideValueHandling");
+            OverrideValue = decoder.ReadVariant("OverrideValue");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.WriterGroupDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.WriterGroupDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.WriterGroupDataType)]
+    public class WriterGroupDataType : PubSubGroupDataType
+    {
+        public UInt16 WriterGroupId { get; set; }
+        public Double PublishingInterval { get; set; }
+        public Double KeepAliveTime { get; set; }
+        public Byte Priority { get; set; }
+        public String[] LocaleIds { get; set; }
+        public String HeaderLayoutUri { get; set; }
+        public WriterGroupTransportDataType TransportSettings { get; set; }
+        public WriterGroupMessageDataType MessageSettings { get; set; }
+        public DataSetWriterDataType[] DataSetWriters { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt16("WriterGroupId", WriterGroupId);
+            encoder.WriteDouble("PublishingInterval", PublishingInterval);
+            encoder.WriteDouble("KeepAliveTime", KeepAliveTime);
+            encoder.WriteByte("Priority", Priority);
+            encoder.WriteStringArray("LocaleIds", LocaleIds);
+            encoder.WriteString("HeaderLayoutUri", HeaderLayoutUri);
+            encoder.WriteExtensionObject<WriterGroupTransportDataType>("TransportSettings", TransportSettings);
+            encoder.WriteExtensionObject<WriterGroupMessageDataType>("MessageSettings", MessageSettings);
+            encoder.WriteEncodableArray<DataSetWriterDataType>("DataSetWriters", DataSetWriters);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            WriterGroupId = decoder.ReadUInt16("WriterGroupId");
+            PublishingInterval = decoder.ReadDouble("PublishingInterval");
+            KeepAliveTime = decoder.ReadDouble("KeepAliveTime");
+            Priority = decoder.ReadByte("Priority");
+            LocaleIds = decoder.ReadStringArray("LocaleIds");
+            HeaderLayoutUri = decoder.ReadString("HeaderLayoutUri");
+            TransportSettings = decoder.ReadExtensionObject<WriterGroupTransportDataType>("TransportSettings");
+            MessageSettings = decoder.ReadExtensionObject<WriterGroupMessageDataType>("MessageSettings");
+            DataSetWriters = decoder.ReadEncodableArray<DataSetWriterDataType>("DataSetWriters");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.WriterGroupTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.WriterGroupTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.WriterGroupTransportDataType)]
+    public class WriterGroupTransportDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.BrokerWriterGroupTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.BrokerWriterGroupTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.BrokerWriterGroupTransportDataType)]
+    public class BrokerWriterGroupTransportDataType : WriterGroupTransportDataType
+    {
+        public String QueueName { get; set; }
+        public String ResourceUri { get; set; }
+        public String AuthenticationProfileUri { get; set; }
+        public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("QueueName", QueueName);
+            encoder.WriteString("ResourceUri", ResourceUri);
+            encoder.WriteString("AuthenticationProfileUri", AuthenticationProfileUri);
+            encoder.WriteEnumeration<BrokerTransportQualityOfService>("RequestedDeliveryGuarantee", RequestedDeliveryGuarantee);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            QueueName = decoder.ReadString("QueueName");
+            ResourceUri = decoder.ReadString("ResourceUri");
+            AuthenticationProfileUri = decoder.ReadString("AuthenticationProfileUri");
+            RequestedDeliveryGuarantee = decoder.ReadEnumeration<BrokerTransportQualityOfService>("RequestedDeliveryGuarantee");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DatagramWriterGroupTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DatagramWriterGroupTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DatagramWriterGroupTransportDataType)]
+    public class DatagramWriterGroupTransportDataType : WriterGroupTransportDataType
+    {
+        public Byte MessageRepeatCount { get; set; }
+        public Double MessageRepeatDelay { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteByte("MessageRepeatCount", MessageRepeatCount);
+            encoder.WriteDouble("MessageRepeatDelay", MessageRepeatDelay);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            MessageRepeatCount = decoder.ReadByte("MessageRepeatCount");
+            MessageRepeatDelay = decoder.ReadDouble("MessageRepeatDelay");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.WriterGroupMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.WriterGroupMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.WriterGroupMessageDataType)]
+    public class WriterGroupMessageDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.JsonWriterGroupMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.JsonWriterGroupMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.JsonWriterGroupMessageDataType)]
+    public class JsonWriterGroupMessageDataType : WriterGroupMessageDataType
+    {
+        public UInt32 NetworkMessageContentMask { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("NetworkMessageContentMask", NetworkMessageContentMask);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            NetworkMessageContentMask = decoder.ReadUInt32("NetworkMessageContentMask");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.UadpWriterGroupMessageDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.UadpWriterGroupMessageDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.UadpWriterGroupMessageDataType)]
+    public class UadpWriterGroupMessageDataType : WriterGroupMessageDataType
+    {
+        public UInt32 GroupVersion { get; set; }
+        public DataSetOrderingType DataSetOrdering { get; set; }
+        public UInt32 NetworkMessageContentMask { get; set; }
+        public Double SamplingOffset { get; set; }
+        public Double[] PublishingOffset { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("GroupVersion", GroupVersion);
+            encoder.WriteEnumeration<DataSetOrderingType>("DataSetOrdering", DataSetOrdering);
+            encoder.WriteUInt32("NetworkMessageContentMask", NetworkMessageContentMask);
+            encoder.WriteDouble("SamplingOffset", SamplingOffset);
+            encoder.WriteDoubleArray("PublishingOffset", PublishingOffset);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            GroupVersion = decoder.ReadUInt32("GroupVersion");
+            DataSetOrdering = decoder.ReadEnumeration<DataSetOrderingType>("DataSetOrdering");
+            NetworkMessageContentMask = decoder.ReadUInt32("NetworkMessageContentMask");
+            SamplingOffset = decoder.ReadDouble("SamplingOffset");
+            PublishingOffset = decoder.ReadDoubleArray("PublishingOffset");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PubSubConnectionDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PubSubConnectionDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PubSubConnectionDataType)]
+    public class PubSubConnectionDataType : IEncodable
+    {
+        public String Name { get; set; }
+        public Boolean Enabled { get; set; }
+        public Variant PublisherId { get; set; }
+        public String TransportProfileUri { get; set; }
+        public NetworkAddressDataType Address { get; set; }
+        public KeyValuePair[] ConnectionProperties { get; set; }
+        public ConnectionTransportDataType TransportSettings { get; set; }
+        public WriterGroupDataType[] WriterGroups { get; set; }
+        public ReaderGroupDataType[] ReaderGroups { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Name", Name);
+            encoder.WriteBoolean("Enabled", Enabled);
+            encoder.WriteVariant("PublisherId", PublisherId);
+            encoder.WriteString("TransportProfileUri", TransportProfileUri);
+            encoder.WriteExtensionObject<NetworkAddressDataType>("Address", Address);
+            encoder.WriteEncodableArray<KeyValuePair>("ConnectionProperties", ConnectionProperties);
+            encoder.WriteExtensionObject<ConnectionTransportDataType>("TransportSettings", TransportSettings);
+            encoder.WriteEncodableArray<WriterGroupDataType>("WriterGroups", WriterGroups);
+            encoder.WriteEncodableArray<ReaderGroupDataType>("ReaderGroups", ReaderGroups);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Name = decoder.ReadString("Name");
+            Enabled = decoder.ReadBoolean("Enabled");
+            PublisherId = decoder.ReadVariant("PublisherId");
+            TransportProfileUri = decoder.ReadString("TransportProfileUri");
+            Address = decoder.ReadExtensionObject<NetworkAddressDataType>("Address");
+            ConnectionProperties = decoder.ReadEncodableArray<KeyValuePair>("ConnectionProperties");
+            TransportSettings = decoder.ReadExtensionObject<ConnectionTransportDataType>("TransportSettings");
+            WriterGroups = decoder.ReadEncodableArray<WriterGroupDataType>("WriterGroups");
+            ReaderGroups = decoder.ReadEncodableArray<ReaderGroupDataType>("ReaderGroups");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.NetworkAddressDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.NetworkAddressDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.NetworkAddressDataType)]
+    public class NetworkAddressDataType : IEncodable
+    {
+        public String NetworkInterface { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("NetworkInterface", NetworkInterface);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            NetworkInterface = decoder.ReadString("NetworkInterface");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.NetworkAddressUrlDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.NetworkAddressUrlDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.NetworkAddressUrlDataType)]
+    public class NetworkAddressUrlDataType : NetworkAddressDataType
+    {
+        public String Url { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("Url", Url);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            Url = decoder.ReadString("Url");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ConnectionTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ConnectionTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ConnectionTransportDataType)]
+    public class ConnectionTransportDataType : IEncodable
+    {
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.BrokerConnectionTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.BrokerConnectionTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.BrokerConnectionTransportDataType)]
+    public class BrokerConnectionTransportDataType : ConnectionTransportDataType
+    {
+        public String ResourceUri { get; set; }
+        public String AuthenticationProfileUri { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteString("ResourceUri", ResourceUri);
+            encoder.WriteString("AuthenticationProfileUri", AuthenticationProfileUri);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            ResourceUri = decoder.ReadString("ResourceUri");
+            AuthenticationProfileUri = decoder.ReadString("AuthenticationProfileUri");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.DatagramConnectionTransportDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.DatagramConnectionTransportDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.DatagramConnectionTransportDataType)]
+    public class DatagramConnectionTransportDataType : ConnectionTransportDataType
+    {
+        public NetworkAddressDataType DiscoveryAddress { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteExtensionObject<NetworkAddressDataType>("DiscoveryAddress", DiscoveryAddress);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            DiscoveryAddress = decoder.ReadExtensionObject<NetworkAddressDataType>("DiscoveryAddress");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.PubSubConfigurationDataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.PubSubConfigurationDataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.PubSubConfigurationDataType)]
+    public class PubSubConfigurationDataType : IEncodable
+    {
+        public PublishedDataSetDataType[] PublishedDataSets { get; set; }
+        public PubSubConnectionDataType[] Connections { get; set; }
+        public Boolean Enabled { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodableArray<PublishedDataSetDataType>("PublishedDataSets", PublishedDataSets);
+            encoder.WriteEncodableArray<PubSubConnectionDataType>("Connections", Connections);
+            encoder.WriteBoolean("Enabled", Enabled);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            PublishedDataSets = decoder.ReadEncodableArray<PublishedDataSetDataType>("PublishedDataSets");
+            Connections = decoder.ReadEncodableArray<PubSubConnectionDataType>("Connections");
+            Enabled = decoder.ReadBoolean("Enabled");
+            decoder.PopNamespace();
+        }
+    }
+
     [BinaryEncodingId(ObjectIds.Node_Encoding_DefaultBinary)]
     [XmlEncodingId(ObjectIds.Node_Encoding_DefaultXml)]
     [DataTypeId(DataTypeIds.Node)]
@@ -350,6 +2704,9 @@ namespace Workstation.ServiceModel.Ua
         public LocalizedText Description { get; set; }
         public UInt32 WriteMask { get; set; }
         public UInt32 UserWriteMask { get; set; }
+        public RolePermissionType[] RolePermissions { get; set; }
+        public RolePermissionType[] UserRolePermissions { get; set; }
+        public UInt16 AccessRestrictions { get; set; }
         public ReferenceNode[] References { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -362,6 +2719,9 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteLocalizedText("Description", Description);
             encoder.WriteUInt32("WriteMask", WriteMask);
             encoder.WriteUInt32("UserWriteMask", UserWriteMask);
+            encoder.WriteEncodableArray<RolePermissionType>("RolePermissions", RolePermissions);
+            encoder.WriteEncodableArray<RolePermissionType>("UserRolePermissions", UserRolePermissions);
+            encoder.WriteUInt16("AccessRestrictions", AccessRestrictions);
             encoder.WriteEncodableArray<ReferenceNode>("References", References);
             encoder.PopNamespace();
         }
@@ -376,6 +2736,9 @@ namespace Workstation.ServiceModel.Ua
             Description = decoder.ReadLocalizedText("Description");
             WriteMask = decoder.ReadUInt32("WriteMask");
             UserWriteMask = decoder.ReadUInt32("UserWriteMask");
+            RolePermissions = decoder.ReadEncodableArray<RolePermissionType>("RolePermissions");
+            UserRolePermissions = decoder.ReadEncodableArray<RolePermissionType>("UserRolePermissions");
+            AccessRestrictions = decoder.ReadUInt16("AccessRestrictions");
             References = decoder.ReadEncodableArray<ReferenceNode>("References");
             decoder.PopNamespace();
         }
@@ -436,12 +2799,14 @@ namespace Workstation.ServiceModel.Ua
     public class DataTypeNode : TypeNode
     {
         public Boolean IsAbstract { get; set; }
+        public DataTypeDefinition DataTypeDefinition { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteBoolean("IsAbstract", IsAbstract);
+            encoder.WriteExtensionObject<DataTypeDefinition>("DataTypeDefinition", DataTypeDefinition);
             encoder.PopNamespace();
         }
 
@@ -450,6 +2815,7 @@ namespace Workstation.ServiceModel.Ua
             base.Decode(decoder);
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             IsAbstract = decoder.ReadBoolean("IsAbstract");
+            DataTypeDefinition = decoder.ReadExtensionObject<DataTypeDefinition>("DataTypeDefinition");
             decoder.PopNamespace();
         }
     }
@@ -632,6 +2998,7 @@ namespace Workstation.ServiceModel.Ua
         public Byte UserAccessLevel { get; set; }
         public Double MinimumSamplingInterval { get; set; }
         public Boolean Historizing { get; set; }
+        public UInt32 AccessLevelEx { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -645,6 +3012,7 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("UserAccessLevel", UserAccessLevel);
             encoder.WriteDouble("MinimumSamplingInterval", MinimumSamplingInterval);
             encoder.WriteBoolean("Historizing", Historizing);
+            encoder.WriteUInt32("AccessLevelEx", AccessLevelEx);
             encoder.PopNamespace();
         }
 
@@ -660,6 +3028,7 @@ namespace Workstation.ServiceModel.Ua
             UserAccessLevel = decoder.ReadByte("UserAccessLevel");
             MinimumSamplingInterval = decoder.ReadDouble("MinimumSamplingInterval");
             Historizing = decoder.ReadBoolean("Historizing");
+            AccessLevelEx = decoder.ReadUInt32("AccessLevelEx");
             decoder.PopNamespace();
         }
     }
@@ -717,34 +3086,6 @@ namespace Workstation.ServiceModel.Ua
             DataType = decoder.ReadNodeId("DataType");
             ValueRank = decoder.ReadInt32("ValueRank");
             ArrayDimensions = decoder.ReadUInt32Array("ArrayDimensions");
-            Description = decoder.ReadLocalizedText("Description");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.EnumValueType_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.EnumValueType_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.EnumValueType)]
-    public class EnumValueType : IEncodable
-    {
-        public Int64 Value { get; set; }
-        public LocalizedText DisplayName { get; set; }
-        public LocalizedText Description { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteInt64("Value", Value);
-            encoder.WriteLocalizedText("DisplayName", DisplayName);
-            encoder.WriteLocalizedText("Description", Description);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            Value = decoder.ReadInt64("Value");
-            DisplayName = decoder.ReadLocalizedText("DisplayName");
             Description = decoder.ReadLocalizedText("Description");
             decoder.PopNamespace();
         }
@@ -815,46 +3156,6 @@ namespace Workstation.ServiceModel.Ua
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             Offset = decoder.ReadInt16("Offset");
             DaylightSavingInOffset = decoder.ReadBoolean("DaylightSavingInOffset");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.ApplicationDescription_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.ApplicationDescription_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.ApplicationDescription)]
-    public class ApplicationDescription : IEncodable
-    {
-        public String ApplicationUri { get; set; }
-        public String ProductUri { get; set; }
-        public LocalizedText ApplicationName { get; set; }
-        public ApplicationType ApplicationType { get; set; }
-        public String GatewayServerUri { get; set; }
-        public String DiscoveryProfileUri { get; set; }
-        public String[] DiscoveryUrls { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteString("ApplicationUri", ApplicationUri);
-            encoder.WriteString("ProductUri", ProductUri);
-            encoder.WriteLocalizedText("ApplicationName", ApplicationName);
-            encoder.WriteEnumeration<ApplicationType>("ApplicationType", ApplicationType);
-            encoder.WriteString("GatewayServerUri", GatewayServerUri);
-            encoder.WriteString("DiscoveryProfileUri", DiscoveryProfileUri);
-            encoder.WriteStringArray("DiscoveryUrls", DiscoveryUrls);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            ApplicationUri = decoder.ReadString("ApplicationUri");
-            ProductUri = decoder.ReadString("ProductUri");
-            ApplicationName = decoder.ReadLocalizedText("ApplicationName");
-            ApplicationType = decoder.ReadEnumeration<ApplicationType>("ApplicationType");
-            GatewayServerUri = decoder.ReadString("GatewayServerUri");
-            DiscoveryProfileUri = decoder.ReadString("DiscoveryProfileUri");
-            DiscoveryUrls = decoder.ReadStringArray("DiscoveryUrls");
             decoder.PopNamespace();
         }
     }
@@ -954,6 +3255,68 @@ namespace Workstation.ServiceModel.Ua
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             ResponseHeader = decoder.ReadEncodable<ResponseHeader>("ResponseHeader");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.SessionlessInvokeRequestType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.SessionlessInvokeRequestType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.SessionlessInvokeRequestType)]
+    public class SessionlessInvokeRequestType : IEncodable
+    {
+        public UInt32[] UrisVersion { get; set; }
+        public String[] NamespaceUris { get; set; }
+        public String[] ServerUris { get; set; }
+        public String[] LocaleIds { get; set; }
+        public UInt32 ServiceId { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32Array("UrisVersion", UrisVersion);
+            encoder.WriteStringArray("NamespaceUris", NamespaceUris);
+            encoder.WriteStringArray("ServerUris", ServerUris);
+            encoder.WriteStringArray("LocaleIds", LocaleIds);
+            encoder.WriteUInt32("ServiceId", ServiceId);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            UrisVersion = decoder.ReadUInt32Array("UrisVersion");
+            NamespaceUris = decoder.ReadStringArray("NamespaceUris");
+            ServerUris = decoder.ReadStringArray("ServerUris");
+            LocaleIds = decoder.ReadStringArray("LocaleIds");
+            ServiceId = decoder.ReadUInt32("ServiceId");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.SessionlessInvokeResponseType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.SessionlessInvokeResponseType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.SessionlessInvokeResponseType)]
+    public class SessionlessInvokeResponseType : IEncodable
+    {
+        public String[] NamespaceUris { get; set; }
+        public String[] ServerUris { get; set; }
+        public UInt32 ServiceId { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteStringArray("NamespaceUris", NamespaceUris);
+            encoder.WriteStringArray("ServerUris", ServerUris);
+            encoder.WriteUInt32("ServiceId", ServiceId);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            NamespaceUris = decoder.ReadStringArray("NamespaceUris");
+            ServerUris = decoder.ReadStringArray("ServerUris");
+            ServiceId = decoder.ReadUInt32("ServiceId");
             decoder.PopNamespace();
         }
     }
@@ -1100,83 +3463,6 @@ namespace Workstation.ServiceModel.Ua
             ResponseHeader = decoder.ReadEncodable<ResponseHeader>("ResponseHeader");
             LastCounterResetTime = decoder.ReadDateTime("LastCounterResetTime");
             Servers = decoder.ReadEncodableArray<ServerOnNetwork>("Servers");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.UserTokenPolicy_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.UserTokenPolicy_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.UserTokenPolicy)]
-    public class UserTokenPolicy : IEncodable
-    {
-        public String PolicyId { get; set; }
-        public UserTokenType TokenType { get; set; }
-        public String IssuedTokenType { get; set; }
-        public String IssuerEndpointUrl { get; set; }
-        public String SecurityPolicyUri { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteString("PolicyId", PolicyId);
-            encoder.WriteEnumeration<UserTokenType>("TokenType", TokenType);
-            encoder.WriteString("IssuedTokenType", IssuedTokenType);
-            encoder.WriteString("IssuerEndpointUrl", IssuerEndpointUrl);
-            encoder.WriteString("SecurityPolicyUri", SecurityPolicyUri);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            PolicyId = decoder.ReadString("PolicyId");
-            TokenType = decoder.ReadEnumeration<UserTokenType>("TokenType");
-            IssuedTokenType = decoder.ReadString("IssuedTokenType");
-            IssuerEndpointUrl = decoder.ReadString("IssuerEndpointUrl");
-            SecurityPolicyUri = decoder.ReadString("SecurityPolicyUri");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.EndpointDescription_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.EndpointDescription_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.EndpointDescription)]
-    public class EndpointDescription : IEncodable
-    {
-        public String EndpointUrl { get; set; }
-        public ApplicationDescription Server { get; set; }
-        public Byte[] ServerCertificate { get; set; }
-        public MessageSecurityMode SecurityMode { get; set; }
-        public String SecurityPolicyUri { get; set; }
-        public UserTokenPolicy[] UserIdentityTokens { get; set; }
-        public String TransportProfileUri { get; set; }
-        public Byte SecurityLevel { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteString("EndpointUrl", EndpointUrl);
-            encoder.WriteEncodable<ApplicationDescription>("Server", Server);
-            encoder.WriteByteString("ServerCertificate", ServerCertificate);
-            encoder.WriteEnumeration<MessageSecurityMode>("SecurityMode", SecurityMode);
-            encoder.WriteString("SecurityPolicyUri", SecurityPolicyUri);
-            encoder.WriteEncodableArray<UserTokenPolicy>("UserIdentityTokens", UserIdentityTokens);
-            encoder.WriteString("TransportProfileUri", TransportProfileUri);
-            encoder.WriteByte("SecurityLevel", SecurityLevel);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            EndpointUrl = decoder.ReadString("EndpointUrl");
-            Server = decoder.ReadEncodable<ApplicationDescription>("Server");
-            ServerCertificate = decoder.ReadByteString("ServerCertificate");
-            SecurityMode = decoder.ReadEnumeration<MessageSecurityMode>("SecurityMode");
-            SecurityPolicyUri = decoder.ReadString("SecurityPolicyUri");
-            UserIdentityTokens = decoder.ReadEncodableArray<UserTokenPolicy>("UserIdentityTokens");
-            TransportProfileUri = decoder.ReadString("TransportProfileUri");
-            SecurityLevel = decoder.ReadByte("SecurityLevel");
             decoder.PopNamespace();
         }
     }
@@ -2040,6 +4326,55 @@ namespace Workstation.ServiceModel.Ua
         }
     }
 
+    [BinaryEncodingId(ObjectIds.GenericAttributes_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.GenericAttributes_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.GenericAttributes)]
+    public class GenericAttributes : NodeAttributes
+    {
+        public GenericAttributeValue[] AttributeValues { get; set; }
+
+        public override void Encode(IEncoder encoder)
+        {
+            base.Encode(encoder);
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteEncodableArray<GenericAttributeValue>("AttributeValues", AttributeValues);
+            encoder.PopNamespace();
+        }
+
+        public override void Decode(IDecoder decoder)
+        {
+            base.Decode(decoder);
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            AttributeValues = decoder.ReadEncodableArray<GenericAttributeValue>("AttributeValues");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.GenericAttributeValue_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.GenericAttributeValue_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.GenericAttributeValue)]
+    public class GenericAttributeValue : IEncodable
+    {
+        public UInt32 AttributeId { get; set; }
+        public Variant Value { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteUInt32("AttributeId", AttributeId);
+            encoder.WriteVariant("Value", Value);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            AttributeId = decoder.ReadUInt32("AttributeId");
+            Value = decoder.ReadVariant("Value");
+            decoder.PopNamespace();
+        }
+    }
+
     [BinaryEncodingId(ObjectIds.ViewAttributes_Encoding_DefaultBinary)]
     [XmlEncodingId(ObjectIds.ViewAttributes_Encoding_DefaultXml)]
     [DataTypeId(DataTypeIds.ViewAttributes)]
@@ -2898,59 +5233,6 @@ namespace Workstation.ServiceModel.Ua
         }
     }
 
-    [BinaryEncodingId(ObjectIds.RelativePathElement_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.RelativePathElement_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.RelativePathElement)]
-    public class RelativePathElement : IEncodable
-    {
-        public NodeId ReferenceTypeId { get; set; }
-        public Boolean IsInverse { get; set; }
-        public Boolean IncludeSubtypes { get; set; }
-        public QualifiedName TargetName { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteNodeId("ReferenceTypeId", ReferenceTypeId);
-            encoder.WriteBoolean("IsInverse", IsInverse);
-            encoder.WriteBoolean("IncludeSubtypes", IncludeSubtypes);
-            encoder.WriteQualifiedName("TargetName", TargetName);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            ReferenceTypeId = decoder.ReadNodeId("ReferenceTypeId");
-            IsInverse = decoder.ReadBoolean("IsInverse");
-            IncludeSubtypes = decoder.ReadBoolean("IncludeSubtypes");
-            TargetName = decoder.ReadQualifiedName("TargetName");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.RelativePath_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.RelativePath_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.RelativePath)]
-    public class RelativePath : IEncodable
-    {
-        public RelativePathElement[] Elements { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteEncodableArray<RelativePathElement>("Elements", Elements);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            Elements = decoder.ReadEncodableArray<RelativePathElement>("Elements");
-            decoder.PopNamespace();
-        }
-    }
-
     [BinaryEncodingId(ObjectIds.BrowsePath_Encoding_DefaultBinary)]
     [XmlEncodingId(ObjectIds.BrowsePath_Encoding_DefaultXml)]
     [DataTypeId(DataTypeIds.BrowsePath)]
@@ -3333,189 +5615,6 @@ namespace Workstation.ServiceModel.Ua
             ReferenceTypeId = decoder.ReadNodeId("ReferenceTypeId");
             IsForward = decoder.ReadBoolean("IsForward");
             ReferencedNodeIds = decoder.ReadNodeIdArray("ReferencedNodeIds");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.ContentFilterElement_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.ContentFilterElement_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.ContentFilterElement)]
-    public class ContentFilterElement : IEncodable
-    {
-        public FilterOperator FilterOperator { get; set; }
-        public FilterOperand[] FilterOperands { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteEnumeration<FilterOperator>("FilterOperator", FilterOperator);
-            encoder.WriteExtensionObjectArray<FilterOperand>("FilterOperands", FilterOperands);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            FilterOperator = decoder.ReadEnumeration<FilterOperator>("FilterOperator");
-            FilterOperands = decoder.ReadExtensionObjectArray<FilterOperand>("FilterOperands");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.FilterOperand_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.FilterOperand_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.FilterOperand)]
-    public class FilterOperand : IEncodable
-    {
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.SimpleAttributeOperand_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.SimpleAttributeOperand_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.SimpleAttributeOperand)]
-    public class SimpleAttributeOperand : FilterOperand
-    {
-        public NodeId TypeDefinitionId { get; set; }
-        public QualifiedName[] BrowsePath { get; set; }
-        public UInt32 AttributeId { get; set; }
-        public String IndexRange { get; set; }
-
-        public override void Encode(IEncoder encoder)
-        {
-            base.Encode(encoder);
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteNodeId("TypeDefinitionId", TypeDefinitionId);
-            encoder.WriteQualifiedNameArray("BrowsePath", BrowsePath);
-            encoder.WriteUInt32("AttributeId", AttributeId);
-            encoder.WriteString("IndexRange", IndexRange);
-            encoder.PopNamespace();
-        }
-
-        public override void Decode(IDecoder decoder)
-        {
-            base.Decode(decoder);
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            TypeDefinitionId = decoder.ReadNodeId("TypeDefinitionId");
-            BrowsePath = decoder.ReadQualifiedNameArray("BrowsePath");
-            AttributeId = decoder.ReadUInt32("AttributeId");
-            IndexRange = decoder.ReadString("IndexRange");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.AttributeOperand_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.AttributeOperand_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.AttributeOperand)]
-    public class AttributeOperand : FilterOperand
-    {
-        public NodeId NodeId { get; set; }
-        public String Alias { get; set; }
-        public RelativePath BrowsePath { get; set; }
-        public UInt32 AttributeId { get; set; }
-        public String IndexRange { get; set; }
-
-        public override void Encode(IEncoder encoder)
-        {
-            base.Encode(encoder);
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteNodeId("NodeId", NodeId);
-            encoder.WriteString("Alias", Alias);
-            encoder.WriteEncodable<RelativePath>("BrowsePath", BrowsePath);
-            encoder.WriteUInt32("AttributeId", AttributeId);
-            encoder.WriteString("IndexRange", IndexRange);
-            encoder.PopNamespace();
-        }
-
-        public override void Decode(IDecoder decoder)
-        {
-            base.Decode(decoder);
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            NodeId = decoder.ReadNodeId("NodeId");
-            Alias = decoder.ReadString("Alias");
-            BrowsePath = decoder.ReadEncodable<RelativePath>("BrowsePath");
-            AttributeId = decoder.ReadUInt32("AttributeId");
-            IndexRange = decoder.ReadString("IndexRange");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.LiteralOperand_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.LiteralOperand_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.LiteralOperand)]
-    public class LiteralOperand : FilterOperand
-    {
-        public Variant Value { get; set; }
-
-        public override void Encode(IEncoder encoder)
-        {
-            base.Encode(encoder);
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteVariant("Value", Value);
-            encoder.PopNamespace();
-        }
-
-        public override void Decode(IDecoder decoder)
-        {
-            base.Decode(decoder);
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            Value = decoder.ReadVariant("Value");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.ElementOperand_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.ElementOperand_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.ElementOperand)]
-    public class ElementOperand : FilterOperand
-    {
-        public UInt32 Index { get; set; }
-
-        public override void Encode(IEncoder encoder)
-        {
-            base.Encode(encoder);
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteUInt32("Index", Index);
-            encoder.PopNamespace();
-        }
-
-        public override void Decode(IDecoder decoder)
-        {
-            base.Decode(decoder);
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            Index = decoder.ReadUInt32("Index");
-            decoder.PopNamespace();
-        }
-    }
-
-    [BinaryEncodingId(ObjectIds.ContentFilter_Encoding_DefaultBinary)]
-    [XmlEncodingId(ObjectIds.ContentFilter_Encoding_DefaultXml)]
-    [DataTypeId(DataTypeIds.ContentFilter)]
-    public class ContentFilter : IEncodable
-    {
-        public ContentFilterElement[] Elements { get; set; }
-
-        public virtual void Encode(IEncoder encoder)
-        {
-            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            encoder.WriteEncodableArray<ContentFilterElement>("Elements", Elements);
-            encoder.PopNamespace();
-        }
-
-        public virtual void Decode(IDecoder decoder)
-        {
-            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
-            Elements = decoder.ReadEncodableArray<ContentFilterElement>("Elements");
             decoder.PopNamespace();
         }
     }
@@ -4685,7 +6784,7 @@ namespace Workstation.ServiceModel.Ua
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodable<RequestHeader>("RequestHeader", RequestHeader);
-            encoder.WriteEncodableArray<HistoryUpdateDetails>("HistoryUpdateDetails", HistoryUpdateDetails);
+            encoder.WriteExtensionObjectArray<HistoryUpdateDetails>("HistoryUpdateDetails", HistoryUpdateDetails);
             encoder.PopNamespace();
         }
 
@@ -4693,7 +6792,7 @@ namespace Workstation.ServiceModel.Ua
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             RequestHeader = decoder.ReadEncodable<RequestHeader>("RequestHeader");
-            HistoryUpdateDetails = decoder.ReadEncodableArray<HistoryUpdateDetails>("HistoryUpdateDetails");
+            HistoryUpdateDetails = decoder.ReadExtensionObjectArray<HistoryUpdateDetails>("HistoryUpdateDetails");
             decoder.PopNamespace();
         }
     }
@@ -6875,6 +8974,61 @@ namespace Workstation.ServiceModel.Ua
             LastMethodSessionId = decoder.ReadNodeId("LastMethodSessionId");
             LastMethodInputArguments = decoder.ReadEncodableArray<Argument>("LastMethodInputArguments");
             LastMethodOutputArguments = decoder.ReadEncodableArray<Argument>("LastMethodOutputArguments");
+            LastMethodCallTime = decoder.ReadDateTime("LastMethodCallTime");
+            LastMethodReturnStatus = decoder.ReadEncodable<StatusResult>("LastMethodReturnStatus");
+            decoder.PopNamespace();
+        }
+    }
+
+    [BinaryEncodingId(ObjectIds.ProgramDiagnostic2DataType_Encoding_DefaultBinary)]
+    [XmlEncodingId(ObjectIds.ProgramDiagnostic2DataType_Encoding_DefaultXml)]
+    [DataTypeId(DataTypeIds.ProgramDiagnostic2DataType)]
+    public class ProgramDiagnostic2DataType : IEncodable
+    {
+        public NodeId CreateSessionId { get; set; }
+        public String CreateClientName { get; set; }
+        public DateTime InvocationCreationTime { get; set; }
+        public DateTime LastTransitionTime { get; set; }
+        public String LastMethodCall { get; set; }
+        public NodeId LastMethodSessionId { get; set; }
+        public Argument[] LastMethodInputArguments { get; set; }
+        public Argument[] LastMethodOutputArguments { get; set; }
+        public Variant[] LastMethodInputValues { get; set; }
+        public Variant[] LastMethodOutputValues { get; set; }
+        public DateTime LastMethodCallTime { get; set; }
+        public StatusResult LastMethodReturnStatus { get; set; }
+
+        public virtual void Encode(IEncoder encoder)
+        {
+            encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            encoder.WriteNodeId("CreateSessionId", CreateSessionId);
+            encoder.WriteString("CreateClientName", CreateClientName);
+            encoder.WriteDateTime("InvocationCreationTime", InvocationCreationTime);
+            encoder.WriteDateTime("LastTransitionTime", LastTransitionTime);
+            encoder.WriteString("LastMethodCall", LastMethodCall);
+            encoder.WriteNodeId("LastMethodSessionId", LastMethodSessionId);
+            encoder.WriteEncodableArray<Argument>("LastMethodInputArguments", LastMethodInputArguments);
+            encoder.WriteEncodableArray<Argument>("LastMethodOutputArguments", LastMethodOutputArguments);
+            encoder.WriteVariantArray("LastMethodInputValues", LastMethodInputValues);
+            encoder.WriteVariantArray("LastMethodOutputValues", LastMethodOutputValues);
+            encoder.WriteDateTime("LastMethodCallTime", LastMethodCallTime);
+            encoder.WriteEncodable<StatusResult>("LastMethodReturnStatus", LastMethodReturnStatus);
+            encoder.PopNamespace();
+        }
+
+        public virtual void Decode(IDecoder decoder)
+        {
+            decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
+            CreateSessionId = decoder.ReadNodeId("CreateSessionId");
+            CreateClientName = decoder.ReadString("CreateClientName");
+            InvocationCreationTime = decoder.ReadDateTime("InvocationCreationTime");
+            LastTransitionTime = decoder.ReadDateTime("LastTransitionTime");
+            LastMethodCall = decoder.ReadString("LastMethodCall");
+            LastMethodSessionId = decoder.ReadNodeId("LastMethodSessionId");
+            LastMethodInputArguments = decoder.ReadEncodableArray<Argument>("LastMethodInputArguments");
+            LastMethodOutputArguments = decoder.ReadEncodableArray<Argument>("LastMethodOutputArguments");
+            LastMethodInputValues = decoder.ReadVariantArray("LastMethodInputValues");
+            LastMethodOutputValues = decoder.ReadVariantArray("LastMethodOutputValues");
             LastMethodCallTime = decoder.ReadDateTime("LastMethodCallTime");
             LastMethodReturnStatus = decoder.ReadEncodable<StatusResult>("LastMethodReturnStatus");
             decoder.PopNamespace();

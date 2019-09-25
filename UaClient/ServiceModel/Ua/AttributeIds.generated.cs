@@ -11,27 +11,32 @@ namespace Workstation.ServiceModel.Ua
 {
     public static class AttributeIds
     {
-        public const uint NodeId = 1u;
-        public const uint NodeClass = 2u;
-        public const uint BrowseName = 3u;
-        public const uint DisplayName = 4u;
-        public const uint Description = 5u;
-        public const uint WriteMask = 6u;
-        public const uint UserWriteMask = 7u;
-        public const uint IsAbstract = 8u;
-        public const uint Symmetric = 9u;
-        public const uint InverseName = 10u;
-        public const uint ContainsNoLoops = 11u;
-        public const uint EventNotifier = 12u;
-        public const uint Value = 13u;
-        public const uint DataType = 14u;
-        public const uint ValueRank = 15u;
-        public const uint ArrayDimensions = 16u;
-        public const uint AccessLevel = 17u;
-        public const uint UserAccessLevel = 18u;
-        public const uint MinimumSamplingInterval = 19u;
-        public const uint Historizing = 20u;
-        public const uint Executable = 21u;
-        public const uint UserExecutable = 22u;
+		public const uint NodeId = 1u;
+		public const uint NodeClass = 2u;
+		public const uint BrowseName = 3u;
+		public const uint DisplayName = 4u;
+		public const uint Description = 5u;
+		public const uint WriteMask = 6u;
+		public const uint UserWriteMask = 7u;
+		public const uint IsAbstract = 8u;
+		public const uint Symmetric = 9u;
+		public const uint InverseName = 10u;
+		public const uint ContainsNoLoops = 11u;
+		public const uint EventNotifier = 12u;
+		public const uint Value = 13u;
+		public const uint DataType = 14u;
+		public const uint ValueRank = 15u;
+		public const uint ArrayDimensions = 16u;
+		public const uint AccessLevel = 17u;
+		public const uint UserAccessLevel = 18u;
+		public const uint MinimumSamplingInterval = 19u;
+		public const uint Historizing = 20u;
+		public const uint Executable = 21u;
+		public const uint UserExecutable = 22u;
+		public const uint DataTypeDefinition = 23u;
+		public const uint RolePermissions = 24u;
+		public const uint UserRolePermissions = 25u;
+		public const uint AccessRestrictions = 26u;
+		public const uint AccessLevelEx = 27u;
     }
 }
