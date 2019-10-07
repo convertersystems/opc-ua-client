@@ -9,7 +9,7 @@ namespace Workstation.ServiceModel.Ua
     /// Attribute for classes of type IEncodable to indicate the binary encoding id.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public sealed class BinaryEncodingIdAttribute : Attribute
+    public class BinaryEncodingIdAttribute : Attribute
     {
         public BinaryEncodingIdAttribute(string s)
         {
