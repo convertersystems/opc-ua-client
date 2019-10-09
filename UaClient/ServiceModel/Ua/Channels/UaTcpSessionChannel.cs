@@ -589,9 +589,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var userNameIdentity = (UserNameIdentity)this.UserIdentity;
-                if (userNameIdentity.UserName == null && userNameIdentity.Password == null)
+                if (userNameIdentity.UserName == null || userNameIdentity.Password == null)
                 {
-                    throw new Exception("Authentication is not anonymous, but no username and password were provided.");
+                    throw new InvalidOperationException("Authentication is not anonymous, but no username and password were provided.");
                 }
 
                 byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password);
