@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -14,6 +16,46 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// </summary>
     public abstract class CommunicationObject : ICommunicationObject
     {
+        // ##############################################################################################################################
+        // Properties
+        // ##############################################################################################################################
+
+        #region Properties
+
+        // ##########################################################################################
+        // Public Properties
+        // ##########################################################################################
+
+        /// <summary>
+        /// Pushes the actual communication state
+        /// </summary>
+        public IObservable<CommunicationState> StateStream => communicationStateSubject.AsObservable().DistinctUntilChanged();
+
+        /// <summary>
+        /// Gets or sets gets a value that indicates the current state of the communication object.
+        /// </summary>
+        /// <returns>A value from the <see cref="T:Workstation.ServiceModel.Ua.CommunicationState" /> enumeration that indicates the current state of the object.</returns>
+        public CommunicationState State
+        {
+            get => communicationStateSubject.Value;
+            protected set => communicationStateSubject.OnNext(value);
+        }
+
+        [Obsolete("use StateStream instead of", false)]
+        public event EventHandler Closed;
+        [Obsolete("use StateStream instead of", false)]
+        public event EventHandler Closing;
+        [Obsolete("use StateStream instead of", false)]
+        public event EventHandler Faulted;
+        [Obsolete("use StateStream instead of", false)]
+        public event EventHandler Opened;
+        [Obsolete("use StateStream instead of", false)]
+        public event EventHandler Opening;
+
+        // ##########################################################################################
+        // Private Properties
+        // ##########################################################################################
+
         private readonly ILogger logger;
         private bool aborted;
         private bool onClosingCalled;
@@ -26,6 +68,16 @@ namespace Workstation.ServiceModel.Ua.Channels
         private SemaphoreSlim semaphore;
         private Lazy<ConcurrentQueue<Exception>> exceptions;
 
+        private readonly BehaviorSubject<CommunicationState> communicationStateSubject;
+
+        #endregion
+        
+        // ##############################################################################################################################
+        // Constructor
+        // ##############################################################################################################################
+
+        #region Constructor
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CommunicationObject"/> class.
         /// </summary>
@@ -35,24 +87,37 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.logger = loggerFactory?.CreateLogger(this.GetType());
             this.semaphore = new SemaphoreSlim(1);
             this.exceptions = new Lazy<ConcurrentQueue<Exception>>();
+
+            communicationStateSubject = new BehaviorSubject<CommunicationState>(CommunicationState.Created);
+            StateStream.Subscribe(state =>
+            {
+                switch (state)
+                {
+                    case CommunicationState.Created:
+                        break;
+                    case CommunicationState.Opening:
+                        Opening?.Invoke(this, EventArgs.Empty);
+                        break;
+                    case CommunicationState.Opened:
+                        Opened?.Invoke(this, EventArgs.Empty);
+                        break;
+                    case CommunicationState.Closing:
+                        Closing?.Invoke(this, EventArgs.Empty);
+                        break;
+                    case CommunicationState.Closed:
+                        Closed?.Invoke(this, EventArgs.Empty);
+                        break;
+                    case CommunicationState.Faulted:
+                        Faulted?.Invoke(this, EventArgs.Empty);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(state), state, null);
+                }
+            });
         }
 
-        public event EventHandler Closed;
-
-        public event EventHandler Closing;
-
-        public event EventHandler Faulted;
-
-        public event EventHandler Opened;
-
-        public event EventHandler Opening;
-
-        /// <summary>
-        /// Gets or sets gets a value that indicates the current state of the communication object.
-        /// </summary>
-        /// <returns>A value from the <see cref="T:Workstation.ServiceModel.Ua.CommunicationState" /> enumeration that indicates the current state of the object.</returns>
-        public CommunicationState State { get; protected set; }
-
+        #endregion
+        
         /// <summary>
         /// Causes a communication object to transition immediately from its current state into the closing state.
         /// </summary>
@@ -300,11 +365,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel closed.");
-            EventHandler closed = this.Closed;
-            if (closed != null)
-            {
-                closed(this, EventArgs.Empty);
-            }
         }
 
         /// <summary>
@@ -331,11 +391,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel closing.");
-            EventHandler closing = this.Closing;
-            if (closing != null)
-            {
-                closing(this, EventArgs.Empty);
-            }
         }
 
         /// <summary>
@@ -361,11 +416,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel faulted.");
-            EventHandler faulted = this.Faulted;
-            if (faulted != null)
-            {
-                faulted(this, EventArgs.Empty);
-            }
         }
 
         /// <summary>
@@ -399,11 +449,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel opened.");
-            EventHandler opened = this.Opened;
-            if (opened != null)
-            {
-                opened(this, EventArgs.Empty);
-            }
         }
 
         /// <summary>
@@ -424,11 +469,6 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel opening.");
-            EventHandler opening = this.Opening;
-            if (opening != null)
-            {
-                opening(this, EventArgs.Empty);
-            }
         }
 
         protected void AddPendingException(Exception exception)
