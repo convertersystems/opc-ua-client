@@ -14,7 +14,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// Provides a common base implementation for the basic state machine common to all communication-oriented objects in the system.
     /// </summary>
-    public abstract class CommunicationObject : ICommunicationObject
+    public abstract class CommunicationObject : ICommunicationObject, IDisposable
     {
         // ##############################################################################################################################
         // Properties
@@ -539,5 +539,28 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             }
         }
+
+        // ##############################################################################################################################
+        // IDisposable
+        // ##############################################################################################################################
+
+        #region IDisposable
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                semaphore?.Dispose();
+                communicationStateSubject?.Dispose();
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }

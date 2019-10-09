@@ -283,5 +283,20 @@ namespace Workstation.ServiceModel.Ua.Channels
 #endif
             return CompletedTask;
         }
+
+
+        // ##############################################################################################################################
+        // IDisposable
+        // ##############################################################################################################################
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            CloseAsync().GetAwaiter().GetResult();
+            base.Dispose(disposing);
+        }
+
+        #endregion
     }
 }

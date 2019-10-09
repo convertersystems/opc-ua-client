@@ -824,5 +824,19 @@ namespace Workstation.ServiceModel.Ua.Channels
             };
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
+
+        // ##############################################################################################################################
+        // IDisposable
+        // ##############################################################################################################################
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            CloseAsync().GetAwaiter().GetResult();
+            base.Dispose(disposing);
+        }
+
+        #endregion
     }
 }

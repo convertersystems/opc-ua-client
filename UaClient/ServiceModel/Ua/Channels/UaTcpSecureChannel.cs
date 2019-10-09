@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,27 +11,14 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using Microsoft.IO;
-using Org.BouncyCastle.Asn1;
-using Org.BouncyCastle.Asn1.Misc;
-using Org.BouncyCastle.Asn1.Utilities;
-using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Digests;
-using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Macs;
-using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Security.Certificates;
-using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.Utilities.Encoders;
 using Org.BouncyCastle.X509;
-using Org.BouncyCastle.X509.Extension;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
@@ -1865,5 +1851,19 @@ namespace Workstation.ServiceModel.Ua.Channels
             Rng.NextBytes(nonce);
             return nonce;
         }
+        
+        // ##############################################################################################################################
+        // IDisposable
+        // ##############################################################################################################################
+
+        #region IDisposable
+
+        protected override void Dispose(bool disposing)
+        {
+            CloseAsync().GetAwaiter().GetResult();
+            base.Dispose(disposing);
+        }
+
+        #endregion
     }
 }
