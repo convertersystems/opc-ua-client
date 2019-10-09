@@ -66,7 +66,7 @@ namespace Workstation.ServiceModel.Ua
 
             this.Body = body;
             this.BodyType = BodyType.Encodable;
-            this.TypeId = body.GetType().GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(false)?.NodeId ?? throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
+            this.TypeId = body.GetType().GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(true)?.NodeId ?? throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
         }
 
         public object Body { get; }

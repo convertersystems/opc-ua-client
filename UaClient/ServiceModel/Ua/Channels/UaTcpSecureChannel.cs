@@ -122,7 +122,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 var info = type.GetTypeInfo();
                 if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
                 {
-                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(true);
                     if (attr != null)
                     {
                         var id = ExpandedNodeId.ToNodeId(attr.NodeId, null);
@@ -709,7 +709,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     var info = type.GetTypeInfo();
                     if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
                     {
-                        var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                        var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(true);
                         if (attr != null)
                         {
                             var id = ExpandedNodeId.ToNodeId(attr.NodeId, this.NamespaceUris);
