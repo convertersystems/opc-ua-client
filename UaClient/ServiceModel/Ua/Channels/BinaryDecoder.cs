@@ -12,6 +12,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryDecoder : IDecoder, IDisposable
     {
+        private const long MinFileTime =  504911232000000000L;
+        private const long MaxFileTime = 3155378975990000000L;
         private Stream stream;
         private UaTcpSecureChannel channel;
         private Encoding encoding;
@@ -121,6 +123,16 @@ namespace Workstation.ServiceModel.Ua.Channels
         public DateTime ReadDateTime(string fieldName)
         {
             long num = this.reader.ReadInt64();
+
+            if (num <= 0)
+            {
+                return DateTime.MinValue;
+            }
+            else if (num >= MaxFileTime - MinFileTime)
+            {
+                return DateTime.MaxValue;
+            }
+
             return DateTime.FromFileTimeUtc(num);
         }
 
