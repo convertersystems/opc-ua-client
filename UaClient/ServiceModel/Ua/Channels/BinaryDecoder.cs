@@ -112,7 +112,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public string ReadString(string fieldName)
         {
             byte[] array = this.ReadByteString(fieldName);
-            if (array == null || array.Length == 0)
+            if (array == null)
             {
                 return null;
             }
