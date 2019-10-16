@@ -12,8 +12,8 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class MonitoredItemBaseCollection : ObservableCollection<MonitoredItemBase>
     {
-        private Dictionary<string, MonitoredItemBase> nameMap = new Dictionary<string, MonitoredItemBase>();
-        private Dictionary<uint, MonitoredItemBase> clientIdMap = new Dictionary<uint, MonitoredItemBase>();
+        private readonly Dictionary<string, MonitoredItemBase> nameMap = new Dictionary<string, MonitoredItemBase>();
+        private readonly Dictionary<uint, MonitoredItemBase> clientIdMap = new Dictionary<uint, MonitoredItemBase>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MonitoredItemBaseCollection"/> class.

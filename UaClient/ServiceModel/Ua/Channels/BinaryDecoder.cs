@@ -14,10 +14,10 @@ namespace Workstation.ServiceModel.Ua.Channels
     {
         private const long MinFileTime =  504911232000000000L;
         private const long MaxFileTime = 3155378975990000000L;
-        private Stream stream;
-        private UaTcpSecureChannel channel;
-        private Encoding encoding;
-        private BinaryReader reader;
+        private readonly Stream stream;
+        private readonly UaTcpSecureChannel channel;
+        private readonly Encoding encoding;
+        private readonly BinaryReader reader;
 
         public BinaryDecoder(Stream stream, UaTcpSecureChannel channel = null, bool keepStreamOpen = false)
         {

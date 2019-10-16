@@ -42,9 +42,9 @@ namespace Workstation.ServiceModel.Ua
 
     public struct Variant
     {
-        public static Variant Null = default(Variant);
+        public static readonly Variant Null = default(Variant);
 
-        private static Dictionary<Type, VariantType> typeMap = new Dictionary<Type, VariantType>()
+        private static readonly Dictionary<Type, VariantType> typeMap = new Dictionary<Type, VariantType>()
         {
             [typeof(bool)] = VariantType.Boolean,
             [typeof(sbyte)] = VariantType.SByte,
@@ -75,7 +75,7 @@ namespace Workstation.ServiceModel.Ua
             */
         };
 
-        private static Dictionary<Type, VariantType> elemTypeMap = new Dictionary<Type, VariantType>()
+        private static readonly Dictionary<Type, VariantType> elemTypeMap = new Dictionary<Type, VariantType>()
         {
             [typeof(bool)] = VariantType.Boolean,
             [typeof(sbyte)] = VariantType.SByte,

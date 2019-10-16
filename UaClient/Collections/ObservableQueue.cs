@@ -13,8 +13,8 @@ namespace Workstation.Collections
     /// <typeparam name="T">Type of element.</typeparam>
     public class ObservableQueue<T> : Queue<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private int capacity;
-        private bool isFixedSize;
+        private readonly int capacity;
+        private readonly bool isFixedSize;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObservableQueue{T}"/> class.
