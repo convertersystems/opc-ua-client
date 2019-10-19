@@ -23,8 +23,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         private bool raisedClosed;
         private bool raisedClosing;
         private bool raisedFaulted;
-        private SemaphoreSlim semaphore;
-        private Lazy<ConcurrentQueue<Exception>> exceptions;
+        private readonly SemaphoreSlim semaphore;
+        private readonly Lazy<ConcurrentQueue<Exception>> exceptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommunicationObject"/> class.
