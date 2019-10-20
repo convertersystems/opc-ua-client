@@ -141,6 +141,16 @@ namespace Workstation.UaClient.UnitTests.Channels
                     .Should().Be(expectation.ServerPicoseconds);
             }
         }
+        
+        private class MatrixEquivalency : TypeMappingEquivalency<Opc.Ua.Matrix, Array>
+        {
+            protected override void Test(Opc.Ua.Matrix subject, Array expectation, string because, object[] becauseArgs)
+            {
+                var arr = subject.ToArray();
+                arr
+                    .Should().BeEquivalentTo(expectation);
+            }
+        }
 
         private class XmlEquivalency : TypeMappingEquivalency<XmlNode, XElement>
         {
@@ -182,6 +192,9 @@ namespace Workstation.UaClient.UnitTests.Channels
 
             // Xml
             AssertionOptions.AssertEquivalencyUsing(options => options.Using(new XmlEquivalency()));
+            
+            // Matrix/Multidim array
+            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new MatrixEquivalency()));
         }
     }
 }

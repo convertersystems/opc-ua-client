@@ -19,12 +19,9 @@ namespace Workstation.UaClient.UnitTests.Channels
         private static T EncodeDecode<T>(Action<Opc.Ua.BinaryEncoder> encode, Func<BinaryDecoder, T> decode)
         {
             using (var stream = new MemoryStream())
+            using (var encoder = new Opc.Ua.BinaryEncoder(stream, new Opc.Ua.ServiceMessageContext {}))
+            using (var decoder = new BinaryDecoder(stream))
             {
-                var encoder = new Opc.Ua.BinaryEncoder(stream, new Opc.Ua.ServiceMessageContext
-                {
-
-                });
-                var decoder = new BinaryDecoder(stream);
 
                 encode(encoder);
                 stream.Position = 0;
@@ -37,6 +34,15 @@ namespace Workstation.UaClient.UnitTests.Channels
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
             return doc.DocumentElement;
+        }
+
+        [Fact]
+        public void CreateWithNullStream()
+        {
+            Stream stream = null;
+
+            stream.Invoking(s => new BinaryDecoder(s))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [InlineData(true)]
@@ -452,7 +458,50 @@ namespace Workstation.UaClient.UnitTests.Channels
             Opc.Ua.QualifiedName.Parse("4:Test"),
             new Opc.Ua.LocalizedText("foo", "fr-FR"),
             XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />"),
-            new Opc.Ua.StatusCode(43)
+            new Opc.Ua.StatusCode(43),
+            new [] {true, false, true },
+            new sbyte[] { 1, 2, 3},
+            new short[] { 1, 2, 3},
+            new ushort[] { 1, 2, 3},
+            new int[] { 1, 2, 3},
+            new uint[] { 1, 2, 3},
+            new long[] { 1, 2, 3},
+            new ulong[] { 1, 2, 3},
+            new float[] { (float)1.3, (float)3.1, (float)4},
+            new double[] { 1.3, 3.1, 4.0},
+            new string[] { "a", "b", ""},
+            new DateTime[] { DateTime.UtcNow },
+            new Opc.Ua.Uuid[] { Opc.Ua.Uuid.Empty, new Opc.Ua.Uuid() },
+            new byte[][] { new byte[] { }, new byte[] { 1, 2, 3} },
+            new Opc.Ua.NodeId[] { new Opc.Ua.NodeId(5), new Opc.Ua.NodeId("b")},
+            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(4), new Opc.Ua.ExpandedNodeId("ee")},
+            new Opc.Ua.QualifiedName[] { Opc.Ua.QualifiedName.Parse("0:A"), Opc.Ua.QualifiedName.Parse("1:t") },
+            new Opc.Ua.LocalizedText[] {new Opc.Ua.LocalizedText("Yes", "en-US"), new Opc.Ua.LocalizedText("Ja", "de-DE")},
+            new [] { XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />") },
+            new Opc.Ua.StatusCode[] {42, 43},
+            new Opc.Ua.Variant[] { new Opc.Ua.Variant(1)},
+            new [,] { { true, false }, { true, true}, { false, false} },
+            new byte[,] { { 1 }, { 2 }, { 3 } },
+            new sbyte[,] { { 1 }, { 2 }, { 3 } },
+            new short[,] { { 1, 2, 3 } },
+            new ushort[,] { { 1, 2 }, { 3, 9 } },
+            new int[,] { { 1, 2 }, { 3, 0 } },
+            new uint[,] { { 1, 2, 3 }, { 6, 0, 0 } },
+            new long[,] { { 1 } },
+            new ulong[,,] { { { 1, 2 }, { 3, 5 } }, { { 8, 2 }, { 3, 7 } }},
+            new float[,] { { (float)3.13456 } },
+            new double[,,,] { { {{ double.PositiveInfinity }, { double.NaN } }, { { double.NegativeInfinity }, { 3.1 } } } },
+            new byte[,][] { { new byte[] { 3, 4} }, { new byte[] { 5, 6, 7} } },
+            new string[,] { { "a", null},{ "b", "" } },
+            new DateTime[,] { { DateTime.MinValue } },
+            new Opc.Ua.Uuid[,] { { Opc.Ua.Uuid.Empty, new Opc.Ua.Uuid() } },
+            new Opc.Ua.NodeId[,] { { new Opc.Ua.NodeId(5) }, {new Opc.Ua.NodeId("b")} },
+            new Opc.Ua.ExpandedNodeId[,] { { new Opc.Ua.ExpandedNodeId(4) }, { new Opc.Ua.ExpandedNodeId("ee") } },
+            new Opc.Ua.QualifiedName[,,,,,,,] { { { { { { { { new Opc.Ua.QualifiedName("A") } } } } } } } },
+            new Opc.Ua.LocalizedText[,] { { new Opc.Ua.LocalizedText("Yes", "en-US"), new Opc.Ua.LocalizedText("Ja", "de-DE") }, { new Opc.Ua.LocalizedText("No", "en-US"), new Opc.Ua.LocalizedText("Nein", "de-DE") } },
+            new [,] { { XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />") } },
+            new Opc.Ua.StatusCode[,,] { {{ 42, 43 }, { 100, 102 }, {100, 234 }, { 239, 199} } },
+            new Opc.Ua.Variant[,] { { new Opc.Ua.Variant(1), new Opc.Ua.Variant(2) }, { new Opc.Ua.Variant(3), new Opc.Ua.Variant(4)} },
         }
         .Select(x => new object[] { new Opc.Ua.Variant(x) });
 

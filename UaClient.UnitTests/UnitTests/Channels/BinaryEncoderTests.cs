@@ -19,17 +19,22 @@ namespace Workstation.UaClient.UnitTests.Channels
         private static T EncodeDecode<T>(Action<BinaryEncoder> encode, Func<Opc.Ua.BinaryDecoder, T> decode)
         {
             using (var stream = new MemoryStream())
+            using (var encoder = new BinaryEncoder(stream))
+            using (var decoder = new Opc.Ua.BinaryDecoder(stream, new Opc.Ua.ServiceMessageContext { }))
             {
-                var encoder = new BinaryEncoder(stream);
-                var decoder = new Opc.Ua.BinaryDecoder(stream, new Opc.Ua.ServiceMessageContext
-                {
-
-                });
-
                 encode(encoder);
                 stream.Position = 0;
                 return decode(decoder);
             }
+        }
+
+        [Fact]
+        public void CreateWithNullStream()
+        {
+            Stream stream = null;
+
+            stream.Invoking(s => new BinaryEncoder(s))
+                .Should().Throw<ArgumentNullException>();
         }
 
         [InlineData(true)]
@@ -220,6 +225,26 @@ namespace Workstation.UaClient.UnitTests.Channels
                 d => d.ReadDateTime(null))
                 .Should().Be(val);
         }
+        
+        [Fact]
+        public void EncodeDateTimeLocal()
+        {
+            var val = new DateTime(2013, 1, 1, 11, 30, 30, DateTimeKind.Local);
+            EncodeDecode(
+                e => e.WriteDateTime(null, val),
+                d => d.ReadDateTime(null))
+                .Should().Be(val.ToUniversalTime());
+        }
+        
+        [Fact]
+        public void EncodeDateTimeUnspecified()
+        {
+            var val = new DateTime(2013, 1, 1, 11, 30, 30, DateTimeKind.Unspecified);
+            EncodeDecode(
+                e => e.WriteDateTime(null, val),
+                d => d.ReadDateTime(null))
+                .Should().Be(val);
+        }
 
         public static IEnumerable<object[]> EncodeGuidData { get; } = new []
         {
@@ -313,7 +338,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             EncodeDecode(
                 e => e.WriteNodeId(null, null),
                 d => d.ReadNodeId(null))
-                .Should().Be(new Opc.Ua.NodeId());
+                .Should().Be(Opc.Ua.NodeId.Null);
         }
 
         public static IEnumerable<object[]> EncodeExpandedNodeIdData { get; } = new []
@@ -328,7 +353,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             "ns=3;g=8994DA00-5CE1-461F-963C-43F7CFC6864E",
             "svr=2;nsu=http://PLCopen.org/OpcUa/IEC61131-3;ns=3;b=Base64+Test="
         }
-        .Select(x => new object[] { ExpandedNodeId.Parse(x) });
+        .Select(x => new object[] { x is null ? null : ExpandedNodeId.Parse(x) });
 
         [MemberData(nameof(EncodeExpandedNodeIdData))]
         [Theory]
@@ -338,6 +363,15 @@ namespace Workstation.UaClient.UnitTests.Channels
                 e => e.WriteExpandedNodeId(null, val),
                 d => d.ReadExpandedNodeId(null))
                 .Should().BeEquivalentTo(val);
+        }
+        
+        [Fact]
+        public void EncodeExpandedNodeIdNull()
+        {
+            EncodeDecode(
+                e => e.WriteExpandedNodeId(null, null),
+                d => d.ReadExpandedNodeId(null))
+                .Should().BeEquivalentTo(Opc.Ua.ExpandedNodeId.Null);
         }
 
         public static IEnumerable<object[]> EncodeStatusCodeData { get; } = new[]
@@ -367,6 +401,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             new DiagnosticInfo(2, 3, 4, 5, "Text text text."),
             new DiagnosticInfo(2, additionalInfo:"Test test test."),
             new DiagnosticInfo(2, locale:6, innerStatusCode: StatusCodes.BadSessionIdInvalid),
+            //new DiagnosticInfo(2, innerDiagnosticInfo: new DiagnosticInfo(2)),
         }
         .Select(x => new object[] { x });
 
@@ -378,6 +413,15 @@ namespace Workstation.UaClient.UnitTests.Channels
                 e => e.WriteDiagnosticInfo(null, val),
                 d => d.ReadDiagnosticInfo(null))
                 .Should().BeEquivalentTo(val);
+        }
+        
+        [Fact]
+        public void EncodeDiagnosticInfoNull()
+        {
+            EncodeDecode(
+                e => e.WriteDiagnosticInfo(null, null),
+                d => d.ReadDiagnosticInfo(null))
+                .Should().BeEquivalentTo(new Opc.Ua.DiagnosticInfo());
         }
 
         public static IEnumerable<object[]> EncodeQualifiedNameData { get; } = new []
@@ -395,6 +439,15 @@ namespace Workstation.UaClient.UnitTests.Channels
                 e => e.WriteQualifiedName(null, val),
                 d => d.ReadQualifiedName(null))
                 .Should().BeEquivalentTo(val);
+        }
+        
+        [Fact]
+        public void EncodeQualifiedNameNull()
+        {
+            EncodeDecode(
+                e => e.WriteQualifiedName(null, null),
+                d => d.ReadQualifiedName(null))
+                .Should().BeEquivalentTo(Opc.Ua.QualifiedName.Null);
         }
 
         public static IEnumerable<object[]> EncodeLocalizedTextData { get; } = new []
@@ -420,6 +473,15 @@ namespace Workstation.UaClient.UnitTests.Channels
                 d => d.ReadLocalizedText(null))
                 .Should().BeEquivalentTo(val);
         }
+        
+        [Fact]
+        public void EncodeLocalizedTextNull()
+        {
+            EncodeDecode(
+                e => e.WriteLocalizedText(null, null),
+                d => d.ReadLocalizedText(null))
+                .Should().BeEquivalentTo(Opc.Ua.LocalizedText.Null);
+        }
 
         public static IEnumerable<object[]> EncodeVariantData { get; } = new object[]
         {
@@ -444,7 +506,50 @@ namespace Workstation.UaClient.UnitTests.Channels
             QualifiedName.Parse("4:Test"),
             new LocalizedText("foo", "fr-FR"),
             XElement.Parse(@"<Item AttributeA=""A"" AttributeB=""B"" />"),
-            new StatusCode(43)
+            new StatusCode(43),
+            new [] {true, false, true },
+            new sbyte[] { 1, 2, 3},
+            new short[] { 1, 2, 3},
+            new ushort[] { 1, 2, 3},
+            new int[] { 1, 2, 3},
+            new uint[] { 1, 2, 3},
+            new long[] { 1, 2, 3},
+            new ulong[] { 1, 2, 3},
+            new float[] { (float)1.3, (float)3.1, (float)4},
+            new double[] { 1.3, 3.1, 4.0},
+            new string[] { "a", "b", ""},
+            new DateTime[] { DateTime.UtcNow },
+            new Guid[] { Guid.NewGuid(), Guid.Empty },
+            new byte[][] { new byte[] { }, new byte[] { 1, 2, 3} },
+            new NodeId[] { new NodeId(5), new NodeId("b")},
+            new ExpandedNodeId[] { new ExpandedNodeId(4), new ExpandedNodeId("ee")},
+            new QualifiedName[] { QualifiedName.Parse("0:A"), QualifiedName.Parse("1:t") },
+            new LocalizedText[] {new LocalizedText("Yes", "en-US"), new LocalizedText("Ja", "de-DE")},
+            new XElement[] { XElement.Parse(@"<Item AttributeA=""A"" AttributeB=""B"" />") },
+            new StatusCode[] {42, 43},
+            new Variant[] { new Variant(1)},
+            new [,] { { true, false }, { true, true}, { false, false} },
+            new byte[,] { { 1 }, { 2 }, { 3 } },
+            new sbyte[,] { { 1 }, { 2 }, { 3 } },
+            new short[,] { { 1, 2, 3 } },
+            new ushort[,] { { 1, 2 }, { 3, 9 } },
+            new int[,] { { 1, 2 }, { 3, 0 } },
+            new uint[,] { { 1, 2, 3 }, { 6, 0, 0 } },
+            new long[,] { { 1 } },
+            new ulong[,,] { { { 1, 2 }, { 3, 5 } }, { { 8, 2 }, { 3, 7 } }},
+            new float[,] { { (float)3.13456 } },
+            new double[,,,] { { {{ double.PositiveInfinity }, { double.NaN } }, { { double.NegativeInfinity }, { 3.1 } } } },
+            new byte[,][] { { new byte[] { 3, 4} }, { new byte[] { 5, 6, 7} } },
+            new string[,] { { "a", null},{ "b", "" } },
+            new DateTime[,] { { DateTime.MinValue } },
+            new Guid[,] { { Guid.NewGuid(), Guid.Empty } },
+            new NodeId[,] { { new NodeId(5) }, {new NodeId("b")} },
+            new ExpandedNodeId[,] { { new ExpandedNodeId(4) }, { new ExpandedNodeId("ee") } },
+            new QualifiedName[,,,,,,,] { { { { { { { { new QualifiedName("A") } } } } } } } },
+            new LocalizedText[,] { { new LocalizedText("Yes", "en-US"), new LocalizedText("Ja", "de-DE") }, { new LocalizedText("No", "en-US"), new LocalizedText("Nein", "de-DE") } },
+            new XElement[,] { { XElement.Parse(@"<Item AttributeA=""A"" AttributeB=""B"" />") } },
+            new StatusCode[,,] { {{ 42, 43 }, { 100, 102 }, {100, 234 }, { 239, 199} } },
+            new Variant[,] { { new Variant(1), new Variant(2) }, { new Variant(3), new Variant(4)} },
         }
         .Select(x => new object[] { new Variant(x) });
 
@@ -475,6 +580,15 @@ namespace Workstation.UaClient.UnitTests.Channels
                 e => e.WriteDataValue(null, val),
                 d => d.ReadDataValue(null))
                 .Should().BeEquivalentTo(val);
+        }
+
+        [Fact]
+        public void EncodeDataValueNull()
+        {
+            EncodeDecode(
+                e => e.WriteDataValue(null, null),
+                d => d.ReadDataValue(null))
+                .Should().BeEquivalentTo(new Opc.Ua.DataValue());
         }
 
         [InlineData(TypeCode.Boolean)]
