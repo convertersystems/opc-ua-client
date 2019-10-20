@@ -151,6 +151,16 @@ namespace Workstation.UaClient.UnitTests.Channels
             }
         }
 
+        private class MatrixEquivalency : TypeMappingEquivalency<Array, Opc.Ua.Matrix>
+        {
+            protected override void Test(Array subject, Opc.Ua.Matrix expectation, string because, object[] becauseArgs)
+            {
+                var arr = expectation.ToArray();
+                subject
+                    .Should().BeEquivalentTo(arr);
+            }
+        }
+
         private class XmlEquivalency : TypeMappingEquivalency<XElement, XmlElement>
         {
             protected override void Test(XElement subject, XmlElement expectation, string because, object[] becauseArgs)
@@ -206,6 +216,9 @@ namespace Workstation.UaClient.UnitTests.Channels
 
             // TimeZoneDataType
             AssertionOptions.AssertEquivalencyUsing(options => options.ComparingByMembers<TimeZoneDataType>().ExcludingMissingMembers());
+            
+            // Matrix/Multidim array
+            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new MatrixEquivalency()));
         }
     }
 }
