@@ -29,18 +29,18 @@ namespace Workstation.ServiceModel.Ua
         private volatile bool isPublishing;
         private volatile UaTcpSessionChannel innerChannel;
         private volatile uint subscriptionId;
-        private ErrorsContainer<string> errors;
+        private readonly ErrorsContainer<string> errors;
         private PropertyChangedEventHandler propertyChanged;
-        private string endpointUrl;
-        private double publishingInterval = UaTcpSessionChannel.DefaultPublishingInterval;
-        private uint keepAliveCount = UaTcpSessionChannel.DefaultKeepaliveCount;
-        private uint lifetimeCount;
-        private MonitoredItemBaseCollection monitoredItems = new MonitoredItemBaseCollection();
+        private readonly string endpointUrl;
+        private readonly double publishingInterval = UaTcpSessionChannel.DefaultPublishingInterval;
+        private readonly uint keepAliveCount = UaTcpSessionChannel.DefaultKeepaliveCount;
+        private readonly uint lifetimeCount;
+        private readonly MonitoredItemBaseCollection monitoredItems = new MonitoredItemBaseCollection();
         private CommunicationState state = CommunicationState.Created;
         private volatile TaskCompletionSource<bool> whenSubscribed;
         private volatile TaskCompletionSource<bool> whenUnsubscribed;
-        private CancellationTokenSource stateMachineCts;
-        private Task stateMachineTask;
+        private readonly CancellationTokenSource stateMachineCts;
+        private readonly Task stateMachineTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionBase"/> class.

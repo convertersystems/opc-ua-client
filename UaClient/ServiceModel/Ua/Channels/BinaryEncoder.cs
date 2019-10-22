@@ -14,10 +14,10 @@ namespace Workstation.ServiceModel.Ua.Channels
     public sealed class BinaryEncoder : IEncoder, IDisposable
     {
         private const long MinFileTime = 504911232000000000L;
-        private Stream stream;
-        private UaTcpSecureChannel channel;
-        private Encoding encoding;
-        private BinaryWriter writer;
+        private readonly Stream stream;
+        private readonly UaTcpSecureChannel channel;
+        private readonly Encoding encoding;
+        private readonly BinaryWriter writer;
 
         public BinaryEncoder(Stream stream, UaTcpSecureChannel channel = null, bool keepStreamOpen = false)
         {

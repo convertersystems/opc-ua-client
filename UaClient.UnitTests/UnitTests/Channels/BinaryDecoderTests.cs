@@ -14,18 +14,26 @@ using Xunit;
 
 namespace Workstation.UaClient.UnitTests.Channels
 {
-    public partial class BinaryEncoderTests
+    public partial class BinaryDecoderTests
     {
-        private static T EncodeDecode<T>(Action<BinaryEncoder> encode, Func<Opc.Ua.BinaryDecoder, T> decode)
+        private static T EncodeDecode<T>(Action<Opc.Ua.BinaryEncoder> encode, Func<BinaryDecoder, T> decode)
         {
             using (var stream = new MemoryStream())
-            using (var encoder = new BinaryEncoder(stream))
-            using (var decoder = new Opc.Ua.BinaryDecoder(stream, new Opc.Ua.ServiceMessageContext { }))
+            using (var encoder = new Opc.Ua.BinaryEncoder(stream, new Opc.Ua.ServiceMessageContext {}))
+            using (var decoder = new BinaryDecoder(stream))
             {
+
                 encode(encoder);
                 stream.Position = 0;
                 return decode(decoder);
             }
+        }
+
+        private static XmlElement XmlElementParse(string xml)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+            return doc.DocumentElement;
         }
 
         [Fact]
@@ -33,14 +41,14 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             Stream stream = null;
 
-            stream.Invoking(s => new BinaryEncoder(s))
+            stream.Invoking(s => new BinaryDecoder(s))
                 .Should().Throw<ArgumentNullException>();
         }
 
         [InlineData(true)]
         [InlineData(false)]
         [Theory]
-        public void EncodeBoolean(bool val)
+        public void DecodeBoolean(bool val)
         {
             EncodeDecode(
                 e => e.WriteBoolean(null, val),
@@ -54,7 +62,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(SByte.MinValue)]
         [InlineData(SByte.MaxValue)]
         [Theory]
-        public void EncodeSByte(sbyte val)
+        public void DecodeSByte(sbyte val)
         {
             EncodeDecode(
                 e => e.WriteSByte(null, val),
@@ -67,7 +75,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(Byte.MinValue)]
         [InlineData(Byte.MaxValue)]
         [Theory]
-        public void EncodeByte(byte val)
+        public void DecodeByte(byte val)
         {
             EncodeDecode(
                 e => e.WriteByte(null, val),
@@ -81,7 +89,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(Int16.MinValue)]
         [InlineData(Int16.MaxValue)]
         [Theory]
-        public void EncodeInt16(short val)
+        public void DecodeInt16(short val)
         {
             EncodeDecode(
                 e => e.WriteInt16(null, val),
@@ -94,7 +102,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(UInt16.MinValue)]
         [InlineData(UInt16.MaxValue)]
         [Theory]
-        public void EncodeUInt16(ushort val)
+        public void DecodeUInt16(ushort val)
         {
             EncodeDecode(
                 e => e.WriteUInt16(null, val),
@@ -108,7 +116,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(Int32.MinValue)]
         [InlineData(Int32.MaxValue)]
         [Theory]
-        public void EncodeInt32(int val)
+        public void DecodeInt32(int val)
         {
             EncodeDecode(
                 e => e.WriteInt32(null, val),
@@ -121,7 +129,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(UInt32.MinValue)]
         [InlineData(UInt32.MaxValue)]
         [Theory]
-        public void EncodeUInt32(uint val)
+        public void DecodeUInt32(uint val)
         {
             EncodeDecode(
                 e => e.WriteUInt32(null, val),
@@ -135,7 +143,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(Int64.MinValue)]
         [InlineData(Int64.MaxValue)]
         [Theory]
-        public void EncodeInt64(long val)
+        public void DecodeInt64(long val)
         {
             EncodeDecode(
                 e => e.WriteInt64(null, val),
@@ -148,7 +156,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(UInt64.MinValue)]
         [InlineData(UInt64.MaxValue)]
         [Theory]
-        public void EncodeUInt64(ulong val)
+        public void DecodeUInt64(ulong val)
         {
             EncodeDecode(
                 e => e.WriteUInt64(null, val),
@@ -166,7 +174,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(Single.NegativeInfinity)]
         [InlineData(Single.PositiveInfinity)]
         [Theory]
-        public void EncodeFloat(float val)
+        public void DecodeFloat(float val)
         {
             EncodeDecode(
                 e => e.WriteFloat(null, val),
@@ -184,7 +192,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(Double.NegativeInfinity)]
         [InlineData(Double.PositiveInfinity)]
         [Theory]
-        public void EncodeDouble(double val)
+        public void DecodeDouble(double val)
         {
             EncodeDecode(
                 e => e.WriteDouble(null, val),
@@ -198,7 +206,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData("Umlaut Ä")]
         [InlineData("Euro €")]
         [Theory]
-        public void EncodeString(string val)
+        public void DecodeString(string val)
         {
             EncodeDecode(
                 e => e.WriteString(null, val),
@@ -206,7 +214,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().Be(val);
         }
 
-        public static IEnumerable<object[]> EncodeDateTimeData { get; } = new []
+        public static IEnumerable<object[]> DecodeDateTimeData { get; } = new []
         {
             new DateTime(0),
             new DateTime(1601, 1, 1, 0, 0, 1),
@@ -216,46 +224,26 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeDateTimeData))]
+        [MemberData(nameof(DecodeDateTimeData))]
         [Theory]
-        public void EncodeDateTime(DateTime val)
+        public void DecodeDateTime(DateTime val)
         {
-            EncodeDecode(
-                e => e.WriteDateTime(null, val),
-                d => d.ReadDateTime(null))
-                .Should().Be(val);
-        }
-        
-        [Fact]
-        public void EncodeDateTimeLocal()
-        {
-            var val = new DateTime(2013, 1, 1, 11, 30, 30, DateTimeKind.Local);
-            EncodeDecode(
-                e => e.WriteDateTime(null, val),
-                d => d.ReadDateTime(null))
-                .Should().Be(val.ToUniversalTime());
-        }
-        
-        [Fact]
-        public void EncodeDateTimeUnspecified()
-        {
-            var val = new DateTime(2013, 1, 1, 11, 30, 30, DateTimeKind.Unspecified);
             EncodeDecode(
                 e => e.WriteDateTime(null, val),
                 d => d.ReadDateTime(null))
                 .Should().Be(val);
         }
 
-        public static IEnumerable<object[]> EncodeGuidData { get; } = new []
+        public static IEnumerable<object[]> DecodeGuidData { get; } = new []
         {
             Guid.Empty,
             Guid.NewGuid()
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeGuidData))]
+        [MemberData(nameof(DecodeGuidData))]
         [Theory]
-        public void EncodeGuid(Guid val)
+        public void DecodeGuid(Guid val)
         {
             EncodeDecode(
                 e => e.WriteGuid(null, val),
@@ -263,7 +251,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().Be(val);
         }
 
-        public static IEnumerable<object[]> EncodeByteStringData { get; } = new []
+        public static IEnumerable<object[]> DecodeByteStringData { get; } = new []
         {
             null,
             new byte[] { },
@@ -272,9 +260,9 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeByteStringData))]
+        [MemberData(nameof(DecodeByteStringData))]
         [Theory]
-        public void EncodeByteString(byte[] val)
+        public void DecodeByteString(byte[] val)
         {
             EncodeDecode(
                 e => e.WriteByteString(null, val),
@@ -282,7 +270,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeXElementData { get; } = new []
+        public static IEnumerable<object[]> DecodeXElementData { get; } = new []
         {
              @"
                 <Window x:Class=""WpfApplication1.Window1""
@@ -296,19 +284,19 @@ namespace Workstation.UaClient.UnitTests.Channels
                 </Window>
             "
         }
-        .Select(x => new object[] { XElement.Parse(x) });
+        .Select(x => new object[] { XmlElementParse(x) });
 
-        [MemberData(nameof(EncodeXElementData))]
+        [MemberData(nameof(DecodeXElementData))]
         [Theory]
-        public void EncodeXElement(XElement val)
+        public void DecodeXElement(XmlElement val)
         {
             EncodeDecode(
-                e => e.WriteXElement(null, val),
-                d => (object)d.ReadXmlElement(null))
+                e => e.WriteXmlElement(null, val),
+                d => (object)d.ReadXElement(null))
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeNodeIdData { get; } = new []
+        public static IEnumerable<object[]> DecodeNodeIdData { get; } = new []
         {
             "ns=0;i=12",
             "ns=0;i=300",
@@ -320,11 +308,11 @@ namespace Workstation.UaClient.UnitTests.Channels
             "ns=3;g=8994DA00-5CE1-461F-963C-43F7CFC6864E",
             "ns=3;b=Base64+Test="
         }
-        .Select(x => new object[] { NodeId.Parse(x) });
+        .Select(x => new object[] { Opc.Ua.NodeId.Parse(x) });
 
-        [MemberData(nameof(EncodeNodeIdData))]
+        [MemberData(nameof(DecodeNodeIdData))]
         [Theory]
-        public void EncodeNodeId(NodeId val)
+        public void DecodeNodeId(Opc.Ua.NodeId val)
         {
             EncodeDecode(
                 e => e.WriteNodeId(null, val),
@@ -333,15 +321,15 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
 
         [Fact]
-        public void EncodeNodeIdNull()
+        public void DecodeNodeIdNull()
         {
             EncodeDecode(
                 e => e.WriteNodeId(null, null),
                 d => d.ReadNodeId(null))
-                .Should().Be(Opc.Ua.NodeId.Null);
+                .Should().Be(NodeId.Null);
         }
 
-        public static IEnumerable<object[]> EncodeExpandedNodeIdData { get; } = new []
+        public static IEnumerable<object[]> DecodeExpandedNodeIdData { get; } = new []
         {
             "ns=0;i=12",
             "svr=1;ns=0;i=300",
@@ -353,37 +341,28 @@ namespace Workstation.UaClient.UnitTests.Channels
             "ns=3;g=8994DA00-5CE1-461F-963C-43F7CFC6864E",
             "svr=2;nsu=http://PLCopen.org/OpcUa/IEC61131-3;ns=3;b=Base64+Test="
         }
-        .Select(x => new object[] { x is null ? null : ExpandedNodeId.Parse(x) });
+        .Select(x => new object[] { Opc.Ua.ExpandedNodeId.Parse(x) });
 
-        [MemberData(nameof(EncodeExpandedNodeIdData))]
+        [MemberData(nameof(DecodeExpandedNodeIdData))]
         [Theory]
-        public void EncodeExpandedNodeId(ExpandedNodeId val)
+        public void DecodeExpandedNodeId(Opc.Ua.ExpandedNodeId val)
         {
             EncodeDecode(
                 e => e.WriteExpandedNodeId(null, val),
                 d => d.ReadExpandedNodeId(null))
                 .Should().BeEquivalentTo(val);
         }
-        
-        [Fact]
-        public void EncodeExpandedNodeIdNull()
-        {
-            EncodeDecode(
-                e => e.WriteExpandedNodeId(null, null),
-                d => d.ReadExpandedNodeId(null))
-                .Should().BeEquivalentTo(Opc.Ua.ExpandedNodeId.Null);
-        }
 
-        public static IEnumerable<object[]> EncodeStatusCodeData { get; } = new[]
+        public static IEnumerable<object[]> DecodeStatusCodeData { get; } = new[]
         {
             StatusCodes.Good,
             StatusCodes.BadCertificateHostNameInvalid
         }
-        .Select(x => new object[] { new StatusCode(x) });
+        .Select(x => new object[] { new Opc.Ua.StatusCode(x) });
 
-        [MemberData(nameof(EncodeStatusCodeData))]
+        [MemberData(nameof(DecodeStatusCodeData))]
         [Theory]
-        public void EncodeStatusCode(StatusCode val)
+        public void DecodeStatusCode(Opc.Ua.StatusCode val)
         {
             EncodeDecode(
                 e => e.WriteStatusCode(null, val),
@@ -391,99 +370,72 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeDiagnosticInfoData { get; } = new []
+        public static IEnumerable<object[]> DecodeDiagnosticInfoData { get; } = new []
         {
-            new DiagnosticInfo(),
-            new DiagnosticInfo(2),
-            new DiagnosticInfo(2, 3),
-            new DiagnosticInfo(2, 3, 4),
-            new DiagnosticInfo(2, 3, 4, 5),
-            new DiagnosticInfo(2, 3, 4, 5, "Text text text."),
-            new DiagnosticInfo(2, additionalInfo:"Test test test."),
-            new DiagnosticInfo(2, locale:6, innerStatusCode: StatusCodes.BadSessionIdInvalid),
-            //new DiagnosticInfo(2, innerDiagnosticInfo: new DiagnosticInfo(2)),
+            new Opc.Ua.DiagnosticInfo(),
+            new Opc.Ua.DiagnosticInfo(0, 0, 0, 0, null),
+            new Opc.Ua.DiagnosticInfo(2, 0, 0, 0, null),
+            new Opc.Ua.DiagnosticInfo(2, 3, 0, 0, null),
+            new Opc.Ua.DiagnosticInfo(2, 3, 4, 0, null),
+            new Opc.Ua.DiagnosticInfo(2, 3, 4, 5, null),
+            new Opc.Ua.DiagnosticInfo(2, 3, 4, 5, "Text text text."),
+            new Opc.Ua.DiagnosticInfo(2, 0, 0, 0, "Test test test."),
+            new Opc.Ua.DiagnosticInfo(2, 0, 6, 0, null),
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeDiagnosticInfoData))]
+        [MemberData(nameof(DecodeDiagnosticInfoData))]
         [Theory]
-        public void EncodeDiagnosticInfo(DiagnosticInfo val)
+        public void DecodeDiagnosticInfo(Opc.Ua.DiagnosticInfo val)
         {
             EncodeDecode(
                 e => e.WriteDiagnosticInfo(null, val),
                 d => d.ReadDiagnosticInfo(null))
                 .Should().BeEquivalentTo(val);
         }
-        
-        [Fact]
-        public void EncodeDiagnosticInfoNull()
-        {
-            EncodeDecode(
-                e => e.WriteDiagnosticInfo(null, null),
-                d => d.ReadDiagnosticInfo(null))
-                .Should().BeEquivalentTo(new Opc.Ua.DiagnosticInfo());
-        }
 
-        public static IEnumerable<object[]> EncodeQualifiedNameData { get; } = new []
+        public static IEnumerable<object[]> DecodeQualifiedNameData { get; } = new []
         {
-            new QualifiedName(null),
-            QualifiedName.Parse("4:Test")
+            new Opc.Ua.QualifiedName(null),
+            Opc.Ua.QualifiedName.Parse("4:Test")
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeQualifiedNameData))]
+        [MemberData(nameof(DecodeQualifiedNameData))]
         [Theory]
-        public void EncodeQualifiedName(QualifiedName val)
+        public void DecodeQualifiedName(Opc.Ua.QualifiedName val)
         {
             EncodeDecode(
                 e => e.WriteQualifiedName(null, val),
                 d => d.ReadQualifiedName(null))
                 .Should().BeEquivalentTo(val);
         }
-        
-        [Fact]
-        public void EncodeQualifiedNameNull()
-        {
-            EncodeDecode(
-                e => e.WriteQualifiedName(null, null),
-                d => d.ReadQualifiedName(null))
-                .Should().BeEquivalentTo(Opc.Ua.QualifiedName.Null);
-        }
 
-        public static IEnumerable<object[]> EncodeLocalizedTextData { get; } = new []
+        public static IEnumerable<object[]> DecodeLocalizedTextData { get; } = new []
         {
-            new LocalizedText("Text", ""),
-            new LocalizedText("Text", "de"),
-            new LocalizedText("Text", null),
-            new LocalizedText("", ""),
-            new LocalizedText("", "de"),
-            new LocalizedText("", null),
-            new LocalizedText(null, ""),
-            new LocalizedText(null, "de"),
-            new LocalizedText(null, null)
+            new Opc.Ua.LocalizedText("Text", ""),
+            new Opc.Ua.LocalizedText("Text", "de"),
+            new Opc.Ua.LocalizedText("Text", null),
+            new Opc.Ua.LocalizedText("", ""),
+            new Opc.Ua.LocalizedText("", "de"),
+            new Opc.Ua.LocalizedText("", null),
+            new Opc.Ua.LocalizedText(null, ""),
+            new Opc.Ua.LocalizedText(null, "de"),
+            new Opc.Ua.LocalizedText(null, null)
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeLocalizedTextData))]
+        [MemberData(nameof(DecodeLocalizedTextData))]
         [Theory]
-        public void EncodeLocalizedText(LocalizedText val)
+        public void DecodeLocalizedText(Opc.Ua.LocalizedText val)
         {
             EncodeDecode(
                 e => e.WriteLocalizedText(null, val),
                 d => d.ReadLocalizedText(null))
                 .Should().BeEquivalentTo(val);
         }
-        
-        [Fact]
-        public void EncodeLocalizedTextNull()
-        {
-            EncodeDecode(
-                e => e.WriteLocalizedText(null, null),
-                d => d.ReadLocalizedText(null))
-                .Should().BeEquivalentTo(Opc.Ua.LocalizedText.Null);
-        }
 
-        public static IEnumerable<object[]> EncodeVariantData { get; } = new object[]
+        public static IEnumerable<object[]> DecodeVariantData { get; } = new object[]
         {
             default,
             true,
@@ -501,12 +453,12 @@ namespace Workstation.UaClient.UnitTests.Channels
             new DateTime(0L),
             Guid.NewGuid(),
             new byte[] { 0x1, 0x3},
-            NodeId.Parse("ns=3;s=Test.Node"),
-            ExpandedNodeId.Parse("svr=2;nsu=http://PLCopen.org/OpcUa/IEC61131-3;ns=2;i=12"),
-            QualifiedName.Parse("4:Test"),
-            new LocalizedText("foo", "fr-FR"),
-            XElement.Parse(@"<Item AttributeA=""A"" AttributeB=""B"" />"),
-            new StatusCode(43),
+            Opc.Ua.NodeId.Parse("ns=3;s=Test.Node"),
+            Opc.Ua.ExpandedNodeId.Parse("svr=2;nsu=http://PLCopen.org/OpcUa/IEC61131-3;ns=2;i=12"),
+            Opc.Ua.QualifiedName.Parse("4:Test"),
+            new Opc.Ua.LocalizedText("foo", "fr-FR"),
+            XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />"),
+            new Opc.Ua.StatusCode(43),
             new [] {true, false, true },
             new sbyte[] { 1, 2, 3},
             new short[] { 1, 2, 3},
@@ -519,15 +471,15 @@ namespace Workstation.UaClient.UnitTests.Channels
             new double[] { 1.3, 3.1, 4.0},
             new string[] { "a", "b", ""},
             new DateTime[] { DateTime.UtcNow },
-            new Guid[] { Guid.NewGuid(), Guid.Empty },
+            new Opc.Ua.Uuid[] { Opc.Ua.Uuid.Empty, new Opc.Ua.Uuid() },
             new byte[][] { new byte[] { }, new byte[] { 1, 2, 3} },
-            new NodeId[] { new NodeId(5), new NodeId("b")},
-            new ExpandedNodeId[] { new ExpandedNodeId(4), new ExpandedNodeId("ee")},
-            new QualifiedName[] { QualifiedName.Parse("0:A"), QualifiedName.Parse("1:t") },
-            new LocalizedText[] {new LocalizedText("Yes", "en-US"), new LocalizedText("Ja", "de-DE")},
-            new XElement[] { XElement.Parse(@"<Item AttributeA=""A"" AttributeB=""B"" />") },
-            new StatusCode[] {42, 43},
-            new Variant[] { new Variant(1)},
+            new Opc.Ua.NodeId[] { new Opc.Ua.NodeId(5), new Opc.Ua.NodeId("b")},
+            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(4), new Opc.Ua.ExpandedNodeId("ee")},
+            new Opc.Ua.QualifiedName[] { Opc.Ua.QualifiedName.Parse("0:A"), Opc.Ua.QualifiedName.Parse("1:t") },
+            new Opc.Ua.LocalizedText[] {new Opc.Ua.LocalizedText("Yes", "en-US"), new Opc.Ua.LocalizedText("Ja", "de-DE")},
+            new [] { XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />") },
+            new Opc.Ua.StatusCode[] {42, 43},
+            new Opc.Ua.Variant[] { new Opc.Ua.Variant(1)},
             new [,] { { true, false }, { true, true}, { false, false} },
             new byte[,] { { 1 }, { 2 }, { 3 } },
             new sbyte[,] { { 1 }, { 2 }, { 3 } },
@@ -542,20 +494,20 @@ namespace Workstation.UaClient.UnitTests.Channels
             new byte[,][] { { new byte[] { 3, 4} }, { new byte[] { 5, 6, 7} } },
             new string[,] { { "a", null},{ "b", "" } },
             new DateTime[,] { { DateTime.MinValue } },
-            new Guid[,] { { Guid.NewGuid(), Guid.Empty } },
-            new NodeId[,] { { new NodeId(5) }, {new NodeId("b")} },
-            new ExpandedNodeId[,] { { new ExpandedNodeId(4) }, { new ExpandedNodeId("ee") } },
-            new QualifiedName[,,,,,,,] { { { { { { { { new QualifiedName("A") } } } } } } } },
-            new LocalizedText[,] { { new LocalizedText("Yes", "en-US"), new LocalizedText("Ja", "de-DE") }, { new LocalizedText("No", "en-US"), new LocalizedText("Nein", "de-DE") } },
-            new XElement[,] { { XElement.Parse(@"<Item AttributeA=""A"" AttributeB=""B"" />") } },
-            new StatusCode[,,] { {{ 42, 43 }, { 100, 102 }, {100, 234 }, { 239, 199} } },
-            new Variant[,] { { new Variant(1), new Variant(2) }, { new Variant(3), new Variant(4)} },
+            new Opc.Ua.Uuid[,] { { Opc.Ua.Uuid.Empty, new Opc.Ua.Uuid() } },
+            new Opc.Ua.NodeId[,] { { new Opc.Ua.NodeId(5) }, {new Opc.Ua.NodeId("b")} },
+            new Opc.Ua.ExpandedNodeId[,] { { new Opc.Ua.ExpandedNodeId(4) }, { new Opc.Ua.ExpandedNodeId("ee") } },
+            new Opc.Ua.QualifiedName[,,,,,,,] { { { { { { { { new Opc.Ua.QualifiedName("A") } } } } } } } },
+            new Opc.Ua.LocalizedText[,] { { new Opc.Ua.LocalizedText("Yes", "en-US"), new Opc.Ua.LocalizedText("Ja", "de-DE") }, { new Opc.Ua.LocalizedText("No", "en-US"), new Opc.Ua.LocalizedText("Nein", "de-DE") } },
+            new [,] { { XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />") } },
+            new Opc.Ua.StatusCode[,,] { {{ 42, 43 }, { 100, 102 }, {100, 234 }, { 239, 199} } },
+            new Opc.Ua.Variant[,] { { new Opc.Ua.Variant(1), new Opc.Ua.Variant(2) }, { new Opc.Ua.Variant(3), new Opc.Ua.Variant(4)} },
         }
-        .Select(x => new object[] { new Variant(x) });
+        .Select(x => new object[] { new Opc.Ua.Variant(x) });
 
-        [MemberData(nameof(EncodeVariantData))]
+        [MemberData(nameof(DecodeVariantData))]
         [Theory]
-        public void EncodeVariant(Variant val)
+        public void DecodeVariant(Opc.Ua.Variant val)
         {
             EncodeDecode(
                 e => e.WriteVariant(null, val),
@@ -563,18 +515,25 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeDataValueData =>
+        public static IEnumerable<object[]> DecodeDataValueData =>
             from value in new object[] { null, 54 }
             from status in new[] { StatusCodes.Good, StatusCodes.BadAttributeIdInvalid }
             from srcts in new[] { DateTime.MinValue, DateTime.UtcNow }
             from srcps in new ushort[] { 0, 212 }
             from svrts in new[] { DateTime.MinValue, DateTime.UtcNow }
             from svrps in new ushort[] { 0, 612 }
-            select new object[] { new DataValue(value, status, srcts, srcps, svrts, svrps) };
+            select new object[]
+            { 
+                new Opc.Ua.DataValue(new Opc.Ua.Variant(value), status, srcts, svrts)
+                {
+                    SourcePicoseconds = srcps,
+                    ServerPicoseconds = svrps
+                }
+            };
 
-        [MemberData(nameof(EncodeDataValueData))]
+        [MemberData(nameof(DecodeDataValueData))]
         [Theory]
-        public void EncodeDataValue(DataValue val)
+        public void DecodeDataValue(Opc.Ua.DataValue val)
         {
             EncodeDecode(
                 e => e.WriteDataValue(null, val),
@@ -582,43 +541,34 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        [Fact]
-        public void EncodeDataValueNull()
-        {
-            EncodeDecode(
-                e => e.WriteDataValue(null, null),
-                d => d.ReadDataValue(null))
-                .Should().BeEquivalentTo(new Opc.Ua.DataValue());
-        }
-
         [InlineData(TypeCode.Boolean)]
         [InlineData(TypeCode.Double)]
         [Theory]
-        public void EncodeEnumeration(TypeCode val)
+        public void DecodeEnumeration(TypeCode val)
         {
             EncodeDecode(
-                e => e.WriteEnumeration(null, val),
-                d => d.ReadEnumerated(null, typeof(TypeCode)))
+                e => e.WriteEnumerated(null, val),
+                d => d.ReadEnumeration<TypeCode>(null))
                 .Should().Be(val);
         }
 
-        public static IEnumerable<object[]> EncodeEncodableData { get; } = new[]
+        public static IEnumerable<object[]> DecodeEncodableData { get; } = new[]
         {
             null,
-            new TimeZoneDataType { },
-            new TimeZoneDataType { Offset = 1, DaylightSavingInOffset = true },
-            new TimeZoneDataType { Offset = 3, DaylightSavingInOffset = false }
+            new Opc.Ua.TimeZoneDataType { },
+            new Opc.Ua.TimeZoneDataType { Offset = 1, DaylightSavingInOffset = true },
+            new Opc.Ua.TimeZoneDataType { Offset = 3, DaylightSavingInOffset = false }
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeEncodableData))]
+        [MemberData(nameof(DecodeEncodableData))]
         [Theory]
-        public void EncodeEncodable(TimeZoneDataType val)
+        public void DecodeEncodable(Opc.Ua.TimeZoneDataType val)
         {
             EncodeDecode(
-                e => e.WriteEncodable(null, val),
-                d => d.ReadEncodeable(null, typeof(Opc.Ua.TimeZoneDataType)))
-                .Should().BeEquivalentTo(val ?? new TimeZoneDataType());
+                e => e.WriteEncodeable(null, val, typeof(Opc.Ua.TimeZoneDataType)),
+                d => d.ReadEncodable<TimeZoneDataType>(null))
+                .Should().BeEquivalentTo(val ?? new Opc.Ua.TimeZoneDataType());
         }
 
 
@@ -627,7 +577,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new bool[] { true })]
         [InlineData(new bool[] { true, false})]
         [Theory]
-        public void EncodeBooleanArray(bool[] val)
+        public void DecodeBooleanArray(bool[] val)
         {
             EncodeDecode(
                 e => e.WriteBooleanArray(null, val),
@@ -640,7 +590,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new sbyte[] { -1 })]
         [InlineData(new sbyte[] { -5, 6 })]
         [Theory]
-        public void EncodeSByteArray(sbyte[] val)
+        public void DecodeSByteArray(sbyte[] val)
         {
             EncodeDecode(
                 e => e.WriteSByteArray(null, val),
@@ -653,7 +603,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new byte[] { 1 })]
         [InlineData(new byte[] { 5, 6 })]
         [Theory]
-        public void EncodeByteArray(byte[] val)
+        public void DecodeByteArray(byte[] val)
         {
             EncodeDecode(
                 e => e.WriteByteArray(null, val),
@@ -666,7 +616,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new short[] { 1 })]
         [InlineData(new short[] { -5, 6 })]
         [Theory]
-        public void EncodeInt16Array(short[] val)
+        public void DecodeInt16Array(short[] val)
         {
             EncodeDecode(
                 e => e.WriteInt16Array(null, val),
@@ -679,7 +629,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new ushort[] { 1 })]
         [InlineData(new ushort[] { 5, 6 })]
         [Theory]
-        public void EncodeUInt16Array(ushort[] val)
+        public void DecodeUInt16Array(ushort[] val)
         {
             EncodeDecode(
                 e => e.WriteUInt16Array(null, val),
@@ -692,7 +642,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new int[] { 1 })]
         [InlineData(new int[] { -5, 6 })]
         [Theory]
-        public void EncodeInt32Array(int[] val)
+        public void DecodeInt32Array(int[] val)
         {
             EncodeDecode(
                 e => e.WriteInt32Array(null, val),
@@ -705,7 +655,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new uint[] { 1 })]
         [InlineData(new uint[] { 5, UInt32.MaxValue })]
         [Theory]
-        public void EncodeUInt32Array(uint[] val)
+        public void DecodeUInt32Array(uint[] val)
         {
             EncodeDecode(
                 e => e.WriteUInt32Array(null, val),
@@ -718,7 +668,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new long[] { 1 })]
         [InlineData(new long[] { -5, 6 })]
         [Theory]
-        public void EncodeInt64Array(long[] val)
+        public void DecodeInt64Array(long[] val)
         {
             EncodeDecode(
                 e => e.WriteInt64Array(null, val),
@@ -731,7 +681,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new ulong[] { 1 })]
         [InlineData(new ulong[] { 5, UInt64.MaxValue })]
         [Theory]
-        public void EncodeUInt64Array(ulong[] val)
+        public void DecodeUInt64Array(ulong[] val)
         {
             EncodeDecode(
                 e => e.WriteUInt64Array(null, val),
@@ -745,7 +695,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new float[] { -12.2f, 123.5f })]
         [InlineData(new float[] { Single.NaN, Single.PositiveInfinity, Single.NegativeInfinity, Single.Epsilon, Single.MaxValue, Single.MinValue })]
         [Theory]
-        public void EncodeFloatArray(float[] val)
+        public void DecodeFloatArray(float[] val)
         {
             EncodeDecode(
                 e => e.WriteFloatArray(null, val),
@@ -759,7 +709,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(new double[] { -12.2, 123.5 })]
         [InlineData(new double[] { Double.NaN, Double.PositiveInfinity, Double.NegativeInfinity, Double.Epsilon, Double.MaxValue, Double.MinValue })]
         [Theory]
-        public void EncodeDoubleArray(double[] val)
+        public void DecodeDoubleArray(double[] val)
         {
             EncodeDecode(
                 e => e.WriteDoubleArray(null, val),
@@ -767,7 +717,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeStringArrayData { get; } = new string[][]
+        public static IEnumerable<object[]> DecodeStringArrayData { get; } = new string[][]
         {
             null,
             new string[] { },
@@ -779,9 +729,9 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeStringArrayData))]
+        [MemberData(nameof(DecodeStringArrayData))]
         [Theory]
-        public void EncodeStringArray(string[] val)
+        public void DecodeStringArray(string[] val)
         {
             EncodeDecode(
                 e => e.WriteStringArray(null, val),
@@ -789,7 +739,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeDateTimeArrayData { get; } = new DateTime[][]
+        public static IEnumerable<object[]> DecodeDateTimeArrayData { get; } = new DateTime[][]
         {
             null,
             new DateTime[] {},
@@ -798,9 +748,9 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeDateTimeArrayData))]
+        [MemberData(nameof(DecodeDateTimeArrayData))]
         [Theory]
-        public void EncodeDateTimeArray(DateTime[] val)
+        public void DecodeDateTimeArray(DateTime[] val)
         {
             EncodeDecode(
                 e => e.WriteDateTimeArray(null, val),
@@ -808,7 +758,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeGuidArrayData { get; } = new Guid[][]
+        public static IEnumerable<object[]> DecodeGuidArrayData { get; } = new Guid[][]
         {
             null,
             new Guid[] {},
@@ -817,9 +767,9 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeGuidArrayData))]
+        [MemberData(nameof(DecodeGuidArrayData))]
         [Theory]
-        public void EncodeGuidArray(Guid[] val)
+        public void DecodeGuidArray(Guid[] val)
         {
             EncodeDecode(
                 e => e.WriteGuidArray(null, val),
@@ -827,7 +777,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeByteStringArrayData { get; } = new byte[][][]
+        public static IEnumerable<object[]> DecodeByteStringArrayData { get; } = new byte[][][]
         {
             null,
             new byte[][] {},
@@ -837,9 +787,9 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeByteStringArrayData))]
+        [MemberData(nameof(DecodeByteStringArrayData))]
         [Theory]
-        public void EncodeByteStringArray(byte[][] val)
+        public void DecodeByteStringArray(byte[][] val)
         {
             EncodeDecode(
                 e => e.WriteByteStringArray(null, val),
@@ -847,7 +797,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeXElementArrayData { get; } = new string[][]
+        public static IEnumerable<object[]> DecodeXElementArrayData { get; } = new string[][]
         {
             null,
             new string[] {},
@@ -856,30 +806,30 @@ namespace Workstation.UaClient.UnitTests.Channels
             new string[] { "<h1 class=\"one\"><p>text</p></h1>" },
             new string[] { "<br />", "<h1 class=\"one\"><p>text</p></h1>" },
         }
-        .Select(x => new object[] { x?.Select(s => s is null ? null : XElement.Parse(s)).ToArray() });
+        .Select(x => new object[] { x?.Select(s => s is null ? null : XmlElementParse(s)).ToArray() });
 
-        [MemberData(nameof(EncodeXElementArrayData))]
+        [MemberData(nameof(DecodeXElementArrayData))]
         [Theory]
-        public void EncodeXElementArray(XElement[] val)
+        public void DecodeXElementArray(XmlElement[] val)
         {
             EncodeDecode(
-                e => e.WriteXElementArray(null, val),
-                d => d.ReadXmlElementArray(null))
+                e => e.WriteXmlElementArray(null, val),
+                d => d.ReadXElementArray(null))
                 .Should().BeEquivalentTo(val);
-        }
+        } 
 
-        public static IEnumerable<object[]> EncodeNodeIdArrayData { get; } = new NodeId[][]
+        public static IEnumerable<object[]> DecodeNodeIdArrayData { get; } = new Opc.Ua.NodeId[][]
         {
             null,
-            new NodeId[] {},
-            new NodeId[] { new NodeId(4, 0) },
-            new NodeId[] { new NodeId(234, 3), new NodeId("Text", 1), new NodeId(Guid.Parse("a8e248bc-4de5-4d5a-ae67-c065cbe452f3"), 8) },
+            new Opc.Ua.NodeId[] {},
+            new Opc.Ua.NodeId[] { new Opc.Ua.NodeId(4, 0) },
+            new Opc.Ua.NodeId[] { new Opc.Ua.NodeId(234, 3), new Opc.Ua.NodeId("Text", 1), new Opc.Ua.NodeId(Guid.Parse("a8e248bc-4de5-4d5a-ae67-c065cbe452f3"), 8) },
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeNodeIdArrayData))]
+        [MemberData(nameof(DecodeNodeIdArrayData))]
         [Theory]
-        public void EncodeNodeIdArray(NodeId[] val)
+        public void DecodeNodeIdArray(Opc.Ua.NodeId[] val)
         {
             EncodeDecode(
                 e => e.WriteNodeIdArray(null, val),
@@ -887,19 +837,19 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeExpandedNodeIdArrayData { get; } = new ExpandedNodeId[][]
+        public static IEnumerable<object[]> DecodeExpandedNodeIdArrayData { get; } = new Opc.Ua.ExpandedNodeId[][]
         {
             null,
-            new ExpandedNodeId[] {},
-            new ExpandedNodeId[] { new ExpandedNodeId(4) },
-            new ExpandedNodeId[] { new ExpandedNodeId(234), new ExpandedNodeId("Text"), new ExpandedNodeId(Guid.Parse("a8e248bc-4de5-4d5a-ae67-c065cbe452f3")) },
-            new ExpandedNodeId[] { ExpandedNodeId.Parse("ns=1;i=234"), ExpandedNodeId.Parse("ns=2;s=bla"), ExpandedNodeId.Parse("svr=2;nsu=http://PLCopen.org/OpcUa/IEC61131-3;ns=3;b=Base64+Test=") },
+            new Opc.Ua.ExpandedNodeId[] {},
+            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(4) },
+            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(234), new Opc.Ua.ExpandedNodeId("Text"), new Opc.Ua.ExpandedNodeId(Guid.Parse("a8e248bc-4de5-4d5a-ae67-c065cbe452f3")) },
+            new Opc.Ua.ExpandedNodeId[] { Opc.Ua.ExpandedNodeId.Parse("ns=1;i=234"), Opc.Ua.ExpandedNodeId.Parse("ns=2;s=bla"), Opc.Ua.ExpandedNodeId.Parse("svr=2;nsu=http://PLCopen.org/OpcUa/IEC61131-3;ns=3;b=Base64+Test=") },
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeExpandedNodeIdArrayData))]
+        [MemberData(nameof(DecodeExpandedNodeIdArrayData))]
         [Theory]
-        public void EncodeExpandedNodeIdArray(ExpandedNodeId[] val)
+        public void DecodeExpandedNodeIdArray(Opc.Ua.ExpandedNodeId[] val)
         {
             EncodeDecode(
                 e => e.WriteExpandedNodeIdArray(null, val),
@@ -907,18 +857,18 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeStatusCodeArrayData { get; } = new StatusCode[][]
+        public static IEnumerable<object[]> DecodeStatusCodeArrayData { get; } = new Opc.Ua.StatusCode[][]
             {
                 null,
-                new StatusCode[] {},
-                new StatusCode[] { StatusCodes.BadAttributeIdInvalid, StatusCodes.BadMaxAgeInvalid, StatusCodes.Good, StatusCodes.GoodClamped },
-                new StatusCode[] { StatusCodes.GoodNoData }
+                new Opc.Ua.StatusCode[] {},
+                new Opc.Ua.StatusCode[] { StatusCodes.BadAttributeIdInvalid, StatusCodes.BadMaxAgeInvalid, StatusCodes.Good, StatusCodes.GoodClamped },
+                new Opc.Ua.StatusCode[] { StatusCodes.GoodNoData }
             }
             .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeStatusCodeArrayData))]
+        [MemberData(nameof(DecodeStatusCodeArrayData))]
         [Theory]
-        public void EncodeStatusCodeArray(StatusCode[] val)
+        public void DecodeStatusCodeArray(Opc.Ua.StatusCode[] val)
         {
             EncodeDecode(
                 e => e.WriteStatusCodeArray(null, val),
@@ -926,18 +876,18 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeQualifiedNameArrayData { get; } = new QualifiedName[][]
+        public static IEnumerable<object[]> DecodeQualifiedNameArrayData { get; } = new Opc.Ua.QualifiedName[][]
         {
                 null,
-                new QualifiedName[] {},
-                new [] { new QualifiedName("Tests", 3), new QualifiedName("22", 34) },
-                new [] { new QualifiedName("Name") }
+                new Opc.Ua.QualifiedName[] {},
+                new [] { new Opc.Ua.QualifiedName("Tests", 3), new Opc.Ua.QualifiedName("22", 34) },
+                new [] { new Opc.Ua.QualifiedName("Name") }
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeQualifiedNameArrayData))]
+        [MemberData(nameof(DecodeQualifiedNameArrayData))]
         [Theory]
-        public void EncodeQualifiedNameArray(QualifiedName[] val)
+        public void DecodeQualifiedNameArray(Opc.Ua.QualifiedName[] val)
         {
             EncodeDecode(
                 e => e.WriteQualifiedNameArray(null, val),
@@ -945,18 +895,18 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeLocalizedTextArrayData { get; } = new object[][]
+        public static IEnumerable<object[]> DecodeLocalizedTextArrayData { get; } = new object[][]
         {
             null,
-            new LocalizedText[] {},
-            new [] { new LocalizedText("Text", null)},
-            new [] { new LocalizedText("", ""), new LocalizedText("", "de") , new LocalizedText("", null)},
+            new Opc.Ua.LocalizedText[] {},
+            new [] { new Opc.Ua.LocalizedText("Text", null)},
+            new [] { new Opc.Ua.LocalizedText("", ""), new Opc.Ua.LocalizedText("", "de") , new Opc.Ua.LocalizedText("", null)},
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeLocalizedTextArrayData))]
+        [MemberData(nameof(DecodeLocalizedTextArrayData))]
         [Theory]
-        public void EncodeLocalizedTextArray(LocalizedText[] val)
+        public void DecodeLocalizedTextArray(Opc.Ua.LocalizedText[] val)
         {
             EncodeDecode(
                 e => e.WriteLocalizedTextArray(null, val),
@@ -964,18 +914,18 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeVariantArrayData { get; } = new Variant[][]
+        public static IEnumerable<object[]> DecodeVariantArrayData { get; } = new Opc.Ua.Variant[][]
         {
             null,
-            new Variant[] {},
-            new [] { new Variant("Text")},
-            new [] { new Variant(1), new Variant((object)null), new Variant(2.0)},
+            new Opc.Ua.Variant[] {},
+            new [] { new Opc.Ua.Variant("Text")},
+            new [] { new Opc.Ua.Variant(1), new Opc.Ua.Variant((object)null), new Opc.Ua.Variant(2.0)},
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeVariantArrayData))]
+        [MemberData(nameof(DecodeVariantArrayData))]
         [Theory]
-        public void EncodeVariantArray(Variant[] val)
+        public void DecodeVariantArray(Opc.Ua.Variant[] val)
         {
             EncodeDecode(
                 e => e.WriteVariantArray(null, val),
@@ -983,18 +933,18 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeDiagnosticInfoArrayData { get; } = new DiagnosticInfo[][]
+        public static IEnumerable<object[]> DecodeDiagnosticInfoArrayData { get; } = new Opc.Ua.DiagnosticInfo[][]
         {
             null,
-            new DiagnosticInfo[] { },
-            new DiagnosticInfo[] { new DiagnosticInfo(2) },
-            new DiagnosticInfo[] { new DiagnosticInfo(2, 3, 4), new DiagnosticInfo(2, locale:6, innerStatusCode: StatusCodes.BadSessionIdInvalid) },
+            new Opc.Ua.DiagnosticInfo[] { },
+            new Opc.Ua.DiagnosticInfo[] { new Opc.Ua.DiagnosticInfo(2, 0, 0, 0, null) },
+            new Opc.Ua.DiagnosticInfo[] { new Opc.Ua.DiagnosticInfo(2, 3, 4, 0, null), new Opc.Ua.DiagnosticInfo(2, 0, 6, 0, null) },
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeDiagnosticInfoArrayData))]
+        [MemberData(nameof(DecodeDiagnosticInfoArrayData))]
         [Theory]
-        public void EncodeDiagnosticInfoArray(DiagnosticInfo[] val)
+        public void DecodeDiagnosticInfoArray(Opc.Ua.DiagnosticInfo[] val)
         {
             EncodeDecode(
                 e => e.WriteDiagnosticInfoArray(null, val),
@@ -1002,22 +952,26 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeDataValueArrayData { get; } = new DataValue[][]
+        public static IEnumerable<object[]> DecodeDataValueArrayData { get; } = new Opc.Ua.DataValue[][]
         {
             null,
-            new DataValue[] { },
-            new DataValue[] { new DataValue(23.0, StatusCodes.BadDataLost, new DateTime(1990,1,1), 12, DateTime.UtcNow, 14)},
-            new DataValue[]
+            new Opc.Ua.DataValue[] { },
+            new Opc.Ua.DataValue[] { new Opc.Ua.DataValue(new Opc.Ua.Variant(23.0), StatusCodes.BadDataLost, new DateTime(1990,1,1), DateTime.UtcNow)},
+            new Opc.Ua.DataValue[]
             {
-                new DataValue(23.0, StatusCodes.BadDataLost, new DateTime(1990,1,1), 12, DateTime.UtcNow, 14),
-                new DataValue(28, StatusCodes.GoodClamped, new DateTime(1990,12,1), 120, DateTime.UtcNow, 99),
+                new Opc.Ua.DataValue(new Opc.Ua.Variant(23.0), StatusCodes.BadDataLost, new DateTime(1990,1,1), DateTime.UtcNow)
+                {
+                    SourcePicoseconds = 13,
+                    ServerPicoseconds = 150
+                },
+                new Opc.Ua.DataValue(new Opc.Ua.Variant(28), StatusCodes.GoodClamped, new DateTime(1990,12,1), DateTime.UtcNow),
             }
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeDataValueArrayData))]
+        [MemberData(nameof(DecodeDataValueArrayData))]
         [Theory]
-        public void EncodeDataValueArray(DataValue[] val)
+        public void DecodeDataValueArray(Opc.Ua.DataValue[] val)
         {
             EncodeDecode(
                 e => e.WriteDataValueArray(null, val),
@@ -1025,7 +979,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeEnumerationArrayData { get; } = new TypeCode[][]
+        public static IEnumerable<object[]> DecodeEnumerationArrayData { get; } = new TypeCode[][]
         {
             null,
             new TypeCode[] { },
@@ -1033,35 +987,35 @@ namespace Workstation.UaClient.UnitTests.Channels
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeEnumerationArrayData))]
+        [MemberData(nameof(DecodeEnumerationArrayData))]
         [Theory]
-        public void EncodeEnumerationArray(TypeCode[] val)
+        public void DecodeEnumerationArray(TypeCode[] val)
         {
             EncodeDecode(
-                e => e.WriteEnumerationArray(null, val),
-                d => d.ReadEnumeratedArray(null, typeof(TypeCode)))
+                e => e.WriteEnumeratedArray(null, val, typeof(TypeCode)),
+                d => d.ReadEnumerationArray<TypeCode>(null))
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> EncodeEncodableArrayData { get; } = new TimeZoneDataType[][]
+        public static IEnumerable<object[]> DecodeEncodableArrayData { get; } = new Opc.Ua.TimeZoneDataType[][]
         {
             null,
-            new TimeZoneDataType[] { },
-            new TimeZoneDataType[]
+            new Opc.Ua.TimeZoneDataType[] { },
+            new Opc.Ua.TimeZoneDataType[]
             {
-                new TimeZoneDataType { Offset = 1, DaylightSavingInOffset = true },
-                new TimeZoneDataType { Offset = 3, DaylightSavingInOffset = false }
+                new Opc.Ua.TimeZoneDataType { Offset = 1, DaylightSavingInOffset = true },
+                new Opc.Ua.TimeZoneDataType { Offset = 3, DaylightSavingInOffset = false }
             }
         }
         .Select(x => new object[] { x });
 
-        [MemberData(nameof(EncodeEncodableArrayData))]
+        [MemberData(nameof(DecodeEncodableArrayData))]
         [Theory]
-        public void EncodeEncodableArray(TimeZoneDataType[] val)
+        public void DecodeEncodableArray(Opc.Ua.TimeZoneDataType[] val)
         {
             EncodeDecode(
-                e => e.WriteEncodableArray(null, val),
-                d => d.ReadEncodeableArray(null, typeof(Opc.Ua.TimeZoneDataType)))
+                e => e.WriteEncodeableArray(null, val, typeof(Opc.Ua.TimeZoneDataType)),
+                d => d.ReadEncodableArray<TimeZoneDataType>(null))
                 .Should().BeEquivalentTo(val);
         }
     }

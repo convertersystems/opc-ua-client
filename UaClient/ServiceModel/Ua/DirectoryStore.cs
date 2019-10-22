@@ -27,8 +27,8 @@ namespace Workstation.ServiceModel.Ua
     public class DirectoryStore : ICertificateStore
     {
         private readonly string pkiPath;
-        private X509CertificateParser certParser = new X509CertificateParser();
-        private SecureRandom rng = new SecureRandom();
+        private readonly X509CertificateParser certParser = new X509CertificateParser();
+        private readonly SecureRandom rng = new SecureRandom();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DirectoryStore"/> class.

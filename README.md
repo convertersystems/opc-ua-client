@@ -2,17 +2,19 @@
 
 # opc-ua-client
 
+[![Actions Status](https://github.com/convertersystems/opc-ua-client/workflows/Unit%20Tests/badge.svg)](https://github.com/convertersystems/opc-ua-client/actions)
+
 Communicate using OPC Unified Architecture and Visual Studio. With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
 
 Supports .NET Core, Universal Windows Platform (UWP), Windows Presentation Framework (WPF) and Xamarin applications.
 
 ### Getting Started
 
-Install package 'Workstation.UaClient' from Nuget to get the latest release for your hmi project.
+Install package ``Workstation.UaClient`` from [Nuget](https://www.nuget.org/packages/Workstation.UaClient/) to get the latest release for your hmi project.
 
-Here's an example of reading the variable "ServerStatus" from a public OPC UA server.
+Here's an example of reading the variable ``ServerStatus`` from a public OPC UA server.
 
-```
+```csharp
 using System;
 using System.Threading.Tasks;
 using Workstation.ServiceModel.Ua;
@@ -103,7 +105,7 @@ public class Program
 For HMI applications, you can use XAML bindings to connect your UI elements to live data.
 
 First add a UaApplication instance and initialize it during startup:
-```
+```csharp
 public partial class App : Application
 {
     private UaApplication application;
@@ -128,7 +130,7 @@ public partial class App : Application
 ```
 
 Then any view model can be transformed into a OPC UA subscription.  
-```    
+```csharp    
 [Subscription(endpointUrl: "opc.tcp://localhost:26543", publishingInterval: 500, keepAliveCount: 20)]
 public class MainViewModel : SubscriptionBase
 {

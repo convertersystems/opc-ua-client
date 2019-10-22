@@ -48,7 +48,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly BroadcastBlock<PublishResponse> publishResponses;
         private readonly ActionBlock<PublishResponse> actionBlock;
         private readonly UaTcpSessionChannelOptions options;
-        private CancellationTokenSource stateMachineCts;
+        private readonly CancellationTokenSource stateMachineCts;
         private Task stateMachineTask;
 
         /// <summary>

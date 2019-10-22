@@ -12,10 +12,12 @@ namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryDecoder : IDecoder, IDisposable
     {
-        private Stream stream;
-        private UaTcpSecureChannel channel;
-        private Encoding encoding;
-        private BinaryReader reader;
+        private const long MinFileTime =  504911232000000000L;
+        private const long MaxFileTime = 3155378975990000000L;
+        private readonly Stream stream;
+        private readonly UaTcpSecureChannel channel;
+        private readonly Encoding encoding;
+        private readonly BinaryReader reader;
 
         public BinaryDecoder(Stream stream, UaTcpSecureChannel channel = null, bool keepStreamOpen = false)
         {
@@ -110,7 +112,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public string ReadString(string fieldName)
         {
             byte[] array = this.ReadByteString(fieldName);
-            if (array == null || array.Length == 0)
+            if (array == null)
             {
                 return null;
             }
@@ -121,6 +123,16 @@ namespace Workstation.ServiceModel.Ua.Channels
         public DateTime ReadDateTime(string fieldName)
         {
             long num = this.reader.ReadInt64();
+
+            if (num <= 0)
+            {
+                return DateTime.MinValue;
+            }
+            else if (num >= MaxFileTime - MinFileTime)
+            {
+                return DateTime.MaxValue;
+            }
+
             return DateTime.FromFileTimeUtc(num);
         }
 
@@ -329,77 +341,79 @@ namespace Workstation.ServiceModel.Ua.Channels
         public Variant ReadVariant(string fieldName)
         {
             byte b = this.reader.ReadByte();
+            var type = (VariantType)(b & 0x3F);
+
             if ((b & 0x80) == 0)
             {
-                switch (b & 0x3F)
+                switch (type)
                 {
-                    case 0:
+                    case VariantType.Null:
                         return Variant.Null;
 
-                    case 1:
+                    case VariantType.Boolean:
                         return new Variant(this.ReadBoolean(null));
 
-                    case 2:
+                    case VariantType.SByte:
                         return new Variant(this.ReadSByte(null));
 
-                    case 3:
+                    case VariantType.Byte:
                         return new Variant(this.ReadByte(null));
 
-                    case 4:
+                    case VariantType.Int16:
                         return new Variant(this.ReadInt16(null));
 
-                    case 5:
+                    case VariantType.UInt16:
                         return new Variant(this.ReadUInt16(null));
 
-                    case 6:
+                    case VariantType.Int32:
                         return new Variant(this.ReadInt32(null));
 
-                    case 7:
+                    case VariantType.UInt32:
                         return new Variant(this.ReadUInt32(null));
 
-                    case 8:
+                    case VariantType.Int64:
                         return new Variant(this.ReadInt64(null));
 
-                    case 9:
+                    case VariantType.UInt64:
                         return new Variant(this.ReadUInt64(null));
 
-                    case 10:
+                    case VariantType.Float:
                         return new Variant(this.ReadFloat(null));
 
-                    case 11:
+                    case VariantType.Double:
                         return new Variant(this.ReadDouble(null));
 
-                    case 12:
+                    case VariantType.String:
                         return new Variant(this.ReadString(null));
 
-                    case 13:
+                    case VariantType.DateTime:
                         return new Variant(this.ReadDateTime(null));
 
-                    case 14:
+                    case VariantType.Guid:
                         return new Variant(this.ReadGuid(null));
 
-                    case 15:
+                    case VariantType.ByteString:
                         return new Variant(this.ReadByteString(null));
 
-                    case 16:
+                    case VariantType.XmlElement:
                         return new Variant(this.ReadXElement(null));
 
-                    case 17:
+                    case VariantType.NodeId:
                         return new Variant(this.ReadNodeId(null));
 
-                    case 18:
+                    case VariantType.ExpandedNodeId:
                         return new Variant(this.ReadExpandedNodeId(null));
 
-                    case 19:
+                    case VariantType.StatusCode:
                         return new Variant(this.ReadStatusCode(null));
 
-                    case 20:
+                    case VariantType.QualifiedName:
                         return new Variant(this.ReadQualifiedName(null));
 
-                    case 21:
+                    case VariantType.LocalizedText:
                         return new Variant(this.ReadLocalizedText(null));
 
-                    case 22:
+                    case VariantType.ExtensionObject:
                         return new Variant(this.ReadExtensionObject(null));
 
                     default:
@@ -409,78 +423,78 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if ((b & 0x40) == 0)
             {
-                switch (b & 0x3F)
+                switch (type)
                 {
-                    case 0:
+                    case VariantType.Null:
                         return Variant.Null;
 
-                    case 1:
+                    case VariantType.Boolean:
                         return new Variant(this.ReadBooleanArray(null));
 
-                    case 2:
+                    case VariantType.SByte:
                         return new Variant(this.ReadSByteArray(null));
 
-                    case 3:
+                    case VariantType.Byte:
                         return new Variant(this.ReadByteArray(null));
 
-                    case 4:
+                    case VariantType.Int16:
                         return new Variant(this.ReadInt16Array(null));
 
-                    case 5:
+                    case VariantType.UInt16:
                         return new Variant(this.ReadUInt16Array(null));
 
-                    case 6:
+                    case VariantType.Int32:
                         return new Variant(this.ReadInt32Array(null));
 
-                    case 7:
+                    case VariantType.UInt32:
                         return new Variant(this.ReadUInt32Array(null));
 
-                    case 8:
+                    case VariantType.Int64:
                         return new Variant(this.ReadInt64Array(null));
 
-                    case 9:
+                    case VariantType.UInt64:
                         return new Variant(this.ReadUInt64Array(null));
 
-                    case 10:
+                    case VariantType.Float:
                         return new Variant(this.ReadFloatArray(null));
 
-                    case 11:
+                    case VariantType.Double:
                         return new Variant(this.ReadDoubleArray(null));
 
-                    case 12:
+                    case VariantType.String:
                         return new Variant(this.ReadStringArray(null));
 
-                    case 13:
+                    case VariantType.DateTime:
                         return new Variant(this.ReadDateTimeArray(null));
 
-                    case 14:
+                    case VariantType.Guid:
                         return new Variant(this.ReadGuidArray(null));
 
-                    case 15:
+                    case VariantType.ByteString:
                         return new Variant(this.ReadByteStringArray(null));
 
-                    case 16:
+                    case VariantType.XmlElement:
                         return new Variant(this.ReadXElementArray(null));
 
-                    case 17:
+                    case VariantType.NodeId:
                         return new Variant(this.ReadNodeIdArray(null));
 
-                    case 18:
+                    case VariantType.ExpandedNodeId:
                         return new Variant(this.ReadExpandedNodeIdArray(null));
 
-                    case 19:
+                    case VariantType.StatusCode:
                         return new Variant(this.ReadStatusCodeArray(null));
 
-                    case 20:
+                    case VariantType.QualifiedName:
                         return new Variant(this.ReadQualifiedNameArray(null));
 
-                    case 21:
+                    case VariantType.LocalizedText:
                         return new Variant(this.ReadLocalizedTextArray(null));
 
-                    case 22:
+                    case VariantType.ExtensionObject:
                         return new Variant(this.ReadExtensionObjectArray(null));
 
-                    case 24:
+                    case VariantType.Variant:
                         return new Variant(this.ReadVariantArray(null));
 
                     default:
@@ -489,78 +503,78 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             else
             {
-                switch (b & 0x3F)
+                switch (type)
                 {
-                    case 0:
+                    case VariantType.Null:
                         return Variant.Null;
 
-                    case 1:
+                    case VariantType.Boolean:
                         return new Variant(this.BuildArray(this.ReadBooleanArray(null), this.ReadInt32Array(null)));
 
-                    case 2:
+                    case VariantType.SByte:
                         return new Variant(this.BuildArray(this.ReadSByteArray(null), this.ReadInt32Array(null)));
 
-                    case 3:
+                    case VariantType.Byte:
                         return new Variant(this.BuildArray(this.ReadByteArray(null), this.ReadInt32Array(null)));
 
-                    case 4:
+                    case VariantType.Int16:
                         return new Variant(this.BuildArray(this.ReadInt16Array(null), this.ReadInt32Array(null)));
 
-                    case 5:
+                    case VariantType.UInt16:
                         return new Variant(this.BuildArray(this.ReadUInt16Array(null), this.ReadInt32Array(null)));
 
-                    case 6:
+                    case VariantType.Int32:
                         return new Variant(this.BuildArray(this.ReadInt32Array(null), this.ReadInt32Array(null)));
 
-                    case 7:
+                    case VariantType.UInt32:
                         return new Variant(this.BuildArray(this.ReadUInt32Array(null), this.ReadInt32Array(null)));
 
-                    case 8:
+                    case VariantType.Int64:
                         return new Variant(this.BuildArray(this.ReadInt64Array(null), this.ReadInt32Array(null)));
 
-                    case 9:
+                    case VariantType.UInt64:
                         return new Variant(this.BuildArray(this.ReadUInt64Array(null), this.ReadInt32Array(null)));
 
-                    case 10:
+                    case VariantType.Float:
                         return new Variant(this.BuildArray(this.ReadFloatArray(null), this.ReadInt32Array(null)));
 
-                    case 11:
+                    case VariantType.Double:
                         return new Variant(this.BuildArray(this.ReadDoubleArray(null), this.ReadInt32Array(null)));
 
-                    case 12:
+                    case VariantType.String:
                         return new Variant(this.BuildArray(this.ReadStringArray(null), this.ReadInt32Array(null)));
 
-                    case 13:
+                    case VariantType.DateTime:
                         return new Variant(this.BuildArray(this.ReadDateTimeArray(null), this.ReadInt32Array(null)));
 
-                    case 14:
+                    case VariantType.Guid:
                         return new Variant(this.BuildArray(this.ReadGuidArray(null), this.ReadInt32Array(null)));
 
-                    case 15:
+                    case VariantType.ByteString:
                         return new Variant(this.BuildArray(this.ReadByteStringArray(null), this.ReadInt32Array(null)));
 
-                    case 16:
+                    case VariantType.XmlElement:
                         return new Variant(this.BuildArray(this.ReadXElementArray(null), this.ReadInt32Array(null)));
 
-                    case 17:
+                    case VariantType.NodeId:
                         return new Variant(this.BuildArray(this.ReadNodeIdArray(null), this.ReadInt32Array(null)));
 
-                    case 18:
+                    case VariantType.ExpandedNodeId:
                         return new Variant(this.BuildArray(this.ReadExpandedNodeIdArray(null), this.ReadInt32Array(null)));
 
-                    case 19:
+                    case VariantType.StatusCode:
                         return new Variant(this.BuildArray(this.ReadStatusCodeArray(null), this.ReadInt32Array(null)));
 
-                    case 20:
+                    case VariantType.QualifiedName:
                         return new Variant(this.BuildArray(this.ReadQualifiedNameArray(null), this.ReadInt32Array(null)));
 
-                    case 21:
+                    case VariantType.LocalizedText:
                         return new Variant(this.BuildArray(this.ReadLocalizedTextArray(null), this.ReadInt32Array(null)));
 
-                    case 22:
+                    case VariantType.ExtensionObject:
                         return new Variant(this.BuildArray(this.ReadExtensionObjectArray(null), this.ReadInt32Array(null)));
 
-                    case 24:
+                    case VariantType.Variant:
                         return new Variant(this.BuildArray(this.ReadVariantArray(null), this.ReadInt32Array(null)));
 
                     default:
