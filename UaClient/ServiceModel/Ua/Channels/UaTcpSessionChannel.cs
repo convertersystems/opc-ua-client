@@ -589,7 +589,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var userNameIdentity = (UserNameIdentity)this.UserIdentity;
-                byte[] passwordBytes = System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password);
+                byte[] passwordBytes = userNameIdentity.Password != null ? System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password) : new byte[0];
                 int plainTextLength = passwordBytes.Length + this.RemoteNonce.Length;
                 IBufferedCipher encryptor;
                 byte[] cipherText;
