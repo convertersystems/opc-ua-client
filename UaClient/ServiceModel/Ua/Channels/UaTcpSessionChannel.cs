@@ -589,14 +589,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var userNameIdentity = (UserNameIdentity)this.UserIdentity;
-
-                // if username and password are empty and there is no anonymous token
-                if (userNameIdentity.UserName == null && userNameIdentity.Password == null
-                    && this.RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t.TokenType == UserTokenType.Anonymous) == null)
-                {
-                    throw new InvalidOperationException("Authentication is not anonymous, but no username and password were provided.");
-                }
-
                 byte[] passwordBytes = userNameIdentity.Password != null ? System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password) : new byte[0];
                 int plainTextLength = passwordBytes.Length + this.RemoteNonce.Length;
                 IBufferedCipher encryptor;
