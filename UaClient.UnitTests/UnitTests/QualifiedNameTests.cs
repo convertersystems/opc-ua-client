@@ -37,6 +37,7 @@ namespace Workstation.UaClient.UnitTests
 
         public static IEnumerable<Func<QualifiedName>> QualifiedNames { get; } = new Func<QualifiedName>[]
         {
+            () => new QualifiedName(null),
             () => new QualifiedName("A"),
             () => new QualifiedName("B"),
             () => new QualifiedName("A", 2),
@@ -65,9 +66,75 @@ namespace Workstation.UaClient.UnitTests
         public void Equality(QualifiedName a, QualifiedName b, bool shouldBeEqual)
         {
             if (shouldBeEqual)
-                a.Should().Be(b);
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().Be(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(QualifiedName)
+                a.Equals(b)
+                    .Should().BeTrue();
+
+                // operator
+                (a == b)
+                    .Should().BeTrue();
+                (a != b)
+                    .Should().BeFalse();
+
+                a.GetHashCode()
+                    .Should().Be(b.GetHashCode());
+            }
             else
-                a.Should().NotBe(b);
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().NotBe(b);
+                a
+                    .Should().NotBe(5);
+                
+                // Test Equal(QualifiedName)
+                a.Equals(b)
+                    .Should().BeFalse();
+
+                // operator
+                (a != b)
+                    .Should().BeTrue();
+                (a == b)
+                    .Should().BeFalse();
+
+                // This is technically not required but the current
+                // implementation fulfills this. If this should ever
+                // fail it could be bad luck or the the implementation
+                // is really broken.
+                a.GetHashCode()
+                    .Should().NotBe(b.GetHashCode());
+            }
+        }
+        
+        public static IEnumerable<object[]> EqualityNullData =>
+            QualifiedNames.Select(id => new[] { id() });
+
+        [MemberData(nameof(EqualityNullData))]
+        [Theory]
+        public void EqualityNull(QualifiedName val)
+        {
+            (val == null)
+                .Should().BeFalse();
+            (val != null)
+                .Should().BeTrue();
+            (null == val)
+                .Should().BeFalse();
+            (null != val)
+                .Should().BeTrue();
+
+            // This is using Equals(object)
+            val.Should()
+                .NotBeNull();
+
+            val.Equals((QualifiedName)null)
+                .Should().BeFalse();
         }
 
         [InlineData("0:ABC", 0, "ABC")]

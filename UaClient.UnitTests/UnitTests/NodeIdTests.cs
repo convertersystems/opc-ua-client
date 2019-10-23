@@ -43,6 +43,14 @@ namespace Workstation.UaClient.UnitTests
         }
 
         [Fact]
+        public void CreateFromStringNull()
+        {
+            var id = default(string);
+            id.Invoking(i => new NodeId(i, 2))
+                .Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
         public void CreateFromGuid()
         {
             var id = Guid.NewGuid();
@@ -71,6 +79,14 @@ namespace Workstation.UaClient.UnitTests
             node.IdType
                 .Should().Be(IdType.Opaque);
         }
+        
+        [Fact]
+        public void CreateFromOpaqueNull()
+        {
+            var id = default(byte[]);
+            id.Invoking(i => new NodeId(i, 2))
+                .Should().Throw<ArgumentNullException>();
+        }
 
         [Fact]
         public void IsNull()
@@ -96,21 +112,23 @@ namespace Workstation.UaClient.UnitTests
         public static IEnumerable<Func<NodeId>> NodeIds { get; } = new Func<NodeId>[]
             {
                 () => new NodeId(new Guid("d0c133bc-470d-40ae-a871-981376c0c762")),
-                () => new NodeId(new Guid("23c76470-5796-4164-b6e2-c071847f9ea0")),
+                () => new NodeId(new Guid("23c76470-5796-4164-b6e2-c071847f9ea0"), 2),
+                () => new NodeId(new Guid("23c76470-5796-4164-b6e2-c071847f9ea0"), 4),
                 () => new NodeId("1"),
                 () => new NodeId("2"),
-                () => new NodeId("1", 4),
+                () => new NodeId("1", 2),
+                () => new NodeId("2", 2),
                 () => new NodeId("2", 4),
                 () => new NodeId(1),
                 () => new NodeId(2),
-                () => new NodeId(1, 4),
+                () => new NodeId(1, 2),
+                () => new NodeId(2, 2),
                 () => new NodeId(2, 4),
                 () => new NodeId(new byte [] {1, 2}),
                 () => new NodeId(new byte [] {1, 2, 3}),
-                () => new NodeId(new byte [] {1, 2}, 4),
-                () => new NodeId(new byte [] {1, 2, 3}, 4),
-                () => null,
-                () => NodeId.Null
+                () => new NodeId(new byte [] {1, 2}, 2),
+                () => new NodeId(new byte [] {1, 2, 3}, 2),
+                () => new NodeId(new byte [] {1, 2, 3}, 4)
             };
 
         public static IEnumerable<object[]> ValueEqualityData =>
@@ -135,9 +153,75 @@ namespace Workstation.UaClient.UnitTests
         public void Equality(NodeId a, NodeId b, bool shouldBeEqual)
         {
             if (shouldBeEqual)
-                a.Should().Be(b);
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().Be(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(NodeId)
+                a.Equals(b)
+                    .Should().BeTrue();
+
+                // operator
+                (a == b)
+                    .Should().BeTrue();
+                (a != b)
+                    .Should().BeFalse();
+
+                a.GetHashCode()
+                    .Should().Be(b.GetHashCode());
+            }
             else
-                a.Should().NotBe(b);
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().NotBe(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(NodeId)
+                a.Equals(b)
+                    .Should().BeFalse();
+
+                // operator
+                (a != b)
+                    .Should().BeTrue();
+                (a == b)
+                    .Should().BeFalse();
+
+                // This is technically not required but the current
+                // implementation fulfills this. If this should ever
+                // fail it could be bad luck or the the implementation
+                // is really broken.
+                a.GetHashCode()
+                    .Should().NotBe(b.GetHashCode());
+            }
+        }
+        
+        public static IEnumerable<object[]> EqualityNullData =>
+            NodeIds.Select(id => new[] { id() });
+
+        [MemberData(nameof(EqualityNullData))]
+        [Theory]
+        public void EqualityNull(NodeId val)
+        {
+            (val == null)
+                .Should().BeFalse();
+            (val != null)
+                .Should().BeTrue();
+            (null == val)
+                .Should().BeFalse();
+            (null != val)
+                .Should().BeTrue();
+
+            // This is using Equals(object)
+            val.Should()
+                .NotBeNull();
+
+            val.Equals((NodeId)null)
+                .Should().BeFalse();
         }
 
         public static IEnumerable<object[]> ParseData
@@ -161,7 +245,8 @@ namespace Workstation.UaClient.UnitTests
                 "n=",
                 "g=234234",
                 "n=ABC",
-                "123412"
+                "123412",
+                "ns=5i=2"
             }
             .Select(o => new[] { o });
 
@@ -173,6 +258,50 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Throw<ServiceResultException>()
                 .Which.HResult
                 .Should().Be(unchecked((int)StatusCodes.BadNodeIdInvalid));
+        }
+
+        public static IEnumerable<object[]> ToExpandedNodeIdData =>
+            NodeIds.Select(id => new[] { id() });
+
+        [MemberData(nameof(ToExpandedNodeIdData))]
+        [Theory]
+        public void ToExpandedNodeId(NodeId nodeId)
+        {
+            var nsUris = new[]
+            {
+                "default",
+                "Namespace1",
+                "Namespace2",
+                "Namespace3"
+            };
+
+            var expnodeId = NodeId.ToExpandedNodeId(nodeId, nsUris);
+
+            expnodeId.NodeId.Identifier
+                .Should().Be(nodeId.Identifier);
+
+            // The test data contains only namespace indeces
+            // that are zero, 2 or greater 3
+            if (nodeId.NamespaceIndex == 2)
+            {
+                expnodeId.NamespaceUri
+                    .Should().Be("Namespace2");
+            }
+            else
+            {
+                expnodeId.NamespaceUri
+                    .Should().BeNull();
+            }
+        }
+        
+        [Fact]
+        public void ToExpandedNodeIdNull()
+        {
+            var nodeId = default(NodeId);
+            var nsUris = new string[] { };
+
+            nodeId.Invoking(n => NodeId.ToExpandedNodeId(n, nsUris))
+                .Should().Throw<ArgumentNullException>();
         }
     }
 }

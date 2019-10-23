@@ -47,15 +47,42 @@ namespace Workstation.UaClient.UnitTests
         {
             if (shouldBeEqual)
             {
+                // Should().Be() is using Equal(object)
                 a
                     .Should().Be(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(LocalizableText)
+                a.Equals(b)
+                    .Should().BeTrue();
+
+                // operator
+                (a == b)
+                    .Should().BeTrue();
+                (a != b)
+                    .Should().BeFalse();
+
                 a.GetHashCode()
                     .Should().Be(b.GetHashCode());
             }
             else
             {
-                a.Should()
-                    .NotBe(b);
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().NotBe(b);
+                a
+                    .Should().NotBe(5);
+                
+                // Test Equal(LocalizableText)
+                a.Equals(b)
+                    .Should().BeFalse();
+
+                // operator
+                (a != b)
+                    .Should().BeTrue();
+                (a == b)
+                    .Should().BeFalse();
 
                 // This is technically not required but the current
                 // implementation fulfills this. If this should ever
@@ -64,6 +91,57 @@ namespace Workstation.UaClient.UnitTests
                 a.GetHashCode()
                     .Should().NotBe(b.GetHashCode());
             }
+        }
+
+        public static IEnumerable<object[]> EqualityNullData =>
+            LocalizedTexts.Select(id => new[] { id() });
+
+        [MemberData(nameof(EqualityNullData))]
+        [Theory]
+        public void EqualityNull(LocalizedText val)
+        {
+            (val == null)
+                .Should().BeFalse();
+            (val != null)
+                .Should().BeTrue();
+            (null == val)
+                .Should().BeFalse();
+            (null != val)
+                .Should().BeTrue();
+
+            // This is using Equals(object)
+            val.Should()
+                .NotBeNull();
+
+            val.Equals((LocalizedText)null)
+                .Should().BeFalse();
+        }
+
+        [InlineData("First text")]
+        [InlineData("Second text")]
+        [InlineData(null)]
+        [Theory]
+        public void ImplicitConversion(string val)
+        {
+            LocalizedText lt = val;
+
+            lt.Text
+                .Should().Be(val);
+            lt.Locale
+                .Should().Be("");
+
+            string txt2 = lt;
+
+            txt2
+                .Should().Be(val);
+        }
+
+        [Fact]
+        public void ImplicitConversionNull()
+        {
+            string txt = (LocalizedText)null;
+            txt
+                .Should().Be(null);
         }
     }
 }
