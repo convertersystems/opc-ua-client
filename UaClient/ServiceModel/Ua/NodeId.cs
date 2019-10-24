@@ -237,7 +237,18 @@ namespace Workstation.ServiceModel.Ua
         public override int GetHashCode()
         {
             int result = this.NamespaceIndex.GetHashCode();
-            result = (397 * result) ^ this.Identifier.GetHashCode();
+
+            if (this.IdType == IdType.Opaque)
+            {
+                foreach (var b in (byte[])this.Identifier)
+                {
+                    result = (397 * result) ^ b.GetHashCode();
+                }
+            }
+            else
+            {
+                result = (397 * result) ^ this.Identifier.GetHashCode();
+            }
             return result;
         }
 
