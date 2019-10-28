@@ -141,10 +141,10 @@ namespace Workstation.UaClient.UnitTests
 
                 await store.GetLocalCertificateAsync(app);
 
-                Directory.EnumerateFiles(dir.Name + @"\own\certs")
+                Directory.EnumerateFiles(dir.Name + @"/own/certs")
                     .Should().HaveCount(1);
 
-                Directory.EnumerateFiles(dir.Name + @"\own\private")
+                Directory.EnumerateFiles(dir.Name + @"/own/private")
                     .Should().HaveCount(1);
             }
         }
@@ -198,7 +198,7 @@ namespace Workstation.UaClient.UnitTests
                 ret
                     .Should().BeFalse();
                 
-                Directory.EnumerateFiles(dirClient.Name + @"\rejected")
+                Directory.EnumerateFiles(dirClient.Name + @"/rejected")
                     .Should().HaveCount(1);
             }
         }
@@ -220,7 +220,7 @@ namespace Workstation.UaClient.UnitTests
                 // First we create a certificate
                 var (cert, _) = await storeServer.GetLocalCertificateAsync(server);
 
-                CopyAll(dirServer.Name + @"\own\certs", dirClient.Name + @"\trusted");
+                CopyAll(dirServer.Name + @"/own/certs", dirClient.Name + @"/trusted");
 
                 // The certificate is now in the expected directory
                 // hence it should be accepted
