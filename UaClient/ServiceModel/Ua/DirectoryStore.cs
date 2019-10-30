@@ -61,6 +61,11 @@ namespace Workstation.ServiceModel.Ua
         /// <inheritdoc/>
         public async Task<(X509Certificate Certificate, RsaKeyParameters Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger = null)
         {
+            if (applicationDescription == null)
+            {
+                throw new ArgumentNullException(nameof(applicationDescription));
+            }
+
             string applicationUri = applicationDescription.ApplicationUri;
             if (string.IsNullOrEmpty(applicationUri))
             {
@@ -265,6 +270,11 @@ namespace Workstation.ServiceModel.Ua
             if (this.AcceptAllRemoteCertificates)
             {
                 return Task.FromResult(true);
+            }
+            
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
             }
 
             var trustedCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
