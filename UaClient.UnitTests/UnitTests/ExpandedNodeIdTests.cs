@@ -179,7 +179,6 @@ namespace Workstation.UaClient.UnitTests
                 () => new ExpandedNodeId(new byte [] {1, 2, 3}),
                 () => new ExpandedNodeId(new byte [] {1, 2}, "namespace", 2),
                 () => new ExpandedNodeId(new byte [] {1, 2}, "namespace"),
-                () => null,
                 () => ExpandedNodeId.Null
             };
 
@@ -205,11 +204,76 @@ namespace Workstation.UaClient.UnitTests
         public void Equality(ExpandedNodeId a, ExpandedNodeId b, bool shouldBeEqual)
         {
             if (shouldBeEqual)
-                a.Should().Be(b);
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().Be(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(NodeId)
+                a.Equals(b)
+                    .Should().BeTrue();
+
+                // operator
+                (a == b)
+                    .Should().BeTrue();
+                (a != b)
+                    .Should().BeFalse();
+
+                a.GetHashCode()
+                    .Should().Be(b.GetHashCode());
+            }
             else
-                a.Should().NotBe(b);
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().NotBe(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(NodeId)
+                a.Equals(b)
+                    .Should().BeFalse();
+
+                // operator
+                (a != b)
+                    .Should().BeTrue();
+                (a == b)
+                    .Should().BeFalse();
+
+                // This is technically not required but the current
+                // implementation fulfills this. If this should ever
+                // fail it could be bad luck or the the implementation
+                // is really broken.
+                a.GetHashCode()
+                    .Should().NotBe(b.GetHashCode());
+            }
         }
 
+        public static IEnumerable<object[]> EqualityNullData =>
+            ExpandedNodeIds.Select(id => new[] { id() });
+
+        [MemberData(nameof(EqualityNullData))]
+        [Theory]
+        public void EqualityNull(ExpandedNodeId val)
+        {
+            (val == null)
+                .Should().BeFalse();
+            (val != null)
+                .Should().BeTrue();
+            (null == val)
+                .Should().BeFalse();
+            (null != val)
+                .Should().BeTrue();
+
+            // This is using Equals(object)
+            val.Should()
+                .NotBeNull();
+
+            val.Equals((ExpandedNodeId)null)
+                .Should().BeFalse();
+        }
 
         public static IEnumerable<object[]> ParseData
             => ExpandedNodeIds.Select(f => f()).Where(n => n != null).Select(n => new object[] { n.ToString(), n});
@@ -233,6 +297,9 @@ namespace Workstation.UaClient.UnitTests
                 "g=234234",
                 "n=ABC",
                 "123412",
+                "svr=234",
+                "svr=234;nsu=Namespace",
+                "nsu=Namespace",
                 "nsu=namespace;svr=3;s=text"
             }
             .Select(o => new[] { o });
@@ -255,18 +322,43 @@ namespace Workstation.UaClient.UnitTests
             "http://www.siemens.com/simatic-s7-opcua"
         };
 
-        [Fact]
-        public void ToNodeTest()
+        public static IEnumerable<object[]> ToNodeIdData => new[]
         {
-            var enodeId = ExpandedNodeId.Parse("nsu=http://some.more;i=42");
-            var nodeId = ExpandedNodeId.ToNodeId(enodeId, NamespaceUris);
+            new ExpandedNodeId(Guid.Parse("77628a5c-a82a-43a1-838f-cfdbd037d15f"), "http://some.more"),
+            new ExpandedNodeId("1", "http://some.more"),
+            new ExpandedNodeId(1, "http://some.more"),
+            new ExpandedNodeId(new byte [] {1, 2}, "http://some.more"),
+            new ExpandedNodeId(1),
+            new ExpandedNodeId(1, "")
+        }
+        .Select(o => new[] { o });
+
+        [MemberData(nameof(ToNodeIdData))]
+        [Theory]
+        public void ToNodeId(ExpandedNodeId exnodeId)
+        {
+            var nodeId = ExpandedNodeId.ToNodeId(exnodeId, NamespaceUris);
 
             nodeId.Identifier
-                .Should().Be(enodeId.NodeId.Identifier);
+                .Should().Be(exnodeId.NodeId.Identifier);
             nodeId.IdType
-                .Should().Be(IdType.Numeric);
-            nodeId.NamespaceIndex
-                .Should().Be(2);
+                .Should().Be(exnodeId.NodeId.IdType);
+
+            if (!string.IsNullOrEmpty(exnodeId.NamespaceUri))
+            {
+                nodeId.NamespaceIndex
+                    .Should().Be(2);
+            }
+        }
+
+        [Fact]
+        public void ToNodeIdNull()
+        {
+            var nodeId = default(ExpandedNodeId);
+            var nsUris = new string[] { };
+
+            nodeId.Invoking(n => ExpandedNodeId.ToNodeId(n, nsUris))
+                .Should().Throw<ArgumentNullException>();
         }
     }
 }
