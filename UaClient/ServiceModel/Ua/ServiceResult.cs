@@ -49,7 +49,7 @@ namespace Workstation.ServiceModel.Ua
 
                 string locale = LookupString(stringTable, diagnosticInfo.Locale);
                 string localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
-                this.LocalizedText = new LocalizedText(locale, localizedText);
+                this.LocalizedText = new LocalizedText(localizedText, locale);
 
                 this.AdditionalInfo = diagnosticInfo.AdditionalInfo;
 
@@ -82,7 +82,7 @@ namespace Workstation.ServiceModel.Ua
 
                     string locale = LookupString(stringTable, diagnosticInfo.Locale);
                     string localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
-                    this.LocalizedText = new LocalizedText(locale, localizedText);
+                    this.LocalizedText = new LocalizedText(localizedText, locale);
 
                     this.AdditionalInfo = diagnosticInfo.AdditionalInfo;
 
