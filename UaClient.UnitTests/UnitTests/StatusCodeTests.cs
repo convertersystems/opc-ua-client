@@ -38,24 +38,81 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(42);
         }
 
-        [Fact]
-        public void Equality()
+        public static IEnumerable<StatusCode> Codes => new uint[]
         {
-            var a = new StatusCode(42);
-            var b = a;
+            0,
+            42,
+            43
+        }
+        .Select(s => new StatusCode(s));
 
-            b
-                .Should().Be(a);
+        public static IEnumerable<object[]> ValueEqualityData =>
+            from a in Codes.Select((s, i) => (code: s, index: i))
+            from b in Codes.Select((s, i) => (code: s, index: i))
+            select new object[] { a.code, b.code, a.index == b.index };
+
+        [MemberData(nameof(ValueEqualityData))]
+        [Theory]
+        public void Equality(StatusCode a, StatusCode b, bool shouldBeEqual)
+        {
+            if (shouldBeEqual)
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().Be(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(NodeId)
+                a.Equals(b)
+                    .Should().BeTrue();
+
+                // operator
+                (a == b)
+                    .Should().BeTrue();
+                (a != b)
+                    .Should().BeFalse();
+
+                a.GetHashCode()
+                    .Should().Be(b.GetHashCode());
+            }
+            else
+            {
+                // Should().Be() is using Equal(object)
+                a
+                    .Should().NotBe(b);
+                a
+                    .Should().NotBe(5);
+
+                // Test Equal(NodeId)
+                a.Equals(b)
+                    .Should().BeFalse();
+
+                // operator
+                (a != b)
+                    .Should().BeTrue();
+                (a == b)
+                    .Should().BeFalse();
+
+                // This is technically not required but the current
+                // implementation fulfills this. If this should ever
+                // fail it could be bad luck or the the implementation
+                // is really broken.
+                a.GetHashCode()
+                    .Should().NotBe(b.GetHashCode());
+            }
         }
 
-        [Fact]
-        public void Unequality()
-        {
-            var a = new StatusCode(42);
-            var b = new StatusCode(43);
+        public static IEnumerable<object[]> EqualityNullData =>
+            Codes.Select(c => new object[] { c });
 
-            b
-                .Should().NotBe(a);
+        [MemberData(nameof(EqualityNullData))]
+        [Theory]
+        public void EqualityNull(StatusCode val)
+        {
+            // This is using Equals(object)
+            val.Should()
+                .NotBeNull();
         }
 
         [InlineData(StatusCodes.Good)]
@@ -122,6 +179,29 @@ namespace Workstation.UaClient.UnitTests
         public void NotUncertain(uint sc)
         {
             StatusCode.IsUncertain(sc)
+                .Should().BeFalse();
+        }
+        [InlineData(StatusCodes.UncertainDominantValueChanged)]
+        [InlineData(StatusCodes.GoodDependentValueChanged)]
+        [InlineData(StatusCodes.BadDominantValueChanged)]
+        [InlineData(StatusCodes.UncertainDependentValueChanged)]
+        [InlineData(StatusCodes.BadDependentValueChanged)]
+        [Theory]
+        public void NotSemanticsChanged(uint sc)
+        {
+            StatusCode.IsSemanticsChanged(sc)
+                .Should().BeFalse();
+        }
+
+        [InlineData(StatusCodes.UncertainDominantValueChanged)]
+        [InlineData(StatusCodes.GoodDependentValueChanged)]
+        [InlineData(StatusCodes.BadDominantValueChanged)]
+        [InlineData(StatusCodes.UncertainDependentValueChanged)]
+        [InlineData(StatusCodes.BadDependentValueChanged)]
+        [Theory]
+        public void NotStructureChanged(uint sc)
+        {
+            StatusCode.IsStructureChanged(sc)
                 .Should().BeFalse();
         }
 

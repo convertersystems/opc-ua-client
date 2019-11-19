@@ -118,10 +118,10 @@ namespace Workstation.UaClient.UnitTests
         [Fact]
         public void HistoryUpdateAsyncNull()
         {
-            var response = new HistoryReadResponse();
+            var response = new HistoryUpdateResponse();
             var channel = new TestRequestChannel(response);
 
-            channel.Invoking(c => c.HistoryReadAsync(null))
+            channel.Invoking(c => c.HistoryUpdateAsync(null))
                 .Should().Throw<ArgumentNullException>();
         }
 
