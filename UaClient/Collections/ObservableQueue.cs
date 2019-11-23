@@ -50,6 +50,11 @@ namespace Workstation.Collections
         /// </summary>
         public new void Clear()
         {
+            if (this.Count == 0)
+            {
+                return;
+            }
+
             base.Clear();
             this.OnPropertyChanged("Count");
             this.OnPropertyChanged("Item[]");
