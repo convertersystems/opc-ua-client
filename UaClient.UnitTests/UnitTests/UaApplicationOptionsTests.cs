@@ -12,14 +12,10 @@ namespace Workstation.UaClient.UnitTests
         [Fact]
         public void UaTcpTransportChannelOptionsDefaults()
         {
-            var lowestBufferSize = 1024u;
+            var lowestBufferSize = 8192u;
 
             var options = new UaTcpTransportChannelOptions();
 
-            options.LocalMaxChunkCount
-                .Should().BeGreaterOrEqualTo(lowestBufferSize);
-            options.LocalMaxMessageSize
-                .Should().BeGreaterOrEqualTo(lowestBufferSize);
             options.LocalReceiveBufferSize
                 .Should().BeGreaterOrEqualTo(lowestBufferSize);
             options.LocalSendBufferSize
