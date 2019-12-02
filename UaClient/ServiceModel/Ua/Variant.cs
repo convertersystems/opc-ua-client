@@ -8,6 +8,8 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public enum VariantType
@@ -106,7 +108,7 @@ namespace Workstation.ServiceModel.Ua
             */
         };
 
-        public Variant(object value)
+        public Variant(object? value)
         {
             if (value == null)
             {
@@ -135,10 +137,9 @@ namespace Workstation.ServiceModel.Ua
                 return;
             }
 
-            var array = value as Array;
-            if (array != null)
+            if (value is Array array)
             {
-                Type elemType = value.GetType().GetElementType();
+                Type? elemType = array.GetType().GetElementType();
                 if (elemType == null)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), elemType, "Array element Type is unsupported.");
@@ -253,7 +254,7 @@ namespace Workstation.ServiceModel.Ua
             this.ArrayDimensions = null;
         }
 
-        public Variant(string value)
+        public Variant(string? value)
         {
             this.Value = value;
             this.Type = VariantType.String;
@@ -274,28 +275,28 @@ namespace Workstation.ServiceModel.Ua
             this.ArrayDimensions = null;
         }
 
-        public Variant(byte[] value)
+        public Variant(byte[]? value)
         {
             this.Value = value;
             this.Type = VariantType.ByteString;
             this.ArrayDimensions = null;
         }
 
-        public Variant(XElement value)
+        public Variant(XElement? value)
         {
             this.Value = value;
             this.Type = VariantType.XmlElement;
             this.ArrayDimensions = null;
         }
 
-        public Variant(NodeId value)
+        public Variant(NodeId? value)
         {
             this.Value = value;
             this.Type = VariantType.NodeId;
             this.ArrayDimensions = null;
         }
 
-        public Variant(ExpandedNodeId value)
+        public Variant(ExpandedNodeId? value)
         {
             this.Value = value;
             this.Type = VariantType.ExpandedNodeId;
@@ -309,28 +310,28 @@ namespace Workstation.ServiceModel.Ua
             this.ArrayDimensions = null;
         }
 
-        public Variant(QualifiedName value)
+        public Variant(QualifiedName? value)
         {
             this.Value = value;
             this.Type = VariantType.QualifiedName;
             this.ArrayDimensions = null;
         }
 
-        public Variant(LocalizedText value)
+        public Variant(LocalizedText? value)
         {
             this.Value = value;
             this.Type = VariantType.LocalizedText;
             this.ArrayDimensions = null;
         }
 
-        public Variant(ExtensionObject value)
+        public Variant(ExtensionObject? value)
         {
             this.Value = value;
             this.Type = VariantType.ExtensionObject;
             this.ArrayDimensions = null;
         }
 
-        public Variant(IEncodable value)
+        public Variant(IEncodable? value)
         {
             this.Value = new ExtensionObject(value);
             this.Type = VariantType.ExtensionObject;
@@ -344,8 +345,9 @@ namespace Workstation.ServiceModel.Ua
             this.ArrayDimensions = null;
         }
 
-        public Variant(bool[] value)
+        public Variant(bool[]? value)
         {
+            // REVIEW: Should we throw on null?
             this.Value = value;
             this.Type = VariantType.Boolean;
             this.ArrayDimensions = new int[value.Rank];
@@ -612,7 +614,7 @@ namespace Workstation.ServiceModel.Ua
         {
             this.Value = value;
             VariantType varType;
-            Type elemType = value.GetType().GetElementType();
+            Type? elemType = value.GetType().GetElementType();
             if (elemType == null || !elemTypeMap.TryGetValue(elemType, out varType))
             {
                 throw new ArgumentOutOfRangeException(nameof(value), elemType, "Array element type is unsupported.");
@@ -626,11 +628,11 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public object Value { get; }
+        public object? Value { get; }
 
         public VariantType Type { get; }
 
-        public int[] ArrayDimensions { get; }
+        public int[]? ArrayDimensions { get; }
 
         public static implicit operator Variant(bool value)
         {
@@ -849,217 +851,217 @@ namespace Workstation.ServiceModel.Ua
 
         public static explicit operator bool(Variant value)
         {
-            return (bool)value.Value;
+            return (bool)value.Value!;
         }
 
         public static explicit operator sbyte(Variant value)
         {
-            return (sbyte)value.Value;
+            return (sbyte)value.Value!;
         }
 
         public static explicit operator byte(Variant value)
         {
-            return (byte)value.Value;
+            return (byte)value.Value!;
         }
 
         public static explicit operator short(Variant value)
         {
-            return (short)value.Value;
+            return (short)value.Value!;
         }
 
         public static explicit operator ushort(Variant value)
         {
-            return (ushort)value.Value;
+            return (ushort)value.Value!;
         }
 
         public static explicit operator int(Variant value)
         {
-            return (int)value.Value;
+            return (int)value.Value!;
         }
 
         public static explicit operator uint(Variant value)
         {
-            return (uint)value.Value;
+            return (uint)value.Value!;
         }
 
         public static explicit operator long(Variant value)
         {
-            return (long)value.Value;
+            return (long)value.Value!;
         }
 
         public static explicit operator ulong(Variant value)
         {
-            return (ulong)value.Value;
+            return (ulong)value.Value!;
         }
 
         public static explicit operator float(Variant value)
         {
-            return (float)value.Value;
+            return (float)value.Value!;
         }
 
         public static explicit operator double(Variant value)
         {
-            return (double)value.Value;
+            return (double)value.Value!;
         }
 
-        public static explicit operator string(Variant value)
+        public static explicit operator string?(Variant value)
         {
-            return (string)value.Value;
+            return (string?)value.Value;
         }
 
         public static explicit operator DateTime(Variant value)
         {
-            return (DateTime)value.Value;
+            return (DateTime)value.Value!;
         }
 
         public static explicit operator Guid(Variant value)
         {
-            return (Guid)value.Value;
+            return (Guid)value.Value!;
         }
 
-        public static explicit operator byte[] (Variant value)
+        public static explicit operator byte[]? (Variant value)
         {
-            return (byte[])value.Value;
+            return (byte[]?)value.Value;
         }
 
-        public static explicit operator XElement(Variant value)
+        public static explicit operator XElement?(Variant value)
         {
-            return (XElement)value.Value;
+            return (XElement?)value.Value;
         }
 
-        public static explicit operator NodeId(Variant value)
+        public static explicit operator NodeId?(Variant value)
         {
-            return (NodeId)value.Value;
+            return (NodeId?)value.Value;
         }
 
-        public static explicit operator ExpandedNodeId(Variant value)
+        public static explicit operator ExpandedNodeId?(Variant value)
         {
-            return (ExpandedNodeId)value.Value;
+            return (ExpandedNodeId?)value.Value;
         }
 
         public static explicit operator StatusCode(Variant value)
         {
-            return (StatusCode)value.Value;
+            return (StatusCode)value.Value!;
         }
 
         public static explicit operator QualifiedName(Variant value)
         {
-            return (QualifiedName)value.Value;
+            return (QualifiedName)value.Value!;
         }
 
-        public static explicit operator LocalizedText(Variant value)
+        public static explicit operator LocalizedText?(Variant value)
         {
-            return (LocalizedText)value.Value;
+            return (LocalizedText?)value.Value;
         }
 
-        public static explicit operator ExtensionObject(Variant value)
+        public static explicit operator ExtensionObject?(Variant value)
         {
-            return (ExtensionObject)value.Value;
+            return (ExtensionObject?)value.Value;
         }
 
-        public static explicit operator bool[] (Variant value)
+        public static explicit operator bool[]? (Variant value)
         {
-            return (bool[])value.Value;
+            return (bool[]?)value.Value;
         }
 
-        public static explicit operator sbyte[] (Variant value)
+        public static explicit operator sbyte[]? (Variant value)
         {
-            return (sbyte[])value.Value;
+            return (sbyte[]?)value.Value;
         }
 
-        public static explicit operator short[] (Variant value)
+        public static explicit operator short[]? (Variant value)
         {
-            return (short[])value.Value;
+            return (short[]?)value.Value;
         }
 
-        public static explicit operator ushort[] (Variant value)
+        public static explicit operator ushort[]? (Variant value)
         {
-            return (ushort[])value.Value;
+            return (ushort[]?)value.Value;
         }
 
-        public static explicit operator int[] (Variant value)
+        public static explicit operator int[]? (Variant value)
         {
-            return (int[])value.Value;
+            return (int[]?)value.Value;
         }
 
-        public static explicit operator uint[] (Variant value)
+        public static explicit operator uint[]? (Variant value)
         {
-            return (uint[])value.Value;
+            return (uint[]?)value.Value;
         }
 
-        public static explicit operator long[] (Variant value)
+        public static explicit operator long[]? (Variant value)
         {
-            return (long[])value.Value;
+            return (long[]?)value.Value;
         }
 
-        public static explicit operator ulong[] (Variant value)
+        public static explicit operator ulong[]? (Variant value)
         {
-            return (ulong[])value.Value;
+            return (ulong[]?)value.Value;
         }
 
-        public static explicit operator float[] (Variant value)
+        public static explicit operator float[]? (Variant value)
         {
-            return (float[])value.Value;
+            return (float[]?)value.Value;
         }
 
-        public static explicit operator double[] (Variant value)
+        public static explicit operator double[]? (Variant value)
         {
-            return (double[])value.Value;
+            return (double[]?)value.Value;
         }
 
-        public static explicit operator string[] (Variant value)
+        public static explicit operator string[]? (Variant value)
         {
-            return (string[])value.Value;
+            return (string[]?)value.Value;
         }
 
-        public static explicit operator DateTime[] (Variant value)
+        public static explicit operator DateTime[]? (Variant value)
         {
-            return (DateTime[])value.Value;
+            return (DateTime[]?)value.Value;
         }
 
-        public static explicit operator Guid[] (Variant value)
+        public static explicit operator Guid[]? (Variant value)
         {
-            return (Guid[])value.Value;
+            return (Guid[]?)value.Value;
         }
 
-        public static explicit operator byte[][] (Variant value)
+        public static explicit operator byte[][]? (Variant value)
         {
-            return (byte[][])value.Value;
+            return (byte[][]?)value.Value;
         }
 
-        public static explicit operator XElement[] (Variant value)
+        public static explicit operator XElement[]? (Variant value)
         {
-            return (XElement[])value.Value;
+            return (XElement[]?)value.Value;
         }
 
-        public static explicit operator NodeId[] (Variant value)
+        public static explicit operator NodeId[]? (Variant value)
         {
-            return (NodeId[])value.Value;
+            return (NodeId[]?)value.Value;
         }
 
-        public static explicit operator ExpandedNodeId[] (Variant value)
+        public static explicit operator ExpandedNodeId[]? (Variant value)
         {
-            return (ExpandedNodeId[])value.Value;
+            return (ExpandedNodeId[]?)value.Value;
         }
 
-        public static explicit operator StatusCode[] (Variant value)
+        public static explicit operator StatusCode[]? (Variant value)
         {
-            return (StatusCode[])value.Value;
+            return (StatusCode[]?)value.Value;
         }
 
-        public static explicit operator QualifiedName[] (Variant value)
+        public static explicit operator QualifiedName[]? (Variant value)
         {
-            return (QualifiedName[])value.Value;
+            return (QualifiedName[]?)value.Value;
         }
 
-        public static explicit operator LocalizedText[] (Variant value)
+        public static explicit operator LocalizedText[]? (Variant value)
         {
-            return (LocalizedText[])value.Value;
+            return (LocalizedText[]?)value.Value;
         }
 
-        public static explicit operator ExtensionObject[] (Variant value)
+        public static explicit operator ExtensionObject[]? (Variant value)
         {
-            return (ExtensionObject[])value.Value;
+            return (ExtensionObject[]?)value.Value;
         }
 
         public static bool IsNull(Variant a)
