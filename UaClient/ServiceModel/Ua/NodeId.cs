@@ -3,9 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+
+#nullable enable
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -82,7 +85,7 @@ namespace Workstation.ServiceModel.Ua
 
         public IdType IdType { get; }
 
-        public static bool operator ==(NodeId a, NodeId b)
+        public static bool operator ==(NodeId? a, NodeId? b)
         {
             if (ReferenceEquals(a, b))
             {
@@ -113,7 +116,7 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public static bool operator !=(NodeId a, NodeId b)
+        public static bool operator !=(NodeId? a, NodeId? b)
         {
             return !(a == b);
         }
@@ -123,7 +126,7 @@ namespace Workstation.ServiceModel.Ua
             return (nodeId == null) || nodeId == Null;
         }
 
-        public static ExpandedNodeId ToExpandedNodeId(NodeId value, IList<string> namespaceUris)
+        public static ExpandedNodeId ToExpandedNodeId(NodeId value, IList<string>? namespaceUris)
         {
             if (ReferenceEquals(value, null))
             {
@@ -131,10 +134,9 @@ namespace Workstation.ServiceModel.Ua
             }
 
             ushort ns = value.NamespaceIndex;
-            string nsu = null;
             if (namespaceUris != null && ns > 0 && ns < namespaceUris.Count)
             {
-                nsu = namespaceUris[ns];
+                var nsu = namespaceUris[ns];
 
                 switch (value.IdType)
                 {
@@ -158,7 +160,7 @@ namespace Workstation.ServiceModel.Ua
             return new ExpandedNodeId(value);
         }
 
-        public static bool TryParse(string s, out NodeId value)
+        public static bool TryParse(string s, [NotNullWhen(returnValue: true)] out NodeId value)
         {
             try
             {
@@ -219,7 +221,7 @@ namespace Workstation.ServiceModel.Ua
             return value;
         }
 
-        public override bool Equals(object o)
+        public override bool Equals(object? o)
         {
             if (o is NodeId)
             {
@@ -229,7 +231,7 @@ namespace Workstation.ServiceModel.Ua
             return false;
         }
 
-        public bool Equals(NodeId that)
+        public bool Equals(NodeId? that)
         {
             return this == that;
         }

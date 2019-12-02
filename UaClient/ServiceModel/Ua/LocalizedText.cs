@@ -3,6 +3,7 @@
 
 namespace Workstation.ServiceModel.Ua
 {
+    #nullable enable
     public sealed class LocalizedText
     {
         /// <summary>
@@ -10,27 +11,27 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="text">The text in the specified locale.</param>
         /// <param name="locale">The locale.</param>
-        public LocalizedText(string text, string locale = "")
+        public LocalizedText(string? text, string? locale = "")
         {
             this.Locale = locale;
             this.Text = text;
         }
 
-        public string Text { get; }
+        public string? Text { get; }
 
-        public string Locale { get; }
+        public string? Locale { get; }
 
-        public static implicit operator LocalizedText(string a)
+        public static implicit operator LocalizedText(string? a)
         {
             return new LocalizedText(a);
         }
 
-        public static implicit operator string(LocalizedText a)
+        public static implicit operator string?(LocalizedText? a)
         {
             return a?.Text;
         }
 
-        public static bool operator ==(LocalizedText a, LocalizedText b)
+        public static bool operator ==(LocalizedText? a, LocalizedText? b)
         {
             if (ReferenceEquals(a, b))
             {
@@ -45,12 +46,12 @@ namespace Workstation.ServiceModel.Ua
             return (a.Text == b.Text) && (a.Locale == b.Locale);
         }
 
-        public static bool operator !=(LocalizedText a, LocalizedText b)
+        public static bool operator !=(LocalizedText? a, LocalizedText? b)
         {
             return !(a == b);
         }
 
-        public override bool Equals(object o)
+        public override bool Equals(object? o)
         {
             if (o is LocalizedText)
             {
@@ -60,7 +61,7 @@ namespace Workstation.ServiceModel.Ua
             return false;
         }
 
-        public bool Equals(LocalizedText that)
+        public bool Equals(LocalizedText? that)
         {
             return this == that;
         }
@@ -72,7 +73,7 @@ namespace Workstation.ServiceModel.Ua
             return result;
         }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return this.Text;
         }
