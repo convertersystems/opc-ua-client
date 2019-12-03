@@ -9,10 +9,16 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: Setup .NET Core
+    - name: Setup .NET Core 2.2
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 2.2.108
+        dotnet-version: '2.2.108'
+    - name: Setup .NET Core 3.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.0.100'
+    - name: Workaround see https://github.com/actions/setup-dotnet/issues/25#issuecomment-557570168
+      run: rsync -a ${DOTNET_ROOT/3.0.100/2.2.108}/* $DOTNET_ROOT/
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Run unit tests
