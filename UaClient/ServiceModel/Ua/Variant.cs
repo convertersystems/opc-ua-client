@@ -256,6 +256,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(string? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.String;
             this.ArrayDimensions = null;
@@ -277,6 +285,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(byte[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.ByteString;
             this.ArrayDimensions = null;
@@ -284,6 +300,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(XElement? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.XmlElement;
             this.ArrayDimensions = null;
@@ -291,6 +315,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(NodeId? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.NodeId;
             this.ArrayDimensions = null;
@@ -298,6 +330,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(ExpandedNodeId? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.ExpandedNodeId;
             this.ArrayDimensions = null;
@@ -312,6 +352,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(QualifiedName? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.QualifiedName;
             this.ArrayDimensions = null;
@@ -319,6 +367,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(LocalizedText? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.LocalizedText;
             this.ArrayDimensions = null;
@@ -326,6 +382,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(ExtensionObject? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.ExtensionObject;
             this.ArrayDimensions = null;
@@ -333,6 +397,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(IEncodable? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = new ExtensionObject(value);
             this.Type = VariantType.ExtensionObject;
             this.ArrayDimensions = null;
@@ -347,7 +419,14 @@ namespace Workstation.ServiceModel.Ua
 
         public Variant(bool[]? value)
         {
-            // REVIEW: Should we throw on null?
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Boolean;
             this.ArrayDimensions = new int[value.Rank];
@@ -357,8 +436,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(sbyte[] value)
+        public Variant(sbyte[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.SByte;
             this.ArrayDimensions = new int[value.Rank];
@@ -368,8 +455,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(short[] value)
+        public Variant(short[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Int16;
             this.ArrayDimensions = new int[value.Rank];
@@ -379,8 +474,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(ushort[] value)
+        public Variant(ushort[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.UInt16;
             this.ArrayDimensions = new int[value.Rank];
@@ -390,8 +493,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(int[] value)
+        public Variant(int[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Int32;
             this.ArrayDimensions = new int[value.Rank];
@@ -401,8 +512,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(uint[] value)
+        public Variant(uint[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.UInt32;
             this.ArrayDimensions = new int[value.Rank];
@@ -412,8 +531,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(long[] value)
+        public Variant(long[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Int64;
             this.ArrayDimensions = new int[value.Rank];
@@ -423,8 +550,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(ulong[] value)
+        public Variant(ulong[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.UInt64;
             this.ArrayDimensions = new int[value.Rank];
@@ -434,8 +569,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(float[] value)
+        public Variant(float[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Float;
             this.ArrayDimensions = new int[value.Rank];
@@ -445,8 +588,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(double[] value)
+        public Variant(double[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Double;
             this.ArrayDimensions = new int[value.Rank];
@@ -456,8 +607,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(string[] value)
+        public Variant(string[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.String;
             this.ArrayDimensions = new int[value.Rank];
@@ -467,8 +626,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(DateTime[] value)
+        public Variant(DateTime[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.DateTime;
             this.ArrayDimensions = new int[value.Rank];
@@ -478,8 +645,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(Guid[] value)
+        public Variant(Guid[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Guid;
             this.ArrayDimensions = new int[value.Rank];
@@ -489,8 +664,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(byte[][] value)
+        public Variant(byte[][]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.ByteString;
             this.ArrayDimensions = new int[value.Rank];
@@ -500,8 +683,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(XElement[] value)
+        public Variant(XElement[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.XmlElement;
             this.ArrayDimensions = new int[value.Rank];
@@ -511,8 +702,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(NodeId[] value)
+        public Variant(NodeId[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.NodeId;
             this.ArrayDimensions = new int[value.Rank];
@@ -522,8 +721,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(ExpandedNodeId[] value)
+        public Variant(ExpandedNodeId[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.ExpandedNodeId;
             this.ArrayDimensions = new int[value.Rank];
@@ -533,8 +740,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(StatusCode[] value)
+        public Variant(StatusCode[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.StatusCode;
             this.ArrayDimensions = new int[value.Rank];
@@ -544,8 +759,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(QualifiedName[] value)
+        public Variant(QualifiedName[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.QualifiedName;
             this.ArrayDimensions = new int[value.Rank];
@@ -555,8 +778,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(LocalizedText[] value)
+        public Variant(LocalizedText[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.LocalizedText;
             this.ArrayDimensions = new int[value.Rank];
@@ -566,8 +797,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(ExtensionObject[] value)
+        public Variant(ExtensionObject[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.ExtensionObject;
             this.ArrayDimensions = new int[value.Rank];
@@ -577,8 +816,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(Variant[] value)
+        public Variant(Variant[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             this.Type = VariantType.Variant;
             this.ArrayDimensions = new int[value.Rank];
@@ -588,8 +835,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(Enum[] value)
+        public Variant(Enum[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value.Select(v => Convert.ToInt32(v, CultureInfo.InvariantCulture)).ToArray();
             this.Type = VariantType.Int32;
             this.ArrayDimensions = new int[value.Rank];
@@ -599,8 +854,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(IEncodable[] value)
+        public Variant(IEncodable[]? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value.Select(v => new ExtensionObject(v)).ToArray();
             this.Type = VariantType.ExtensionObject;
             this.ArrayDimensions = new int[value.Rank];
@@ -610,8 +873,16 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(Array value)
+        public Variant(Array? value)
         {
+            if (value is null)
+            {
+                this.Value = null;
+                this.Type = VariantType.Null;
+                this.ArrayDimensions = null;
+                return;
+            }
+
             this.Value = value;
             VariantType varType;
             Type? elemType = value.GetType().GetElementType();
@@ -689,7 +960,7 @@ namespace Workstation.ServiceModel.Ua
             return new Variant(value);
         }
 
-        public static implicit operator Variant(string value)
+        public static implicit operator Variant(string? value)
         {
             return new Variant(value);
         }
@@ -704,22 +975,22 @@ namespace Workstation.ServiceModel.Ua
             return new Variant(value);
         }
 
-        public static implicit operator Variant(byte[] value)
+        public static implicit operator Variant(byte[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(XElement value)
+        public static implicit operator Variant(XElement? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(NodeId value)
+        public static implicit operator Variant(NodeId? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(ExpandedNodeId value)
+        public static implicit operator Variant(ExpandedNodeId? value)
         {
             return new Variant(value);
         }
@@ -729,122 +1000,122 @@ namespace Workstation.ServiceModel.Ua
             return new Variant(value);
         }
 
-        public static implicit operator Variant(QualifiedName value)
+        public static implicit operator Variant(QualifiedName? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(LocalizedText value)
+        public static implicit operator Variant(LocalizedText? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(ExtensionObject value)
+        public static implicit operator Variant(ExtensionObject? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(bool[] value)
+        public static implicit operator Variant(bool[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(sbyte[] value)
+        public static implicit operator Variant(sbyte[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(short[] value)
+        public static implicit operator Variant(short[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(ushort[] value)
+        public static implicit operator Variant(ushort[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(int[] value)
+        public static implicit operator Variant(int[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(uint[] value)
+        public static implicit operator Variant(uint[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(long[] value)
+        public static implicit operator Variant(long[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(ulong[] value)
+        public static implicit operator Variant(ulong[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(float[] value)
+        public static implicit operator Variant(float[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(double[] value)
+        public static implicit operator Variant(double[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(string[] value)
+        public static implicit operator Variant(string[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(DateTime[] value)
+        public static implicit operator Variant(DateTime[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(Guid[] value)
+        public static implicit operator Variant(Guid[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(byte[][] value)
+        public static implicit operator Variant(byte[][]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(XElement[] value)
+        public static implicit operator Variant(XElement[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(NodeId[] value)
+        public static implicit operator Variant(NodeId[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(ExpandedNodeId[] value)
+        public static implicit operator Variant(ExpandedNodeId[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(StatusCode[] value)
+        public static implicit operator Variant(StatusCode[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(QualifiedName[] value)
+        public static implicit operator Variant(QualifiedName[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(LocalizedText[] value)
+        public static implicit operator Variant(LocalizedText[]? value)
         {
             return new Variant(value);
         }
 
-        public static implicit operator Variant(ExtensionObject[] value)
+        public static implicit operator Variant(ExtensionObject[]? value)
         {
             return new Variant(value);
         }
@@ -919,7 +1190,7 @@ namespace Workstation.ServiceModel.Ua
             return (Guid)value.Value!;
         }
 
-        public static explicit operator byte[]? (Variant value)
+        public static explicit operator byte[]?(Variant value)
         {
             return (byte[]?)value.Value;
         }
@@ -944,9 +1215,9 @@ namespace Workstation.ServiceModel.Ua
             return (StatusCode)value.Value!;
         }
 
-        public static explicit operator QualifiedName(Variant value)
+        public static explicit operator QualifiedName?(Variant value)
         {
-            return (QualifiedName)value.Value!;
+            return (QualifiedName?)value.Value;
         }
 
         public static explicit operator LocalizedText?(Variant value)
@@ -959,107 +1230,107 @@ namespace Workstation.ServiceModel.Ua
             return (ExtensionObject?)value.Value;
         }
 
-        public static explicit operator bool[]? (Variant value)
+        public static explicit operator bool[]?(Variant value)
         {
             return (bool[]?)value.Value;
         }
 
-        public static explicit operator sbyte[]? (Variant value)
+        public static explicit operator sbyte[]?(Variant value)
         {
             return (sbyte[]?)value.Value;
         }
 
-        public static explicit operator short[]? (Variant value)
+        public static explicit operator short[]?(Variant value)
         {
             return (short[]?)value.Value;
         }
 
-        public static explicit operator ushort[]? (Variant value)
+        public static explicit operator ushort[]?(Variant value)
         {
             return (ushort[]?)value.Value;
         }
 
-        public static explicit operator int[]? (Variant value)
+        public static explicit operator int[]?(Variant value)
         {
             return (int[]?)value.Value;
         }
 
-        public static explicit operator uint[]? (Variant value)
+        public static explicit operator uint[]?(Variant value)
         {
             return (uint[]?)value.Value;
         }
 
-        public static explicit operator long[]? (Variant value)
+        public static explicit operator long[]?(Variant value)
         {
             return (long[]?)value.Value;
         }
 
-        public static explicit operator ulong[]? (Variant value)
+        public static explicit operator ulong[]?(Variant value)
         {
             return (ulong[]?)value.Value;
         }
 
-        public static explicit operator float[]? (Variant value)
+        public static explicit operator float[]?(Variant value)
         {
             return (float[]?)value.Value;
         }
 
-        public static explicit operator double[]? (Variant value)
+        public static explicit operator double[]?(Variant value)
         {
             return (double[]?)value.Value;
         }
 
-        public static explicit operator string[]? (Variant value)
+        public static explicit operator string[]?(Variant value)
         {
             return (string[]?)value.Value;
         }
 
-        public static explicit operator DateTime[]? (Variant value)
+        public static explicit operator DateTime[]?(Variant value)
         {
             return (DateTime[]?)value.Value;
         }
 
-        public static explicit operator Guid[]? (Variant value)
+        public static explicit operator Guid[]?(Variant value)
         {
             return (Guid[]?)value.Value;
         }
 
-        public static explicit operator byte[][]? (Variant value)
+        public static explicit operator byte[][]?(Variant value)
         {
             return (byte[][]?)value.Value;
         }
 
-        public static explicit operator XElement[]? (Variant value)
+        public static explicit operator XElement[]?(Variant value)
         {
             return (XElement[]?)value.Value;
         }
 
-        public static explicit operator NodeId[]? (Variant value)
+        public static explicit operator NodeId[]?(Variant value)
         {
             return (NodeId[]?)value.Value;
         }
 
-        public static explicit operator ExpandedNodeId[]? (Variant value)
+        public static explicit operator ExpandedNodeId[]?(Variant value)
         {
             return (ExpandedNodeId[]?)value.Value;
         }
 
-        public static explicit operator StatusCode[]? (Variant value)
+        public static explicit operator StatusCode[]?(Variant value)
         {
             return (StatusCode[]?)value.Value;
         }
 
-        public static explicit operator QualifiedName[]? (Variant value)
+        public static explicit operator QualifiedName[]?(Variant value)
         {
             return (QualifiedName[]?)value.Value;
         }
 
-        public static explicit operator LocalizedText[]? (Variant value)
+        public static explicit operator LocalizedText[]?(Variant value)
         {
             return (LocalizedText[]?)value.Value;
         }
 
-        public static explicit operator ExtensionObject[]? (Variant value)
+        public static explicit operator ExtensionObject[]?(Variant value)
         {
             return (ExtensionObject[]?)value.Value;
         }
