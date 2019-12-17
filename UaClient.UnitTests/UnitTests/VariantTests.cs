@@ -108,6 +108,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(length);
         }
+        
+        [Fact]
+        public void CreateArrayNull()
+        {
+            var val = default(Array);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void CreateArrayObjectEncodeable()
@@ -203,6 +217,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+
+        [Fact]
+        public void CreateBooleanArrayNull()
+        {
+            var val = default(bool[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
         
         [Fact]
         public void ImplicitCreateBooleanArray()
@@ -277,6 +305,21 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateSByteArrayNull()
+        {
+            var val = default(sbyte[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
         
         [Fact]
         public void ImplicitCreateSByteArray()
@@ -389,6 +432,20 @@ namespace Workstation.UaClient.UnitTests
         }
         
         [Fact]
+        public void CreateShortArrayNull()
+        {
+            var val = default(short[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
         public void ImplicitCreateShortArray()
         {
             var val = new short[] { 2, 3, 4, 0 };
@@ -460,6 +517,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().ContainSingle()
                 .Which
                 .Should().Be(val.Length);
+        }
+        
+        [Fact]
+        public void CreateUShortArrayNull()
+        {
+            var val = default(ushort[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
         }
         
         [Fact]
@@ -537,6 +608,20 @@ namespace Workstation.UaClient.UnitTests
         }
         
         [Fact]
+        public void CreateIntArrayNull()
+        {
+            var val = default(int[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
         public void ImplicitCreateIntArray()
         {
             var val = new int[] { 2, 3, 4, 0 };
@@ -608,6 +693,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().ContainSingle()
                 .Which
                 .Should().Be(val.Length);
+        }
+        
+        [Fact]
+        public void CreateUIntArrayNull()
+        {
+            var val = default(uint[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
         }
         
         [Fact]
@@ -683,7 +782,21 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateLongArrayNull()
+        {
+            var val = default(long[]);
+            var v = new Variant(val);
 
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
         [Fact]
         public void ImplicitCreateLongArray()
         {
@@ -757,7 +870,21 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateULongArrayNull()
+        {
+            var val = default(ulong[]);
+            var v = new Variant(val);
 
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
         [Fact]
         public void ImplicitCreateULongArray()
         {
@@ -831,7 +958,21 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateFloatArrayNull()
+        {
+            var val = default(float[]);
+            var v = new Variant(val);
 
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
         [Fact]
         public void ImplicitCreateFloatArray()
         {
@@ -905,6 +1046,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateDoubleArrayNull()
+        {
+            var val = default(double[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void ImplicitCreateDoubleArray()
@@ -938,6 +1093,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.String);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateStringNull()
+        {
+            var val = default(string);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -978,6 +1147,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().ContainSingle()
                 .Which
                 .Should().Be(val.Length);
+        }
+        
+        [Fact]
+        public void CreateStringArrayNull()
+        {
+            var val = default(string[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
         }
         
         [Fact]
@@ -1053,6 +1236,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateDateTimeArrayNull()
+        {
+            var val = default(DateTime[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void ImplicitCreateDateTimeArray()
@@ -1127,6 +1324,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateGuidArrayNull()
+        {
+            var val = default(Guid[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void ImplicitCreateGuidArray()
@@ -1160,6 +1371,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.ByteString);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateByteStringNull()
+        {
+            var val = default(byte[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -1201,6 +1426,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateByteStringArrayNull()
+        {
+            var val = default(byte[][]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void ImplicitCreateByteStringArray()
@@ -1234,6 +1473,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.XmlElement);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateXElementNull()
+        {
+            var val = default(XElement);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -1277,6 +1530,20 @@ namespace Workstation.UaClient.UnitTests
         }
         
         [Fact]
+        public void CreateXElementArrayNull()
+        {
+            var val = default(XElement[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
         public void ImplicitCreateXElementArray()
         {
             var val = new[] { XElement.Parse(@"<Item AttributeA=""A"" AttributeB=""B"" />") };
@@ -1308,6 +1575,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.NodeId);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateNodeIdNull()
+        {
+            var val = default(NodeId);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -1349,6 +1630,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateNodeIdArrayNull()
+        {
+            var val = default(NodeId[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void ImplicitCreateNodeIdArray()
@@ -1382,6 +1677,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.ExpandedNodeId);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateExpandedNodeIdNull()
+        {
+            var val = default(ExpandedNodeId);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -1422,6 +1731,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().ContainSingle()
                 .Which
                 .Should().Be(val.Length);
+        }
+        
+        [Fact]
+        public void CreateExpandedNodeIdArrayNull()
+        {
+            var val = default(ExpandedNodeId[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
         }
 
         [Fact]
@@ -1497,6 +1820,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateStatusCodeArrayNull()
+        {
+            var val = default(StatusCode[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void ImplicitCreateStatusCodeArray()
@@ -1530,6 +1867,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.QualifiedName);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateQualifiedNameNull()
+        {
+            var val = default(QualifiedName);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -1573,6 +1924,20 @@ namespace Workstation.UaClient.UnitTests
         }
         
         [Fact]
+        public void CreateQualifiedNameArrayNull()
+        {
+            var val = default(QualifiedName[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+
+        [Fact]
         public void ImplicitCreateQualifiedNameArray()
         {
             var val = new[] { new QualifiedName("name") };
@@ -1604,6 +1969,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.LocalizedText);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateLocalizedTextNull()
+        {
+            var val = default(LocalizedText);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -1645,6 +2024,20 @@ namespace Workstation.UaClient.UnitTests
                 .Which
                 .Should().Be(val.Length);
         }
+        
+        [Fact]
+        public void CreateLocalizedTextArrayNull()
+        {
+            var val = default(LocalizedText[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void ImplicitCreateLocalizedTextArray()
@@ -1678,6 +2071,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(val);
             v.Type
                 .Should().Be(VariantType.ExtensionObject);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateExtensionObjectNull()
+        {
+            var val = default(ExtensionObject);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
             v.ArrayDimensions
                 .Should().BeNull();
         }
@@ -1721,6 +2128,20 @@ namespace Workstation.UaClient.UnitTests
         }
         
         [Fact]
+        public void CreateExtensionObjectArrayNull()
+        {
+            var val = default(ExtensionObject[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
         public void ImplicitCreateExtensionObjectArray()
         {
             var val = new[] { new ExtensionObject(null) };
@@ -1755,6 +2176,20 @@ namespace Workstation.UaClient.UnitTests
             v.ArrayDimensions
                 .Should().BeNull();
         }
+        
+        [Fact]
+        public void CreateEncodeableNull()
+        {
+            var val = default(ReadRequest);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
 
         [Fact]
         public void CreateEncodeableArray()
@@ -1770,6 +2205,20 @@ namespace Workstation.UaClient.UnitTests
                 .Should().ContainSingle()
                 .Which
                 .Should().Be(val.Length);
+        }
+        
+        [Fact]
+        public void CreateEncodeableArrayNull()
+        {
+            var val = default(ReadRequest[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
         }
 
         enum TestEnumeration
@@ -1806,6 +2255,34 @@ namespace Workstation.UaClient.UnitTests
                 .Should().ContainSingle()
                 .Which
                 .Should().Be(val.Length);
+        }
+        
+        [Fact]
+        public void CreateEnumArrayNull()
+        {
+            var val = default(Enum[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
+        }
+        
+        [Fact]
+        public void CreateVariantArrayNull()
+        {
+            var val = default(Variant[]);
+            var v = new Variant(val);
+
+            v.Value
+                .Should().Be(val);
+            v.Type
+                .Should().Be(VariantType.Null);
+            v.ArrayDimensions
+                .Should().BeNull();
         }
     }
 }
