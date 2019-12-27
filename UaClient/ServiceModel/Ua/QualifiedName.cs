@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public sealed class QualifiedName
@@ -12,17 +14,17 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="name">the text portion of the QualifiedName. </param>
         /// <param name="namespaceIndex">index that identifies the namespace that qualifies the name.</param>
-        public QualifiedName(string name, ushort namespaceIndex = 0)
+        public QualifiedName(string? name, ushort namespaceIndex = 0)
         {
             this.Name = name;
             this.NamespaceIndex = namespaceIndex;
         }
 
-        public string Name { get; private set; }
+        public string? Name { get; private set; }
 
         public ushort NamespaceIndex { get; private set; }
 
-        public static bool operator ==(QualifiedName a, QualifiedName b)
+        public static bool operator ==(QualifiedName? a, QualifiedName? b)
         {
             if (ReferenceEquals(a, b))
             {
@@ -37,7 +39,7 @@ namespace Workstation.ServiceModel.Ua
             return (a.Name == b.Name) && (a.NamespaceIndex == b.NamespaceIndex);
         }
 
-        public static bool operator !=(QualifiedName a, QualifiedName b)
+        public static bool operator !=(QualifiedName? a, QualifiedName? b)
         {
             return !(a == b);
         }
@@ -76,7 +78,7 @@ namespace Workstation.ServiceModel.Ua
             return value;
         }
 
-        public override bool Equals(object o)
+        public override bool Equals(object? o)
         {
             if (o is QualifiedName)
             {
@@ -86,7 +88,7 @@ namespace Workstation.ServiceModel.Ua
             return false;
         }
 
-        public bool Equals(QualifiedName that)
+        public bool Equals(QualifiedName? that)
         {
             return this == that;
         }

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public struct StatusCode
@@ -79,7 +81,7 @@ namespace Workstation.ServiceModel.Ua
             return ((a.Value & InfoTypeMask) == InfoTypeDataValue) && ((a.Value & Overflow) == Overflow);
         }
 
-        public override bool Equals(object o)
+        public override bool Equals(object? o)
         {
             if (o is StatusCode)
             {

@@ -19,6 +19,8 @@ using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 using Org.BouncyCastle.X509.Store;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
@@ -59,7 +61,7 @@ namespace Workstation.ServiceModel.Ua
         public bool CreateLocalCertificateIfNotExist { get; }
 
         /// <inheritdoc/>
-        public async Task<(X509Certificate Certificate, RsaKeyParameters Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger = null)
+        public async Task<(X509Certificate? Certificate, RsaKeyParameters? Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger? logger = null)
         {
             if (applicationDescription == null)
             {
@@ -72,9 +74,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentOutOfRangeException(nameof(applicationDescription), "Expecting ApplicationUri in the form of 'http://{hostname}/{appname}' -or- 'urn:{hostname}:{appname}'.");
             }
 
-            string subjectName = null;
-            string hostName = null;
-            string appName = null;
+            string? subjectName = null;
+            string? hostName = null;
+            string? appName = null;
 
             UriBuilder appUri = new UriBuilder(applicationUri);
             if (appUri.Scheme == "http" && !string.IsNullOrEmpty(appUri.Host))
@@ -265,7 +267,7 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <inheritdoc/>
-        public Task<bool> ValidateRemoteCertificateAsync(X509Certificate target, ILogger logger = null)
+        public Task<bool> ValidateRemoteCertificateAsync(X509Certificate target, ILogger? logger = null)
         {
             if (this.AcceptAllRemoteCertificates)
             {
@@ -359,7 +361,7 @@ namespace Workstation.ServiceModel.Ua
 
             // Create the trust anchors (set of root CA certificates)
             var trustAnchors = new Org.BouncyCastle.Utilities.Collections.HashSet();
-            foreach (X509Certificate trustedRootCert in trustedRootCerts)
+            foreach (X509Certificate? trustedRootCert in trustedRootCerts)
             {
                 trustAnchors.Add(new TrustAnchor(trustedRootCert, null));
             }
