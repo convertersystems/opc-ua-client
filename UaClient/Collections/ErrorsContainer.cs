@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable enable
+
 namespace Workstation.Collections
 {
     /// <summary>
@@ -53,7 +55,7 @@ namespace Workstation.Collections
         public IEnumerable<T> GetErrors(string propertyName)
         {
             var localPropertyName = propertyName ?? string.Empty;
-            List<T> currentValidationResults = null;
+            List<T>? currentValidationResults = null;
             if (this.validationResults.TryGetValue(localPropertyName, out currentValidationResults))
             {
                 return currentValidationResults;
@@ -94,7 +96,7 @@ namespace Workstation.Collections
             {
                 if (hasNewValidationResults)
                 {
-                    this.validationResults[localPropertyName] = new List<T>(newValidationResults);
+                    this.validationResults[localPropertyName] = new List<T>(newValidationResults!);
                     this.raiseErrorsChanged(localPropertyName);
                 }
                 else
