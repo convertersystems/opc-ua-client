@@ -607,7 +607,7 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(string[]? value)
+        public Variant(string?[]? value)
         {
             if (value is null)
             {
@@ -664,7 +664,7 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(byte[][]? value)
+        public Variant(byte[]?[]? value)
         {
             if (value is null)
             {
@@ -683,7 +683,7 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(XElement[]? value)
+        public Variant(XElement?[]? value)
         {
             if (value is null)
             {
@@ -797,7 +797,7 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public Variant(ExtensionObject[]? value)
+        public Variant(ExtensionObject?[]? value)
         {
             if (value is null)
             {
