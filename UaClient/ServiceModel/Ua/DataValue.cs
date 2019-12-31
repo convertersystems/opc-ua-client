@@ -3,11 +3,13 @@
 
 using System;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public sealed class DataValue
     {
-        public DataValue(object value, StatusCode statusCode = default(StatusCode), DateTime sourceTimestamp = default(DateTime), ushort sourcePicoseconds = 0, DateTime serverTimestamp = default(DateTime), ushort serverPicoseconds = 0)
+        public DataValue(object? value, StatusCode statusCode = default(StatusCode), DateTime sourceTimestamp = default(DateTime), ushort sourcePicoseconds = 0, DateTime serverTimestamp = default(DateTime), ushort serverPicoseconds = 0)
         {
             this.Variant = new Variant(value);
             this.StatusCode = statusCode;
@@ -27,7 +29,7 @@ namespace Workstation.ServiceModel.Ua
             this.ServerPicoseconds = serverPicoseconds;
         }
 
-        public object Value
+        public object? Value
         {
             get { return this.Variant.Value; }
         }

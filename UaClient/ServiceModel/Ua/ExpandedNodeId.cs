@@ -81,7 +81,7 @@ namespace Workstation.ServiceModel.Ua
             return (nodeId == null) || NodeId.IsNull(nodeId.NodeId);
         }
 
-        public static NodeId ToNodeId(ExpandedNodeId value, IList<string?>? namespaceUris)
+        public static NodeId ToNodeId(ExpandedNodeId value, IList<string>? namespaceUris)
         {
             if (ReferenceEquals(value, null))
             {
@@ -92,7 +92,7 @@ namespace Workstation.ServiceModel.Ua
             var nsu = value.NamespaceUri;
             if (namespaceUris != null && !string.IsNullOrEmpty(nsu))
             {
-                int i = namespaceUris.IndexOf(nsu);
+                int i = namespaceUris.IndexOf(nsu!);
                 if (i != -1)
                 {
                     ns = (ushort)i;

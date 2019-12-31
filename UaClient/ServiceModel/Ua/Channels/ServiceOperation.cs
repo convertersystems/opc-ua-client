@@ -3,6 +3,8 @@
 
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua.Channels
 {
     public class ServiceOperation : TaskCompletionSource<IServiceResponse>
@@ -19,6 +21,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets the request.
         /// </summary>
-        public IServiceRequest Request => (IServiceRequest)this.Task.AsyncState;
+        public IServiceRequest Request => (IServiceRequest)this.Task.AsyncState!;
     }
 }
