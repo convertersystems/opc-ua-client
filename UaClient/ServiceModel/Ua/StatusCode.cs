@@ -3,7 +3,7 @@
 
 namespace Workstation.ServiceModel.Ua
 {
-    public struct StatusCode
+    public readonly struct StatusCode
     {
         private const uint SeverityMask = 0xC0000000u;
         private const uint SeverityGood = 0x00000000u;
