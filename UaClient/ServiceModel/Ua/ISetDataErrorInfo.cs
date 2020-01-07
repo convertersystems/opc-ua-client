@@ -3,6 +3,8 @@
 
 using System.Collections.Generic;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
@@ -15,6 +17,6 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="propertyName">The property name.</param>
         /// <param name="errors">The error messages.</param>
-        void SetErrors(string propertyName, IEnumerable<string> errors);
+        void SetErrors(string propertyName, IEnumerable<string>? errors);
     }
 }

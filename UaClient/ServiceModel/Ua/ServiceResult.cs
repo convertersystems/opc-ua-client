@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="localizedText">A localizedText.</param>
         /// <param name="additionalInfo">AdditionalInfo.</param>
         /// <param name="innerResult">An innerResult</param>
-        public ServiceResult(StatusCode code, string symbolicId = null, string namespaceUri = null, LocalizedText localizedText = null, string additionalInfo = null, ServiceResult innerResult = null)
+        public ServiceResult(StatusCode code, string? symbolicId = null, string? namespaceUri = null, LocalizedText? localizedText = null, string? additionalInfo = null, ServiceResult? innerResult = null)
         {
             this.StatusCode = code;
             this.SymbolicId = symbolicId;
@@ -38,7 +40,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="code">A code.</param>
         /// <param name="diagnosticInfo">A diagnostic info.</param>
         /// <param name="stringTable">A string table.</param>
-        public ServiceResult(StatusCode code, DiagnosticInfo diagnosticInfo, IList<string> stringTable)
+        public ServiceResult(StatusCode code, DiagnosticInfo? diagnosticInfo, IList<string> stringTable)
         {
             this.StatusCode = code;
 
@@ -47,8 +49,8 @@ namespace Workstation.ServiceModel.Ua
                 this.SymbolicId = LookupString(stringTable, diagnosticInfo.SymbolicId);
                 this.NamespaceUri = LookupString(stringTable, diagnosticInfo.NamespaceUri);
 
-                string locale = LookupString(stringTable, diagnosticInfo.Locale);
-                string localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
+                string? locale = LookupString(stringTable, diagnosticInfo.Locale);
+                string? localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
                 this.LocalizedText = new LocalizedText(localizedText, locale);
 
                 this.AdditionalInfo = diagnosticInfo.AdditionalInfo;
@@ -80,8 +82,8 @@ namespace Workstation.ServiceModel.Ua
                     this.SymbolicId = LookupString(stringTable, diagnosticInfo.SymbolicId);
                     this.NamespaceUri = LookupString(stringTable, diagnosticInfo.NamespaceUri);
 
-                    string locale = LookupString(stringTable, diagnosticInfo.Locale);
-                    string localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
+                    string? locale = LookupString(stringTable, diagnosticInfo.Locale);
+                    string? localizedText = LookupString(stringTable, diagnosticInfo.LocalizedText);
                     this.LocalizedText = new LocalizedText(localizedText, locale);
 
                     this.AdditionalInfo = diagnosticInfo.AdditionalInfo;
@@ -102,27 +104,27 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the namespace that qualifies symbolic identifier.
         /// </summary>
-        public string NamespaceUri { get; }
+        public string? NamespaceUri { get; }
 
         /// <summary>
         /// Gets the qualified name of the symbolic identifier associated with the status code.
         /// </summary>
-        public string SymbolicId { get; }
+        public string? SymbolicId { get; }
 
         /// <summary>
         /// Gets the localized description for the status code.
         /// </summary>
-        public LocalizedText LocalizedText { get; }
+        public LocalizedText? LocalizedText { get; }
 
         /// <summary>
         /// Gets additional diagnostic/debugging information associated with the operation.
         /// </summary>
-        public string AdditionalInfo { get; }
+        public string? AdditionalInfo { get; }
 
         /// <summary>
         /// Gets nested error information.
         /// </summary>
-        public ServiceResult InnerResult { get; }
+        public ServiceResult? InnerResult { get; }
 
         /// <summary>
         /// Converts a 32-bit code a ServiceResult object.
@@ -223,7 +225,7 @@ namespace Workstation.ServiceModel.Ua
         /// Looks up a string in a string table.
         /// </summary>
         /// <returns>A string.</returns>
-        private static string LookupString(IList<string> stringTable, int index)
+        private static string? LookupString(IList<string> stringTable, int index)
         {
             if (stringTable == null || index < 0 || index >= stringTable.Count)
             {

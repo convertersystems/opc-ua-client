@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public static class ServiceExtensions
@@ -25,7 +27,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="array">The <see cref="T:ConverterSystems.ServiceModel.Ua.Variant" /> array.</param>
         /// <returns>The object array.</returns>
-        public static object[] ToObjectArray(this Variant[] array)
+        public static object?[] ToObjectArray(this Variant[] array)
         {
             return array.Select(a => a.Value).ToArray();
         }
@@ -41,7 +43,7 @@ namespace Workstation.ServiceModel.Ua
         public static async Task<T> WithCancellation<T>(this Task<T> task, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s!).TrySetResult(true), tcs))
             {
                 if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                 {
@@ -62,7 +64,7 @@ namespace Workstation.ServiceModel.Ua
         public static async Task WithCancellation(this Task task, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s!).TrySetResult(true), tcs))
             {
                 if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                 {
@@ -143,7 +145,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="condition">an AcknowledgeableCondition.</param>
         /// <param name="comment">a comment.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<StatusCode> AcknowledgeAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText comment = null)
+        public static async Task<StatusCode> AcknowledgeAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText? comment = null)
         {
             if (condition == null)
             {
@@ -173,7 +175,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="condition">an AcknowledgeableCondition.</param>
         /// <param name="comment">a comment.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<StatusCode> ConfirmAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText comment = null)
+        public static async Task<StatusCode> ConfirmAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText? comment = null)
         {
             if (condition == null)
             {

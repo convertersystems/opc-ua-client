@@ -86,7 +86,7 @@ namespace Workstation.Collections
         /// </remarks>
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="newValidationResults">The new validation errors.</param>
-        public void SetErrors(string propertyName, IEnumerable<T> newValidationResults)
+        public void SetErrors(string propertyName, IEnumerable<T>? newValidationResults)
         {
             var localPropertyName = propertyName ?? string.Empty;
             var hasCurrentValidationResults = this.validationResults.ContainsKey(localPropertyName);
