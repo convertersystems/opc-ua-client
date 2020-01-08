@@ -8,6 +8,8 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryDecoder : IDecoder, IDisposable
@@ -15,11 +17,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const long MinFileTime =  504911232000000000L;
         private const long MaxFileTime = 3155378975990000000L;
         private readonly Stream stream;
-        private readonly UaTcpSecureChannel channel;
+        private readonly UaTcpSecureChannel? channel;
         private readonly Encoding encoding;
         private readonly BinaryReader reader;
 
-        public BinaryDecoder(Stream stream, UaTcpSecureChannel channel = null, bool keepStreamOpen = false)
+        public BinaryDecoder(Stream stream, UaTcpSecureChannel? channel = null, bool keepStreamOpen = false)
         {
             if (stream == null)
             {
@@ -54,64 +56,64 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
         }
 
-        public bool ReadBoolean(string fieldName)
+        public bool ReadBoolean(string? fieldName)
         {
             return this.reader.ReadBoolean();
         }
 
-        public sbyte ReadSByte(string fieldName)
+        public sbyte ReadSByte(string? fieldName)
         {
             return this.reader.ReadSByte();
         }
 
-        public byte ReadByte(string fieldName)
+        public byte ReadByte(string? fieldName)
         {
             return this.reader.ReadByte();
         }
 
-        public short ReadInt16(string fieldName)
+        public short ReadInt16(string? fieldName)
         {
             return this.reader.ReadInt16();
         }
 
-        public ushort ReadUInt16(string fieldName)
+        public ushort ReadUInt16(string? fieldName)
         {
             return this.reader.ReadUInt16();
         }
 
-        public int ReadInt32(string fieldName)
+        public int ReadInt32(string? fieldName)
         {
             return this.reader.ReadInt32();
         }
 
-        public uint ReadUInt32(string fieldName)
+        public uint ReadUInt32(string? fieldName)
         {
             return this.reader.ReadUInt32();
         }
 
-        public long ReadInt64(string fieldName)
+        public long ReadInt64(string? fieldName)
         {
             return this.reader.ReadInt64();
         }
 
-        public ulong ReadUInt64(string fieldName)
+        public ulong ReadUInt64(string? fieldName)
         {
             return this.reader.ReadUInt64();
         }
 
-        public float ReadFloat(string fieldName)
+        public float ReadFloat(string? fieldName)
         {
             return this.reader.ReadSingle();
         }
 
-        public double ReadDouble(string fieldName)
+        public double ReadDouble(string? fieldName)
         {
             return this.reader.ReadDouble();
         }
 
-        public string ReadString(string fieldName)
+        public string? ReadString(string? fieldName)
         {
-            byte[] array = this.ReadByteString(fieldName);
+            var array = this.ReadByteString(fieldName);
             if (array == null)
             {
                 return null;
@@ -120,7 +122,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return this.encoding.GetString(array, 0, array.Length);
         }
 
-        public DateTime ReadDateTime(string fieldName)
+        public DateTime ReadDateTime(string? fieldName)
         {
             long num = this.reader.ReadInt64();
 
@@ -136,13 +138,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return DateTime.FromFileTimeUtc(num);
         }
 
-        public Guid ReadGuid(string fieldName)
+        public Guid ReadGuid(string? fieldName)
         {
             byte[] b = this.reader.ReadBytes(16);
             return new Guid(b);
         }
 
-        public byte[] ReadByteString(string fieldName)
+        public byte[]? ReadByteString(string? fieldName)
         {
             int num = this.reader.ReadInt32();
             if (num == -1)
@@ -153,9 +155,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             return this.reader.ReadBytes(num);
         }
 
-        public XElement ReadXElement(string fieldName)
+        public XElement? ReadXElement(string? fieldName)
         {
-            byte[] array = this.ReadByteString(fieldName);
+            var array = this.ReadByteString(fieldName);
             if (array == null || array.Length == 0)
             {
                 return null;
@@ -171,7 +173,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public NodeId ReadNodeId(string fieldName)
+        public NodeId ReadNodeId(string? fieldName)
         {
             ushort ns = 0;
             byte b = this.reader.ReadByte();
@@ -190,7 +192,13 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 case 0x03:
                     ns = this.reader.ReadUInt16();
-                    return new NodeId(this.ReadString(null), ns);
+                    var str = this.ReadString(null);
+                    if (str is null)
+                    {
+                        break;
+                    }
+
+                    return new NodeId(str, ns);
 
                 case 0x04:
                     ns = this.reader.ReadUInt16();
@@ -198,18 +206,25 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 case 0x05:
                     ns = this.reader.ReadUInt16();
-                    return new NodeId(this.ReadByteString(null), ns);
+                    var bstr = this.ReadByteString(null);
+                    if (bstr is null)
+                    {
+                        break;
+                    }
+                    return new NodeId(bstr, ns);
 
                 default:
-                    throw new ServiceResultException(StatusCodes.BadDecodingError);
+                    break;
             }
+
+            throw new ServiceResultException(StatusCodes.BadDecodingError);
         }
 
-        public ExpandedNodeId ReadExpandedNodeId(string fieldName)
+        public ExpandedNodeId ReadExpandedNodeId(string? fieldName)
         {
             ushort ns = 0;
-            NodeId nodeId = null;
-            string nsu = null;
+            NodeId? nodeId = null;
+            string? nsu = null;
             uint svr = 0;
             byte b = this.reader.ReadByte();
             switch (b & 0x0F)
@@ -230,7 +245,10 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 case 0x03:
                     ns = this.reader.ReadUInt16();
-                    nodeId = new NodeId(this.ReadString(null), ns);
+                    if (this.ReadString(null) is { } str)
+                    {
+                        nodeId = new NodeId(str, ns);
+                    }
                     break;
 
                 case 0x04:
@@ -240,11 +258,19 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 case 0x05:
                     ns = this.reader.ReadUInt16();
-                    nodeId = new NodeId(this.ReadByteString(null), ns);
+                    if (this.ReadByteString(null) is { } bstr)
+                    {
+                        nodeId = new NodeId(bstr, ns);
+                    }
                     break;
 
                 default:
-                    throw new ServiceResultException(StatusCodes.BadDecodingError);
+                    break;
+            }
+
+            if (nodeId is null)
+            {
+                throw new ServiceResultException(StatusCodes.BadDecodingError);
             }
 
             if ((b & 0x80) != 0)
@@ -260,20 +286,20 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new ExpandedNodeId(nodeId, nsu, svr);
         }
 
-        public StatusCode ReadStatusCode(string fieldName)
+        public StatusCode ReadStatusCode(string? fieldName)
         {
             return this.ReadUInt32(fieldName);
         }
 
-        public DiagnosticInfo ReadDiagnosticInfo(string fieldName)
+        public DiagnosticInfo ReadDiagnosticInfo(string? fieldName)
         {
             int symbolicId = -1;
             int namespaceUri = -1;
             int locale = -1;
             int localizedText = -1;
-            string additionalInfo = null;
+            string? additionalInfo = null;
             StatusCode innerStatusCode = default(StatusCode);
-            DiagnosticInfo innerDiagnosticInfo = default(DiagnosticInfo);
+            DiagnosticInfo? innerDiagnosticInfo = default(DiagnosticInfo);
             byte b = this.reader.ReadByte();
             if ((b & 1) != 0)
             {
@@ -313,17 +339,17 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new DiagnosticInfo(namespaceUri, symbolicId, locale, localizedText, additionalInfo, innerStatusCode, innerDiagnosticInfo);
         }
 
-        public QualifiedName ReadQualifiedName(string fieldName)
+        public QualifiedName ReadQualifiedName(string? fieldName)
         {
             ushort ns = this.ReadUInt16(null);
-            string name = this.ReadString(null);
+            string? name = this.ReadString(null);
             return new QualifiedName(name, ns);
         }
 
-        public LocalizedText ReadLocalizedText(string fieldName)
+        public LocalizedText ReadLocalizedText(string? fieldName)
         {
-            string text = null;
-            string locale = null;
+            string? text = null;
+            string? locale = null;
             byte b = this.reader.ReadByte();
             if ((b & 1) != 0)
             {
@@ -338,7 +364,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new LocalizedText(text, locale);
         }
 
-        public Variant ReadVariant(string fieldName)
+        public Variant ReadVariant(string? fieldName)
         {
             byte b = this.reader.ReadByte();
             var type = (VariantType)(b & 0x3F);
@@ -583,7 +609,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public DataValue ReadDataValue(string fieldName)
+        public DataValue ReadDataValue(string? fieldName)
         {
             Variant variant = Variant.Null;
             StatusCode statusCode = 0;
@@ -625,7 +651,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new DataValue(variant, statusCode, sourceTimestamp, sourcePicoseconds, serverTimestamp, serverPicoseconds);
         }
 
-        public ExtensionObject ReadExtensionObject(string fieldName)
+        public ExtensionObject? ReadExtensionObject(string? fieldName)
         {
             Type type;
             NodeId nodeId = this.ReadNodeId(null);
@@ -634,10 +660,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
 
-                if (this.channel.TryGetTypeFromEncodingId(nodeId, out type))
+                if (this.channel != null && this.channel.TryGetTypeFromEncodingId(nodeId, out type))
                 {
                     var len = this.ReadInt32(null);
-                    var encodable = Activator.CreateInstance(type) as IEncodable;
+                    var encodable = (IEncodable)Activator.CreateInstance(type)!;
                     encodable.Decode(this);
                     return new ExtensionObject(encodable, binaryEncodingId);
                 }
@@ -654,20 +680,20 @@ namespace Workstation.ServiceModel.Ua.Channels
             return null;
         }
 
-        public T ReadExtensionObject<T>(string fieldName)
+        public T? ReadExtensionObject<T>(string? fieldName)
             where T : class, IEncodable
         {
             NodeId nodeId = this.ReadNodeId(null);
             byte b = this.reader.ReadByte();
             if (b == (byte)BodyType.ByteString)
             {
-                if (!this.channel.TryGetTypeFromEncodingId(nodeId, out Type type))
+                if (this.channel == null || !this.channel.TryGetTypeFromEncodingId(nodeId, out Type type))
                 {
                     throw new ServiceResultException(StatusCodes.BadDecodingError);
                 }
 
                 var len = this.ReadInt32(null);
-                var encodable = Activator.CreateInstance(type) as IEncodable;
+                var encodable = (IEncodable)Activator.CreateInstance(type)!;
                 encodable.Decode(this);
                 return (T)encodable;
             }
@@ -677,7 +703,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return default(T);
         }
 
-        public T ReadEncodable<T>(string fieldName)
+        public T ReadEncodable<T>(string? fieldName)
             where T : class, IEncodable
         {
             var value = Activator.CreateInstance<T>();
@@ -685,13 +711,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return value;
         }
 
-        public T ReadEnumeration<T>(string fieldName)
+        public T ReadEnumeration<T>(string? fieldName)
             where T : struct, IConvertible
         {
             return (T)Enum.ToObject(typeof(T), this.ReadInt32(null));
         }
 
-        public bool[] ReadBooleanArray(string fieldNames)
+        public bool[]? ReadBooleanArray(string? fieldNames)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -708,7 +734,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public sbyte[] ReadSByteArray(string fieldName)
+        public sbyte[]? ReadSByteArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -725,7 +751,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public byte[] ReadByteArray(string fieldName)
+        public byte[]? ReadByteArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -742,7 +768,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public short[] ReadInt16Array(string fieldName)
+        public short[]? ReadInt16Array(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -759,7 +785,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public ushort[] ReadUInt16Array(string fieldName)
+        public ushort[]? ReadUInt16Array(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -776,7 +802,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public int[] ReadInt32Array(string fieldName)
+        public int[]? ReadInt32Array(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -793,7 +819,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public uint[] ReadUInt32Array(string fieldName)
+        public uint[]? ReadUInt32Array(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -810,7 +836,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public long[] ReadInt64Array(string fieldName)
+        public long[]? ReadInt64Array(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -827,7 +853,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public ulong[] ReadUInt64Array(string fieldName)
+        public ulong[]? ReadUInt64Array(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -844,7 +870,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public float[] ReadFloatArray(string fieldName)
+        public float[]? ReadFloatArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -861,7 +887,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public double[] ReadDoubleArray(string fieldName)
+        public double[]? ReadDoubleArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -878,7 +904,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public string[] ReadStringArray(string fieldName)
+        public string?[]? ReadStringArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -886,7 +912,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return null;
             }
 
-            var list = new string[num];
+            var list = new string?[num];
             for (int i = 0; i < num; i++)
             {
                 list[i] = this.ReadString(null);
@@ -895,7 +921,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public DateTime[] ReadDateTimeArray(string fieldName)
+        public DateTime[]? ReadDateTimeArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -912,7 +938,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public Guid[] ReadGuidArray(string fieldName)
+        public Guid[]? ReadGuidArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -929,7 +955,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public byte[][] ReadByteStringArray(string fieldName)
+        public byte[]?[]? ReadByteStringArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -937,7 +963,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return null;
             }
 
-            var list = new byte[num][];
+            byte[]?[] list = new byte[num][];
             for (int i = 0; i < num; i++)
             {
                 list[i] = this.ReadByteString(null);
@@ -946,7 +972,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public XElement[] ReadXElementArray(string fieldName)
+        public XElement?[]? ReadXElementArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -954,7 +980,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return null;
             }
 
-            var list = new XElement[num];
+            var list = new XElement?[num];
             for (int i = 0; i < num; i++)
             {
                 list[i] = this.ReadXElement(null);
@@ -963,7 +989,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public NodeId[] ReadNodeIdArray(string fieldName)
+        public NodeId[]? ReadNodeIdArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -980,7 +1006,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public ExpandedNodeId[] ReadExpandedNodeIdArray(string fieldName)
+        public ExpandedNodeId[]? ReadExpandedNodeIdArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -997,7 +1023,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public StatusCode[] ReadStatusCodeArray(string fieldName)
+        public StatusCode[]? ReadStatusCodeArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1014,7 +1040,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public DiagnosticInfo[] ReadDiagnosticInfoArray(string fieldName)
+        public DiagnosticInfo[]? ReadDiagnosticInfoArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1031,7 +1057,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public QualifiedName[] ReadQualifiedNameArray(string fieldName)
+        public QualifiedName[]? ReadQualifiedNameArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1048,7 +1074,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public LocalizedText[] ReadLocalizedTextArray(string fieldName)
+        public LocalizedText[]? ReadLocalizedTextArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1065,7 +1091,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public Variant[] ReadVariantArray(string fieldName)
+        public Variant[]? ReadVariantArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1082,7 +1108,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public DataValue[] ReadDataValueArray(string fieldName)
+        public DataValue[]? ReadDataValueArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1099,7 +1125,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public ExtensionObject[] ReadExtensionObjectArray(string fieldName)
+        public ExtensionObject?[]? ReadExtensionObjectArray(string? fieldName)
         {
             int num = this.ReadArrayLength();
             if (num == -1)
@@ -1107,7 +1133,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return null;
             }
 
-            var list = new ExtensionObject[num];
+            var list = new ExtensionObject?[num];
             for (int i = 0; i < num; i++)
             {
                 list[i] = this.ReadExtensionObject(null);
@@ -1116,7 +1142,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public T[] ReadExtensionObjectArray<T>(string fieldName)
+        public T?[]? ReadExtensionObjectArray<T>(string? fieldName)
             where T : class, IEncodable
         {
             int num = this.ReadArrayLength();
@@ -1125,7 +1151,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return null;
             }
 
-            var list = new T[num];
+            var list = new T?[num];
             for (int i = 0; i < num; i++)
             {
                 list[i] = this.ReadExtensionObject<T>(null);
@@ -1134,7 +1160,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public T[] ReadEncodableArray<T>(string fieldName)
+        public T[]? ReadEncodableArray<T>(string? fieldName)
             where T : class, IEncodable
         {
             int num = this.ReadArrayLength();
@@ -1152,7 +1178,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
-        public T[] ReadEnumerationArray<T>(string fieldName)
+        public T[]? ReadEnumerationArray<T>(string? fieldName)
             where T : struct, IConvertible
         {
             int num = this.ReadArrayLength();
@@ -1181,8 +1207,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return num;
         }
 
-        private Array BuildArray<T>(T[] a1, int[] dims)
+        private Array? BuildArray<T>(T[]? a1, int[]? dims)
         {
+            if (a1 is null || dims is null)
+            {
+                return default(Array);
+            }
+
             var indices = new int[dims.Length];
             var a2 = Array.CreateInstance(typeof(T), dims);
             foreach (var value in a1)
