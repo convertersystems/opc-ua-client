@@ -875,8 +875,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExtensionObject<T>(string? fieldName, T value)
-            where T : class?, IEncodable
+        public void WriteExtensionObject<T>(string? fieldName, T? value)
+            where T : class, IEncodable
         {
             if (value == null)
             {
@@ -904,7 +904,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return;
         }
 
-        public void WriteEncodable<T>(string? fieldName, T value)
+        public void WriteEncodable<T>(string? fieldName, T? value)
             where T : class, IEncodable
         {
             if (value == null)
@@ -1042,7 +1042,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteStringArray(string? fieldName, string[]? values)
+        public void WriteStringArray(string? fieldName, string?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1196,7 +1196,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExtensionObjectArray<T>(string? fieldName, T[]? values)
+        public void WriteExtensionObjectArray<T>(string? fieldName, T?[]? values)
             where T : class?, IEncodable
         {
             if (this.TryWriteArrayLength(values))
@@ -1208,7 +1208,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteEncodableArray<T>(string? fieldName, T[]? values)
+        public void WriteEncodableArray<T>(string? fieldName, T?[]? values)
             where T : class?, IEncodable
         {
             if (this.TryWriteArrayLength(values))

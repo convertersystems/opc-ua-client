@@ -135,7 +135,14 @@ namespace Workstation.ServiceModel.Ua
                 }
             });
 
-            return response.Results[0].StatusCode;
+            var result = response.Results?[0];
+
+            if (result == null)
+            {
+                throw new ServiceResultException(StatusCodes.BadDataEncodingInvalid, "The CallMethodeResult is null!");
+            }
+
+            return result.StatusCode;
         }
 
         /// <summary>
@@ -164,8 +171,15 @@ namespace Workstation.ServiceModel.Ua
                     }
                 }
             });
+            
+            var result = response.Results?[0];
 
-            return response.Results[0].StatusCode;
+            if (result == null)
+            {
+                throw new ServiceResultException(StatusCodes.BadDataEncodingInvalid, "The CallMethodeResult is null!");
+            }
+
+            return result.StatusCode;
         }
 
         /// <summary>
@@ -195,7 +209,14 @@ namespace Workstation.ServiceModel.Ua
                 }
             });
 
-            return response.Results[0].StatusCode;
+            var result = response.Results?[0];
+
+            if (result == null)
+            {
+                throw new ServiceResultException(StatusCodes.BadDataEncodingInvalid, "The CallMethodeResult is null!");
+            }
+            
+            return result.StatusCode;
         }
     }
 }
