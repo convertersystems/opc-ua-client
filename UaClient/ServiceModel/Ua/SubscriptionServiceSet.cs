@@ -5,6 +5,8 @@ using System;
 using System.Threading.Tasks;
 using System.ComponentModel;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public static class SubscriptionServiceSet

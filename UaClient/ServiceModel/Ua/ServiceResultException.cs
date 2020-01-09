@@ -3,6 +3,8 @@
 
 using System;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public sealed class ServiceResultException : Exception

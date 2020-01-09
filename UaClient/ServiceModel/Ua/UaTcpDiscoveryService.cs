@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Workstation.ServiceModel.Ua.Channels;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
@@ -16,9 +18,9 @@ namespace Workstation.ServiceModel.Ua
     {
         private readonly UaTcpSecureChannel innerChannel;
         private readonly SemaphoreSlim semaphore;
-        private readonly ILogger logger;
+        private readonly ILogger? logger;
 
-        private UaTcpDiscoveryService(EndpointDescription remoteEndpoint, ILoggerFactory loggerFactory = null, UaTcpSecureChannelOptions options = null)
+        private UaTcpDiscoveryService(EndpointDescription remoteEndpoint, ILoggerFactory? loggerFactory = null, UaTcpSecureChannelOptions? options = null)
         {
             this.innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryService) }, null, remoteEndpoint, loggerFactory, options, null);
             this.semaphore = new SemaphoreSlim(1);
@@ -40,7 +42,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="request">a request.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<FindServersResponse> FindServersAsync(FindServersRequest request, ILoggerFactory loggerFactory = null, UaApplicationOptions options = null)
+        public static async Task<FindServersResponse> FindServersAsync(FindServersRequest request, ILoggerFactory? loggerFactory = null, UaApplicationOptions? options = null)
         {
             if (request == null)
             {
@@ -77,7 +79,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The secure channel options.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<GetEndpointsResponse> GetEndpointsAsync(GetEndpointsRequest request, ILoggerFactory loggerFactory = null, UaApplicationOptions options = null)
+        public static async Task<GetEndpointsResponse> GetEndpointsAsync(GetEndpointsRequest request, ILoggerFactory? loggerFactory = null, UaApplicationOptions? options = null)
         {
             if (request == null)
             {

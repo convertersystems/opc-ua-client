@@ -7,6 +7,8 @@ using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.X509;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
@@ -20,7 +22,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="applicationDescription">The application description.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The local certificate and private key.</returns>
-        Task<(X509Certificate Certificate, RsaKeyParameters Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger);
+        Task<(X509Certificate? Certificate, RsaKeyParameters? Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger? logger);
 
         /// <summary>
         /// Validates the remote certificate.
@@ -28,6 +30,6 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="certificate">The remote certificate.</param>
         /// <param name="logger">The logger.</param>
         /// <returns>The validator result.</returns>
-        Task<bool> ValidateRemoteCertificateAsync(X509Certificate certificate, ILogger logger);
+        Task<bool> ValidateRemoteCertificateAsync(X509Certificate certificate, ILogger? logger);
     }
 }

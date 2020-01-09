@@ -5,6 +5,8 @@ using System;
 using System.Threading.Tasks;
 using Workstation.ServiceModel.Ua.Channels;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     public static class MonitoredItemServiceSet

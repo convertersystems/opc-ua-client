@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
+
+#nullable enable
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -37,8 +40,7 @@ namespace Workstation.ServiceModel.Ua
                     throw new ArgumentNullException(nameof(name));
                 }
 
-                MonitoredItemBase item;
-                if (this.nameMap.TryGetValue(name, out item))
+                if (this.nameMap.TryGetValue(name, out var item))
                 {
                     return item;
                 }
@@ -57,8 +59,7 @@ namespace Workstation.ServiceModel.Ua
         {
             get
             {
-                MonitoredItemBase item;
-                if (this.clientIdMap.TryGetValue(clientId, out item))
+                if (this.clientIdMap.TryGetValue(clientId, out var item))
                 {
                     return item;
                 }
@@ -83,7 +84,7 @@ namespace Workstation.ServiceModel.Ua
             return new MonitoredItemBaseCollection();
         }
 
-        public static explicit operator MonitoredItemBase[](MonitoredItemBaseCollection values)
+        public static explicit operator MonitoredItemBase[]?(MonitoredItemBaseCollection values)
         {
             if (values != null)
             {
@@ -99,7 +100,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>true if the <see cref="MonitoredItemBaseCollection" /> contains an element with the specified name; otherwise, false.</returns>
         /// <param name="name">The name of the value to get.</param>
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
-        public bool TryGetValueByName(string name, out MonitoredItemBase value)
+        public bool TryGetValueByName(string name, [NotNullWhen(returnValue: true)] out MonitoredItemBase? value)
         {
             return this.nameMap.TryGetValue(name, out value);
         }
@@ -108,7 +109,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>true if the <see cref="MonitoredItemBaseCollection" /> contains an element with the specified clientId; otherwise, false.</returns>
         /// <param name="clientId">The clientId of the value to get.</param>
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
-        public bool TryGetValueByClientId(uint clientId, out MonitoredItemBase value)
+        public bool TryGetValueByClientId(uint clientId, [NotNullWhen(returnValue: true)] out MonitoredItemBase? value)
         {
             return this.clientIdMap.TryGetValue(clientId, out value);
         }

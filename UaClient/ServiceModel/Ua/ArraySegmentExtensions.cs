@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
@@ -44,6 +46,11 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A new <see cref="MemoryStream"/>.</returns>
         public static MemoryStream CreateStream(this ArraySegment<byte> segment, bool writable = true)
         {
+            if (segment.Array is null)
+            {
+                throw new InvalidOperationException("The Array property of the array segment may not be null here");
+            }
+
             return new MemoryStream(segment.Array, segment.Offset, segment.Count, writable);
         }
 
@@ -76,6 +83,11 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> Take<T>(this ArraySegment<T> segment, int count)
         {
+            if (segment.Array is null)
+            {
+                throw new InvalidOperationException("The Array property of the array segment may not be null here");
+            }
+
             return new ArraySegment<T>(segment.Array, segment.Offset, count);
         }
 
@@ -88,6 +100,11 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> Skip<T>(this ArraySegment<T> segment, int count)
         {
+            if (segment.Array is null)
+            {
+                throw new InvalidOperationException("The Array property of the array segment may not be null here");
+            }
+
             return new ArraySegment<T>(segment.Array, segment.Offset + count, segment.Count - count);
         }
 
@@ -101,6 +118,11 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>The new array segment.</returns>
         public static ArraySegment<T> Slice<T>(this ArraySegment<T> segment, int skipCount, int takeCount)
         {
+            if (segment.Array is null)
+            {
+                throw new InvalidOperationException("The Array property of the array segment may not be null here");
+            }
+
             return new ArraySegment<T>(segment.Array, segment.Offset + skipCount, takeCount);
         }
 
@@ -136,6 +158,16 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="destination">The detsintation array segment.</param>
         public static void CopyTo<T>(this ArraySegment<T> segment, ArraySegment<T> destination)
         {
+            if (segment.Array is null)
+            {
+                throw new InvalidOperationException("The Array property of the array segment may not be null here");
+            }
+            
+            if (destination.Array is null)
+            {
+                throw new InvalidOperationException("The Array property of the destination array segment may not be null here");
+            }
+
             Array.Copy(segment.Array, segment.Offset, destination.Array, destination.Offset, Math.Min(segment.Count, destination.Count));
         }
 
@@ -148,6 +180,11 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="arrayIndex">The index in the destination array at which to begin copying. Defaults to <c>0</c>. Must be greater than or equal to <c>0</c>.</param>
         public static void CopyTo<T>(this ArraySegment<T> segment, T[] array, int arrayIndex = 0)
         {
+            if (segment.Array is null)
+            {
+                throw new InvalidOperationException("The Array property of the array segment may not be null here");
+            }
+            
             Array.Copy(segment.Array, segment.Offset, array, arrayIndex, segment.Count);
         }
 
