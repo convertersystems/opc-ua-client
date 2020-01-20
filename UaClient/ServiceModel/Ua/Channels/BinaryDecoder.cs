@@ -15,11 +15,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const long MinFileTime =  504911232000000000L;
         private const long MaxFileTime = 3155378975990000000L;
         private readonly Stream stream;
-        private readonly UaTcpSecureChannel channel;
+        private readonly IEncodingMap map;
         private readonly Encoding encoding;
         private readonly BinaryReader reader;
 
-        public BinaryDecoder(Stream stream, UaTcpSecureChannel channel = null, bool keepStreamOpen = false)
+        public BinaryDecoder(Stream stream, IEncodingMap map = null, bool keepStreamOpen = false)
         {
             if (stream == null)
             {
@@ -27,7 +27,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.stream = stream;
-            this.channel = channel;
+            this.map = map;
             this.encoding = new UTF8Encoding(false, true);
             this.reader = new BinaryReader(this.stream, this.encoding, keepStreamOpen);
         }
@@ -632,9 +632,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             byte b = this.reader.ReadByte();
             if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
             {
-                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
+                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.map?.NamespaceUris);
 
-                if (this.channel.TryGetTypeFromEncodingId(nodeId, out type))
+                if (this.map.TryGetType(nodeId, out type))
                 {
                     var len = this.ReadInt32(null);
                     var encodable = Activator.CreateInstance(type) as IEncodable;
@@ -647,7 +647,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (b == (byte)BodyType.XmlElement)
             {
-                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
+                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, this.map?.NamespaceUris);
                 return new ExtensionObject(this.ReadXElement(null), xmlEncodingId);
             }
 
@@ -661,7 +661,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             byte b = this.reader.ReadByte();
             if (b == (byte)BodyType.ByteString)
             {
-                if (!this.channel.TryGetTypeFromEncodingId(nodeId, out Type type))
+                if (!this.map.TryGetType(nodeId, out Type type))
                 {
                     throw new ServiceResultException(StatusCodes.BadDecodingError);
                 }

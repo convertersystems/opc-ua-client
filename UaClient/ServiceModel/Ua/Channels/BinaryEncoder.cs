@@ -15,11 +15,11 @@ namespace Workstation.ServiceModel.Ua.Channels
     {
         private const long MinFileTime = 504911232000000000L;
         private readonly Stream stream;
-        private readonly UaTcpSecureChannel channel;
+        private readonly IEncodingMap map;
         private readonly Encoding encoding;
         private readonly BinaryWriter writer;
 
-        public BinaryEncoder(Stream stream, UaTcpSecureChannel channel = null, bool keepStreamOpen = false)
+        public BinaryEncoder(Stream stream, IEncodingMap map = null, bool keepStreamOpen = false)
         {
             if (stream == null)
             {
@@ -27,7 +27,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.stream = stream;
-            this.channel = channel;
+            this.map = map;
             this.encoding = new UTF8Encoding(false, true);
             this.writer = new BinaryWriter(this.stream, this.encoding, keepStreamOpen);
         }
@@ -838,7 +838,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (value.BodyType == BodyType.ByteString)
             {
-                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.map?.NamespaceUris));
                 this.WriteByte(null, 0x01);
                 this.WriteByteString(null, (byte[])value.Body);
                 return;
@@ -846,7 +846,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (value.BodyType == BodyType.XmlElement)
             {
-                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.map?.NamespaceUris));
                 this.WriteByte(null, 0x02);
                 this.WriteXElement(null, (XElement)value.Body);
                 return;
@@ -854,7 +854,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (value.BodyType == BodyType.Encodable)
             {
-                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.map?.NamespaceUris));
                 this.WriteByte(null, 0x01); // BodyType Encodable is encoded as ByteString.
                 var pos0 = this.writer.BaseStream.Position;
                 this.WriteInt32(null, -1);
@@ -879,7 +879,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             var type = value.GetType();
-            if (!this.channel.TryGetBinaryEncodingIdFromType(type, out NodeId binaryEncodingId))
+            if (!this.map.TryGetEncodingId(type, out NodeId binaryEncodingId))
             {
                 throw new ServiceResultException(StatusCodes.BadEncodingError);
             }

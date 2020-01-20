@@ -53,8 +53,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const int SequenceHeaderSize = 8;
         private const int TokenRequestedLifetime = 60 * 60 * 1000; // 60 minutes
 
-        private static readonly Dictionary<NodeId, Type> BinaryEncodingIdToTypeDictionary = new Dictionary<NodeId, Type>();
-        private static readonly Dictionary<Type, NodeId> TypeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>();
         private static readonly NodeId OpenSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId CloseSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.CloseSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId ReadResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
@@ -69,8 +67,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly ActionBlock<ServiceOperation> pendingRequests;
         private readonly ConcurrentDictionary<uint, ServiceOperation> pendingCompletions;
         private readonly X509CertificateParser certificateParser = new X509CertificateParser();
-        private readonly Dictionary<NodeId, Type> encodingIdToTypeDictionary;
-        private readonly Dictionary<Type, NodeId> typeToBinaryEncodingIdDictionary;
 
         private int handle;
         private int sequenceNumber;
@@ -115,29 +111,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private DateTime tokenRenewalTime = DateTime.MaxValue;
         private IDigest thumbprintDigest;
 
-        static UaTcpSecureChannel()
-        {
-            foreach (var type in typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly.ExportedTypes)
-            {
-                var info = type.GetTypeInfo();
-                if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
-                {
-                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-                    if (attr != null)
-                    {
-                        var id = ExpandedNodeId.ToNodeId(attr.NodeId, null);
-                        BinaryEncodingIdToTypeDictionary[id] = type;
-                        TypeToBinaryEncodingIdDictionary[type] = id;
-                    }
-                }
-            }
-
-            //TypeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>()
-            //{
-            //    { typeof(Argument), NodeId.Parse(ObjectIds.Argument_Encoding_DefaultBinary) },
-            //};
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSecureChannel"/> class.
         /// </summary>
@@ -165,14 +138,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
 
             this.AuthenticationToken = null;
-            this.NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
+            this.EncodingMap = new BinaryEncodingMap();
             this.ServerUris = new List<string>();
             this.channelCts = new CancellationTokenSource();
             this.pendingRequests = new ActionBlock<ServiceOperation>(t => this.SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
             this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
-
-            this.encodingIdToTypeDictionary = new Dictionary<NodeId, Type>(BinaryEncodingIdToTypeDictionary);
-            this.typeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>(TypeToBinaryEncodingIdDictionary);
         }
 
         /// <summary>
@@ -241,37 +211,19 @@ namespace Workstation.ServiceModel.Ua.Channels
         public NodeId AuthenticationToken { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the namespace uris.
+        /// Gets the encoding map.
         /// </summary>
-        public List<string> NamespaceUris { get; protected set; }
+        public EncodingMap EncodingMap { get; }
+        
+        /// <summary>
+        /// Gets the namespace uris.
+        /// </summary>
+        public List<string> NamespaceUris => EncodingMap.NamespaceUris;
 
         /// <summary>
         /// Gets or sets the server uris.
         /// </summary>
         public List<string> ServerUris { get; protected set; }
-
-        /// <summary>
-        /// Gets the system type associated with the encodingId.
-        /// </summary>
-        /// <param name="encodingId">The encodingId.</param>
-        /// <param name="type">The system type.</param>
-        /// <returns>True if successfull.</returns>
-        public bool TryGetTypeFromEncodingId(NodeId encodingId, out Type type)
-        {
-            return this.encodingIdToTypeDictionary.TryGetValue(encodingId, out type);
-        }
-
-
-        /// <summary>
-        /// Gets the BinaryEncodingId associated with the system type.
-        /// </summary>
-        /// <param name="type">The system type.</param>
-        /// <param name="binaryEncodingId">The BinaryEncodingId.</param>
-        /// <returns>True if successfull.</returns>
-        public bool TryGetBinaryEncodingIdFromType(Type type, out NodeId binaryEncodingId)
-        {
-            return this.typeToBinaryEncodingIdDictionary.TryGetValue(type, out binaryEncodingId);
-        }
 
         /// <summary>
         /// Sends a <see cref="T:Workstation.ServiceModel.Ua.IServiceRequest"/> to the server.
@@ -712,9 +664,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
                         if (attr != null)
                         {
-                            var id = ExpandedNodeId.ToNodeId(attr.NodeId, this.NamespaceUris);
-                            this.encodingIdToTypeDictionary[id] = type;
-                            this.typeToBinaryEncodingIdDictionary[type] = id;
+                            this.EncodingMap.Add(attr.NodeId, type);
                         }
                     }
                 }
@@ -893,7 +843,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = StreamManager.GetStream("SendOpenSecureChannelRequestAsync");
-            var bodyEncoder = new BinaryEncoder(bodyStream, this);
+            var bodyEncoder = new BinaryEncoder(bodyStream, this.EncodingMap);
             try
             {
                 bodyEncoder.WriteNodeId(null, OpenSecureChannelRequestNodeId);
@@ -916,7 +866,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
 
                     var stream = new MemoryStream(this.sendBuffer, 0, (int)this.RemoteReceiveBufferSize, true, true);
-                    var encoder = new BinaryEncoder(stream, this);
+                    var encoder = new BinaryEncoder(stream, this.EncodingMap);
                     try
                     {
                         // header
@@ -1070,7 +1020,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = StreamManager.GetStream("SendCloseSecureChannelRequestAsync");
-            var bodyEncoder = new BinaryEncoder(bodyStream, this);
+            var bodyEncoder = new BinaryEncoder(bodyStream, this.EncodingMap);
             try
             {
                 bodyEncoder.WriteNodeId(null, CloseSecureChannelRequestNodeId);
@@ -1093,7 +1043,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
 
                     var stream = new MemoryStream(this.sendBuffer, 0, (int)this.RemoteReceiveBufferSize, true, true);
-                    var encoder = new BinaryEncoder(stream, this);
+                    var encoder = new BinaryEncoder(stream, this.EncodingMap);
                     try
                     {
                         // header
@@ -1238,10 +1188,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
             var bodyStream = StreamManager.GetStream("SendServiceRequestAsync");
-            var bodyEncoder = new BinaryEncoder(bodyStream, this);
+            var bodyEncoder = new BinaryEncoder(bodyStream, this.EncodingMap);
             try
             {
-                if (!this.TryGetBinaryEncodingIdFromType(request.GetType(), out NodeId binaryEncodingId))
+                if (!this.EncodingMap.TryGetEncodingId(request.GetType(), out NodeId binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }
@@ -1266,7 +1216,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
 
                     var stream = new MemoryStream(this.sendBuffer, 0, (int)this.RemoteReceiveBufferSize, true, true);
-                    var encoder = new BinaryEncoder(stream, this);
+                    var encoder = new BinaryEncoder(stream, this.EncodingMap);
                     try
                     {
                         // header
@@ -1500,7 +1450,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 int paddingSize;
 
                 var bodyStream = StreamManager.GetStream("ReceiveResponseAsync");
-                var bodyDecoder = new BinaryDecoder(bodyStream, this);
+                var bodyDecoder = new BinaryDecoder(bodyStream, this.EncodingMap);
                 try
                 {
                     // read chunks
@@ -1521,7 +1471,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         }
 
                         var stream = new MemoryStream(this.receiveBuffer, 0, count, true, true);
-                        var decoder = new BinaryDecoder(stream, this);
+                        var decoder = new BinaryDecoder(stream, this.EncodingMap);
                         try
                         {
                             uint channelId;
@@ -1729,7 +1679,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     else
                     {
                         // find node in dictionary
-                        if (!this.TryGetTypeFromEncodingId(nodeId, out Type type2))
+                        if (!this.EncodingMap.TryGetType(nodeId, out Type type2))
                         {
                             throw new ServiceResultException(StatusCodes.BadEncodingError, "NodeId not registered in dictionary.");
                         }
