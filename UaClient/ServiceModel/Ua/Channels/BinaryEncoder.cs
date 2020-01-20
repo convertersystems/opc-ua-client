@@ -886,7 +886,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             var type = value.GetType();
-            if (this.channel is null || !this.channel.TryGetBinaryEncodingIdFromType(type, out NodeId binaryEncodingId))
+            if (this.channel is null || !this.channel.TryGetBinaryEncodingIdFromType(type, out var binaryEncodingId))
             {
                 throw new ServiceResultException(StatusCodes.BadEncodingError);
             }

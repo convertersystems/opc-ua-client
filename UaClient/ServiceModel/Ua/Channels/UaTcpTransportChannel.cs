@@ -8,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
@@ -23,11 +25,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const int ConnectTimeout = 5000;
         private static readonly Task CompletedTask = Task.FromResult(true);
 
-        private readonly ILogger logger;
-        private byte[] sendBuffer;
-        private byte[] receiveBuffer;
-        private Stream stream;
-        private TcpClient tcpClient;
+        private readonly ILogger? logger;
+        private byte[]? sendBuffer;
+        private byte[]? receiveBuffer;
+        private Stream? stream;
+        private TcpClient? tcpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpTransportChannel"/> class.
@@ -37,8 +39,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="options">The transport channel options.</param>
         public UaTcpTransportChannel(
             EndpointDescription remoteEndpoint,
-            ILoggerFactory loggerFactory = null,
-            UaTcpTransportChannelOptions options = null)
+            ILoggerFactory? loggerFactory = null,
+            UaTcpTransportChannelOptions? options = null)
             : base(loggerFactory)
         {
             this.RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
@@ -97,7 +99,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets the inner TCP socket.
         /// </summary>
-        protected virtual Socket Socket => this.tcpClient?.Client;
+        protected virtual Socket? Socket => this.tcpClient?.Client;
 
         /// <summary>
         /// Asynchronously sends a sequence of bytes to the remote endpoint.
@@ -110,7 +112,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
             this.ThrowIfClosedOrNotOpening();
-            await this.stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
+            var stream = this.stream ?? throw new InvalidOperationException("The stream field is null!");
+            await stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -124,6 +127,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
         {
             this.ThrowIfClosedOrNotOpening();
+            var stream = this.stream ?? throw new InvalidOperationException("The stream field is null!");
             int initialOffset = offset;
             int maxCount = count;
             int num = 0;
@@ -132,7 +136,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                    num = await stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
@@ -159,7 +163,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    num = await this.stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
+                    num = await stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
@@ -186,7 +190,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.receiveBuffer = new byte[MinBufferSize];
 
             this.tcpClient = new TcpClient { NoDelay = true };
-            var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl);
+            var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl!);
             await this.tcpClient.ConnectAsync(uri.Host, uri.Port).WithTimeoutAfter(ConnectTimeout).ConfigureAwait(false);
             this.stream = this.tcpClient.GetStream();
 
