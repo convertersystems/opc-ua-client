@@ -307,8 +307,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             // requires from previous Session: SessionId, AuthenticationToken, RemoteNonce
             if (this.SessionId == null)
             {
-                var localNonce = this.RemoteEndpoint.SecurityMode != MessageSecurityMode.None ? this.GetNextNonce(NonceLength) : null;
-                var localCertificate = this.RemoteEndpoint.SecurityMode != MessageSecurityMode.None ? this.LocalCertificate : null;
+                var localNonce = this.GetNextNonce(NonceLength);
+                var localCertificate = this.LocalCertificate;
                 var createSessionRequest = new CreateSessionRequest
                 {
                     ClientDescription = this.LocalDescription,
