@@ -386,10 +386,16 @@ namespace Workstation.ServiceModel.Ua
                 {
                     // if data change.
                     var dcn = n as DataChangeNotification;
-                    if (dcn != null)
+                    if (dcn?.MonitoredItems != null)
                     {
                         foreach (var min in dcn.MonitoredItems)
                         {
+                            if (min?.Value == null)
+                            {
+                                this.logger?.LogError($"One of the monitored item notifications is null");
+                                continue;
+                            }
+
                             if (this.monitoredItems.TryGetValueByClientId(min.ClientHandle, out var item))
                             {
                                 try
@@ -408,10 +414,16 @@ namespace Workstation.ServiceModel.Ua
 
                     // if event.
                     var enl = n as EventNotificationList;
-                    if (enl != null)
+                    if (enl?.Events != null)
                     {
                         foreach (var efl in enl.Events)
                         {
+                            if (efl?.EventFields == null)
+                            {
+                                this.logger?.LogError($"One of the event field list is null");
+                                continue;
+                            }
+
                             if (this.monitoredItems.TryGetValueByClientId(efl.ClientHandle, out var item))
                             {
                                 try
@@ -457,7 +469,7 @@ namespace Workstation.ServiceModel.Ua
                     try
                     {
                         var writeResponse = await this.InnerChannel.WriteAsync(writeRequest).ConfigureAwait(false);
-                        statusCode = writeResponse.Results[0];
+                        statusCode = writeResponse?.Results?[0] ?? StatusCodes.BadDataEncodingInvalid;
                     }
                     catch (ServiceResultException ex)
                     {
@@ -559,14 +571,25 @@ namespace Workstation.ServiceModel.Ua
                                     ItemsToCreate = requests,
                                 };
                                 var itemsResponse = await this.innerChannel.CreateMonitoredItemsAsync(itemsRequest);
-                                for (int i = 0; i < itemsResponse.Results.Length; i++)
+
+                                if (itemsResponse.Results is { } results)
                                 {
-                                    var item = items[i];
-                                    var result = itemsResponse.Results[i];
-                                    item.OnCreateResult(result);
-                                    if (StatusCode.IsBad(result.StatusCode))
+                                    for (int i = 0; i < results.Length; i++)
                                     {
-                                        this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                        var item = items[i];
+                                        var result = results[i];
+
+                                        if (result is null)
+                                        {
+                                            this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. The result is null.");
+                                            continue;
+                                        }
+
+                                        item.OnCreateResult(result);
+                                        if (StatusCode.IsBad(result.StatusCode))
+                                        {
+                                            this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                        }
                                     }
                                 }
                             }

@@ -7,6 +7,6 @@ namespace Workstation.ServiceModel.Ua
 {
     public interface IServiceResponse : IEncodable
     {
-        ResponseHeader ResponseHeader { get; set; }
+        ResponseHeader? ResponseHeader { get; set; }
     }
 }

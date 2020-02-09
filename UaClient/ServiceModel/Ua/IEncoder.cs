@@ -36,7 +36,7 @@ namespace Workstation.ServiceModel.Ua
 
         void WriteDouble(string? fieldName, double value);
 
-        void WriteString(string? fieldName, string value);
+        void WriteString(string? fieldName, string? value);
 
         void WriteDateTime(string? fieldName, DateTime value);
 
@@ -58,8 +58,8 @@ namespace Workstation.ServiceModel.Ua
 
         void WriteExtensionObject(string? fieldName, ExtensionObject? value);
 
-        void WriteExtensionObject<T>(string? fieldName, T value)
-            where T : class?, IEncodable;
+        void WriteExtensionObject<T>(string? fieldName, T? value)
+            where T : class, IEncodable;
 
         void WriteDataValue(string? fieldName, DataValue? value);
 
@@ -67,8 +67,8 @@ namespace Workstation.ServiceModel.Ua
 
         void WriteDiagnosticInfo(string? fieldName, DiagnosticInfo? value);
 
-        void WriteEncodable<T>(string? fieldName, T value)
-            where T : class?, IEncodable;
+        void WriteEncodable<T>(string? fieldName, T? value)
+            where T : class, IEncodable;
 
         void WriteEnumeration<T>(string? fieldName, T value)
             where T : struct, IConvertible;
@@ -95,7 +95,7 @@ namespace Workstation.ServiceModel.Ua
 
         void WriteDoubleArray(string? fieldName, double[]? values);
 
-        void WriteStringArray(string? fieldName, string[]? values);
+        void WriteStringArray(string? fieldName, string?[]? values);
 
         void WriteDateTimeArray(string? fieldName, DateTime[]? values);
 
@@ -117,8 +117,8 @@ namespace Workstation.ServiceModel.Ua
 
         void WriteExtensionObjectArray(string? fieldName, ExtensionObject?[]? values);
 
-        void WriteExtensionObjectArray<T>(string? fieldName, T[]? values)
-            where T : class?, IEncodable;
+        void WriteExtensionObjectArray<T>(string? fieldName, T?[]? values)
+            where T : class, IEncodable;
 
         void WriteDataValueArray(string? fieldName, DataValue?[]? values);
 
@@ -126,8 +126,8 @@ namespace Workstation.ServiceModel.Ua
 
         void WriteDiagnosticInfoArray(string? fieldName, DiagnosticInfo?[]? values);
 
-        void WriteEncodableArray<T>(string? fieldName, T[]? values)
-            where T : class?, IEncodable;
+        void WriteEncodableArray<T>(string? fieldName, T?[]? values)
+            where T : class, IEncodable;
 
         void WriteEnumerationArray<T>(string fieldName, T[] values)
             where T : struct, IConvertible;

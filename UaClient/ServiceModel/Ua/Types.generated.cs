@@ -7,6 +7,9 @@
 //     the code is regenerated.
 // </auto-generated>
 // ------------------------------------------------------------------------------
+
+#nullable enable
+
 namespace Workstation.ServiceModel.Ua
 {
     using System;
@@ -356,7 +359,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.KeyValuePair)]
     public class KeyValuePair : IEncodable
     {
-        public QualifiedName Key { get; set; }
+        public QualifiedName? Key { get; set; }
         public Variant Value { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -381,10 +384,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EndpointType)]
     public class EndpointType : IEncodable
     {
-        public String EndpointUrl { get; set; }
+        public String? EndpointUrl { get; set; }
         public MessageSecurityMode SecurityMode { get; set; }
-        public String SecurityPolicyUri { get; set; }
-        public String TransportProfileUri { get; set; }
+        public String? SecurityPolicyUri { get; set; }
+        public String? TransportProfileUri { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -603,8 +606,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ThreeDFrame)]
     public class ThreeDFrame : Frame
     {
-        public ThreeDCartesianCoordinates CartesianCoordinates { get; set; }
-        public ThreeDOrientation Orientation { get; set; }
+        public ThreeDCartesianCoordinates? CartesianCoordinates { get; set; }
+        public ThreeDOrientation? Orientation { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -631,7 +634,7 @@ namespace Workstation.ServiceModel.Ua
     public class IdentityMappingRuleType : IEncodable
     {
         public IdentityCriteriaType CriteriaType { get; set; }
-        public String Criteria { get; set; }
+        public String? Criteria { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -656,10 +659,10 @@ namespace Workstation.ServiceModel.Ua
     public class TrustListDataType : IEncodable
     {
         public UInt32 SpecifiedLists { get; set; }
-        public Byte[][] TrustedCertificates { get; set; }
-        public Byte[][] TrustedCrls { get; set; }
-        public Byte[][] IssuerCertificates { get; set; }
-        public Byte[][] IssuerCrls { get; set; }
+        public Byte[]?[]? TrustedCertificates { get; set; }
+        public Byte[]?[]? TrustedCrls { get; set; }
+        public Byte[]?[]? IssuerCertificates { get; set; }
+        public Byte[]?[]? IssuerCrls { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -690,7 +693,7 @@ namespace Workstation.ServiceModel.Ua
     public class DecimalDataType : IEncodable
     {
         public Int16 Scale { get; set; }
-        public Byte[] Value { get; set; }
+        public Byte[]? Value { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -714,10 +717,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataTypeSchemaHeader)]
     public class DataTypeSchemaHeader : IEncodable
     {
-        public String[] Namespaces { get; set; }
-        public StructureDescription[] StructureDataTypes { get; set; }
-        public EnumDescription[] EnumDataTypes { get; set; }
-        public SimpleTypeDescription[] SimpleDataTypes { get; set; }
+        public String?[]? Namespaces { get; set; }
+        public StructureDescription?[]? StructureDataTypes { get; set; }
+        public EnumDescription?[]? EnumDataTypes { get; set; }
+        public SimpleTypeDescription?[]? SimpleDataTypes { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -745,7 +748,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.StructureDescription)]
     public class StructureDescription : DataTypeDescription
     {
-        public StructureDefinition StructureDefinition { get; set; }
+        public StructureDefinition? StructureDefinition { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -769,10 +772,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.StructureDefinition)]
     public class StructureDefinition : DataTypeDefinition
     {
-        public NodeId DefaultEncodingId { get; set; }
-        public NodeId BaseDataType { get; set; }
+        public NodeId? DefaultEncodingId { get; set; }
+        public NodeId? BaseDataType { get; set; }
         public StructureType StructureType { get; set; }
-        public StructureField[] Fields { get; set; }
+        public StructureField?[]? Fields { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -802,11 +805,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.StructureField)]
     public class StructureField : IEncodable
     {
-        public String Name { get; set; }
-        public LocalizedText Description { get; set; }
-        public NodeId DataType { get; set; }
+        public String? Name { get; set; }
+        public LocalizedText? Description { get; set; }
+        public NodeId? DataType { get; set; }
         public Int32 ValueRank { get; set; }
-        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32[]? ArrayDimensions { get; set; }
         public UInt32 MaxStringLength { get; set; }
         public Boolean IsOptional { get; set; }
 
@@ -861,7 +864,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EnumDefinition)]
     public class EnumDefinition : DataTypeDefinition
     {
-        public EnumField[] Fields { get; set; }
+        public EnumField?[]? Fields { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -885,7 +888,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EnumField)]
     public class EnumField : EnumValueType
     {
-        public String Name { get; set; }
+        public String? Name { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -910,8 +913,8 @@ namespace Workstation.ServiceModel.Ua
     public class EnumValueType : IEncodable
     {
         public Int64 Value { get; set; }
-        public LocalizedText DisplayName { get; set; }
-        public LocalizedText Description { get; set; }
+        public LocalizedText? DisplayName { get; set; }
+        public LocalizedText? Description { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -937,8 +940,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataTypeDescription)]
     public class DataTypeDescription : IEncodable
     {
-        public NodeId DataTypeId { get; set; }
-        public QualifiedName Name { get; set; }
+        public NodeId? DataTypeId { get; set; }
+        public QualifiedName? Name { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -962,7 +965,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SimpleTypeDescription)]
     public class SimpleTypeDescription : DataTypeDescription
     {
-        public NodeId BaseDataType { get; set; }
+        public NodeId? BaseDataType { get; set; }
         public Byte BuiltInType { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -989,7 +992,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EnumDescription)]
     public class EnumDescription : DataTypeDescription
     {
-        public EnumDefinition EnumDefinition { get; set; }
+        public EnumDefinition? EnumDefinition { get; set; }
         public Byte BuiltInType { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -1016,11 +1019,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataSetMetaDataType)]
     public class DataSetMetaDataType : DataTypeSchemaHeader
     {
-        public String Name { get; set; }
-        public LocalizedText Description { get; set; }
-        public FieldMetaData[] Fields { get; set; }
+        public String? Name { get; set; }
+        public LocalizedText? Description { get; set; }
+        public FieldMetaData?[]? Fields { get; set; }
         public Guid DataSetClassId { get; set; }
-        public ConfigurationVersionDataType ConfigurationVersion { get; set; }
+        public ConfigurationVersionDataType? ConfigurationVersion { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -1052,16 +1055,16 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.FieldMetaData)]
     public class FieldMetaData : IEncodable
     {
-        public String Name { get; set; }
-        public LocalizedText Description { get; set; }
+        public String? Name { get; set; }
+        public LocalizedText? Description { get; set; }
         public UInt16 FieldFlags { get; set; }
         public Byte BuiltInType { get; set; }
-        public NodeId DataType { get; set; }
+        public NodeId? DataType { get; set; }
         public Int32 ValueRank { get; set; }
-        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32[]? ArrayDimensions { get; set; }
         public UInt32 MaxStringLength { get; set; }
         public Guid DataSetFieldId { get; set; }
-        public KeyValuePair[] Properties { get; set; }
+        public KeyValuePair?[]? Properties { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1126,8 +1129,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.UABinaryFileDataType)]
     public class UABinaryFileDataType : DataTypeSchemaHeader
     {
-        public String SchemaLocation { get; set; }
-        public KeyValuePair[] FileHeader { get; set; }
+        public String? SchemaLocation { get; set; }
+        public KeyValuePair?[]? FileHeader { get; set; }
         public Variant Body { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -1156,11 +1159,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PublishedDataSetDataType)]
     public class PublishedDataSetDataType : IEncodable
     {
-        public String Name { get; set; }
-        public String[] DataSetFolder { get; set; }
-        public DataSetMetaDataType DataSetMetaData { get; set; }
-        public KeyValuePair[] ExtensionFields { get; set; }
-        public PublishedDataSetSourceDataType DataSetSource { get; set; }
+        public String? Name { get; set; }
+        public String?[]? DataSetFolder { get; set; }
+        public DataSetMetaDataType? DataSetMetaData { get; set; }
+        public KeyValuePair?[]? ExtensionFields { get; set; }
+        public PublishedDataSetSourceDataType? DataSetSource { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1209,9 +1212,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PublishedEventsDataType)]
     public class PublishedEventsDataType : PublishedDataSetSourceDataType
     {
-        public NodeId EventNotifier { get; set; }
-        public SimpleAttributeOperand[] SelectedFields { get; set; }
-        public ContentFilter Filter { get; set; }
+        public NodeId? EventNotifier { get; set; }
+        public SimpleAttributeOperand?[]? SelectedFields { get; set; }
+        public ContentFilter? Filter { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -1239,10 +1242,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SimpleAttributeOperand)]
     public class SimpleAttributeOperand : FilterOperand
     {
-        public NodeId TypeDefinitionId { get; set; }
-        public QualifiedName[] BrowsePath { get; set; }
+        public NodeId? TypeDefinitionId { get; set; }
+        public QualifiedName?[]? BrowsePath { get; set; }
         public UInt32 AttributeId { get; set; }
-        public String IndexRange { get; set; }
+        public String? IndexRange { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -1291,11 +1294,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AttributeOperand)]
     public class AttributeOperand : FilterOperand
     {
-        public NodeId NodeId { get; set; }
-        public String Alias { get; set; }
-        public RelativePath BrowsePath { get; set; }
+        public NodeId? NodeId { get; set; }
+        public String? Alias { get; set; }
+        public RelativePath? BrowsePath { get; set; }
         public UInt32 AttributeId { get; set; }
-        public String IndexRange { get; set; }
+        public String? IndexRange { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -1327,7 +1330,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RelativePath)]
     public class RelativePath : IEncodable
     {
-        public RelativePathElement[] Elements { get; set; }
+        public RelativePathElement?[]? Elements { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1349,10 +1352,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RelativePathElement)]
     public class RelativePathElement : IEncodable
     {
-        public NodeId ReferenceTypeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsInverse { get; set; }
         public Boolean IncludeSubtypes { get; set; }
-        public QualifiedName TargetName { get; set; }
+        public QualifiedName? TargetName { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1428,7 +1431,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ContentFilter)]
     public class ContentFilter : IEncodable
     {
-        public ContentFilterElement[] Elements { get; set; }
+        public ContentFilterElement?[]? Elements { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1451,7 +1454,7 @@ namespace Workstation.ServiceModel.Ua
     public class ContentFilterElement : IEncodable
     {
         public FilterOperator FilterOperator { get; set; }
-        public FilterOperand[] FilterOperands { get; set; }
+        public FilterOperand?[]? FilterOperands { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1475,7 +1478,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PublishedDataItemsDataType)]
     public class PublishedDataItemsDataType : PublishedDataSetSourceDataType
     {
-        public PublishedVariableDataType[] PublishedData { get; set; }
+        public PublishedVariableDataType?[]? PublishedData { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -1499,14 +1502,14 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PublishedVariableDataType)]
     public class PublishedVariableDataType : IEncodable
     {
-        public NodeId PublishedVariable { get; set; }
+        public NodeId? PublishedVariable { get; set; }
         public UInt32 AttributeId { get; set; }
         public Double SamplingIntervalHint { get; set; }
         public UInt32 DeadbandType { get; set; }
         public Double DeadbandValue { get; set; }
-        public String IndexRange { get; set; }
+        public String? IndexRange { get; set; }
         public Variant SubstituteValue { get; set; }
-        public QualifiedName[] MetaDataProperties { get; set; }
+        public QualifiedName?[]? MetaDataProperties { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1542,15 +1545,15 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataSetWriterDataType)]
     public class DataSetWriterDataType : IEncodable
     {
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public Boolean Enabled { get; set; }
         public UInt16 DataSetWriterId { get; set; }
         public UInt32 DataSetFieldContentMask { get; set; }
         public UInt32 KeyFrameCount { get; set; }
-        public String DataSetName { get; set; }
-        public KeyValuePair[] DataSetWriterProperties { get; set; }
-        public DataSetWriterTransportDataType TransportSettings { get; set; }
-        public DataSetWriterMessageDataType MessageSettings { get; set; }
+        public String? DataSetName { get; set; }
+        public KeyValuePair?[]? DataSetWriterProperties { get; set; }
+        public DataSetWriterTransportDataType? TransportSettings { get; set; }
+        public DataSetWriterMessageDataType? MessageSettings { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1607,11 +1610,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrokerDataSetWriterTransportDataType)]
     public class BrokerDataSetWriterTransportDataType : DataSetWriterTransportDataType
     {
-        public String QueueName { get; set; }
-        public String ResourceUri { get; set; }
-        public String AuthenticationProfileUri { get; set; }
+        public String? QueueName { get; set; }
+        public String? ResourceUri { get; set; }
+        public String? AuthenticationProfileUri { get; set; }
         public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
-        public String MetaDataQueueName { get; set; }
+        public String? MetaDataQueueName { get; set; }
         public Double MetaDataUpdateTime { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -1722,13 +1725,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PubSubGroupDataType)]
     public class PubSubGroupDataType : IEncodable
     {
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public Boolean Enabled { get; set; }
         public MessageSecurityMode SecurityMode { get; set; }
-        public String SecurityGroupId { get; set; }
-        public EndpointDescription[] SecurityKeyServices { get; set; }
+        public String? SecurityGroupId { get; set; }
+        public EndpointDescription?[]? SecurityKeyServices { get; set; }
         public UInt32 MaxNetworkMessageSize { get; set; }
-        public KeyValuePair[] GroupProperties { get; set; }
+        public KeyValuePair?[]? GroupProperties { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1762,13 +1765,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EndpointDescription)]
     public class EndpointDescription : IEncodable
     {
-        public String EndpointUrl { get; set; }
-        public ApplicationDescription Server { get; set; }
-        public Byte[] ServerCertificate { get; set; }
+        public String? EndpointUrl { get; set; }
+        public ApplicationDescription? Server { get; set; }
+        public Byte[]? ServerCertificate { get; set; }
         public MessageSecurityMode SecurityMode { get; set; }
-        public String SecurityPolicyUri { get; set; }
-        public UserTokenPolicy[] UserIdentityTokens { get; set; }
-        public String TransportProfileUri { get; set; }
+        public String? SecurityPolicyUri { get; set; }
+        public UserTokenPolicy?[]? UserIdentityTokens { get; set; }
+        public String? TransportProfileUri { get; set; }
         public Byte SecurityLevel { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -1805,13 +1808,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ApplicationDescription)]
     public class ApplicationDescription : IEncodable
     {
-        public String ApplicationUri { get; set; }
-        public String ProductUri { get; set; }
-        public LocalizedText ApplicationName { get; set; }
+        public String? ApplicationUri { get; set; }
+        public String? ProductUri { get; set; }
+        public LocalizedText? ApplicationName { get; set; }
         public ApplicationType ApplicationType { get; set; }
-        public String GatewayServerUri { get; set; }
-        public String DiscoveryProfileUri { get; set; }
-        public String[] DiscoveryUrls { get; set; }
+        public String? GatewayServerUri { get; set; }
+        public String? DiscoveryProfileUri { get; set; }
+        public String?[]? DiscoveryUrls { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1845,11 +1848,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.UserTokenPolicy)]
     public class UserTokenPolicy : IEncodable
     {
-        public String PolicyId { get; set; }
+        public String? PolicyId { get; set; }
         public UserTokenType TokenType { get; set; }
-        public String IssuedTokenType { get; set; }
-        public String IssuerEndpointUrl { get; set; }
-        public String SecurityPolicyUri { get; set; }
+        public String? IssuedTokenType { get; set; }
+        public String? IssuerEndpointUrl { get; set; }
+        public String? SecurityPolicyUri { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -1879,9 +1882,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReaderGroupDataType)]
     public class ReaderGroupDataType : PubSubGroupDataType
     {
-        public ReaderGroupTransportDataType TransportSettings { get; set; }
-        public ReaderGroupMessageDataType MessageSettings { get; set; }
-        public DataSetReaderDataType[] DataSetReaders { get; set; }
+        public ReaderGroupTransportDataType? TransportSettings { get; set; }
+        public ReaderGroupMessageDataType? MessageSettings { get; set; }
+        public DataSetReaderDataType?[]? DataSetReaders { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -1947,23 +1950,23 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataSetReaderDataType)]
     public class DataSetReaderDataType : IEncodable
     {
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public Boolean Enabled { get; set; }
         public Variant PublisherId { get; set; }
         public UInt16 WriterGroupId { get; set; }
         public UInt16 DataSetWriterId { get; set; }
-        public DataSetMetaDataType DataSetMetaData { get; set; }
+        public DataSetMetaDataType? DataSetMetaData { get; set; }
         public UInt32 DataSetFieldContentMask { get; set; }
         public Double MessageReceiveTimeout { get; set; }
         public UInt32 KeyFrameCount { get; set; }
-        public String HeaderLayoutUri { get; set; }
+        public String? HeaderLayoutUri { get; set; }
         public MessageSecurityMode SecurityMode { get; set; }
-        public String SecurityGroupId { get; set; }
-        public EndpointDescription[] SecurityKeyServices { get; set; }
-        public KeyValuePair[] DataSetReaderProperties { get; set; }
-        public DataSetReaderTransportDataType TransportSettings { get; set; }
-        public DataSetReaderMessageDataType MessageSettings { get; set; }
-        public SubscribedDataSetDataType SubscribedDataSet { get; set; }
+        public String? SecurityGroupId { get; set; }
+        public EndpointDescription?[]? SecurityKeyServices { get; set; }
+        public KeyValuePair?[]? DataSetReaderProperties { get; set; }
+        public DataSetReaderTransportDataType? TransportSettings { get; set; }
+        public DataSetReaderMessageDataType? MessageSettings { get; set; }
+        public SubscribedDataSetDataType? SubscribedDataSet { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -2036,11 +2039,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrokerDataSetReaderTransportDataType)]
     public class BrokerDataSetReaderTransportDataType : DataSetReaderTransportDataType
     {
-        public String QueueName { get; set; }
-        public String ResourceUri { get; set; }
-        public String AuthenticationProfileUri { get; set; }
+        public String? QueueName { get; set; }
+        public String? ResourceUri { get; set; }
+        public String? AuthenticationProfileUri { get; set; }
         public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
-        public String MetaDataQueueName { get; set; }
+        public String? MetaDataQueueName { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2185,8 +2188,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SubscribedDataSetMirrorDataType)]
     public class SubscribedDataSetMirrorDataType : SubscribedDataSetDataType
     {
-        public String ParentNodeName { get; set; }
-        public RolePermissionType[] RolePermissions { get; set; }
+        public String? ParentNodeName { get; set; }
+        public RolePermissionType?[]? RolePermissions { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2212,7 +2215,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RolePermissionType)]
     public class RolePermissionType : IEncodable
     {
-        public NodeId RoleId { get; set; }
+        public NodeId? RoleId { get; set; }
         public UInt32 Permissions { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -2237,7 +2240,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.TargetVariablesDataType)]
     public class TargetVariablesDataType : SubscribedDataSetDataType
     {
-        public FieldTargetDataType[] TargetVariables { get; set; }
+        public FieldTargetDataType?[]? TargetVariables { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2262,10 +2265,10 @@ namespace Workstation.ServiceModel.Ua
     public class FieldTargetDataType : IEncodable
     {
         public Guid DataSetFieldId { get; set; }
-        public String ReceiverIndexRange { get; set; }
-        public NodeId TargetNodeId { get; set; }
+        public String? ReceiverIndexRange { get; set; }
+        public NodeId? TargetNodeId { get; set; }
         public UInt32 AttributeId { get; set; }
-        public String WriteIndexRange { get; set; }
+        public String? WriteIndexRange { get; set; }
         public OverrideValueHandling OverrideValueHandling { get; set; }
         public Variant OverrideValue { get; set; }
 
@@ -2305,11 +2308,11 @@ namespace Workstation.ServiceModel.Ua
         public Double PublishingInterval { get; set; }
         public Double KeepAliveTime { get; set; }
         public Byte Priority { get; set; }
-        public String[] LocaleIds { get; set; }
-        public String HeaderLayoutUri { get; set; }
-        public WriterGroupTransportDataType TransportSettings { get; set; }
-        public WriterGroupMessageDataType MessageSettings { get; set; }
-        public DataSetWriterDataType[] DataSetWriters { get; set; }
+        public String?[]? LocaleIds { get; set; }
+        public String? HeaderLayoutUri { get; set; }
+        public WriterGroupTransportDataType? TransportSettings { get; set; }
+        public WriterGroupMessageDataType? MessageSettings { get; set; }
+        public DataSetWriterDataType?[]? DataSetWriters { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2368,9 +2371,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrokerWriterGroupTransportDataType)]
     public class BrokerWriterGroupTransportDataType : WriterGroupTransportDataType
     {
-        public String QueueName { get; set; }
-        public String ResourceUri { get; set; }
-        public String AuthenticationProfileUri { get; set; }
+        public String? QueueName { get; set; }
+        public String? ResourceUri { get; set; }
+        public String? AuthenticationProfileUri { get; set; }
         public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -2475,7 +2478,7 @@ namespace Workstation.ServiceModel.Ua
         public DataSetOrderingType DataSetOrdering { get; set; }
         public UInt32 NetworkMessageContentMask { get; set; }
         public Double SamplingOffset { get; set; }
-        public Double[] PublishingOffset { get; set; }
+        public Double[]? PublishingOffset { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2507,15 +2510,15 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PubSubConnectionDataType)]
     public class PubSubConnectionDataType : IEncodable
     {
-        public String Name { get; set; }
+        public String? Name { get; set; }
         public Boolean Enabled { get; set; }
         public Variant PublisherId { get; set; }
-        public String TransportProfileUri { get; set; }
-        public NetworkAddressDataType Address { get; set; }
-        public KeyValuePair[] ConnectionProperties { get; set; }
-        public ConnectionTransportDataType TransportSettings { get; set; }
-        public WriterGroupDataType[] WriterGroups { get; set; }
-        public ReaderGroupDataType[] ReaderGroups { get; set; }
+        public String? TransportProfileUri { get; set; }
+        public NetworkAddressDataType? Address { get; set; }
+        public KeyValuePair?[]? ConnectionProperties { get; set; }
+        public ConnectionTransportDataType? TransportSettings { get; set; }
+        public WriterGroupDataType?[]? WriterGroups { get; set; }
+        public ReaderGroupDataType?[]? ReaderGroups { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -2553,7 +2556,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.NetworkAddressDataType)]
     public class NetworkAddressDataType : IEncodable
     {
-        public String NetworkInterface { get; set; }
+        public String? NetworkInterface { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -2575,7 +2578,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.NetworkAddressUrlDataType)]
     public class NetworkAddressUrlDataType : NetworkAddressDataType
     {
-        public String Url { get; set; }
+        public String? Url { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2618,8 +2621,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrokerConnectionTransportDataType)]
     public class BrokerConnectionTransportDataType : ConnectionTransportDataType
     {
-        public String ResourceUri { get; set; }
-        public String AuthenticationProfileUri { get; set; }
+        public String? ResourceUri { get; set; }
+        public String? AuthenticationProfileUri { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2645,7 +2648,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DatagramConnectionTransportDataType)]
     public class DatagramConnectionTransportDataType : ConnectionTransportDataType
     {
-        public NetworkAddressDataType DiscoveryAddress { get; set; }
+        public NetworkAddressDataType? DiscoveryAddress { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2669,8 +2672,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PubSubConfigurationDataType)]
     public class PubSubConfigurationDataType : IEncodable
     {
-        public PublishedDataSetDataType[] PublishedDataSets { get; set; }
-        public PubSubConnectionDataType[] Connections { get; set; }
+        public PublishedDataSetDataType?[]? PublishedDataSets { get; set; }
+        public PubSubConnectionDataType?[]? Connections { get; set; }
         public Boolean Enabled { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -2697,17 +2700,17 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Node)]
     public class Node : IEncodable
     {
-        public NodeId NodeId { get; set; }
+        public NodeId? NodeId { get; set; }
         public NodeClass NodeClass { get; set; }
-        public QualifiedName BrowseName { get; set; }
-        public LocalizedText DisplayName { get; set; }
-        public LocalizedText Description { get; set; }
+        public QualifiedName? BrowseName { get; set; }
+        public LocalizedText? DisplayName { get; set; }
+        public LocalizedText? Description { get; set; }
         public UInt32 WriteMask { get; set; }
         public UInt32 UserWriteMask { get; set; }
-        public RolePermissionType[] RolePermissions { get; set; }
-        public RolePermissionType[] UserRolePermissions { get; set; }
+        public RolePermissionType?[]? RolePermissions { get; set; }
+        public RolePermissionType?[]? UserRolePermissions { get; set; }
         public UInt16 AccessRestrictions { get; set; }
-        public ReferenceNode[] References { get; set; }
+        public ReferenceNode?[]? References { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -2749,9 +2752,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReferenceNode)]
     public class ReferenceNode : IEncodable
     {
-        public NodeId ReferenceTypeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsInverse { get; set; }
-        public ExpandedNodeId TargetId { get; set; }
+        public ExpandedNodeId? TargetId { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -2799,7 +2802,7 @@ namespace Workstation.ServiceModel.Ua
     public class DataTypeNode : TypeNode
     {
         public Boolean IsAbstract { get; set; }
-        public DataTypeDefinition DataTypeDefinition { get; set; }
+        public DataTypeDefinition? DataTypeDefinition { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2827,7 +2830,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public Boolean IsAbstract { get; set; }
         public Boolean Symmetric { get; set; }
-        public LocalizedText InverseName { get; set; }
+        public LocalizedText? InverseName { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -2856,9 +2859,9 @@ namespace Workstation.ServiceModel.Ua
     public class VariableTypeNode : TypeNode
     {
         public Variant Value { get; set; }
-        public NodeId DataType { get; set; }
+        public NodeId? DataType { get; set; }
         public Int32 ValueRank { get; set; }
-        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32[]? ArrayDimensions { get; set; }
         public Boolean IsAbstract { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -2991,9 +2994,9 @@ namespace Workstation.ServiceModel.Ua
     public class VariableNode : InstanceNode
     {
         public Variant Value { get; set; }
-        public NodeId DataType { get; set; }
+        public NodeId? DataType { get; set; }
         public Int32 ValueRank { get; set; }
-        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32[]? ArrayDimensions { get; set; }
         public Byte AccessLevel { get; set; }
         public Byte UserAccessLevel { get; set; }
         public Double MinimumSamplingInterval { get; set; }
@@ -3062,11 +3065,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Argument)]
     public class Argument : IEncodable
     {
-        public String Name { get; set; }
-        public NodeId DataType { get; set; }
+        public String? Name { get; set; }
+        public NodeId? DataType { get; set; }
         public Int32 ValueRank { get; set; }
-        public UInt32[] ArrayDimensions { get; set; }
-        public LocalizedText Description { get; set; }
+        public UInt32[]? ArrayDimensions { get; set; }
+        public LocalizedText? Description { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3096,8 +3099,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.OptionSet)]
     public class OptionSet : IEncodable
     {
-        public Byte[] Value { get; set; }
-        public Byte[] ValidBits { get; set; }
+        public Byte[]? Value { get; set; }
+        public Byte[]? ValidBits { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3165,13 +3168,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RequestHeader)]
     public class RequestHeader : IEncodable
     {
-        public NodeId AuthenticationToken { get; set; }
+        public NodeId? AuthenticationToken { get; set; }
         public DateTime Timestamp { get; set; }
         public UInt32 RequestHandle { get; set; }
         public UInt32 ReturnDiagnostics { get; set; }
-        public String AuditEntryId { get; set; }
+        public String? AuditEntryId { get; set; }
         public UInt32 TimeoutHint { get; set; }
-        public ExtensionObject AdditionalHeader { get; set; }
+        public ExtensionObject? AdditionalHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3208,9 +3211,9 @@ namespace Workstation.ServiceModel.Ua
         public DateTime Timestamp { get; set; }
         public UInt32 RequestHandle { get; set; }
         public StatusCode ServiceResult { get; set; }
-        public DiagnosticInfo ServiceDiagnostics { get; set; }
-        public String[] StringTable { get; set; }
-        public ExtensionObject AdditionalHeader { get; set; }
+        public DiagnosticInfo? ServiceDiagnostics { get; set; }
+        public String?[]? StringTable { get; set; }
+        public ExtensionObject? AdditionalHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3242,7 +3245,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ServiceFault)]
     public class ServiceFault : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3264,10 +3267,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SessionlessInvokeRequestType)]
     public class SessionlessInvokeRequestType : IEncodable
     {
-        public UInt32[] UrisVersion { get; set; }
-        public String[] NamespaceUris { get; set; }
-        public String[] ServerUris { get; set; }
-        public String[] LocaleIds { get; set; }
+        public UInt32[]? UrisVersion { get; set; }
+        public String?[]? NamespaceUris { get; set; }
+        public String?[]? ServerUris { get; set; }
+        public String?[]? LocaleIds { get; set; }
         public UInt32 ServiceId { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -3298,8 +3301,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SessionlessInvokeResponseType)]
     public class SessionlessInvokeResponseType : IEncodable
     {
-        public String[] NamespaceUris { get; set; }
-        public String[] ServerUris { get; set; }
+        public String?[]? NamespaceUris { get; set; }
+        public String?[]? ServerUris { get; set; }
         public UInt32 ServiceId { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -3326,10 +3329,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.FindServersRequest)]
     public class FindServersRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public String EndpointUrl { get; set; }
-        public String[] LocaleIds { get; set; }
-        public String[] ServerUris { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public String? EndpointUrl { get; set; }
+        public String?[]? LocaleIds { get; set; }
+        public String?[]? ServerUris { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3357,8 +3360,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.FindServersResponse)]
     public class FindServersResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public ApplicationDescription[] Servers { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public ApplicationDescription?[]? Servers { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3383,9 +3386,9 @@ namespace Workstation.ServiceModel.Ua
     public class ServerOnNetwork : IEncodable
     {
         public UInt32 RecordId { get; set; }
-        public String ServerName { get; set; }
-        public String DiscoveryUrl { get; set; }
-        public String[] ServerCapabilities { get; set; }
+        public String? ServerName { get; set; }
+        public String? DiscoveryUrl { get; set; }
+        public String?[]? ServerCapabilities { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3413,10 +3416,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.FindServersOnNetworkRequest)]
     public class FindServersOnNetworkRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 StartingRecordId { get; set; }
         public UInt32 MaxRecordsToReturn { get; set; }
-        public String[] ServerCapabilityFilter { get; set; }
+        public String?[]? ServerCapabilityFilter { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3444,9 +3447,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.FindServersOnNetworkResponse)]
     public class FindServersOnNetworkResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
         public DateTime LastCounterResetTime { get; set; }
-        public ServerOnNetwork[] Servers { get; set; }
+        public ServerOnNetwork?[]? Servers { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3472,10 +3475,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.GetEndpointsRequest)]
     public class GetEndpointsRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public String EndpointUrl { get; set; }
-        public String[] LocaleIds { get; set; }
-        public String[] ProfileUris { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public String? EndpointUrl { get; set; }
+        public String?[]? LocaleIds { get; set; }
+        public String?[]? ProfileUris { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3503,8 +3506,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.GetEndpointsResponse)]
     public class GetEndpointsResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public EndpointDescription[] Endpoints { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public EndpointDescription?[]? Endpoints { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3528,13 +3531,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RegisteredServer)]
     public class RegisteredServer : IEncodable
     {
-        public String ServerUri { get; set; }
-        public String ProductUri { get; set; }
-        public LocalizedText[] ServerNames { get; set; }
+        public String? ServerUri { get; set; }
+        public String? ProductUri { get; set; }
+        public LocalizedText?[]? ServerNames { get; set; }
         public ApplicationType ServerType { get; set; }
-        public String GatewayServerUri { get; set; }
-        public String[] DiscoveryUrls { get; set; }
-        public String SemaphoreFilePath { get; set; }
+        public String? GatewayServerUri { get; set; }
+        public String?[]? DiscoveryUrls { get; set; }
+        public String? SemaphoreFilePath { get; set; }
         public Boolean IsOnline { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -3571,8 +3574,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RegisterServerRequest)]
     public class RegisterServerRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public RegisteredServer Server { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public RegisteredServer? Server { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3596,7 +3599,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RegisterServerResponse)]
     public class RegisterServerResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3637,8 +3640,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.MdnsDiscoveryConfiguration)]
     public class MdnsDiscoveryConfiguration : DiscoveryConfiguration
     {
-        public String MdnsServerName { get; set; }
-        public String[] ServerCapabilities { get; set; }
+        public String? MdnsServerName { get; set; }
+        public String?[]? ServerCapabilities { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -3664,9 +3667,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RegisterServer2Request)]
     public class RegisterServer2Request : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public RegisteredServer Server { get; set; }
-        public DiscoveryConfiguration[] DiscoveryConfiguration { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public RegisteredServer? Server { get; set; }
+        public DiscoveryConfiguration?[]? DiscoveryConfiguration { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3692,9 +3695,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RegisterServer2Response)]
     public class RegisterServer2Response : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] ConfigurationResults { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? ConfigurationResults { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3751,11 +3754,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.OpenSecureChannelRequest)]
     public class OpenSecureChannelRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 ClientProtocolVersion { get; set; }
         public SecurityTokenRequestType RequestType { get; set; }
         public MessageSecurityMode SecurityMode { get; set; }
-        public Byte[] ClientNonce { get; set; }
+        public Byte[]? ClientNonce { get; set; }
         public UInt32 RequestedLifetime { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -3788,10 +3791,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.OpenSecureChannelResponse)]
     public class OpenSecureChannelResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
         public UInt32 ServerProtocolVersion { get; set; }
-        public ChannelSecurityToken SecurityToken { get; set; }
-        public Byte[] ServerNonce { get; set; }
+        public ChannelSecurityToken? SecurityToken { get; set; }
+        public Byte[]? ServerNonce { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3819,7 +3822,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CloseSecureChannelRequest)]
     public class CloseSecureChannelRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3841,7 +3844,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CloseSecureChannelResponse)]
     public class CloseSecureChannelResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3863,8 +3866,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SignedSoftwareCertificate)]
     public class SignedSoftwareCertificate : IEncodable
     {
-        public Byte[] CertificateData { get; set; }
-        public Byte[] Signature { get; set; }
+        public Byte[]? CertificateData { get; set; }
+        public Byte[]? Signature { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3888,8 +3891,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SignatureData)]
     public class SignatureData : IEncodable
     {
-        public String Algorithm { get; set; }
-        public Byte[] Signature { get; set; }
+        public String? Algorithm { get; set; }
+        public Byte[]? Signature { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -3913,13 +3916,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CreateSessionRequest)]
     public class CreateSessionRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public ApplicationDescription ClientDescription { get; set; }
-        public String ServerUri { get; set; }
-        public String EndpointUrl { get; set; }
-        public String SessionName { get; set; }
-        public Byte[] ClientNonce { get; set; }
-        public Byte[] ClientCertificate { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public ApplicationDescription? ClientDescription { get; set; }
+        public String? ServerUri { get; set; }
+        public String? EndpointUrl { get; set; }
+        public String? SessionName { get; set; }
+        public Byte[]? ClientNonce { get; set; }
+        public Byte[]? ClientCertificate { get; set; }
         public Double RequestedSessionTimeout { get; set; }
         public UInt32 MaxResponseMessageSize { get; set; }
 
@@ -3959,15 +3962,15 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CreateSessionResponse)]
     public class CreateSessionResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public NodeId SessionId { get; set; }
-        public NodeId AuthenticationToken { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public NodeId? SessionId { get; set; }
+        public NodeId? AuthenticationToken { get; set; }
         public Double RevisedSessionTimeout { get; set; }
-        public Byte[] ServerNonce { get; set; }
-        public Byte[] ServerCertificate { get; set; }
-        public EndpointDescription[] ServerEndpoints { get; set; }
-        public SignedSoftwareCertificate[] ServerSoftwareCertificates { get; set; }
-        public SignatureData ServerSignature { get; set; }
+        public Byte[]? ServerNonce { get; set; }
+        public Byte[]? ServerCertificate { get; set; }
+        public EndpointDescription?[]? ServerEndpoints { get; set; }
+        public SignedSoftwareCertificate?[]? ServerSoftwareCertificates { get; set; }
+        public SignatureData? ServerSignature { get; set; }
         public UInt32 MaxRequestMessageSize { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -4008,7 +4011,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.UserIdentityToken)]
     public class UserIdentityToken : IEncodable
     {
-        public String PolicyId { get; set; }
+        public String? PolicyId { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4030,8 +4033,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.IssuedIdentityToken)]
     public class IssuedIdentityToken : UserIdentityToken
     {
-        public Byte[] TokenData { get; set; }
-        public String EncryptionAlgorithm { get; set; }
+        public Byte[]? TokenData { get; set; }
+        public String? EncryptionAlgorithm { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -4057,7 +4060,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.X509IdentityToken)]
     public class X509IdentityToken : UserIdentityToken
     {
-        public Byte[] CertificateData { get; set; }
+        public Byte[]? CertificateData { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -4081,9 +4084,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.UserNameIdentityToken)]
     public class UserNameIdentityToken : UserIdentityToken
     {
-        public String UserName { get; set; }
-        public Byte[] Password { get; set; }
-        public String EncryptionAlgorithm { get; set; }
+        public String? UserName { get; set; }
+        public Byte[]? Password { get; set; }
+        public String? EncryptionAlgorithm { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -4132,12 +4135,12 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ActivateSessionRequest)]
     public class ActivateSessionRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public SignatureData ClientSignature { get; set; }
-        public SignedSoftwareCertificate[] ClientSoftwareCertificates { get; set; }
-        public String[] LocaleIds { get; set; }
-        public UserIdentityToken UserIdentityToken { get; set; }
-        public SignatureData UserTokenSignature { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public SignatureData? ClientSignature { get; set; }
+        public SignedSoftwareCertificate?[]? ClientSoftwareCertificates { get; set; }
+        public String?[]? LocaleIds { get; set; }
+        public UserIdentityToken? UserIdentityToken { get; set; }
+        public SignatureData? UserTokenSignature { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4169,10 +4172,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ActivateSessionResponse)]
     public class ActivateSessionResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public Byte[] ServerNonce { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public Byte[]? ServerNonce { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4200,7 +4203,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CloseSessionRequest)]
     public class CloseSessionRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public Boolean DeleteSubscriptions { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -4225,7 +4228,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CloseSessionResponse)]
     public class CloseSessionResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4247,7 +4250,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CancelRequest)]
     public class CancelRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 RequestHandle { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -4272,7 +4275,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CancelResponse)]
     public class CancelResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
         public UInt32 CancelCount { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -4298,8 +4301,8 @@ namespace Workstation.ServiceModel.Ua
     public class NodeAttributes : IEncodable
     {
         public UInt32 SpecifiedAttributes { get; set; }
-        public LocalizedText DisplayName { get; set; }
-        public LocalizedText Description { get; set; }
+        public LocalizedText? DisplayName { get; set; }
+        public LocalizedText? Description { get; set; }
         public UInt32 WriteMask { get; set; }
         public UInt32 UserWriteMask { get; set; }
 
@@ -4331,7 +4334,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.GenericAttributes)]
     public class GenericAttributes : NodeAttributes
     {
-        public GenericAttributeValue[] AttributeValues { get; set; }
+        public GenericAttributeValue?[]? AttributeValues { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -4433,7 +4436,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public Boolean IsAbstract { get; set; }
         public Boolean Symmetric { get; set; }
-        public LocalizedText InverseName { get; set; }
+        public LocalizedText? InverseName { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -4462,9 +4465,9 @@ namespace Workstation.ServiceModel.Ua
     public class VariableTypeAttributes : NodeAttributes
     {
         public Variant Value { get; set; }
-        public NodeId DataType { get; set; }
+        public NodeId? DataType { get; set; }
         public Int32 ValueRank { get; set; }
-        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32[]? ArrayDimensions { get; set; }
         public Boolean IsAbstract { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -4549,9 +4552,9 @@ namespace Workstation.ServiceModel.Ua
     public class VariableAttributes : NodeAttributes
     {
         public Variant Value { get; set; }
-        public NodeId DataType { get; set; }
+        public NodeId? DataType { get; set; }
         public Int32 ValueRank { get; set; }
-        public UInt32[] ArrayDimensions { get; set; }
+        public UInt32[]? ArrayDimensions { get; set; }
         public Byte AccessLevel { get; set; }
         public Byte UserAccessLevel { get; set; }
         public Double MinimumSamplingInterval { get; set; }
@@ -4617,13 +4620,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AddNodesItem)]
     public class AddNodesItem : IEncodable
     {
-        public ExpandedNodeId ParentNodeId { get; set; }
-        public NodeId ReferenceTypeId { get; set; }
-        public ExpandedNodeId RequestedNewNodeId { get; set; }
-        public QualifiedName BrowseName { get; set; }
+        public ExpandedNodeId? ParentNodeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
+        public ExpandedNodeId? RequestedNewNodeId { get; set; }
+        public QualifiedName? BrowseName { get; set; }
         public NodeClass NodeClass { get; set; }
-        public NodeAttributes NodeAttributes { get; set; }
-        public ExpandedNodeId TypeDefinition { get; set; }
+        public NodeAttributes? NodeAttributes { get; set; }
+        public ExpandedNodeId? TypeDefinition { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4658,7 +4661,7 @@ namespace Workstation.ServiceModel.Ua
     public class AddNodesResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public NodeId AddedNodeId { get; set; }
+        public NodeId? AddedNodeId { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4682,8 +4685,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AddNodesRequest)]
     public class AddNodesRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public AddNodesItem[] NodesToAdd { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public AddNodesItem?[]? NodesToAdd { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4707,9 +4710,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AddNodesResponse)]
     public class AddNodesResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public AddNodesResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public AddNodesResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4735,11 +4738,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AddReferencesItem)]
     public class AddReferencesItem : IEncodable
     {
-        public NodeId SourceNodeId { get; set; }
-        public NodeId ReferenceTypeId { get; set; }
+        public NodeId? SourceNodeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsForward { get; set; }
-        public String TargetServerUri { get; set; }
-        public ExpandedNodeId TargetNodeId { get; set; }
+        public String? TargetServerUri { get; set; }
+        public ExpandedNodeId? TargetNodeId { get; set; }
         public NodeClass TargetNodeClass { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -4772,8 +4775,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AddReferencesRequest)]
     public class AddReferencesRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public AddReferencesItem[] ReferencesToAdd { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public AddReferencesItem?[]? ReferencesToAdd { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4797,9 +4800,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AddReferencesResponse)]
     public class AddReferencesResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4825,7 +4828,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteNodesItem)]
     public class DeleteNodesItem : IEncodable
     {
-        public NodeId NodeId { get; set; }
+        public NodeId? NodeId { get; set; }
         public Boolean DeleteTargetReferences { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -4850,8 +4853,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteNodesRequest)]
     public class DeleteNodesRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public DeleteNodesItem[] NodesToDelete { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public DeleteNodesItem?[]? NodesToDelete { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4875,9 +4878,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteNodesResponse)]
     public class DeleteNodesResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4903,10 +4906,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteReferencesItem)]
     public class DeleteReferencesItem : IEncodable
     {
-        public NodeId SourceNodeId { get; set; }
-        public NodeId ReferenceTypeId { get; set; }
+        public NodeId? SourceNodeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsForward { get; set; }
-        public ExpandedNodeId TargetNodeId { get; set; }
+        public ExpandedNodeId? TargetNodeId { get; set; }
         public Boolean DeleteBidirectional { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -4937,8 +4940,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteReferencesRequest)]
     public class DeleteReferencesRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public DeleteReferencesItem[] ReferencesToDelete { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public DeleteReferencesItem?[]? ReferencesToDelete { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4962,9 +4965,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteReferencesResponse)]
     public class DeleteReferencesResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -4990,7 +4993,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ViewDescription)]
     public class ViewDescription : IEncodable
     {
-        public NodeId ViewId { get; set; }
+        public NodeId? ViewId { get; set; }
         public DateTime Timestamp { get; set; }
         public UInt32 ViewVersion { get; set; }
 
@@ -5018,9 +5021,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrowseDescription)]
     public class BrowseDescription : IEncodable
     {
-        public NodeId NodeId { get; set; }
+        public NodeId? NodeId { get; set; }
         public BrowseDirection BrowseDirection { get; set; }
-        public NodeId ReferenceTypeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
         public Boolean IncludeSubtypes { get; set; }
         public UInt32 NodeClassMask { get; set; }
         public UInt32 ResultMask { get; set; }
@@ -5055,13 +5058,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReferenceDescription)]
     public class ReferenceDescription : IEncodable
     {
-        public NodeId ReferenceTypeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsForward { get; set; }
-        public ExpandedNodeId NodeId { get; set; }
-        public QualifiedName BrowseName { get; set; }
-        public LocalizedText DisplayName { get; set; }
+        public ExpandedNodeId? NodeId { get; set; }
+        public QualifiedName? BrowseName { get; set; }
+        public LocalizedText? DisplayName { get; set; }
         public NodeClass NodeClass { get; set; }
-        public ExpandedNodeId TypeDefinition { get; set; }
+        public ExpandedNodeId? TypeDefinition { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5096,8 +5099,8 @@ namespace Workstation.ServiceModel.Ua
     public class BrowseResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public Byte[] ContinuationPoint { get; set; }
-        public ReferenceDescription[] References { get; set; }
+        public Byte[]? ContinuationPoint { get; set; }
+        public ReferenceDescription?[]? References { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5123,10 +5126,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrowseRequest)]
     public class BrowseRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public ViewDescription View { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public ViewDescription? View { get; set; }
         public UInt32 RequestedMaxReferencesPerNode { get; set; }
-        public BrowseDescription[] NodesToBrowse { get; set; }
+        public BrowseDescription?[]? NodesToBrowse { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5154,9 +5157,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrowseResponse)]
     public class BrowseResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public BrowseResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public BrowseResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5182,9 +5185,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrowseNextRequest)]
     public class BrowseNextRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public Boolean ReleaseContinuationPoints { get; set; }
-        public Byte[][] ContinuationPoints { get; set; }
+        public Byte[]?[]? ContinuationPoints { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5210,9 +5213,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrowseNextResponse)]
     public class BrowseNextResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public BrowseResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public BrowseResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5238,8 +5241,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrowsePath)]
     public class BrowsePath : IEncodable
     {
-        public NodeId StartingNode { get; set; }
-        public RelativePath RelativePath { get; set; }
+        public NodeId? StartingNode { get; set; }
+        public RelativePath? RelativePath { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5263,7 +5266,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BrowsePathTarget)]
     public class BrowsePathTarget : IEncodable
     {
-        public ExpandedNodeId TargetId { get; set; }
+        public ExpandedNodeId? TargetId { get; set; }
         public UInt32 RemainingPathIndex { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -5289,7 +5292,7 @@ namespace Workstation.ServiceModel.Ua
     public class BrowsePathResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public BrowsePathTarget[] Targets { get; set; }
+        public BrowsePathTarget?[]? Targets { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5313,8 +5316,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.TranslateBrowsePathsToNodeIdsRequest)]
     public class TranslateBrowsePathsToNodeIdsRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public BrowsePath[] BrowsePaths { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public BrowsePath?[]? BrowsePaths { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5338,9 +5341,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.TranslateBrowsePathsToNodeIdsResponse)]
     public class TranslateBrowsePathsToNodeIdsResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public BrowsePathResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public BrowsePathResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5366,8 +5369,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RegisterNodesRequest)]
     public class RegisterNodesRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public NodeId[] NodesToRegister { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public NodeId?[]? NodesToRegister { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5391,8 +5394,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RegisterNodesResponse)]
     public class RegisterNodesResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public NodeId[] RegisteredNodeIds { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public NodeId?[]? RegisteredNodeIds { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5416,8 +5419,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.UnregisterNodesRequest)]
     public class UnregisterNodesRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public NodeId[] NodesToUnregister { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public NodeId?[]? NodesToUnregister { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5441,7 +5444,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.UnregisterNodesResponse)]
     public class UnregisterNodesResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5509,9 +5512,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.QueryDataDescription)]
     public class QueryDataDescription : IEncodable
     {
-        public RelativePath RelativePath { get; set; }
+        public RelativePath? RelativePath { get; set; }
         public UInt32 AttributeId { get; set; }
-        public String IndexRange { get; set; }
+        public String? IndexRange { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5537,9 +5540,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.NodeTypeDescription)]
     public class NodeTypeDescription : IEncodable
     {
-        public ExpandedNodeId TypeDefinitionNode { get; set; }
+        public ExpandedNodeId? TypeDefinitionNode { get; set; }
         public Boolean IncludeSubTypes { get; set; }
-        public QueryDataDescription[] DataToReturn { get; set; }
+        public QueryDataDescription?[]? DataToReturn { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5565,9 +5568,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.QueryDataSet)]
     public class QueryDataSet : IEncodable
     {
-        public ExpandedNodeId NodeId { get; set; }
-        public ExpandedNodeId TypeDefinitionNode { get; set; }
-        public Variant[] Values { get; set; }
+        public ExpandedNodeId? NodeId { get; set; }
+        public ExpandedNodeId? TypeDefinitionNode { get; set; }
+        public Variant[]? Values { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5593,10 +5596,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.NodeReference)]
     public class NodeReference : IEncodable
     {
-        public NodeId NodeId { get; set; }
-        public NodeId ReferenceTypeId { get; set; }
+        public NodeId? NodeId { get; set; }
+        public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsForward { get; set; }
-        public NodeId[] ReferencedNodeIds { get; set; }
+        public NodeId?[]? ReferencedNodeIds { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5625,8 +5628,8 @@ namespace Workstation.ServiceModel.Ua
     public class ContentFilterElementResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public StatusCode[] OperandStatusCodes { get; set; }
-        public DiagnosticInfo[] OperandDiagnosticInfos { get; set; }
+        public StatusCode[]? OperandStatusCodes { get; set; }
+        public DiagnosticInfo?[]? OperandDiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5652,8 +5655,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ContentFilterResult)]
     public class ContentFilterResult : IEncodable
     {
-        public ContentFilterElementResult[] ElementResults { get; set; }
-        public DiagnosticInfo[] ElementDiagnosticInfos { get; set; }
+        public ContentFilterElementResult?[]? ElementResults { get; set; }
+        public DiagnosticInfo?[]? ElementDiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5678,8 +5681,8 @@ namespace Workstation.ServiceModel.Ua
     public class ParsingResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public StatusCode[] DataStatusCodes { get; set; }
-        public DiagnosticInfo[] DataDiagnosticInfos { get; set; }
+        public StatusCode[]? DataStatusCodes { get; set; }
+        public DiagnosticInfo?[]? DataDiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5705,10 +5708,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.QueryFirstRequest)]
     public class QueryFirstRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public ViewDescription View { get; set; }
-        public NodeTypeDescription[] NodeTypes { get; set; }
-        public ContentFilter Filter { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public ViewDescription? View { get; set; }
+        public NodeTypeDescription?[]? NodeTypes { get; set; }
+        public ContentFilter? Filter { get; set; }
         public UInt32 MaxDataSetsToReturn { get; set; }
         public UInt32 MaxReferencesToReturn { get; set; }
 
@@ -5742,12 +5745,12 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.QueryFirstResponse)]
     public class QueryFirstResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public QueryDataSet[] QueryDataSets { get; set; }
-        public Byte[] ContinuationPoint { get; set; }
-        public ParsingResult[] ParsingResults { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
-        public ContentFilterResult FilterResult { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public QueryDataSet?[]? QueryDataSets { get; set; }
+        public Byte[]? ContinuationPoint { get; set; }
+        public ParsingResult?[]? ParsingResults { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
+        public ContentFilterResult? FilterResult { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5779,9 +5782,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.QueryNextRequest)]
     public class QueryNextRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public Boolean ReleaseContinuationPoint { get; set; }
-        public Byte[] ContinuationPoint { get; set; }
+        public Byte[]? ContinuationPoint { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5807,9 +5810,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.QueryNextResponse)]
     public class QueryNextResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public QueryDataSet[] QueryDataSets { get; set; }
-        public Byte[] RevisedContinuationPoint { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public QueryDataSet?[]? QueryDataSets { get; set; }
+        public Byte[]? RevisedContinuationPoint { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5835,10 +5838,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReadValueId)]
     public class ReadValueId : IEncodable
     {
-        public NodeId NodeId { get; set; }
+        public NodeId? NodeId { get; set; }
         public UInt32 AttributeId { get; set; }
-        public String IndexRange { get; set; }
-        public QualifiedName DataEncoding { get; set; }
+        public String? IndexRange { get; set; }
+        public QualifiedName? DataEncoding { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5866,10 +5869,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReadRequest)]
     public class ReadRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public Double MaxAge { get; set; }
         public TimestampsToReturn TimestampsToReturn { get; set; }
-        public ReadValueId[] NodesToRead { get; set; }
+        public ReadValueId?[]? NodesToRead { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5897,9 +5900,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReadResponse)]
     public class ReadResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public DataValue[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public DataValue?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5925,10 +5928,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryReadValueId)]
     public class HistoryReadValueId : IEncodable
     {
-        public NodeId NodeId { get; set; }
-        public String IndexRange { get; set; }
-        public QualifiedName DataEncoding { get; set; }
-        public Byte[] ContinuationPoint { get; set; }
+        public NodeId? NodeId { get; set; }
+        public String? IndexRange { get; set; }
+        public QualifiedName? DataEncoding { get; set; }
+        public Byte[]? ContinuationPoint { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -5975,7 +5978,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryEvent)]
     public class HistoryEvent : HistoryBase
     {
-        public HistoryEventFieldList[] Events { get; set; }
+        public HistoryEventFieldList?[]? Events { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -5999,7 +6002,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryEventFieldList)]
     public class HistoryEventFieldList : IEncodable
     {
-        public Variant[] EventFields { get; set; }
+        public Variant[]? EventFields { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6021,7 +6024,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryData)]
     public class HistoryData : HistoryBase
     {
-        public DataValue[] DataValues { get; set; }
+        public DataValue?[]? DataValues { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6045,7 +6048,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryModifiedData)]
     public class HistoryModifiedData : HistoryData
     {
-        public ModificationInfo[] ModificationInfos { get; set; }
+        public ModificationInfo?[]? ModificationInfos { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6071,7 +6074,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public DateTime ModificationTime { get; set; }
         public HistoryUpdateType UpdateType { get; set; }
-        public String UserName { get; set; }
+        public String? UserName { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6098,8 +6101,8 @@ namespace Workstation.ServiceModel.Ua
     public class HistoryReadResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public Byte[] ContinuationPoint { get; set; }
-        public HistoryBase HistoryData { get; set; }
+        public Byte[]? ContinuationPoint { get; set; }
+        public HistoryBase? HistoryData { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6144,7 +6147,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReadAtTimeDetails)]
     public class ReadAtTimeDetails : HistoryReadDetails
     {
-        public DateTime[] ReqTimes { get; set; }
+        public DateTime[]? ReqTimes { get; set; }
         public Boolean UseSimpleBounds { get; set; }
 
         public override void Encode(IEncoder encoder)
@@ -6174,8 +6177,8 @@ namespace Workstation.ServiceModel.Ua
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public Double ProcessingInterval { get; set; }
-        public NodeId[] AggregateType { get; set; }
-        public AggregateConfiguration AggregateConfiguration { get; set; }
+        public NodeId?[]? AggregateType { get; set; }
+        public AggregateConfiguration? AggregateConfiguration { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6280,7 +6283,7 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 NumValuesPerNode { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-        public EventFilter Filter { get; set; }
+        public EventFilter? Filter { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6310,8 +6313,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EventFilter)]
     public class EventFilter : MonitoringFilter
     {
-        public SimpleAttributeOperand[] SelectClauses { get; set; }
-        public ContentFilter WhereClause { get; set; }
+        public SimpleAttributeOperand?[]? SelectClauses { get; set; }
+        public ContentFilter? WhereClause { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6357,9 +6360,9 @@ namespace Workstation.ServiceModel.Ua
     public class AggregateFilter : MonitoringFilter
     {
         public DateTime StartTime { get; set; }
-        public NodeId AggregateType { get; set; }
+        public NodeId? AggregateType { get; set; }
         public Double ProcessingInterval { get; set; }
-        public AggregateConfiguration AggregateConfiguration { get; set; }
+        public AggregateConfiguration? AggregateConfiguration { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6419,11 +6422,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryReadRequest)]
     public class HistoryReadRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public HistoryReadDetails HistoryReadDetails { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public HistoryReadDetails? HistoryReadDetails { get; set; }
         public TimestampsToReturn TimestampsToReturn { get; set; }
         public Boolean ReleaseContinuationPoints { get; set; }
-        public HistoryReadValueId[] NodesToRead { get; set; }
+        public HistoryReadValueId?[]? NodesToRead { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6453,9 +6456,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryReadResponse)]
     public class HistoryReadResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public HistoryReadResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public HistoryReadResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6481,10 +6484,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.WriteValue)]
     public class WriteValue : IEncodable
     {
-        public NodeId NodeId { get; set; }
+        public NodeId? NodeId { get; set; }
         public UInt32 AttributeId { get; set; }
-        public String IndexRange { get; set; }
-        public DataValue Value { get; set; }
+        public String? IndexRange { get; set; }
+        public DataValue? Value { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6512,8 +6515,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.WriteRequest)]
     public class WriteRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public WriteValue[] NodesToWrite { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public WriteValue?[]? NodesToWrite { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6537,9 +6540,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.WriteResponse)]
     public class WriteResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6565,7 +6568,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryUpdateDetails)]
     public class HistoryUpdateDetails : IEncodable
     {
-        public NodeId NodeId { get; set; }
+        public NodeId? NodeId { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6587,7 +6590,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteEventDetails)]
     public class DeleteEventDetails : HistoryUpdateDetails
     {
-        public Byte[][] EventIds { get; set; }
+        public Byte[]?[]? EventIds { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6611,7 +6614,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteAtTimeDetails)]
     public class DeleteAtTimeDetails : HistoryUpdateDetails
     {
-        public DateTime[] ReqTimes { get; set; }
+        public DateTime[]? ReqTimes { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6666,8 +6669,8 @@ namespace Workstation.ServiceModel.Ua
     public class UpdateEventDetails : HistoryUpdateDetails
     {
         public PerformUpdateType PerformInsertReplace { get; set; }
-        public EventFilter Filter { get; set; }
-        public HistoryEventFieldList[] EventData { get; set; }
+        public EventFilter? Filter { get; set; }
+        public HistoryEventFieldList?[]? EventData { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6696,7 +6699,7 @@ namespace Workstation.ServiceModel.Ua
     public class UpdateStructureDataDetails : HistoryUpdateDetails
     {
         public PerformUpdateType PerformInsertReplace { get; set; }
-        public DataValue[] UpdateValues { get; set; }
+        public DataValue?[]? UpdateValues { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6723,7 +6726,7 @@ namespace Workstation.ServiceModel.Ua
     public class UpdateDataDetails : HistoryUpdateDetails
     {
         public PerformUpdateType PerformInsertReplace { get; set; }
-        public DataValue[] UpdateValues { get; set; }
+        public DataValue?[]? UpdateValues { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6750,8 +6753,8 @@ namespace Workstation.ServiceModel.Ua
     public class HistoryUpdateResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public StatusCode[] OperationResults { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public StatusCode[]? OperationResults { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6777,8 +6780,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryUpdateRequest)]
     public class HistoryUpdateRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public HistoryUpdateDetails[] HistoryUpdateDetails { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public HistoryUpdateDetails?[]? HistoryUpdateDetails { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6802,9 +6805,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryUpdateResponse)]
     public class HistoryUpdateResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public HistoryUpdateResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public HistoryUpdateResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6830,9 +6833,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CallMethodRequest)]
     public class CallMethodRequest : IEncodable
     {
-        public NodeId ObjectId { get; set; }
-        public NodeId MethodId { get; set; }
-        public Variant[] InputArguments { get; set; }
+        public NodeId? ObjectId { get; set; }
+        public NodeId? MethodId { get; set; }
+        public Variant[]? InputArguments { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6859,9 +6862,9 @@ namespace Workstation.ServiceModel.Ua
     public class CallMethodResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public StatusCode[] InputArgumentResults { get; set; }
-        public DiagnosticInfo[] InputArgumentDiagnosticInfos { get; set; }
-        public Variant[] OutputArguments { get; set; }
+        public StatusCode[]? InputArgumentResults { get; set; }
+        public DiagnosticInfo?[]? InputArgumentDiagnosticInfos { get; set; }
+        public Variant[]? OutputArguments { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6889,8 +6892,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CallRequest)]
     public class CallRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public CallMethodRequest[] MethodsToCall { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public CallMethodRequest?[]? MethodsToCall { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6914,9 +6917,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CallResponse)]
     public class CallResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public CallMethodResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public CallMethodResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -6963,7 +6966,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public DateTime RevisedStartTime { get; set; }
         public Double RevisedProcessingInterval { get; set; }
-        public AggregateConfiguration RevisedAggregateConfiguration { get; set; }
+        public AggregateConfiguration? RevisedAggregateConfiguration { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -6991,9 +6994,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EventFilterResult)]
     public class EventFilterResult : MonitoringFilterResult
     {
-        public StatusCode[] SelectClauseResults { get; set; }
-        public DiagnosticInfo[] SelectClauseDiagnosticInfos { get; set; }
-        public ContentFilterResult WhereClauseResult { get; set; }
+        public StatusCode[]? SelectClauseResults { get; set; }
+        public DiagnosticInfo?[]? SelectClauseDiagnosticInfos { get; set; }
+        public ContentFilterResult? WhereClauseResult { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -7023,7 +7026,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 ClientHandle { get; set; }
         public Double SamplingInterval { get; set; }
-        public MonitoringFilter Filter { get; set; }
+        public MonitoringFilter? Filter { get; set; }
         public UInt32 QueueSize { get; set; }
         public Boolean DiscardOldest { get; set; }
 
@@ -7055,9 +7058,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.MonitoredItemCreateRequest)]
     public class MonitoredItemCreateRequest : IEncodable
     {
-        public ReadValueId ItemToMonitor { get; set; }
+        public ReadValueId? ItemToMonitor { get; set; }
         public MonitoringMode MonitoringMode { get; set; }
-        public MonitoringParameters RequestedParameters { get; set; }
+        public MonitoringParameters? RequestedParameters { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7087,7 +7090,7 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 MonitoredItemId { get; set; }
         public Double RevisedSamplingInterval { get; set; }
         public UInt32 RevisedQueueSize { get; set; }
-        public MonitoringFilterResult FilterResult { get; set; }
+        public MonitoringFilterResult? FilterResult { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7117,10 +7120,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CreateMonitoredItemsRequest)]
     public class CreateMonitoredItemsRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public TimestampsToReturn TimestampsToReturn { get; set; }
-        public MonitoredItemCreateRequest[] ItemsToCreate { get; set; }
+        public MonitoredItemCreateRequest?[]? ItemsToCreate { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7148,9 +7151,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CreateMonitoredItemsResponse)]
     public class CreateMonitoredItemsResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public MonitoredItemCreateResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public MonitoredItemCreateResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7177,7 +7180,7 @@ namespace Workstation.ServiceModel.Ua
     public class MonitoredItemModifyRequest : IEncodable
     {
         public UInt32 MonitoredItemId { get; set; }
-        public MonitoringParameters RequestedParameters { get; set; }
+        public MonitoringParameters? RequestedParameters { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7204,7 +7207,7 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode StatusCode { get; set; }
         public Double RevisedSamplingInterval { get; set; }
         public UInt32 RevisedQueueSize { get; set; }
-        public MonitoringFilterResult FilterResult { get; set; }
+        public MonitoringFilterResult? FilterResult { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7232,10 +7235,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ModifyMonitoredItemsRequest)]
     public class ModifyMonitoredItemsRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public TimestampsToReturn TimestampsToReturn { get; set; }
-        public MonitoredItemModifyRequest[] ItemsToModify { get; set; }
+        public MonitoredItemModifyRequest?[]? ItemsToModify { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7263,9 +7266,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ModifyMonitoredItemsResponse)]
     public class ModifyMonitoredItemsResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public MonitoredItemModifyResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public MonitoredItemModifyResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7291,10 +7294,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SetMonitoringModeRequest)]
     public class SetMonitoringModeRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public MonitoringMode MonitoringMode { get; set; }
-        public UInt32[] MonitoredItemIds { get; set; }
+        public UInt32[]? MonitoredItemIds { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7322,9 +7325,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SetMonitoringModeResponse)]
     public class SetMonitoringModeResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7350,11 +7353,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SetTriggeringRequest)]
     public class SetTriggeringRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public UInt32 TriggeringItemId { get; set; }
-        public UInt32[] LinksToAdd { get; set; }
-        public UInt32[] LinksToRemove { get; set; }
+        public UInt32[]? LinksToAdd { get; set; }
+        public UInt32[]? LinksToRemove { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7384,11 +7387,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SetTriggeringResponse)]
     public class SetTriggeringResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] AddResults { get; set; }
-        public DiagnosticInfo[] AddDiagnosticInfos { get; set; }
-        public StatusCode[] RemoveResults { get; set; }
-        public DiagnosticInfo[] RemoveDiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? AddResults { get; set; }
+        public DiagnosticInfo?[]? AddDiagnosticInfos { get; set; }
+        public StatusCode[]? RemoveResults { get; set; }
+        public DiagnosticInfo?[]? RemoveDiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7418,9 +7421,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteMonitoredItemsRequest)]
     public class DeleteMonitoredItemsRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
-        public UInt32[] MonitoredItemIds { get; set; }
+        public UInt32[]? MonitoredItemIds { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7446,9 +7449,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteMonitoredItemsResponse)]
     public class DeleteMonitoredItemsResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7474,7 +7477,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CreateSubscriptionRequest)]
     public class CreateSubscriptionRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public Double RequestedPublishingInterval { get; set; }
         public UInt32 RequestedLifetimeCount { get; set; }
         public UInt32 RequestedMaxKeepAliveCount { get; set; }
@@ -7514,7 +7517,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CreateSubscriptionResponse)]
     public class CreateSubscriptionResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public Double RevisedPublishingInterval { get; set; }
         public UInt32 RevisedLifetimeCount { get; set; }
@@ -7548,7 +7551,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ModifySubscriptionRequest)]
     public class ModifySubscriptionRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public Double RequestedPublishingInterval { get; set; }
         public UInt32 RequestedLifetimeCount { get; set; }
@@ -7588,7 +7591,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ModifySubscriptionResponse)]
     public class ModifySubscriptionResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
         public Double RevisedPublishingInterval { get; set; }
         public UInt32 RevisedLifetimeCount { get; set; }
         public UInt32 RevisedMaxKeepAliveCount { get; set; }
@@ -7619,9 +7622,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SetPublishingModeRequest)]
     public class SetPublishingModeRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public Boolean PublishingEnabled { get; set; }
-        public UInt32[] SubscriptionIds { get; set; }
+        public UInt32[]? SubscriptionIds { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7647,9 +7650,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SetPublishingModeResponse)]
     public class SetPublishingModeResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7677,7 +7680,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 SequenceNumber { get; set; }
         public DateTime PublishTime { get; set; }
-        public NotificationData[] NotificationData { get; set; }
+        public NotificationData?[]? NotificationData { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7723,7 +7726,7 @@ namespace Workstation.ServiceModel.Ua
     public class StatusChangeNotification : NotificationData
     {
         public StatusCode Status { get; set; }
-        public DiagnosticInfo DiagnosticInfo { get; set; }
+        public DiagnosticInfo? DiagnosticInfo { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -7749,7 +7752,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EventNotificationList)]
     public class EventNotificationList : NotificationData
     {
-        public EventFieldList[] Events { get; set; }
+        public EventFieldList?[]? Events { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -7774,7 +7777,7 @@ namespace Workstation.ServiceModel.Ua
     public class EventFieldList : IEncodable
     {
         public UInt32 ClientHandle { get; set; }
-        public Variant[] EventFields { get; set; }
+        public Variant[]? EventFields { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7798,8 +7801,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataChangeNotification)]
     public class DataChangeNotification : NotificationData
     {
-        public MonitoredItemNotification[] MonitoredItems { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public MonitoredItemNotification?[]? MonitoredItems { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public override void Encode(IEncoder encoder)
         {
@@ -7826,7 +7829,7 @@ namespace Workstation.ServiceModel.Ua
     public class MonitoredItemNotification : IEncodable
     {
         public UInt32 ClientHandle { get; set; }
-        public DataValue Value { get; set; }
+        public DataValue? Value { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7875,8 +7878,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PublishRequest)]
     public class PublishRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public SubscriptionAcknowledgement[] SubscriptionAcknowledgements { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public SubscriptionAcknowledgement?[]? SubscriptionAcknowledgements { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7900,13 +7903,13 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PublishResponse)]
     public class PublishResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
-        public UInt32[] AvailableSequenceNumbers { get; set; }
+        public UInt32[]? AvailableSequenceNumbers { get; set; }
         public Boolean MoreNotifications { get; set; }
-        public NotificationMessage NotificationMessage { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public NotificationMessage? NotificationMessage { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7940,7 +7943,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RepublishRequest)]
     public class RepublishRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public UInt32 RetransmitSequenceNumber { get; set; }
 
@@ -7968,8 +7971,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RepublishResponse)]
     public class RepublishResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public NotificationMessage NotificationMessage { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public NotificationMessage? NotificationMessage { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -7994,7 +7997,7 @@ namespace Workstation.ServiceModel.Ua
     public class TransferResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public UInt32[] AvailableSequenceNumbers { get; set; }
+        public UInt32[]? AvailableSequenceNumbers { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8018,8 +8021,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.TransferSubscriptionsRequest)]
     public class TransferSubscriptionsRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public UInt32[] SubscriptionIds { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public UInt32[]? SubscriptionIds { get; set; }
         public Boolean SendInitialValues { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -8046,9 +8049,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.TransferSubscriptionsResponse)]
     public class TransferSubscriptionsResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public TransferResult[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public TransferResult?[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8074,8 +8077,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteSubscriptionsRequest)]
     public class DeleteSubscriptionsRequest : IServiceRequest
     {
-        public RequestHeader RequestHeader { get; set; }
-        public UInt32[] SubscriptionIds { get; set; }
+        public RequestHeader? RequestHeader { get; set; }
+        public UInt32[]? SubscriptionIds { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8099,9 +8102,9 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DeleteSubscriptionsResponse)]
     public class DeleteSubscriptionsResponse : IServiceResponse
     {
-        public ResponseHeader ResponseHeader { get; set; }
-        public StatusCode[] Results { get; set; }
-        public DiagnosticInfo[] DiagnosticInfos { get; set; }
+        public ResponseHeader? ResponseHeader { get; set; }
+        public StatusCode[]? Results { get; set; }
+        public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8127,11 +8130,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.BuildInfo)]
     public class BuildInfo : IEncodable
     {
-        public String ProductUri { get; set; }
-        public String ManufacturerName { get; set; }
-        public String ProductName { get; set; }
-        public String SoftwareVersion { get; set; }
-        public String BuildNumber { get; set; }
+        public String? ProductUri { get; set; }
+        public String? ManufacturerName { get; set; }
+        public String? ProductName { get; set; }
+        public String? SoftwareVersion { get; set; }
+        public String? BuildNumber { get; set; }
         public DateTime BuildDate { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -8164,7 +8167,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.RedundantServerDataType)]
     public class RedundantServerDataType : IEncodable
     {
-        public String ServerId { get; set; }
+        public String? ServerId { get; set; }
         public Byte ServiceLevel { get; set; }
         public ServerState ServerState { get; set; }
 
@@ -8192,7 +8195,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EndpointUrlListDataType)]
     public class EndpointUrlListDataType : IEncodable
     {
-        public String[] EndpointUrlList { get; set; }
+        public String?[]? EndpointUrlList { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8214,8 +8217,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.NetworkGroupDataType)]
     public class NetworkGroupDataType : IEncodable
     {
-        public String ServerUri { get; set; }
-        public EndpointUrlListDataType[] NetworkPaths { get; set; }
+        public String? ServerUri { get; set; }
+        public EndpointUrlListDataType?[]? NetworkPaths { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8328,9 +8331,9 @@ namespace Workstation.ServiceModel.Ua
         public DateTime StartTime { get; set; }
         public DateTime CurrentTime { get; set; }
         public ServerState State { get; set; }
-        public BuildInfo BuildInfo { get; set; }
+        public BuildInfo? BuildInfo { get; set; }
         public UInt32 SecondsTillShutdown { get; set; }
-        public LocalizedText ShutdownReason { get; set; }
+        public LocalizedText? ShutdownReason { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8362,12 +8365,12 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SessionDiagnosticsDataType)]
     public class SessionDiagnosticsDataType : IEncodable
     {
-        public NodeId SessionId { get; set; }
-        public String SessionName { get; set; }
-        public ApplicationDescription ClientDescription { get; set; }
-        public String ServerUri { get; set; }
-        public String EndpointUrl { get; set; }
-        public String[] LocaleIds { get; set; }
+        public NodeId? SessionId { get; set; }
+        public String? SessionName { get; set; }
+        public ApplicationDescription? ClientDescription { get; set; }
+        public String? ServerUri { get; set; }
+        public String? EndpointUrl { get; set; }
+        public String?[]? LocaleIds { get; set; }
         public Double ActualSessionTimeout { get; set; }
         public UInt32 MaxResponseMessageSize { get; set; }
         public DateTime ClientConnectionTime { get; set; }
@@ -8375,36 +8378,36 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 CurrentSubscriptionsCount { get; set; }
         public UInt32 CurrentMonitoredItemsCount { get; set; }
         public UInt32 CurrentPublishRequestsInQueue { get; set; }
-        public ServiceCounterDataType TotalRequestCount { get; set; }
+        public ServiceCounterDataType? TotalRequestCount { get; set; }
         public UInt32 UnauthorizedRequestCount { get; set; }
-        public ServiceCounterDataType ReadCount { get; set; }
-        public ServiceCounterDataType HistoryReadCount { get; set; }
-        public ServiceCounterDataType WriteCount { get; set; }
-        public ServiceCounterDataType HistoryUpdateCount { get; set; }
-        public ServiceCounterDataType CallCount { get; set; }
-        public ServiceCounterDataType CreateMonitoredItemsCount { get; set; }
-        public ServiceCounterDataType ModifyMonitoredItemsCount { get; set; }
-        public ServiceCounterDataType SetMonitoringModeCount { get; set; }
-        public ServiceCounterDataType SetTriggeringCount { get; set; }
-        public ServiceCounterDataType DeleteMonitoredItemsCount { get; set; }
-        public ServiceCounterDataType CreateSubscriptionCount { get; set; }
-        public ServiceCounterDataType ModifySubscriptionCount { get; set; }
-        public ServiceCounterDataType SetPublishingModeCount { get; set; }
-        public ServiceCounterDataType PublishCount { get; set; }
-        public ServiceCounterDataType RepublishCount { get; set; }
-        public ServiceCounterDataType TransferSubscriptionsCount { get; set; }
-        public ServiceCounterDataType DeleteSubscriptionsCount { get; set; }
-        public ServiceCounterDataType AddNodesCount { get; set; }
-        public ServiceCounterDataType AddReferencesCount { get; set; }
-        public ServiceCounterDataType DeleteNodesCount { get; set; }
-        public ServiceCounterDataType DeleteReferencesCount { get; set; }
-        public ServiceCounterDataType BrowseCount { get; set; }
-        public ServiceCounterDataType BrowseNextCount { get; set; }
-        public ServiceCounterDataType TranslateBrowsePathsToNodeIdsCount { get; set; }
-        public ServiceCounterDataType QueryFirstCount { get; set; }
-        public ServiceCounterDataType QueryNextCount { get; set; }
-        public ServiceCounterDataType RegisterNodesCount { get; set; }
-        public ServiceCounterDataType UnregisterNodesCount { get; set; }
+        public ServiceCounterDataType? ReadCount { get; set; }
+        public ServiceCounterDataType? HistoryReadCount { get; set; }
+        public ServiceCounterDataType? WriteCount { get; set; }
+        public ServiceCounterDataType? HistoryUpdateCount { get; set; }
+        public ServiceCounterDataType? CallCount { get; set; }
+        public ServiceCounterDataType? CreateMonitoredItemsCount { get; set; }
+        public ServiceCounterDataType? ModifyMonitoredItemsCount { get; set; }
+        public ServiceCounterDataType? SetMonitoringModeCount { get; set; }
+        public ServiceCounterDataType? SetTriggeringCount { get; set; }
+        public ServiceCounterDataType? DeleteMonitoredItemsCount { get; set; }
+        public ServiceCounterDataType? CreateSubscriptionCount { get; set; }
+        public ServiceCounterDataType? ModifySubscriptionCount { get; set; }
+        public ServiceCounterDataType? SetPublishingModeCount { get; set; }
+        public ServiceCounterDataType? PublishCount { get; set; }
+        public ServiceCounterDataType? RepublishCount { get; set; }
+        public ServiceCounterDataType? TransferSubscriptionsCount { get; set; }
+        public ServiceCounterDataType? DeleteSubscriptionsCount { get; set; }
+        public ServiceCounterDataType? AddNodesCount { get; set; }
+        public ServiceCounterDataType? AddReferencesCount { get; set; }
+        public ServiceCounterDataType? DeleteNodesCount { get; set; }
+        public ServiceCounterDataType? DeleteReferencesCount { get; set; }
+        public ServiceCounterDataType? BrowseCount { get; set; }
+        public ServiceCounterDataType? BrowseNextCount { get; set; }
+        public ServiceCounterDataType? TranslateBrowsePathsToNodeIdsCount { get; set; }
+        public ServiceCounterDataType? QueryFirstCount { get; set; }
+        public ServiceCounterDataType? QueryNextCount { get; set; }
+        public ServiceCounterDataType? RegisterNodesCount { get; set; }
+        public ServiceCounterDataType? UnregisterNodesCount { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8535,15 +8538,15 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SessionSecurityDiagnosticsDataType)]
     public class SessionSecurityDiagnosticsDataType : IEncodable
     {
-        public NodeId SessionId { get; set; }
-        public String ClientUserIdOfSession { get; set; }
-        public String[] ClientUserIdHistory { get; set; }
-        public String AuthenticationMechanism { get; set; }
-        public String Encoding { get; set; }
-        public String TransportProtocol { get; set; }
+        public NodeId? SessionId { get; set; }
+        public String? ClientUserIdOfSession { get; set; }
+        public String?[]? ClientUserIdHistory { get; set; }
+        public String? AuthenticationMechanism { get; set; }
+        public String? Encoding { get; set; }
+        public String? TransportProtocol { get; set; }
         public MessageSecurityMode SecurityMode { get; set; }
-        public String SecurityPolicyUri { get; set; }
-        public Byte[] ClientCertificate { get; set; }
+        public String? SecurityPolicyUri { get; set; }
+        public Byte[]? ClientCertificate { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8582,7 +8585,7 @@ namespace Workstation.ServiceModel.Ua
     public class StatusResult : IEncodable
     {
         public StatusCode StatusCode { get; set; }
-        public DiagnosticInfo DiagnosticInfo { get; set; }
+        public DiagnosticInfo? DiagnosticInfo { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8606,7 +8609,7 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SubscriptionDiagnosticsDataType)]
     public class SubscriptionDiagnosticsDataType : IEncodable
     {
-        public NodeId SessionId { get; set; }
+        public NodeId? SessionId { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public Byte Priority { get; set; }
         public Double PublishingInterval { get; set; }
@@ -8718,8 +8721,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ModelChangeStructureDataType)]
     public class ModelChangeStructureDataType : IEncodable
     {
-        public NodeId Affected { get; set; }
-        public NodeId AffectedType { get; set; }
+        public NodeId? Affected { get; set; }
+        public NodeId? AffectedType { get; set; }
         public Byte Verb { get; set; }
 
         public virtual void Encode(IEncoder encoder)
@@ -8746,8 +8749,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SemanticChangeStructureDataType)]
     public class SemanticChangeStructureDataType : IEncodable
     {
-        public NodeId Affected { get; set; }
-        public NodeId AffectedType { get; set; }
+        public NodeId? Affected { get; set; }
+        public NodeId? AffectedType { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8796,10 +8799,10 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.EUInformation)]
     public class EUInformation : IEncodable
     {
-        public String NamespaceUri { get; set; }
+        public String? NamespaceUri { get; set; }
         public Int32 UnitId { get; set; }
-        public LocalizedText DisplayName { get; set; }
-        public LocalizedText Description { get; set; }
+        public LocalizedText? DisplayName { get; set; }
+        public LocalizedText? Description { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8877,11 +8880,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AxisInformation)]
     public class AxisInformation : IEncodable
     {
-        public EUInformation EngineeringUnits { get; set; }
-        public Range EURange { get; set; }
-        public LocalizedText Title { get; set; }
+        public EUInformation? EngineeringUnits { get; set; }
+        public Range? EURange { get; set; }
+        public LocalizedText? Title { get; set; }
         public AxisScaleEnumeration AxisScaleType { get; set; }
-        public Double[] AxisSteps { get; set; }
+        public Double[]? AxisSteps { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8936,16 +8939,16 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ProgramDiagnosticDataType)]
     public class ProgramDiagnosticDataType : IEncodable
     {
-        public NodeId CreateSessionId { get; set; }
-        public String CreateClientName { get; set; }
+        public NodeId? CreateSessionId { get; set; }
+        public String? CreateClientName { get; set; }
         public DateTime InvocationCreationTime { get; set; }
         public DateTime LastTransitionTime { get; set; }
-        public String LastMethodCall { get; set; }
-        public NodeId LastMethodSessionId { get; set; }
-        public Argument[] LastMethodInputArguments { get; set; }
-        public Argument[] LastMethodOutputArguments { get; set; }
+        public String? LastMethodCall { get; set; }
+        public NodeId? LastMethodSessionId { get; set; }
+        public Argument?[]? LastMethodInputArguments { get; set; }
+        public Argument?[]? LastMethodOutputArguments { get; set; }
         public DateTime LastMethodCallTime { get; set; }
-        public StatusResult LastMethodReturnStatus { get; set; }
+        public StatusResult? LastMethodReturnStatus { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -8985,18 +8988,18 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ProgramDiagnostic2DataType)]
     public class ProgramDiagnostic2DataType : IEncodable
     {
-        public NodeId CreateSessionId { get; set; }
-        public String CreateClientName { get; set; }
+        public NodeId? CreateSessionId { get; set; }
+        public String? CreateClientName { get; set; }
         public DateTime InvocationCreationTime { get; set; }
         public DateTime LastTransitionTime { get; set; }
-        public String LastMethodCall { get; set; }
-        public NodeId LastMethodSessionId { get; set; }
-        public Argument[] LastMethodInputArguments { get; set; }
-        public Argument[] LastMethodOutputArguments { get; set; }
-        public Variant[] LastMethodInputValues { get; set; }
-        public Variant[] LastMethodOutputValues { get; set; }
+        public String? LastMethodCall { get; set; }
+        public NodeId? LastMethodSessionId { get; set; }
+        public Argument?[]? LastMethodInputArguments { get; set; }
+        public Argument?[]? LastMethodOutputArguments { get; set; }
+        public Variant[]? LastMethodInputValues { get; set; }
+        public Variant[]? LastMethodOutputValues { get; set; }
         public DateTime LastMethodCallTime { get; set; }
-        public StatusResult LastMethodReturnStatus { get; set; }
+        public StatusResult? LastMethodReturnStatus { get; set; }
 
         public virtual void Encode(IEncoder encoder)
         {
@@ -9040,8 +9043,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Annotation)]
     public class Annotation : IEncodable
     {
-        public String Message { get; set; }
-        public String UserName { get; set; }
+        public String? Message { get; set; }
+        public String? UserName { get; set; }
         public DateTime AnnotationTime { get; set; }
 
         public virtual void Encode(IEncoder encoder)
