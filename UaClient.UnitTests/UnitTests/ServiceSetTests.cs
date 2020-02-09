@@ -730,5 +730,138 @@ namespace Workstation.UaClient.UnitTests
             channel.Request
                 .Should().BeSameAs(request);
         }
+
+        /*
+         * ServiceExtensions
+         * Tests for: ServiceExtensions.css
+         */
+        [Fact]
+        public async Task ConditionRefreshAsync()
+        {
+            var response = new CallResponse
+            {
+                Results = new CallMethodResult[]
+                {
+                    new CallMethodResult
+                    {
+                        StatusCode = StatusCodes.BadAttributeIdInvalid
+                    }
+                }
+            };
+            var channel = new TestRequestChannel(response);
+
+            var ret = await channel.ConditionRefreshAsync(subscriptionId: 100);
+
+            ret
+                .Should().Be((StatusCode)StatusCodes.BadAttributeIdInvalid);
+
+            channel.Request
+                .Should().BeEquivalentTo(new
+                {
+                    MethodsToCall = new[]
+                    {
+                        new
+                        {
+                            ObjectId = NodeId.Parse(ObjectTypeIds.ConditionType),
+                            MethodId = NodeId.Parse(MethodIds.ConditionType_ConditionRefresh),
+                            InputArguments = new Variant[] { 100u }
+                        }
+                    }
+                });
+        }
+
+        [Fact]
+        public async Task AcknowledgeAsync()
+        {
+            var condition = new AcknowledgeableCondition();
+            var comment = new LocalizedText("Comment");
+            var response = new CallResponse
+            {
+                Results = new CallMethodResult[]
+                {
+                    new CallMethodResult
+                    {
+                        StatusCode = StatusCodes.BadAttributeIdInvalid
+                    }
+                }
+            };
+            var channel = new TestRequestChannel(response);
+
+            var ret = await channel.AcknowledgeAsync(condition, comment);
+
+            ret
+                .Should().Be((StatusCode)StatusCodes.BadAttributeIdInvalid);
+
+            channel.Request
+                .Should().BeEquivalentTo(new
+                {
+                    MethodsToCall = new[]
+                    {
+                        new
+                        {
+                            ObjectId = condition.ConditionId,
+                            MethodId = NodeId.Parse(MethodIds.AcknowledgeableConditionType_Acknowledge),
+                            InputArguments = new Variant[] { condition.EventId, comment }
+                        }
+                    }
+                });
+        }
+        
+        [Fact]
+        public void AcknowledgeAsyncNull()
+        {
+            var response = new CallResponse();
+            var channel = new TestRequestChannel(response);
+
+            channel.Invoking(c => c.AcknowledgeAsync(null, "Comment"))
+                .Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public async Task ConfirmAsync()
+        {
+            var condition = new AcknowledgeableCondition();
+            var comment = new LocalizedText("Comment");
+            var response = new CallResponse
+            {
+                Results = new CallMethodResult[]
+                {
+                    new CallMethodResult
+                    {
+                        StatusCode = StatusCodes.BadAttributeIdInvalid
+                    }
+                }
+            };
+            var channel = new TestRequestChannel(response);
+
+            var ret = await channel.ConfirmAsync(condition, comment);
+
+            ret
+                .Should().Be((StatusCode)StatusCodes.BadAttributeIdInvalid);
+
+            channel.Request
+                .Should().BeEquivalentTo(new
+                {
+                    MethodsToCall = new[]
+                    {
+                        new
+                        {
+                            ObjectId = condition.ConditionId,
+                            MethodId = NodeId.Parse(MethodIds.AcknowledgeableConditionType_Confirm),
+                            InputArguments = new Variant[] { condition.EventId, comment }
+                        }
+                    }
+                });
+        }
+        
+        [Fact]
+        public void ConfirmAsyncNull()
+        {
+            var response = new CallResponse();
+            var channel = new TestRequestChannel(response);
+
+            channel.Invoking(c => c.ConfirmAsync(null, "Comment"))
+                .Should().Throw<ArgumentNullException>();
+        }
     }
 }
