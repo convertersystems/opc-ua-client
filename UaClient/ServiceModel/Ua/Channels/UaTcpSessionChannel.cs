@@ -171,6 +171,31 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
         }
 
+        //Here you have the option to pass reconnect parameter
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            ICertificateStore certificateStore,
+            IUserIdentity userIdentity,
+            string endpointUrl,
+            UaTcpSessionChannelReconnectParameter uaTcpSessionChannelReconnectParameter,
+            string securityPolicyUri = null,
+            ILoggerFactory loggerFactory = null,
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
+        {
+            this.UserIdentity = userIdentity;
+            this.SessionId = uaTcpSessionChannelReconnectParameter.sessionId;
+            this.RemoteNonce = uaTcpSessionChannelReconnectParameter.RemoteNonce;
+            this.AuthenticationToken = uaTcpSessionChannelReconnectParameter.AuthenticationToken;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+        }
+
         /// <summary>
         /// Gets the asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>
         /// </summary>
