@@ -28,6 +28,18 @@ namespace Workstation.ServiceModel.Ua
     }
 
     /// <summary>
+    /// The UaTcpSessionChannel options.
+    /// </summary>
+   
+    public class UaTcpSessionChannelReconnectParameter
+    {
+        public byte[] RemoteNonce { get; set; } = null;
+        public NodeId AuthenticationToken { get; set; } = null;
+        public NodeId SessionId { get; set; } = null;
+    }
+
+
+    /// <summary>
     /// The UaTcpSecureChannel options.
     /// </summary>
     public class UaTcpSecureChannelOptions : UaTcpTransportChannelOptions
