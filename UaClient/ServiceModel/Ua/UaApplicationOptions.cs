@@ -35,7 +35,7 @@ namespace Workstation.ServiceModel.Ua
     {
         public byte[] RemoteNonce { get; set; } = null;
         public NodeId AuthenticationToken { get; set; } = null;
-        public NodeId sessionId { get; set; } = null;
+        public NodeId SessionId { get; set; } = null;
     }
 
 

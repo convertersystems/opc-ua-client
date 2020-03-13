@@ -185,7 +185,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
         {
             this.UserIdentity = userIdentity;
-            this.SessionId = uaTcpSessionChannelReconnectParameter.sessionId;
+            this.SessionId = uaTcpSessionChannelReconnectParameter.SessionId;
             this.RemoteNonce = uaTcpSessionChannelReconnectParameter.RemoteNonce;
             this.AuthenticationToken = uaTcpSessionChannelReconnectParameter.AuthenticationToken;
             this.options = options ?? new UaTcpSessionChannelOptions();
