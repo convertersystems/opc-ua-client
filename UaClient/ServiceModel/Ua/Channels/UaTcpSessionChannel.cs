@@ -86,6 +86,40 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
+        /// <param name="uaTcpSessionChannelReconnectParameter">Provides SessionId, RemoteNonce and AuthenticationToken for reconnecting to a session</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            ICertificateStore certificateStore,
+            IUserIdentity userIdentity,
+            EndpointDescription remoteEndpoint,
+            UaTcpSessionChannelReconnectParameter uaTcpSessionChannelReconnectParameter,
+            ILoggerFactory loggerFactory = null,
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, additionalTypes)
+        {
+            this.UserIdentity = userIdentity;
+            this.SessionId = uaTcpSessionChannelReconnectParameter.SessionId;
+            this.RemoteNonce = uaTcpSessionChannelReconnectParameter.RemoteNonce;
+            this.AuthenticationToken = uaTcpSessionChannelReconnectParameter.AuthenticationToken;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
+        /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
@@ -103,6 +137,42 @@ namespace Workstation.ServiceModel.Ua.Channels
             : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
         {
             this.UserIdentity = userIdentity;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
+        /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
+        /// <param name="uaTcpSessionChannelReconnectParameter">Provides SessionId, RemoteNonce and AuthenticationToken for reconnecting to a session</param>
+        /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            ICertificateStore certificateStore,
+            IUserIdentity userIdentity,
+            string endpointUrl,
+            UaTcpSessionChannelReconnectParameter uaTcpSessionChannelReconnectParameter,
+            string securityPolicyUri = null,
+            ILoggerFactory loggerFactory = null,
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
+        {
+            this.UserIdentity = userIdentity;
+            this.SessionId = uaTcpSessionChannelReconnectParameter.SessionId;
+            this.RemoteNonce = uaTcpSessionChannelReconnectParameter.RemoteNonce;
+            this.AuthenticationToken = uaTcpSessionChannelReconnectParameter.AuthenticationToken;
             this.options = options ?? new UaTcpSessionChannelOptions();
             this.loggerFactory = loggerFactory;
             this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
@@ -146,6 +216,40 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
+        /// <param name="uaTcpSessionChannelReconnectParameter">Provides SessionId, RemoteNonce and AuthenticationToken for reconnecting to a session</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
+        public UaTcpSessionChannel(
+            ApplicationDescription localDescription,
+            ICertificateStore certificateStore,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
+            EndpointDescription remoteEndpoint,
+            UaTcpSessionChannelReconnectParameter uaTcpSessionChannelReconnectParameter,
+            ILoggerFactory loggerFactory = null,
+            UaTcpSessionChannelOptions options = null,
+            IEnumerable<Type> additionalTypes = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, additionalTypes)
+        {
+            this.UserIdentityProvider = userIdentityProvider;
+            this.SessionId = uaTcpSessionChannelReconnectParameter.SessionId;
+            this.RemoteNonce = uaTcpSessionChannelReconnectParameter.RemoteNonce;
+            this.AuthenticationToken = uaTcpSessionChannelReconnectParameter.AuthenticationToken;
+            this.options = options ?? new UaTcpSessionChannelOptions();
+            this.loggerFactory = loggerFactory;
+            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
+            this.stateMachineCts = new CancellationTokenSource();
+            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
         /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
@@ -171,11 +275,22 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
         }
 
-        //Here you have the option to pass reconnect parameter
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// </summary>
+        /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
+        /// <param name="certificateStore">The local certificate store.</param>
+        /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
+        /// <param name="endpointUrl">The url of the endpoint of the remote application</param>
+        /// <param name="uaTcpSessionChannelReconnectParameter">Provides SessionId, RemoteNonce and AuthenticationToken for reconnecting to a session</param>
+        /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
+        /// <param name="loggerFactory">The logger factory.</param>
+        /// <param name="options">The session channel options.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
-            IUserIdentity userIdentity,
+            Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             string endpointUrl,
             UaTcpSessionChannelReconnectParameter uaTcpSessionChannelReconnectParameter,
             string securityPolicyUri = null,
@@ -184,7 +299,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             IEnumerable<Type> additionalTypes = null)
             : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
         {
-            this.UserIdentity = userIdentity;
+            this.UserIdentityProvider = userIdentityProvider;
             this.SessionId = uaTcpSessionChannelReconnectParameter.SessionId;
             this.RemoteNonce = uaTcpSessionChannelReconnectParameter.RemoteNonce;
             this.AuthenticationToken = uaTcpSessionChannelReconnectParameter.AuthenticationToken;
@@ -195,6 +310,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.stateMachineCts = new CancellationTokenSource();
             this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
         }
+
+
 
         /// <summary>
         /// Gets the asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>
