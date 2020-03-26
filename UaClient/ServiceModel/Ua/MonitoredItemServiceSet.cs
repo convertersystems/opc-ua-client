@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
-using Workstation.ServiceModel.Ua.Channels;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -15,14 +15,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="CreateMonitoredItemsRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="CreateMonitoredItemsResponse"/>.</returns>
-        public static async Task<CreateMonitoredItemsResponse> CreateMonitoredItemsAsync(this IRequestChannel channel, CreateMonitoredItemsRequest request)
+        public static async Task<CreateMonitoredItemsResponse> CreateMonitoredItemsAsync(this IRequestChannel channel, CreateMonitoredItemsRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (CreateMonitoredItemsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (CreateMonitoredItemsResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -31,14 +31,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="ModifyMonitoredItemsRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="ModifyMonitoredItemsResponse"/>.</returns>
-        public static async Task<ModifyMonitoredItemsResponse> ModifyMonitoredItemsAsync(this IRequestChannel channel, ModifyMonitoredItemsRequest request)
+        public static async Task<ModifyMonitoredItemsResponse> ModifyMonitoredItemsAsync(this IRequestChannel channel, ModifyMonitoredItemsRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (ModifyMonitoredItemsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (ModifyMonitoredItemsResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -47,14 +47,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="SetMonitoringModeRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="SetMonitoringModeResponse"/>.</returns>
-        public static async Task<SetMonitoringModeResponse> SetMonitoringModeAsync(this IRequestChannel channel, SetMonitoringModeRequest request)
+        public static async Task<SetMonitoringModeResponse> SetMonitoringModeAsync(this IRequestChannel channel, SetMonitoringModeRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (SetMonitoringModeResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (SetMonitoringModeResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -63,14 +63,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="SetTriggeringRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="SetTriggeringResponse"/>.</returns>
-        public static async Task<SetTriggeringResponse> SetTriggeringAsync(this IRequestChannel channel, SetTriggeringRequest request)
+        public static async Task<SetTriggeringResponse> SetTriggeringAsync(this IRequestChannel channel, SetTriggeringRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (SetTriggeringResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (SetTriggeringResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -79,14 +79,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="DeleteMonitoredItemsRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="DeleteMonitoredItemsResponse"/>.</returns>
-        public static async Task<DeleteMonitoredItemsResponse> DeleteMonitoredItemsAsync(this IRequestChannel channel, DeleteMonitoredItemsRequest request)
+        public static async Task<DeleteMonitoredItemsResponse> DeleteMonitoredItemsAsync(this IRequestChannel channel, DeleteMonitoredItemsRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (DeleteMonitoredItemsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (DeleteMonitoredItemsResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
     }

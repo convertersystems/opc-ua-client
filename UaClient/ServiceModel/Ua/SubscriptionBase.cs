@@ -485,7 +485,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">The session channel. </param>
         /// <param name="token">A cancellation token. </param>
         /// <returns>A task.</returns>
-        private async Task WhenChannelClosingAsync(UaTcpSessionChannel channel, CancellationToken token = default(CancellationToken))
+        private async Task WhenChannelClosingAsync(UaTcpSessionChannel channel, CancellationToken token = default)
         {
             var tcs = new TaskCompletionSource<bool>();
             EventHandler handler = (o, e) =>
@@ -514,7 +514,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task StateMachineAsync(CancellationToken token = default(CancellationToken))
+        private async Task StateMachineAsync(CancellationToken token = default)
         {
             while (!token.IsCancellationRequested)
             {

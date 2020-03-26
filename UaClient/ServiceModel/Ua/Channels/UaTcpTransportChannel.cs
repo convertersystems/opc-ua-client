@@ -107,7 +107,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="count">The count.</param>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
+        protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default)
         {
             this.ThrowIfClosedOrNotOpening();
             await this.stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
@@ -121,7 +121,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="count">The count.</param>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default(CancellationToken))
+        protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default)
         {
             this.ThrowIfClosedOrNotOpening();
             int initialOffset = offset;
@@ -187,7 +187,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.tcpClient = new TcpClient { NoDelay = true };
             var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl);
-            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).WithTimeoutAfter(ConnectTimeout).ConfigureAwait(false);
+            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(ConnectTimeout).ConfigureAwait(false);
             this.stream = this.tcpClient.GetStream();
 
             // send 'hello'.

@@ -112,7 +112,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task AbortAsync(CancellationToken token = default(CancellationToken))
+        public async Task AbortAsync(CancellationToken token = default)
         {
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
@@ -130,7 +130,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task CloseAsync(CancellationToken token = default(CancellationToken))
+        public async Task CloseAsync(CancellationToken token = default)
         {
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
@@ -148,7 +148,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task OpenAsync(CancellationToken token = default(CancellationToken))
+        public async Task OpenAsync(CancellationToken token = default)
         {
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try

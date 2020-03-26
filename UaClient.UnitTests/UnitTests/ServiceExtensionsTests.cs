@@ -141,7 +141,7 @@ namespace Workstation.UaClient.UnitTests
         {
             var task = Task.CompletedTask;
 
-            task.WithTimeoutAfter(-1).IsCompleted
+            task.TimeoutAfter(-1).IsCompleted
                 .Should().BeTrue();
         }
         
@@ -149,7 +149,7 @@ namespace Workstation.UaClient.UnitTests
         public async Task WithTimeoutAfterFastTask()
         {
             var fast = Task.Delay(1);
-            var task = fast.WithTimeoutAfter(-1);
+            var task = fast.TimeoutAfter(-1);
 
             await task.Invoking(t => t)
                 .Should().NotThrowAsync();
@@ -159,7 +159,7 @@ namespace Workstation.UaClient.UnitTests
         public async Task WithTimeoutAfter()
         {
             var never = Never();
-            var task = never.WithTimeoutAfter(0);
+            var task = never.TimeoutAfter(0);
 
             await task.Invoking(t => t)
                 .Should().ThrowAsync<TimeoutException>();
@@ -170,7 +170,7 @@ namespace Workstation.UaClient.UnitTests
         {
             var task = Task.FromResult(10);
 
-            task.WithTimeoutAfter(-1).IsCompleted
+            task.TimeoutAfter(-1).IsCompleted
                 .Should().BeTrue();
         }
 
@@ -178,7 +178,7 @@ namespace Workstation.UaClient.UnitTests
         public async Task ValueWithTimeoutAfter()
         {
             var never = Never(10);
-            var task = never.WithTimeoutAfter(0);
+            var task = never.TimeoutAfter(0);
 
             await task.Invoking(t => t)
                 .Should().ThrowAsync<TimeoutException>();
