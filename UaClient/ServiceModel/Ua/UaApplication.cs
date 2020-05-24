@@ -238,9 +238,9 @@ namespace Workstation.ServiceModel.Ua
                 this.logger?.LogTrace($"Begin creating UaTcpSessionChannel for {endpointUrl}");
                 await this.CheckSuspension(token).ConfigureAwait(false);
 
-                EndpointDescription? endpoint;
+                EndpointDescription endpoint;
                 var mappedEndpoint = this.MappedEndpoints?.LastOrDefault(m => m.RequestedUrl == endpointUrl);
-                if (mappedEndpoint != null)
+                if (mappedEndpoint?.Endpoint != null)
                 {
                     endpoint = mappedEndpoint.Endpoint;
                 }

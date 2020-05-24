@@ -653,14 +653,13 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ExtensionObject? ReadExtensionObject(string? fieldName)
         {
-            Type type;
             NodeId nodeId = this.ReadNodeId(null);
             byte b = this.reader.ReadByte();
             if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
             {
                 ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
 
-                if (this.channel != null && this.channel.TryGetTypeFromEncodingId(nodeId, out type))
+                if (this.channel != null && this.channel.TryGetTypeFromEncodingId(nodeId, out var type))
                 {
                     var len = this.ReadInt32(null);
                     var encodable = (IEncodable)Activator.CreateInstance(type)!;
@@ -687,7 +686,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             byte b = this.reader.ReadByte();
             if (b == (byte)BodyType.ByteString)
             {
-                if (this.channel == null || !this.channel.TryGetTypeFromEncodingId(nodeId, out Type type))
+                if (this.channel == null || !this.channel.TryGetTypeFromEncodingId(nodeId, out var type))
                 {
                     throw new ServiceResultException(StatusCodes.BadDecodingError);
                 }

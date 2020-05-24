@@ -40,7 +40,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="code">A code.</param>
         /// <param name="diagnosticInfo">A diagnostic info.</param>
         /// <param name="stringTable">A string table.</param>
-        public ServiceResult(StatusCode code, DiagnosticInfo? diagnosticInfo, IList<string> stringTable)
+        public ServiceResult(StatusCode code, DiagnosticInfo? diagnosticInfo, IList<string?>? stringTable)
         {
             this.StatusCode = code;
 
@@ -69,7 +69,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="index">An index.</param>
         /// <param name="diagnosticInfos">A diagnostic info array.</param>
         /// <param name="stringTable">A string table.</param>
-        public ServiceResult(StatusCode code, int index, DiagnosticInfo[] diagnosticInfos, IList<string> stringTable)
+        public ServiceResult(StatusCode code, int index, DiagnosticInfo[] diagnosticInfos, IList<string?>? stringTable)
         {
             this.StatusCode = code;
 
@@ -225,7 +225,7 @@ namespace Workstation.ServiceModel.Ua
         /// Looks up a string in a string table.
         /// </summary>
         /// <returns>A string.</returns>
-        private static string? LookupString(IList<string> stringTable, int index)
+        private static string? LookupString(IList<string?>? stringTable, int index)
         {
             if (stringTable == null || index < 0 || index >= stringTable.Count)
             {
