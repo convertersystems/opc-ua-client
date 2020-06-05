@@ -258,6 +258,47 @@ namespace Workstation.UaClient.IntegrationTests
         }
 
         /// <summary>
+        /// Tests simulating a reconnect.
+        /// Only run this test with a running opc test server.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task ConnectToExistingSession()
+        {
+
+            UaTcpSessionChannelReconnectParameter uaTcpSessionChannelReconnectParameter =
+                new UaTcpSessionChannelReconnectParameter();
+
+            var channel = new UaTcpSessionChannel(
+                this.localDescription,
+                this.certificateStore,
+                new AnonymousIdentity(),
+                EndpointUrl,
+                SecurityPolicyUris.None,
+                loggerFactory: this.loggerFactory);
+
+            await channel.OpenAsync();
+
+            uaTcpSessionChannelReconnectParameter.RemoteNonce = channel.RemoteNonce;
+            uaTcpSessionChannelReconnectParameter.AuthenticationToken = channel.AuthenticationToken;
+            uaTcpSessionChannelReconnectParameter.SessionId = channel.SessionId;
+
+            await channel.AbortAsync();
+
+            var channel2 = new UaTcpSessionChannel(
+                   this.localDescription,
+                   this.certificateStore,
+                   new AnonymousIdentity(),
+                   EndpointUrl,
+                   uaTcpSessionChannelReconnectParameter,
+                   SecurityPolicyUris.None,
+                   options: new UaTcpSessionChannelOptions { SessionTimeout = 120000 });
+
+            await channel2.OpenAsync();
+            await channel2.CloseAsync();
+        }
+
+        /// <summary>
         /// Tests read server status.
         /// Only run this test with a running opc test server.
         /// </summary>
