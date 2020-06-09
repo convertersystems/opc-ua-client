@@ -12,7 +12,7 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A service for discovery of remote OPC UA servers and their endpoints.
     /// </summary>
-    public class UaTcpDiscoveryService : ICommunicationObject, IDisposable
+    public class UaTcpDiscoveryService : ICommunicationObject
     {
         private readonly UaTcpSecureChannel innerChannel;
         private readonly SemaphoreSlim semaphore;
@@ -158,31 +158,6 @@ namespace Workstation.ServiceModel.Ua
             finally
             {
                 this.semaphore.Release();
-            }
-        }
-
-        /// <inheritdoc/>
-        void IDisposable.Dispose()
-        {
-            this.Dispose(true);
-        }
-
-        /// <summary>
-        /// Release unmanaged resources
-        /// </summary>
-        /// <param name="disposing">True when disposing, otherwise finalizing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                try
-                {
-                    this.CloseAsync().Wait(5000);
-                }
-                catch
-                {
-                    this.logger?.LogError("Error closing channel");
-                }
             }
         }
     }
