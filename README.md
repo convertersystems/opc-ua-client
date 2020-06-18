@@ -96,7 +96,6 @@ public class Program
 //   SoftwareVersion: 1.0.0-rc5-52-g04067153-dirty
 //   ManufacturerName: open62541
 //   State: Running
-//   CurrentTime: 09/08/2019 17:54:14
 
 ```
 

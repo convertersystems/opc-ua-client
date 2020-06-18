@@ -44,11 +44,7 @@ namespace Workstation.UaClient.IntegrationTests
 
         public IntegrationTests()
         {
-            var serviceCollection = new ServiceCollection();
-            serviceCollection.AddLogging(builder => builder.AddDebug());
-
-            var serviceProvider = serviceCollection.BuildServiceProvider();
-            this.loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            this.loggerFactory = LoggerFactory.Create(builder => builder.AddDebug());
             this.logger = this.loggerFactory?.CreateLogger<IntegrationTests>();
 
             this.localDescription = new ApplicationDescription
@@ -318,7 +314,6 @@ namespace Workstation.UaClient.IntegrationTests
             logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
             logger.LogInformation($"Activated session '{channel.SessionId}'.");
 
-
             var readRequest = new ReadRequest { NodesToRead = new[] { new ReadValueId { NodeId = NodeId.Parse(VariableIds.Server_ServerStatus_CurrentTime), AttributeId = AttributeIds.Value } } };
             for (int i = 0; i < 10; i++)
             {
@@ -326,6 +321,7 @@ namespace Workstation.UaClient.IntegrationTests
                 logger.LogInformation("Read {0}", readResult.Results[0].GetValueOrDefault<DateTime>());
                 await Task.Delay(1000);
             }
+
             logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }

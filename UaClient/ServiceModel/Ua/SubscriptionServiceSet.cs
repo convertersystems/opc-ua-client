@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using System.ComponentModel;
+using System.Threading;
 
 #nullable enable
 
@@ -17,14 +17,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="CreateSubscriptionRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="CreateSubscriptionResponse"/>.</returns>
-        public static async Task<CreateSubscriptionResponse> CreateSubscriptionAsync(this IRequestChannel channel, CreateSubscriptionRequest request)
+        public static async Task<CreateSubscriptionResponse> CreateSubscriptionAsync(this IRequestChannel channel, CreateSubscriptionRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (CreateSubscriptionResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (CreateSubscriptionResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -33,14 +33,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="ModifySubscriptionRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="ModifySubscriptionResponse"/>.</returns>
-        public static async Task<ModifySubscriptionResponse> ModifySubscriptionAsync(this IRequestChannel channel, ModifySubscriptionRequest request)
+        public static async Task<ModifySubscriptionResponse> ModifySubscriptionAsync(this IRequestChannel channel, ModifySubscriptionRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (ModifySubscriptionResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (ModifySubscriptionResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -49,14 +49,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="SetPublishingModeRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="SetPublishingModeResponse"/>.</returns>
-        public static async Task<SetPublishingModeResponse> SetPublishingModeAsync(this IRequestChannel channel, SetPublishingModeRequest request)
+        public static async Task<SetPublishingModeResponse> SetPublishingModeAsync(this IRequestChannel channel, SetPublishingModeRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (SetPublishingModeResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (SetPublishingModeResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -65,14 +65,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="PublishRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="PublishResponse"/>.</returns>
-        internal static async Task<PublishResponse> PublishAsync(this IRequestChannel channel, PublishRequest request)
+        internal static async Task<PublishResponse> PublishAsync(this IRequestChannel channel, PublishRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (PublishResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (PublishResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -81,14 +81,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="RepublishRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="RepublishResponse"/>.</returns>
-        internal static async Task<RepublishResponse> RepublishAsync(this IRequestChannel channel, RepublishRequest request)
+        internal static async Task<RepublishResponse> RepublishAsync(this IRequestChannel channel, RepublishRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (RepublishResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (RepublishResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -97,14 +97,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="TransferSubscriptionsRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="TransferSubscriptionsResponse"/>.</returns>
-        public static async Task<TransferSubscriptionsResponse> TransferSubscriptionsAsync(this IRequestChannel channel, TransferSubscriptionsRequest request)
+        public static async Task<TransferSubscriptionsResponse> TransferSubscriptionsAsync(this IRequestChannel channel, TransferSubscriptionsRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (TransferSubscriptionsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (TransferSubscriptionsResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -113,14 +113,14 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="DeleteSubscriptionsRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="DeleteSubscriptionsResponse"/>.</returns>
-        public static async Task<DeleteSubscriptionsResponse> DeleteSubscriptionsAsync(this IRequestChannel channel, DeleteSubscriptionsRequest request)
+        public static async Task<DeleteSubscriptionsResponse> DeleteSubscriptionsAsync(this IRequestChannel channel, DeleteSubscriptionsRequest request, CancellationToken token = default)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
             }
 
-            return (DeleteSubscriptionsResponse)await channel.RequestAsync(request).ConfigureAwait(false);
+            return (DeleteSubscriptionsResponse)await channel.RequestAsync(request, token).ConfigureAwait(false);
         }
     }
 }

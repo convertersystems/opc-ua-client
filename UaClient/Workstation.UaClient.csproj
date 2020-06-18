@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0;netcoreapp3.0</TargetFrameworks>
     <AssemblyName>Workstation.UaClient</AssemblyName>
     <RootNamespace>Workstation</RootNamespace>
-    <Version>2.5.0</Version>
+    <Version>2.5.2</Version>
     <Authors>Andrew Cullen</Authors>
     <Company>Converter Systems LLC</Company>
     <PackageProjectUrl>https://github.com/convertersystems/opc-ua-client</PackageProjectUrl>
@@ -12,11 +12,11 @@
     <Description>A library to browse, read, write and subscribe to the live data published by the OPC UA servers on your network.</Description>
     <PackageTags>opc, opc-ua, iiot</PackageTags>
     <RepositoryUrl>https://github.com/convertersystems/opc-ua-client</RepositoryUrl>
-    <Copyright>Copyright ©  2019 Converter Systems LLC.</Copyright>
-    <AssemblyVersion>2.5.0.0</AssemblyVersion>
+    <Copyright>Copyright ©  2020 Converter Systems LLC.</Copyright>
+    <AssemblyVersion>2.5.2.0</AssemblyVersion>
     <AssemblyTitle>Workstation.UaClient ($(TargetFramework))</AssemblyTitle>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <FileVersion>2.5.0.0</FileVersion>
+    <FileVersion>2.5.2.0</FileVersion>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
     <IncludeSymbols>true</IncludeSymbols>
