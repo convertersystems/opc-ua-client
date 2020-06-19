@@ -6,8 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public static class VariantExtensions

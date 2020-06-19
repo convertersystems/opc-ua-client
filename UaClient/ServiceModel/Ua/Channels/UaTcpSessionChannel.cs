@@ -12,8 +12,6 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>

@@ -4,8 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>Defines the contract for the basic state machine for all communication-oriented objects in the system.</summary>

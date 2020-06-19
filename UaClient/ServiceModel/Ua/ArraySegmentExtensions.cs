@@ -4,8 +4,6 @@
 using System;
 using System.IO;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>

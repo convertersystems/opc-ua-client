@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public static class ServiceExtensions

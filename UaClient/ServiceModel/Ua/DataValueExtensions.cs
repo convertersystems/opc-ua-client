@@ -5,8 +5,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public static class DataValueExtensions

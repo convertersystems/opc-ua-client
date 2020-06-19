@@ -10,8 +10,6 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryEncoder : IEncoder, IDisposable

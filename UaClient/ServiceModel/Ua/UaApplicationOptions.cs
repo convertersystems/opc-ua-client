@@ -7,8 +7,6 @@ using System.Text;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>

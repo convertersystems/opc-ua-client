@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Workstation.ServiceModel.Ua.Channels;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>

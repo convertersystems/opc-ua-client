@@ -35,8 +35,6 @@ using Org.BouncyCastle.Utilities.Encoders;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>

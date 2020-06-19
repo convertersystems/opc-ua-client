@@ -8,8 +8,6 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryDecoder : IDecoder, IDisposable

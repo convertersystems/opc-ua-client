@@ -15,8 +15,6 @@ using Microsoft.Extensions.Logging;
 using Workstation.Collections;
 using Workstation.ServiceModel.Ua.Channels;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>

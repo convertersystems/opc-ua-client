@@ -4,8 +4,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
