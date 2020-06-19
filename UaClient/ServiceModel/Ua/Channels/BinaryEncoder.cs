@@ -10,8 +10,6 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryEncoder : IEncoder, IDisposable
@@ -31,7 +29,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.stream = stream;
             this.channel = channel;
-            this.encoding = new UTF8Encoding(false, true);
+            this.encoding = new UTF8Encoding(false, false);
             this.writer = new BinaryWriter(this.stream, this.encoding, keepStreamOpen);
         }
 

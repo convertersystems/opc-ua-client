@@ -8,8 +8,6 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryDecoder : IDecoder, IDisposable
@@ -30,7 +28,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             this.stream = stream;
             this.channel = channel;
-            this.encoding = new UTF8Encoding(false, true);
+            this.encoding = new UTF8Encoding(false, false);
             this.reader = new BinaryReader(this.stream, this.encoding, keepStreamOpen);
         }
 

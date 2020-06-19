@@ -8,8 +8,6 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public enum VariantType
@@ -42,7 +40,7 @@ namespace Workstation.ServiceModel.Ua
         DiagnosticInfo = 25,
     }
 
-    public struct Variant
+    public readonly struct Variant
     {
         public static readonly Variant Null = default(Variant);
 

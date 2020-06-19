@@ -14,8 +14,6 @@ using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 using Org.BouncyCastle.X509.Store;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public class X509Identity : IUserIdentity

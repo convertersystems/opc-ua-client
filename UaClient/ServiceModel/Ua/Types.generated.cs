@@ -8,6 +8,7 @@
 // </auto-generated>
 // ------------------------------------------------------------------------------
 
+// Auto-generated code requires an explicit `#nullable` directive in source.
 #nullable enable
 
 namespace Workstation.ServiceModel.Ua

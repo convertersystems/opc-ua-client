@@ -7,8 +7,6 @@ using System.Reflection;
 using System.Threading;
 using Workstation.Collections;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>

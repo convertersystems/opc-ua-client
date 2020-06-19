@@ -4,8 +4,6 @@
 using System;
 using System.Xml.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public interface IDecoder

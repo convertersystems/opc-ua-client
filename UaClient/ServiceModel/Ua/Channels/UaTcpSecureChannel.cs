@@ -35,8 +35,6 @@ using Org.BouncyCastle.Utilities.Encoders;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
@@ -281,14 +279,14 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <param name="request">The request.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public virtual async Task<IServiceResponse> RequestAsync(IServiceRequest request)
+        public virtual async Task<IServiceResponse> RequestAsync(IServiceRequest request, CancellationToken token = default)
         {
             this.ThrowIfClosedOrNotOpening();
             this.TimestampHeader(request);
             var operation = new ServiceOperation(request);
             // TimestampHeader takes care that the RequestHeader property will not be null
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader!.TimeoutHint))
-            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.channelCts.Token))
+            using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, this.channelCts.Token, token))
             using (var registration = linkedCts.Token.Register(o => ((ServiceOperation)o!).TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)), operation, false))
             {
                 if (this.pendingRequests.Post(operation))
@@ -673,7 +671,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnOpenAsync(CancellationToken token = default(CancellationToken))
+        protected override async Task OnOpenAsync(CancellationToken token = default)
         {
             await base.OnOpenAsync(token).ConfigureAwait(false);
 
@@ -702,7 +700,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnOpenedAsync(CancellationToken token = default(CancellationToken))
+        protected override async Task OnOpenedAsync(CancellationToken token = default)
         {
             await base.OnOpenedAsync(token);
 
@@ -726,7 +724,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnCloseAsync(CancellationToken token = default(CancellationToken))
+        protected override async Task OnCloseAsync(CancellationToken token = default)
         {
             try
             {
@@ -742,7 +740,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnAbortAsync(CancellationToken token = default(CancellationToken))
+        protected override async Task OnAbortAsync(CancellationToken token = default)
         {
             await base.OnAbortAsync(token).ConfigureAwait(false);
         }
@@ -825,7 +823,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="operation">A service operation.</param>
         /// <param name="token">A cancellation token</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task SendRequestAsync(ServiceOperation operation, CancellationToken token = default(CancellationToken))
+        private async Task SendRequestAsync(ServiceOperation operation, CancellationToken token = default)
         {
             await this.sendingSemaphore.WaitAsync(token).ConfigureAwait(false);
             var request = operation.Request;
@@ -1413,7 +1411,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <param name="token">A cancellation token</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task ReceiveResponsesAsync(CancellationToken token = default(CancellationToken))
+        private async Task ReceiveResponsesAsync(CancellationToken token = default)
         {
             try
             {
@@ -1489,7 +1487,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <param name="token">A cancellation token</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<IServiceResponse?> ReceiveResponseAsync(CancellationToken token = default(CancellationToken))
+        private async Task<IServiceResponse?> ReceiveResponseAsync(CancellationToken token = default)
         {
             await this.receivingSemaphore.WaitAsync(token).ConfigureAwait(false);
             try

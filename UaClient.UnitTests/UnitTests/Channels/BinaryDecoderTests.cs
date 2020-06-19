@@ -213,6 +213,26 @@ namespace Workstation.UaClient.UnitTests.Channels
                 d => d.ReadString(null))
                 .Should().Be(val);
         }
+        
+        // This is a valid UTF8 string
+        [InlineData(new byte[] { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20 })]
+        // A leading byte of [C0] or [C1] is not allowed
+        [InlineData(new byte[] { 0x48, 0x65, 0x6c, 0xc0, 0xa0 })]
+        // A leading byte of [E0] is not allowed to be followed by a 
+        // continuation byte of [80] [9F]
+        [InlineData(new byte[] { 0x48, 0x65, 0x6c, 0xe0, 0x81, 0xa0 })]
+        // A leading byte of [F5] is not allowed
+        [InlineData(new byte[] { 0x48, 0x65, 0x6c, 0xf5, 0x81, 0xa0, 0xaa })]
+        [Theory]
+        public void DecodeMalformedUtf8String(byte[] val)
+        {
+            var str = Encoding.UTF8.GetString(val);
+
+            EncodeDecode(
+                e => e.WriteByteString(null, val),
+                d => d.ReadString(null))
+                .Should().Be(str);
+        }
 
         public static IEnumerable<object[]> DecodeDateTimeData { get; } = new []
         {
@@ -737,6 +757,32 @@ namespace Workstation.UaClient.UnitTests.Channels
                 e => e.WriteStringArray(null, val),
                 d => d.ReadStringArray(null))
                 .Should().BeEquivalentTo(val);
+        }
+        
+        public static IEnumerable<object[]> DecodeMalformedUtf8StringArrayData { get; } = new byte[][]
+        {
+            // This is a valid UTF8 string
+            new byte[] { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20 },
+            // A leading byte of [C0] or [C1] is not allowed
+            new byte[] { 0x48, 0x65, 0x6c, 0xc0, 0xa0 },
+            // A leading byte of [E0] is not allowed to be followed by a 
+            // continuation byte of [80] [9F]
+            new byte[] { 0x48, 0x65, 0x6c, 0xe0, 0x81, 0xa0 },
+            // A leading byte of [F5] is not allowed
+            new byte[] { 0x48, 0x65, 0x6c, 0xf5, 0x81, 0xa0, 0xaa }
+        }
+        .Select(x => new object[] { new byte[][] { x, new byte[] { 0x20 } } });
+
+        [MemberData(nameof(DecodeMalformedUtf8StringArrayData))]
+        [Theory]
+        public void DecodeMalformedUtf8StringArray(byte[][] val)
+        {
+            var str = val.Select(a => Encoding.UTF8.GetString(a));
+
+            EncodeDecode(
+                e => e.WriteByteStringArray(null, val),
+                d => d.ReadStringArray(null))
+                .Should().BeEquivalentTo(str);
         }
 
         public static IEnumerable<object[]> DecodeDateTimeArrayData { get; } = new DateTime[][]

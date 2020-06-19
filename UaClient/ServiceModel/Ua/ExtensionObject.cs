@@ -5,8 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public enum BodyType

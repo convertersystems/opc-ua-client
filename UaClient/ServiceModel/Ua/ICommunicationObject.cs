@@ -4,8 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>Defines the contract for the basic state machine for all communication-oriented objects in the system.</summary>
@@ -18,16 +16,16 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>Causes a communication object to transition immediately from its current state into the closed state.  </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies that the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task AbortAsync(CancellationToken token = default(CancellationToken));
+        Task AbortAsync(CancellationToken token = default);
 
         /// <summary>Causes a communication object to transition from its current state into the closed state.  </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies that the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task CloseAsync(CancellationToken token = default(CancellationToken));
+        Task CloseAsync(CancellationToken token = default);
 
         /// <summary>Causes a communication object to transition from the created state into the opened state.  </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies that the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task OpenAsync(CancellationToken token = default(CancellationToken));
+        Task OpenAsync(CancellationToken token = default);
     }
 }

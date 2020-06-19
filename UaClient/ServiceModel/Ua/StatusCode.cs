@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
-    public struct StatusCode
+    public readonly struct StatusCode
     {
         private const uint SeverityMask = 0xC0000000u;
         private const uint SeverityGood = 0x00000000u;

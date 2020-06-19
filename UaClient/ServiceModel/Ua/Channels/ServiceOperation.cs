@@ -3,8 +3,6 @@
 
 using System.Threading.Tasks;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     public class ServiceOperation : TaskCompletionSource<IServiceResponse>

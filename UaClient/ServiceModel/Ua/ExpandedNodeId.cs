@@ -7,8 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     public sealed class ExpandedNodeId : IEquatable<ExpandedNodeId>

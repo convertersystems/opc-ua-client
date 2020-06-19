@@ -7,14 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Workstation.ServiceModel.Ua.Channels;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
     /// A service for discovery of remote OPC UA servers and their endpoints.
     /// </summary>
-    public class UaTcpDiscoveryService : ICommunicationObject, IDisposable
+    public class UaTcpDiscoveryService : ICommunicationObject
     {
         private readonly UaTcpSecureChannel innerChannel;
         private readonly SemaphoreSlim semaphore;
@@ -114,7 +112,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task AbortAsync(CancellationToken token = default(CancellationToken))
+        public async Task AbortAsync(CancellationToken token = default)
         {
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
@@ -132,7 +130,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task CloseAsync(CancellationToken token = default(CancellationToken))
+        public async Task CloseAsync(CancellationToken token = default)
         {
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
@@ -150,7 +148,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">The <see cref="T:System.Threading.CancellationToken" /> that notifies when the task should be canceled.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task OpenAsync(CancellationToken token = default(CancellationToken))
+        public async Task OpenAsync(CancellationToken token = default)
         {
             await this.semaphore.WaitAsync(token).ConfigureAwait(false);
             try
@@ -160,31 +158,6 @@ namespace Workstation.ServiceModel.Ua
             finally
             {
                 this.semaphore.Release();
-            }
-        }
-
-        /// <inheritdoc/>
-        void IDisposable.Dispose()
-        {
-            this.Dispose(true);
-        }
-
-        /// <summary>
-        /// Release unmanaged resources
-        /// </summary>
-        /// <param name="disposing">True when disposing, otherwise finalizing.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                try
-                {
-                    this.CloseAsync().Wait(5000);
-                }
-                catch
-                {
-                    this.logger?.LogError("Error closing channel");
-                }
             }
         }
     }

@@ -10,8 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Workstation.ServiceModel.Ua.Channels;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
@@ -201,7 +199,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private Task CheckSuspension(CancellationToken token = default(CancellationToken))
+        private Task CheckSuspension(CancellationToken token = default)
         {
             return this.suspensionTask.Task.WithCancellation(token);
         }
@@ -212,7 +210,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="endpointUrl">The endpoint url of the OPC UA server</param>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A <see cref="UaTcpSessionChannel"/>.</returns>
-        public async Task<UaTcpSessionChannel> GetChannelAsync(string endpointUrl, CancellationToken token = default(CancellationToken))
+        public async Task<UaTcpSessionChannel> GetChannelAsync(string endpointUrl, CancellationToken token = default)
         {
             this.logger?.LogTrace($"Begin getting UaTcpSessionChannel for {endpointUrl}");
             if (string.IsNullOrEmpty(endpointUrl))
@@ -225,13 +223,12 @@ namespace Workstation.ServiceModel.Ua
             var ch = await this.channelMap
                 .GetOrAdd(endpointUrl, k => new Lazy<Task<UaTcpSessionChannel>>(() => Task.Run(() => this.CreateChannelAsync(k, token))))
                 .Value
-                .WithCancellation(token)
                 .ConfigureAwait(false);
 
             return ch;
         }
 
-        private async Task<UaTcpSessionChannel> CreateChannelAsync(string endpointUrl, CancellationToken token = default(CancellationToken))
+        private async Task<UaTcpSessionChannel> CreateChannelAsync(string endpointUrl, CancellationToken token = default)
         {
             try
             {
@@ -285,7 +282,6 @@ namespace Workstation.ServiceModel.Ua
             catch (Exception ex)
             {
                 this.logger?.LogTrace($"Error creating UaTcpSessionChannel for {endpointUrl}. {ex.Message}");
-                this.channelMap.TryRemove(endpointUrl, out _);
                 throw;
             }
         }

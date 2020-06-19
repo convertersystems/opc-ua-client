@@ -12,8 +12,6 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
 using System.Collections.Generic;
 
-#nullable enable
-
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
@@ -27,14 +25,19 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const double DefaultSessionTimeout = 120 * 1000; // 2 minutes
 
         /// <summary>
-        /// The default publishing interval.
+        /// The default subscription publishing interval.
         /// </summary>
         public const double DefaultPublishingInterval = 1000f;
 
         /// <summary>
-        /// The default keep alive count.
+        /// The default subscription keep-alive count.
         /// </summary>
         public const uint DefaultKeepaliveCount = 30;
+
+        /// <summary>
+        /// The default subscription lifetime count.
+        /// </summary>
+        public const uint DefaultLifetimeCount = DefaultKeepaliveCount* 3;
 
         private const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         private const string RsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
@@ -241,7 +244,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnOpeningAsync(CancellationToken token = default(CancellationToken))
+        protected override async Task OnOpeningAsync(CancellationToken token = default)
         {
             if (this.RemoteEndpoint.Server == null)
             {
@@ -301,7 +304,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnOpenAsync(CancellationToken token = default(CancellationToken))
+        protected override async Task OnOpenAsync(CancellationToken token = default)
         {
             this.logger?.LogInformation($"Opening session channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
             this.logger?.LogInformation($"SecurityPolicy: '{this.RemoteEndpoint.SecurityPolicyUri}'.");
@@ -316,8 +319,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             // requires from previous Session: SessionId, AuthenticationToken, RemoteNonce
             if (this.SessionId == null)
             {
-                var localNonce = this.RemoteEndpoint.SecurityMode != MessageSecurityMode.None ? this.GetNextNonce(NonceLength) : null;
-                var localCertificate = this.RemoteEndpoint.SecurityMode != MessageSecurityMode.None ? this.LocalCertificate : null;
+                var localNonce = this.GetNextNonce(NonceLength);
+                var localCertificate = this.LocalCertificate;
                 var createSessionRequest = new CreateSessionRequest
                 {
                     ClientDescription = this.LocalDescription,
@@ -736,9 +739,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             // create the keep alive subscription.
             var subscriptionRequest = new CreateSubscriptionRequest
             {
-                RequestedPublishingInterval = DefaultPublishingInterval,
-                RequestedMaxKeepAliveCount = DefaultKeepaliveCount,
-                RequestedLifetimeCount = DefaultKeepaliveCount * 3,
+                RequestedPublishingInterval = 1000f,
+                RequestedMaxKeepAliveCount = 5,
+                RequestedLifetimeCount = 120,
                 PublishingEnabled = true,
             };
             var subscriptionResponse = await this.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
@@ -752,14 +755,14 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override Task OnClosingAsync(CancellationToken token = default(CancellationToken))
+        protected override Task OnClosingAsync(CancellationToken token = default)
         {
             this.stateMachineCts.Cancel();
             return base.OnClosingAsync(token);
         }
 
         /// <inheritdoc/>
-        protected override async Task OnCloseAsync(CancellationToken token = default(CancellationToken))
+        protected override async Task OnCloseAsync(CancellationToken token = default)
         {
             await this.CloseSessionAsync(new CloseSessionRequest { DeleteSubscriptions = true }).ConfigureAwait(false);
             await Task.Delay(1000).ConfigureAwait(false);
@@ -780,7 +783,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task PublishAsync(CancellationToken token = default(CancellationToken))
+        private async Task PublishAsync(CancellationToken token = default)
         {
             var publishRequest = new PublishRequest
             {
@@ -791,7 +794,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 try
                 {
-                    var publishResponse = await this.PublishAsync(publishRequest).WithCancellation(token).ConfigureAwait(false);
+                    var publishResponse = await this.PublishAsync(publishRequest, token).ConfigureAwait(false);
 
                     // post to linked data flow blocks and subscriptions.
                     this.publishResponses.Post(publishResponse);
@@ -834,7 +837,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         /// <param name="token">A cancellation token.</param>
         /// <returns>A task.</returns>
-        private async Task StateMachineAsync(CancellationToken token = default(CancellationToken))
+        private async Task StateMachineAsync(CancellationToken token = default)
         {
             var tasks = new[]
             {
