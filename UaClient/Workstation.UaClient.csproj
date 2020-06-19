@@ -23,6 +23,7 @@
     <GenerateDocumentationFile Condition=" '$(Configuration)' == 'Release' ">true</GenerateDocumentationFile>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

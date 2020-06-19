@@ -26,7 +26,7 @@ namespace System.Diagnostics.CodeAnalysis
     internal sealed partial class DoesNotReturnIfAttribute : System.Attribute
     {
         public DoesNotReturnIfAttribute(bool parameterValue) { }
-        public bool ParameterValue { get { throw null; } }
+        public bool ParameterValue { get { throw null!; } }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue, Inherited = false)]
     internal sealed partial class MaybeNullAttribute : System.Attribute
@@ -37,7 +37,7 @@ namespace System.Diagnostics.CodeAnalysis
     internal sealed partial class MaybeNullWhenAttribute : System.Attribute
     {
         public MaybeNullWhenAttribute(bool returnValue) { }
-        public bool ReturnValue { get { throw null; } }
+        public bool ReturnValue { get { throw null!; } }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue, Inherited = false)]
     internal sealed partial class NotNullAttribute : System.Attribute
@@ -48,13 +48,13 @@ namespace System.Diagnostics.CodeAnalysis
     internal sealed partial class NotNullIfNotNullAttribute : System.Attribute
     {
         public NotNullIfNotNullAttribute(string parameterName) { }
-        public string ParameterName { get { throw null; } }
+        public string ParameterName { get { throw null!; } }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited = false)]
     internal sealed partial class NotNullWhenAttribute : System.Attribute
     {
         public NotNullWhenAttribute(bool returnValue) { }
-        public bool ReturnValue { get { throw null; } }
+        public bool ReturnValue { get { throw null!; } }
     }
 }
 
