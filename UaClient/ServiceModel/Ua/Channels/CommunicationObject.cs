@@ -14,7 +14,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// </summary>
     public abstract class CommunicationObject : ICommunicationObject
     {
-        private readonly ILogger logger;
+        private readonly ILogger? logger;
         private bool aborted;
         private bool onClosingCalled;
         private bool onClosedCalled;
@@ -30,22 +30,22 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Initializes a new instance of the <see cref="CommunicationObject"/> class.
         /// </summary>
         /// <param name="loggerFactory">The logger.</param>
-        public CommunicationObject(ILoggerFactory loggerFactory = null)
+        public CommunicationObject(ILoggerFactory? loggerFactory = null)
         {
             this.logger = loggerFactory?.CreateLogger(this.GetType());
             this.semaphore = new SemaphoreSlim(1);
             this.exceptions = new Lazy<ConcurrentQueue<Exception>>();
         }
 
-        public event EventHandler Closed;
+        public event EventHandler? Closed;
 
-        public event EventHandler Closing;
+        public event EventHandler? Closing;
 
-        public event EventHandler Faulted;
+        public event EventHandler? Faulted;
 
-        public event EventHandler Opened;
+        public event EventHandler? Opened;
 
-        public event EventHandler Opening;
+        public event EventHandler? Opening;
 
         /// <summary>
         /// Gets or sets gets a value that indicates the current state of the communication object.
@@ -300,7 +300,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel closed.");
-            EventHandler closed = this.Closed;
+            EventHandler? closed = this.Closed;
             if (closed != null)
             {
                 closed(this, EventArgs.Empty);
@@ -331,7 +331,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel closing.");
-            EventHandler closing = this.Closing;
+            EventHandler? closing = this.Closing;
             if (closing != null)
             {
                 closing(this, EventArgs.Empty);
@@ -361,7 +361,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel faulted.");
-            EventHandler faulted = this.Faulted;
+            EventHandler? faulted = this.Faulted;
             if (faulted != null)
             {
                 faulted(this, EventArgs.Empty);
@@ -399,7 +399,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel opened.");
-            EventHandler opened = this.Opened;
+            EventHandler? opened = this.Opened;
             if (opened != null)
             {
                 opened(this, EventArgs.Empty);
@@ -424,7 +424,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.logger?.LogTrace($"Channel opening.");
-            EventHandler opening = this.Opening;
+            EventHandler? opening = this.Opening;
             if (opening != null)
             {
                 opening(this, EventArgs.Empty);
@@ -436,10 +436,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.exceptions.Value.Enqueue(exception);
         }
 
-        protected Exception GetPendingException()
+        protected Exception? GetPendingException()
         {
-            Exception ex;
-            if (this.exceptions.Value.TryDequeue(out ex))
+            if (this.exceptions.Value.TryDequeue(out var ex))
             {
                 return ex;
             }
@@ -449,7 +448,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected void ThrowPending()
         {
-            Exception exception = this.GetPendingException();
+            Exception? exception = this.GetPendingException();
             if (exception != null)
             {
                 throw exception;

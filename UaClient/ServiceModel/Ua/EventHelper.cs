@@ -17,7 +17,7 @@ namespace Workstation.ServiceModel.Ua
             where T : BaseEvent, new()
         {
             var e = Activator.CreateInstance<T>();
-            if (DeserializerCache.TryGetValue(typeof(T), out PropertyInfo[] infos))
+            if (DeserializerCache.TryGetValue(typeof(T), out var infos))
             {
                 for (int i = 0; i < eventFields.Length; i++)
                 {
@@ -30,8 +30,8 @@ namespace Workstation.ServiceModel.Ua
 
         public static BaseEvent Deserialize(Type type, Variant[] eventFields)
         {
-            var e = (BaseEvent)Activator.CreateInstance(type);
-            if (DeserializerCache.TryGetValue(type, out PropertyInfo[] infos))
+            var e = (BaseEvent)Activator.CreateInstance(type)!;
+            if (DeserializerCache.TryGetValue(type, out var infos))
             {
                 for (int i = 0; i < eventFields.Length; i++)
                 {
@@ -46,7 +46,7 @@ namespace Workstation.ServiceModel.Ua
             where T : BaseEvent, new()
         {
             var type = typeof(T);
-            if (SelectClauseCache.TryGetValue(type, out SimpleAttributeOperand[] clauses))
+            if (SelectClauseCache.TryGetValue(type, out var clauses))
             {
                 return clauses;
             }
@@ -57,7 +57,7 @@ namespace Workstation.ServiceModel.Ua
 
         public static SimpleAttributeOperand[] GetSelectClauses(Type type)
         {
-            if (SelectClauseCache.TryGetValue(type, out SimpleAttributeOperand[] clauses))
+            if (SelectClauseCache.TryGetValue(type, out var clauses))
             {
                 return clauses;
             }
@@ -80,8 +80,8 @@ namespace Workstation.ServiceModel.Ua
 
                 var clause = new SimpleAttributeOperand
                 {
-                    TypeDefinitionId = NodeId.Parse(efa.TypeDefinitionId),
-                    BrowsePath = !String.IsNullOrWhiteSpace(efa.BrowsePath) ? efa.BrowsePath.Split('/').Select(s => QualifiedName.Parse(s)).ToArray() : new QualifiedName[0],
+                    TypeDefinitionId = NodeId.Parse(efa.TypeDefinitionId!),
+                    BrowsePath = !String.IsNullOrWhiteSpace(efa.BrowsePath) ? efa.BrowsePath!.Split('/').Select(s => QualifiedName.Parse(s)).ToArray() : new QualifiedName[0],
                     AttributeId = efa.AttributeId,
                     IndexRange = efa.IndexRange
                 };

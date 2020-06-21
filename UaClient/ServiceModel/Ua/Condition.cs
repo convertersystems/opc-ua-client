@@ -12,13 +12,13 @@ namespace Workstation.ServiceModel.Ua
     public class Condition : BaseEvent
     {
         [EventField(typeDefinitionId: ObjectTypeIds.ConditionType, attributeId: AttributeIds.NodeId)]
-        public NodeId ConditionId { get; set; }
+        public NodeId? ConditionId { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.ConditionType, browsePath: "ConditionName")]
-        public string ConditionName { get; set; }
+        public string? ConditionName { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.ConditionType, browsePath: "BranchId")]
-        public NodeId BranchId { get; set; }
+        public NodeId? BranchId { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.ConditionType, browsePath: "Retain")]
         public bool? Retain { get; set; }

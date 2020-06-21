@@ -12,19 +12,19 @@ namespace Workstation.ServiceModel.Ua
     public class BaseEvent
     {
         [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "EventId")]
-        public byte[] EventId { get; set; }
+        public byte[]? EventId { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "EventType")]
-        public NodeId EventType { get; set; }
+        public NodeId? EventType { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "SourceName")]
-        public string SourceName { get; set; }
+        public string? SourceName { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "Time")]
         public DateTime Time { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "Message")]
-        public LocalizedText Message { get; set; }
+        public LocalizedText? Message { get; set; }
 
         [EventField(typeDefinitionId: ObjectTypeIds.BaseEventType, browsePath: "Severity")]
         public ushort Severity { get; set; }

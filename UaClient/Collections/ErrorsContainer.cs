@@ -53,7 +53,7 @@ namespace Workstation.Collections
         public IEnumerable<T> GetErrors(string propertyName)
         {
             var localPropertyName = propertyName ?? string.Empty;
-            List<T> currentValidationResults = null;
+            List<T>? currentValidationResults = null;
             if (this.validationResults.TryGetValue(localPropertyName, out currentValidationResults))
             {
                 return currentValidationResults;
@@ -84,7 +84,7 @@ namespace Workstation.Collections
         /// </remarks>
         /// <param name="propertyName">The name of the property.</param>
         /// <param name="newValidationResults">The new validation errors.</param>
-        public void SetErrors(string propertyName, IEnumerable<T> newValidationResults)
+        public void SetErrors(string propertyName, IEnumerable<T>? newValidationResults)
         {
             var localPropertyName = propertyName ?? string.Empty;
             var hasCurrentValidationResults = this.validationResults.ContainsKey(localPropertyName);
@@ -94,7 +94,7 @@ namespace Workstation.Collections
             {
                 if (hasNewValidationResults)
                 {
-                    this.validationResults[localPropertyName] = new List<T>(newValidationResults);
+                    this.validationResults[localPropertyName] = new List<T>(newValidationResults!);
                     this.raiseErrorsChanged(localPropertyName);
                 }
                 else

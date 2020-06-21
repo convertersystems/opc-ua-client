@@ -18,7 +18,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="browsePath">the browse names, separated by '/'.</param>
         /// <param name="attributeId">the attribute.</param>
         /// <param name="indexRange">the range of array indexes.</param>
-        public EventFieldAttribute(string typeDefinitionId = null, string browsePath = null, uint attributeId = AttributeIds.Value, string indexRange = null)
+        public EventFieldAttribute(string? typeDefinitionId = null, string? browsePath = null, uint attributeId = AttributeIds.Value, string? indexRange = null)
         {
             this.TypeDefinitionId = typeDefinitionId;
             this.BrowsePath = browsePath;
@@ -29,12 +29,12 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the TypeDefinitionId.
         /// </summary>
-        public string TypeDefinitionId { get; }
+        public string? TypeDefinitionId { get; }
 
         /// <summary>
         /// Gets the BrowsePath.
         /// </summary>
-        public string BrowsePath { get; }
+        public string? BrowsePath { get; }
 
         /// <summary>
         /// Gets the attribute.
@@ -44,6 +44,6 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the range of array indexes.
         /// </summary>
-        public string IndexRange { get; }
+        public string? IndexRange { get; }
     }
 }

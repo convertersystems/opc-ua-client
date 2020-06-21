@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -14,7 +15,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="variant">The Variant.</param>
         /// <returns>The value.</returns>
-        public static object GetValue(this Variant variant)
+        public static object? GetValue(this Variant variant)
         {
             var value = variant.Value;
             switch (value)
@@ -39,6 +40,7 @@ namespace Workstation.ServiceModel.Ua
         /// <typeparam name="T">The expected type.</typeparam>
         /// <param name="variant">The Variant.</param>
         /// <returns>The value, if an instance of the specified Type, otherwise the Type's default value.</returns>
+        [return: MaybeNull]
         public static T GetValueOrDefault<T>(this Variant variant)
         {
             var value = variant.GetValue();
@@ -50,7 +52,7 @@ namespace Workstation.ServiceModel.Ua
                 }
             }
 
-            return default(T);
+            return default(T)!;
         }
 
         /// <summary>
@@ -60,6 +62,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="variant">A Variant</param>
         /// <param name="defaultValue">A default value.</param>
         /// <returns>The value, if an instance of the specified Type, otherwise the specified default value.</returns>
+        [return: NotNullIfNotNull("defaultValue")]
         public static T GetValueOrDefault<T>(this Variant variant, T defaultValue)
         {
             var value = variant.GetValue();

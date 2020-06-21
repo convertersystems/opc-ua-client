@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -15,11 +16,11 @@ namespace Workstation.ServiceModel.Ua.Channels
     {
         private const long MinFileTime = 504911232000000000L;
         private readonly Stream stream;
-        private readonly UaTcpSecureChannel channel;
+        private readonly UaTcpSecureChannel? channel;
         private readonly Encoding encoding;
         private readonly BinaryWriter writer;
 
-        public BinaryEncoder(Stream stream, UaTcpSecureChannel channel = null, bool keepStreamOpen = false)
+        public BinaryEncoder(Stream stream, UaTcpSecureChannel? channel = null, bool keepStreamOpen = false)
         {
             if (stream == null)
             {
@@ -54,62 +55,62 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
         }
 
-        public void WriteBoolean(string fieldName, bool value)
+        public void WriteBoolean(string? fieldName, bool value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteSByte(string fieldName, sbyte value)
+        public void WriteSByte(string? fieldName, sbyte value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteByte(string fieldName, byte value)
+        public void WriteByte(string? fieldName, byte value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteInt16(string fieldName, short value)
+        public void WriteInt16(string? fieldName, short value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteUInt16(string fieldName, ushort value)
+        public void WriteUInt16(string? fieldName, ushort value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteInt32(string fieldName, int value)
+        public void WriteInt32(string? fieldName, int value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteUInt32(string fieldName, uint value)
+        public void WriteUInt32(string? fieldName, uint value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteInt64(string fieldName, long value)
+        public void WriteInt64(string? fieldName, long value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteUInt64(string fieldName, ulong value)
+        public void WriteUInt64(string? fieldName, ulong value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteFloat(string fieldName, float value)
+        public void WriteFloat(string? fieldName, float value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteDouble(string fieldName, double value)
+        public void WriteDouble(string? fieldName, double value)
         {
             this.writer.Write(value);
         }
 
-        public void WriteString(string fieldName, string value)
+        public void WriteString(string? fieldName, string? value)
         {
             if (value == null)
             {
@@ -120,7 +121,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteByteString(null, this.encoding.GetBytes(value));
         }
 
-        public void WriteDateTime(string fieldName, DateTime value)
+        public void WriteDateTime(string? fieldName, DateTime value)
         {
             if (value.Kind == DateTimeKind.Local)
             {
@@ -136,12 +137,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.writer.Write(value.ToFileTimeUtc());
         }
 
-        public void WriteGuid(string fieldName, Guid value)
+        public void WriteGuid(string? fieldName, Guid value)
         {
             this.writer.Write(value.ToByteArray());
         }
 
-        public void WriteByteString(string fieldName, byte[] value)
+        public void WriteByteString(string? fieldName, byte[]? value)
         {
             if (value == null)
             {
@@ -153,7 +154,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.writer.Write(value);
         }
 
-        public void WriteXElement(string fieldName, XElement value)
+        public void WriteXElement(string? fieldName, XElement? value)
         {
             if (value == null)
             {
@@ -164,7 +165,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteByteString(null, this.encoding.GetBytes(value.ToString()));
         }
 
-        public void WriteNodeId(string fieldName, NodeId value)
+        public void WriteNodeId(string? fieldName, NodeId? value)
         {
             if (value == null)
             {
@@ -221,7 +222,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExpandedNodeId(string fieldName, ExpandedNodeId value)
+        public void WriteExpandedNodeId(string? fieldName, ExpandedNodeId? value)
         {
             if (value == null)
             {
@@ -306,12 +307,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteStatusCode(string fieldName, StatusCode value)
+        public void WriteStatusCode(string? fieldName, StatusCode value)
         {
             this.WriteUInt32(null, value.Value);
         }
 
-        public void WriteDiagnosticInfo(string fieldName, DiagnosticInfo value)
+        public void WriteDiagnosticInfo(string? fieldName, DiagnosticInfo? value)
         {
             if (value == null)
             {
@@ -392,7 +393,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteQualifiedName(string fieldName, QualifiedName value)
+        public void WriteQualifiedName(string? fieldName, QualifiedName? value)
         {
             if (value == null)
             {
@@ -405,7 +406,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteString(null, value.Name);
         }
 
-        public void WriteLocalizedText(string fieldName, LocalizedText value)
+        public void WriteLocalizedText(string? fieldName, LocalizedText? value)
         {
             if (value == null)
             {
@@ -436,17 +437,17 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteVariant(string fieldName, Variant value)
+        public void WriteVariant(string? fieldName, Variant value)
         {
-            if (Variant.IsNull(value))
+            var obj = value.Value;
+            if (obj is null || Variant.IsNull(value))
             {
                 this.WriteByte(null, 0);
                 return;
             }
 
-            object obj = value.Value;
             byte b = (byte)value.Type;
-            int[] dims = value.ArrayDimensions;
+            int[]? dims = value.ArrayDimensions;
             if (dims == null)
             {
                 this.WriteByte(null, b);
@@ -652,7 +653,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return;
             }
 
-            var a1 = obj as Array;
+            var a1 = (Array)obj;
             b |= 64;
             this.WriteByte(null, b);
             switch (value.Type)
@@ -756,7 +757,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteInt32Array(null, dims);
         }
 
-        public void WriteDataValue(string fieldName, DataValue value)
+        public void WriteDataValue(string? fieldName, DataValue? value)
         {
             if (value == null)
             {
@@ -827,7 +828,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExtensionObject(string fieldName, ExtensionObject value)
+        public void WriteExtensionObject(string? fieldName, ExtensionObject? value)
         {
             if (value == null || value.BodyType == BodyType.None)
             {
@@ -836,30 +837,34 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return;
             }
 
+            // If the body type is not none, than the type id
+            // is guaranteed to be not null
+            var typeId = value.TypeId!;
+
             if (value.BodyType == BodyType.ByteString)
             {
-                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, this.channel?.NamespaceUris));
                 this.WriteByte(null, 0x01);
-                this.WriteByteString(null, (byte[])value.Body);
+                this.WriteByteString(null, (byte[]?)value.Body);
                 return;
             }
 
             if (value.BodyType == BodyType.XmlElement)
             {
-                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, this.channel?.NamespaceUris));
                 this.WriteByte(null, 0x02);
-                this.WriteXElement(null, (XElement)value.Body);
+                this.WriteXElement(null, (XElement?)value.Body);
                 return;
             }
 
             if (value.BodyType == BodyType.Encodable)
             {
-                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, this.channel?.NamespaceUris));
+                this.WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, this.channel?.NamespaceUris));
                 this.WriteByte(null, 0x01); // BodyType Encodable is encoded as ByteString.
                 var pos0 = this.writer.BaseStream.Position;
                 this.WriteInt32(null, -1);
                 var pos1 = this.writer.BaseStream.Position;
-                ((IEncodable)value.Body).Encode(this);
+                ((IEncodable)value.Body!).Encode(this);
                 var pos2 = this.writer.BaseStream.Position;
                 this.writer.Seek((int)pos0, SeekOrigin.Begin);
                 this.WriteInt32(null, (int)(pos2 - pos1));
@@ -868,7 +873,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExtensionObject<T>(string fieldName, T value)
+        public void WriteExtensionObject<T>(string? fieldName, T? value)
             where T : class, IEncodable
         {
             if (value == null)
@@ -879,7 +884,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             var type = value.GetType();
-            if (!this.channel.TryGetBinaryEncodingIdFromType(type, out NodeId binaryEncodingId))
+            if (this.channel is null || !this.channel.TryGetBinaryEncodingIdFromType(type, out var binaryEncodingId))
             {
                 throw new ServiceResultException(StatusCodes.BadEncodingError);
             }
@@ -897,7 +902,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             return;
         }
 
-        public void WriteEncodable<T>(string fieldName, T value)
+        public void WriteEncodable<T>(string? fieldName, T? value)
             where T : class, IEncodable
         {
             if (value == null)
@@ -908,13 +913,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             value.Encode(this);
         }
 
-        public void WriteEnumeration<T>(string fieldName, T value)
+        public void WriteEnumeration<T>(string? fieldName, T value)
             where T : struct, IConvertible
         {
             this.WriteInt32(null, Convert.ToInt32(value, CultureInfo.InvariantCulture));
         }
 
-        public void WriteBooleanArray(string fieldName, bool[] values)
+        public void WriteBooleanArray(string? fieldName, bool[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -925,7 +930,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteSByteArray(string fieldName, sbyte[] values)
+        public void WriteSByteArray(string? fieldName, sbyte[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -936,7 +941,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteByteArray(string fieldName, byte[] values)
+        public void WriteByteArray(string? fieldName, byte[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -947,7 +952,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteInt16Array(string fieldName, short[] values)
+        public void WriteInt16Array(string? fieldName, short[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -958,7 +963,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteUInt16Array(string fieldName, ushort[] values)
+        public void WriteUInt16Array(string? fieldName, ushort[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -969,7 +974,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteInt32Array(string fieldName, int[] values)
+        public void WriteInt32Array(string? fieldName, int[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -980,7 +985,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteUInt32Array(string fieldName, uint[] values)
+        public void WriteUInt32Array(string? fieldName, uint[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -991,7 +996,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteInt64Array(string fieldName, long[] values)
+        public void WriteInt64Array(string? fieldName, long[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1002,7 +1007,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteUInt64Array(string fieldName, ulong[] values)
+        public void WriteUInt64Array(string? fieldName, ulong[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1013,7 +1018,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteFloatArray(string fieldName, float[] values)
+        public void WriteFloatArray(string? fieldName, float[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1024,7 +1029,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteDoubleArray(string fieldName, double[] values)
+        public void WriteDoubleArray(string? fieldName, double[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1035,7 +1040,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteStringArray(string fieldName, string[] values)
+        public void WriteStringArray(string? fieldName, string?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1046,7 +1051,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteDateTimeArray(string fieldName, DateTime[] values)
+        public void WriteDateTimeArray(string? fieldName, DateTime[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1057,7 +1062,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteGuidArray(string fieldName, Guid[] values)
+        public void WriteGuidArray(string? fieldName, Guid[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1068,7 +1073,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteByteStringArray(string fieldName, byte[][] values)
+        public void WriteByteStringArray(string? fieldName, byte[]?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1079,7 +1084,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteXElementArray(string fieldName, XElement[] values)
+        public void WriteXElementArray(string? fieldName, XElement?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1090,7 +1095,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteNodeIdArray(string fieldName, NodeId[] values)
+        public void WriteNodeIdArray(string? fieldName, NodeId?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1101,7 +1106,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExpandedNodeIdArray(string fieldName, ExpandedNodeId[] values)
+        public void WriteExpandedNodeIdArray(string? fieldName, ExpandedNodeId?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1112,7 +1117,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteStatusCodeArray(string fieldName, StatusCode[] values)
+        public void WriteStatusCodeArray(string? fieldName, StatusCode[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1123,7 +1128,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteDiagnosticInfoArray(string fieldName, DiagnosticInfo[] values)
+        public void WriteDiagnosticInfoArray(string? fieldName, DiagnosticInfo?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1134,7 +1139,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteQualifiedNameArray(string fieldName, QualifiedName[] values)
+        public void WriteQualifiedNameArray(string? fieldName, QualifiedName?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1145,7 +1150,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteLocalizedTextArray(string fieldName, LocalizedText[] values)
+        public void WriteLocalizedTextArray(string? fieldName, LocalizedText?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1156,7 +1161,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteVariantArray(string fieldName, Variant[] values)
+        public void WriteVariantArray(string? fieldName, Variant[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1167,7 +1172,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteDataValueArray(string fieldName, DataValue[] values)
+        public void WriteDataValueArray(string? fieldName, DataValue?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1178,7 +1183,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExtensionObjectArray(string fieldName, ExtensionObject[] values)
+        public void WriteExtensionObjectArray(string? fieldName, ExtensionObject?[]? values)
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1189,8 +1194,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteExtensionObjectArray<T>(string fieldName, T[] values)
-            where T : class, IEncodable
+        public void WriteExtensionObjectArray<T>(string? fieldName, T?[]? values)
+            where T : class?, IEncodable
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1201,8 +1206,8 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteEncodableArray<T>(string fieldName, T[] values)
-            where T : class, IEncodable
+        public void WriteEncodableArray<T>(string? fieldName, T?[]? values)
+            where T : class?, IEncodable
         {
             if (this.TryWriteArrayLength(values))
             {
@@ -1213,7 +1218,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
-        public void WriteEnumerationArray<T>(string fieldName, T[] values)
+        public void WriteEnumerationArray<T>(string? fieldName, T[]? values)
             where T : struct, IConvertible
         {
             if (this.TryWriteArrayLength(values))
@@ -1230,7 +1235,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.writer.Write(buffer, index, count);
         }
 
-        private bool TryWriteArrayLength<T>(T[] values)
+        private bool TryWriteArrayLength<T>([NotNullWhen(returnValue: true)] T[]? values)
         {
             if (values == null)
             {

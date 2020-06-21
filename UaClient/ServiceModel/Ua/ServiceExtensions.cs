@@ -1,4 +1,4 @@
-﻿// Copyright (c) Converter Systems LLC. All rights reserved.
+// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -25,7 +25,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="array">The <see cref="T:ConverterSystems.ServiceModel.Ua.Variant" /> array.</param>
         /// <returns>The object array.</returns>
-        public static object[] ToObjectArray(this Variant[] array)
+        public static object?[] ToObjectArray(this Variant[] array)
         {
             return array.Select(a => a.Value).ToArray();
         }
@@ -51,7 +51,14 @@ namespace Workstation.ServiceModel.Ua
                 }
             });
 
-            return response.Results[0].StatusCode;
+            var result = response.Results?[0];
+
+            if (result == null)
+            {
+                throw new ServiceResultException(StatusCodes.BadDataEncodingInvalid, "The CallMethodeResult is null!");
+            }
+
+            return result.StatusCode;
         }
 
         /// <summary>
@@ -61,7 +68,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="condition">an AcknowledgeableCondition.</param>
         /// <param name="comment">a comment.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<StatusCode> AcknowledgeAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText comment = null)
+        public static async Task<StatusCode> AcknowledgeAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText? comment = null)
         {
             if (condition == null)
             {
@@ -80,8 +87,15 @@ namespace Workstation.ServiceModel.Ua
                     }
                 }
             });
+            
+            var result = response.Results?[0];
 
-            return response.Results[0].StatusCode;
+            if (result == null)
+            {
+                throw new ServiceResultException(StatusCodes.BadDataEncodingInvalid, "The CallMethodeResult is null!");
+            }
+
+            return result.StatusCode;
         }
 
         /// <summary>
@@ -91,7 +105,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="condition">an AcknowledgeableCondition.</param>
         /// <param name="comment">a comment.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static async Task<StatusCode> ConfirmAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText comment = null)
+        public static async Task<StatusCode> ConfirmAsync(this IRequestChannel channel, AcknowledgeableCondition condition, LocalizedText? comment = null)
         {
             if (condition == null)
             {
@@ -111,13 +125,20 @@ namespace Workstation.ServiceModel.Ua
                 }
             });
 
-            return response.Results[0].StatusCode;
+            var result = response.Results?[0];
+
+            if (result == null)
+            {
+                throw new ServiceResultException(StatusCodes.BadDataEncodingInvalid, "The CallMethodeResult is null!");
+            }
+            
+            return result.StatusCode;
         }
 
         public static async Task WithCancellation(this Task task, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s).TrySetResult(true), tcs))
+            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s!).TrySetResult(true), tcs))
             {
                 if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
                 {

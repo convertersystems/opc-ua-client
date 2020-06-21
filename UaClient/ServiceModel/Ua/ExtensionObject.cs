@@ -17,7 +17,7 @@ namespace Workstation.ServiceModel.Ua
 
     public sealed class ExtensionObject
     {
-        public ExtensionObject(byte[] body, ExpandedNodeId typeId)
+        public ExtensionObject(byte[]? body, ExpandedNodeId? typeId)
         {
             if (body == null)
             {
@@ -30,7 +30,7 @@ namespace Workstation.ServiceModel.Ua
             this.TypeId = typeId;
         }
 
-        public ExtensionObject(XElement body, ExpandedNodeId typeId)
+        public ExtensionObject(XElement? body, ExpandedNodeId? typeId)
         {
             if (body == null)
             {
@@ -43,7 +43,7 @@ namespace Workstation.ServiceModel.Ua
             this.TypeId = typeId;
         }
 
-        public ExtensionObject(IEncodable body, ExpandedNodeId typeId)
+        public ExtensionObject(IEncodable? body, ExpandedNodeId? typeId)
         {
             if (body == null)
             {
@@ -56,7 +56,7 @@ namespace Workstation.ServiceModel.Ua
             this.TypeId = typeId;
         }
 
-        public ExtensionObject(IEncodable body)
+        public ExtensionObject(IEncodable? body)
         {
             if (body == null)
             {
@@ -69,9 +69,9 @@ namespace Workstation.ServiceModel.Ua
             this.TypeId = body.GetType().GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(false)?.NodeId ?? throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
         }
 
-        public object Body { get; }
+        public object? Body { get; }
 
-        public ExpandedNodeId TypeId { get; }
+        public ExpandedNodeId? TypeId { get; }
 
         public BodyType BodyType { get; }
     }

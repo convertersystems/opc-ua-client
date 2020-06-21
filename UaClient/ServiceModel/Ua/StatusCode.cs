@@ -79,7 +79,7 @@ namespace Workstation.ServiceModel.Ua
             return ((a.Value & InfoTypeMask) == InfoTypeDataValue) && ((a.Value & Overflow) == Overflow);
         }
 
-        public override bool Equals(object o)
+        public override bool Equals(object? o)
         {
             if (o is StatusCode)
             {

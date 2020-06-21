@@ -5,6 +5,6 @@ namespace Workstation.ServiceModel.Ua
 {
     public interface IServiceRequest : IEncodable
     {
-        RequestHeader RequestHeader { get; set; }
+        RequestHeader? RequestHeader { get; set; }
     }
 }

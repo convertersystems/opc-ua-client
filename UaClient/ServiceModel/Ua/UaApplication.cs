@@ -18,9 +18,9 @@ namespace Workstation.ServiceModel.Ua
     public class UaApplication : IDisposable
     {
         private static readonly object globalLock = new object();
-        private static volatile UaApplication appInstance;
+        private static volatile UaApplication? appInstance;
 
-        private readonly ILogger logger;
+        private readonly ILogger? logger;
         private readonly ConcurrentDictionary<string, Lazy<Task<UaTcpSessionChannel>>> channelMap;
         private readonly TaskCompletionSource<bool> completionTask = new TaskCompletionSource<bool>();
         private volatile TaskCompletionSource<bool> suspensionTask = new TaskCompletionSource<bool>();
@@ -38,12 +38,12 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaApplication(
             ApplicationDescription localDescription,
-            ICertificateStore certificateStore,
-            Func<EndpointDescription, Task<IUserIdentity>> identityProvider,
+            ICertificateStore? certificateStore,
+            Func<EndpointDescription, Task<IUserIdentity>>? identityProvider,
             IEnumerable<MappedEndpoint> mappedEndpoints,
-            ILoggerFactory loggerFactory = null,
-            UaApplicationOptions options = null,
-            IEnumerable<Type> additionalTypes = null)
+            ILoggerFactory? loggerFactory = null,
+            UaApplicationOptions? options = null,
+            IEnumerable<Type>? additionalTypes = null)
         {
             if (localDescription == null)
             {
@@ -75,7 +75,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the current <see cref="UaApplication"/>.
         /// </summary>
-        public static UaApplication Current => appInstance;
+        public static UaApplication? Current => appInstance;
 
         /// <summary>
         /// Gets the <see cref="ApplicationDescription"/> of the local application.
@@ -85,12 +85,12 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the local certificate store.
         /// </summary>
-        public ICertificateStore CertificateStore { get; }
+        public ICertificateStore? CertificateStore { get; }
 
         /// <summary>
         /// Gets an asynchronous function that provides the identity of the user. Supports <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> and <see cref="X509Identity"/>.
         /// </summary>
-        public Func<EndpointDescription, Task<IUserIdentity>> UserIdentityProvider { get; }
+        public Func<EndpointDescription, Task<IUserIdentity>>? UserIdentityProvider { get; }
 
         /// <summary>
         /// Gets the mapped endpoints.
@@ -100,7 +100,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the logger factory.
         /// </summary>
-        public ILoggerFactory LoggerFactory { get; }
+        public ILoggerFactory? LoggerFactory { get; }
 
         /// <summary>
         /// Gets the application options.
@@ -110,7 +110,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets any additional types to be registered with encoder.
         /// </summary>
-        public IEnumerable<Type> AdditionalTypes { get; }
+        public IEnumerable<Type>? AdditionalTypes { get; }
 
         /// <summary>
         /// Gets a System.Threading.Tasks.Task that represents the completion of the UaApplication.
@@ -237,7 +237,7 @@ namespace Workstation.ServiceModel.Ua
 
                 EndpointDescription endpoint;
                 var mappedEndpoint = this.MappedEndpoints?.LastOrDefault(m => m.RequestedUrl == endpointUrl);
-                if (mappedEndpoint != null)
+                if (mappedEndpoint?.Endpoint != null)
                 {
                     endpoint = mappedEndpoint.Endpoint;
                 }
@@ -258,7 +258,7 @@ namespace Workstation.ServiceModel.Ua
                 channel.Faulted += (s, e) =>
                 {
                     this.logger?.LogTrace($"Error creating UaTcpSessionChannel for {endpointUrl}. OnFaulted");
-                    var ch = (UaTcpSessionChannel)s;
+                    var ch = (UaTcpSessionChannel)s!;
                     try
                     {
                         ch.AbortAsync().Wait();
@@ -271,7 +271,7 @@ namespace Workstation.ServiceModel.Ua
                 channel.Closing += (s, e) =>
                 {
                     this.logger?.LogTrace($"Removing UaTcpSessionChannel for {endpointUrl} from channelMap.");
-                    this.channelMap.TryRemove(endpointUrl, out Lazy<Task<UaTcpSessionChannel>> value);
+                    this.channelMap.TryRemove(endpointUrl, out _);
                 };
 
                 await channel.OpenAsync(token).ConfigureAwait(false);

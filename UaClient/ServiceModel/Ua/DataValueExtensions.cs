@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Workstation.ServiceModel.Ua
@@ -13,7 +14,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="dataValue">The DataValue.</param>
         /// <returns>The value.</returns>
-        public static object GetValue(this DataValue dataValue)
+        public static object? GetValue(this DataValue dataValue)
         {
             var value = dataValue.Value;
             switch (value)
@@ -38,6 +39,7 @@ namespace Workstation.ServiceModel.Ua
         /// <typeparam name="T">The expected type.</typeparam>
         /// <param name="dataValue">The DataValue.</param>
         /// <returns>The value, if an instance of the specified Type, otherwise the Type's default value.</returns>
+        [return: MaybeNull]
         public static T GetValueOrDefault<T>(this DataValue dataValue)
         {
             var value = dataValue.GetValue();
@@ -49,7 +51,11 @@ namespace Workstation.ServiceModel.Ua
                 }
             }
 
-            return default(T);
+            // While [MaybeNull] attribute signals to the caller
+            // that the return value can be null. It is ignored
+            // by the compiler inside of the method, hence we
+            // have to use the bang operator.
+            return default!;
         }
 
         /// <summary>
@@ -59,6 +65,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="dataValue">A DataValue</param>
         /// <param name="defaultValue">A default value.</param>
         /// <returns>The value, if an instance of the specified Type, otherwise the specified default value.</returns>
+        [return: NotNullIfNotNull("defaultValue")]
         public static T GetValueOrDefault<T>(this DataValue dataValue, T defaultValue)
         {
             var value = dataValue.GetValue();

@@ -18,11 +18,11 @@ namespace Workstation.ServiceModel.Ua
         private readonly List<Action<UaApplicationOptions>> configureOptionsActions = new List<Action<UaApplicationOptions>>();
         private readonly List<Action<ILoggerFactory>> configureLoggerFactoryActions = new List<Action<ILoggerFactory>>();
         private readonly List<Type> additionalTypes = new List<Type>();
-        private ApplicationDescription localDescription;
-        private ICertificateStore certificateStore;
-        private Func<EndpointDescription, Task<IUserIdentity>> identityProvider;
-        private ILoggerFactory loggerFactory;
-        private UaApplicationOptions options;
+        private ApplicationDescription? localDescription;
+        private ICertificateStore? certificateStore;
+        private Func<EndpointDescription, Task<IUserIdentity>>? identityProvider;
+        private ILoggerFactory? loggerFactory;
+        private UaApplicationOptions? options;
 
         /// <summary>
         /// Specify the ApplicationUri.
@@ -36,7 +36,7 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(uri));
             }
 
-            string appName = null;
+            string? appName = null;
 
             UriBuilder appUri = new UriBuilder(uri);
             if (appUri.Scheme == "http" && !string.IsNullOrEmpty(appUri.Host))
@@ -190,7 +190,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="endpointUrl">The endpoint url to use.</param>
         /// <param name="securityPolicyUri">Optionally, the securityPolicyUri to use.</param>
         /// <returns>The <see cref="UaApplicationBuilder"/>.</returns>
-        public UaApplicationBuilder AddMappedEndpoint(string requestedUrl, string endpointUrl, string securityPolicyUri = null)
+        public UaApplicationBuilder AddMappedEndpoint(string requestedUrl, string endpointUrl, string? securityPolicyUri = null)
         {
             if (string.IsNullOrEmpty(requestedUrl))
             {

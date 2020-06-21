@@ -24,14 +24,14 @@ namespace Workstation.ServiceModel.Ua
     {
         private readonly ActionBlock<PublishResponse> actionBlock;
         private readonly IProgress<CommunicationState> progress;
-        private readonly ILogger logger;
+        private readonly ILogger? logger;
         private readonly UaApplication application;
         private volatile bool isPublishing;
-        private volatile UaTcpSessionChannel innerChannel;
+        private volatile UaTcpSessionChannel? innerChannel;
         private volatile uint subscriptionId;
         private readonly ErrorsContainer<string> errors;
-        private PropertyChangedEventHandler propertyChanged;
-        private readonly string endpointUrl;
+        private PropertyChangedEventHandler? propertyChanged;
+        private readonly string? endpointUrl;
         private readonly double publishingInterval = UaTcpSessionChannel.DefaultPublishingInterval;
         private readonly uint keepAliveCount = UaTcpSessionChannel.DefaultKeepaliveCount;
         private readonly uint lifetimeCount;
@@ -54,7 +54,7 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="SubscriptionBase"/> class.
         /// </summary>
         /// <param name="application">The UaApplication.</param>
-        public SubscriptionBase(UaApplication application)
+        public SubscriptionBase(UaApplication? application)
         {
             this.application = application ?? throw new ArgumentNullException(nameof(application));
             this.application.Completion.ContinueWith(t => this.stateMachineCts?.Cancel());
@@ -96,7 +96,7 @@ namespace Workstation.ServiceModel.Ua
                     continue;
                 }
 
-                MonitoringFilter filter = null;
+                MonitoringFilter? filter = null;
                 if (mia.AttributeId == AttributeIds.Value && (mia.DataChangeTrigger != DataChangeTrigger.StatusValue || mia.DeadbandType != DeadbandType.None))
                 {
                     filter = new DataChangeFilter() { Trigger = mia.DataChangeTrigger, DeadbandType = (uint)mia.DeadbandType, DeadbandValue = mia.DeadbandValue };
@@ -164,7 +164,7 @@ namespace Workstation.ServiceModel.Ua
                         mia.SamplingInterval,
                         new EventFilter() { SelectClauses = EventHelper.GetSelectClauses(elemType) },
                         mia.QueueSize,
-                        mia.DiscardOldest));
+                        mia.DiscardOldest)!);
                         continue;
                     }
                 }
@@ -191,7 +191,7 @@ namespace Workstation.ServiceModel.Ua
         {
             add
             {
-                var flag = this.propertyChanged.GetInvocationList().Length == 1;
+                var flag = this.propertyChanged?.GetInvocationList().Length == 1;
                 this.propertyChanged += value;
                 if (flag)
                 {
@@ -204,7 +204,7 @@ namespace Workstation.ServiceModel.Ua
             remove
             {
                 this.propertyChanged -= value;
-                if (this.propertyChanged.GetInvocationList().Length == 1)
+                if (this.propertyChanged?.GetInvocationList().Length == 1)
                 {
                     this.whenSubscribed = new TaskCompletionSource<bool>();
                     this.whenUnsubscribed.TrySetResult(true);
@@ -246,7 +246,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="condition">an AcknowledgeableCondition.</param>
         /// <param name="comment">a comment.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<StatusCode> AcknowledgeAsync(AcknowledgeableCondition condition, LocalizedText comment = null)
+        public async Task<StatusCode> AcknowledgeAsync(AcknowledgeableCondition condition, LocalizedText? comment = null)
         {
             if (condition == null)
             {
@@ -267,7 +267,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="condition">an AcknowledgeableCondition.</param>
         /// <param name="comment">a comment.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<StatusCode> ConfirmAsync(AcknowledgeableCondition condition, LocalizedText comment = null)
+        public async Task<StatusCode> ConfirmAsync(AcknowledgeableCondition condition, LocalizedText? comment = null)
         {
             if (condition == null)
             {
@@ -308,7 +308,7 @@ namespace Workstation.ServiceModel.Ua
         /// value is optional and can be provided automatically when invoked from compilers that
         /// support CallerMemberName.</param>
         /// <returns>True if the value changed, otherwise false.</returns>
-        protected virtual bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        protected virtual bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
         {
             if (object.Equals(storage, value))
             {
@@ -326,7 +326,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="propertyName">Name of the property used to notify listeners. This
         /// value is optional and can be provided automatically when invoked from compilers
         /// that support <see cref="T:System.Runtime.CompilerServices.CallerMemberNameAttribute" />.</param>
-        protected virtual void NotifyPropertyChanged([CallerMemberName] string propertyName = null)
+        protected virtual void NotifyPropertyChanged([CallerMemberName] string? propertyName = null)
         {
             this.propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
@@ -334,7 +334,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Occurs when the validation errors have changed for a property or entity.
         /// </summary>
-        public event EventHandler<DataErrorsChangedEventArgs> ErrorsChanged;
+        public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 
         /// <summary>
         /// Gets a value indicating whether the entity has validation errors.
@@ -359,7 +359,7 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="propertyName">The name of the property, or null or System.String.Empty to set entity-level errors.</param>
         /// <param name="errors">The validation errors for the property or entity.</param>
-        void ISetDataErrorInfo.SetErrors(string propertyName, IEnumerable<string> errors)
+        void ISetDataErrorInfo.SetErrors(string propertyName, IEnumerable<string>? errors)
         {
             this.errors.SetErrors(propertyName, errors);
         }
@@ -384,12 +384,17 @@ namespace Workstation.ServiceModel.Ua
                 {
                     // if data change.
                     var dcn = n as DataChangeNotification;
-                    if (dcn != null)
+                    if (dcn?.MonitoredItems != null)
                     {
-                        MonitoredItemBase item;
                         foreach (var min in dcn.MonitoredItems)
                         {
-                            if (this.monitoredItems.TryGetValueByClientId(min.ClientHandle, out item))
+                            if (min?.Value == null)
+                            {
+                                this.logger?.LogError($"One of the monitored item notifications is null");
+                                continue;
+                            }
+
+                            if (this.monitoredItems.TryGetValueByClientId(min.ClientHandle, out var item))
                             {
                                 try
                                 {
@@ -407,12 +412,17 @@ namespace Workstation.ServiceModel.Ua
 
                     // if event.
                     var enl = n as EventNotificationList;
-                    if (enl != null)
+                    if (enl?.Events != null)
                     {
-                        MonitoredItemBase item;
                         foreach (var efl in enl.Events)
                         {
-                            if (this.monitoredItems.TryGetValueByClientId(efl.ClientHandle, out item))
+                            if (efl?.EventFields == null)
+                            {
+                                this.logger?.LogError($"One of the event field list is null");
+                                continue;
+                            }
+
+                            if (this.monitoredItems.TryGetValueByClientId(efl.ClientHandle, out var item))
                             {
                                 try
                                 {
@@ -445,11 +455,9 @@ namespace Workstation.ServiceModel.Ua
                 return;
             }
 
-            MonitoredItemBase item;
-            if (this.monitoredItems.TryGetValueByName(e.PropertyName, out item))
+            if (this.monitoredItems.TryGetValueByName(e.PropertyName, out var item))
             {
-                DataValue value;
-                if (item.TryGetValue(out value))
+                if (item.TryGetValue(out var value))
                 {
                     StatusCode statusCode;
                     var writeRequest = new WriteRequest
@@ -459,7 +467,7 @@ namespace Workstation.ServiceModel.Ua
                     try
                     {
                         var writeResponse = await this.InnerChannel.WriteAsync(writeRequest).ConfigureAwait(false);
-                        statusCode = writeResponse.Results[0];
+                        statusCode = writeResponse?.Results?[0] ?? StatusCodes.BadDataEncodingInvalid;
                     }
                     catch (ServiceResultException ex)
                     {
@@ -492,7 +500,7 @@ namespace Workstation.ServiceModel.Ua
             {
                 tcs.TrySetResult(true);
             };
-            using (token.Register(state => ((TaskCompletionSource<bool>)state).TrySetCanceled(), tcs, false))
+            using (token.Register(state => ((TaskCompletionSource<bool>)state!).TrySetCanceled(), tcs, false))
             {
                 try
                 {
@@ -524,6 +532,11 @@ namespace Workstation.ServiceModel.Ua
 
                 try
                 {
+                    if (this.endpointUrl is null)
+                    {
+                        throw new InvalidOperationException("The endpointUrl field must not be null. Please, use the Subscription attribute properly.");
+                    }
+
                     // get a channel.
                     this.innerChannel = await this.application.GetChannelAsync(this.endpointUrl, token);
 
@@ -556,14 +569,25 @@ namespace Workstation.ServiceModel.Ua
                                     ItemsToCreate = requests,
                                 };
                                 var itemsResponse = await this.innerChannel.CreateMonitoredItemsAsync(itemsRequest);
-                                for (int i = 0; i < itemsResponse.Results.Length; i++)
+
+                                if (itemsResponse.Results is { } results)
                                 {
-                                    var item = items[i];
-                                    var result = itemsResponse.Results[i];
-                                    item.OnCreateResult(result);
-                                    if (StatusCode.IsBad(result.StatusCode))
+                                    for (int i = 0; i < results.Length; i++)
                                     {
-                                        this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                        var item = items[i];
+                                        var result = results[i];
+
+                                        if (result is null)
+                                        {
+                                            this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. The result is null.");
+                                            continue;
+                                        }
+
+                                        item.OnCreateResult(result);
+                                        if (StatusCode.IsBad(result.StatusCode))
+                                        {
+                                            this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                        }
                                     }
                                 }
                             }

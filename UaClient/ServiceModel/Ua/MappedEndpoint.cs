@@ -8,8 +8,8 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class MappedEndpoint
     {
-        public string RequestedUrl { get; set; }
+        public string? RequestedUrl { get; set; }
 
-        public EndpointDescription Endpoint { get; set; }
+        public EndpointDescription? Endpoint { get; set; }
     }
 }
