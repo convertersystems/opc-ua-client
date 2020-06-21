@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.0;netcoreapp3.0</TargetFrameworks>
     <AssemblyName>Workstation.UaClient</AssemblyName>
     <RootNamespace>Workstation</RootNamespace>
-    <Version>2.5.2</Version>
+    <Version>2.6.0</Version>
     <Authors>Andrew Cullen</Authors>
     <Company>Converter Systems LLC</Company>
     <PackageProjectUrl>https://github.com/convertersystems/opc-ua-client</PackageProjectUrl>
@@ -13,10 +13,10 @@
     <PackageTags>opc, opc-ua, iiot</PackageTags>
     <RepositoryUrl>https://github.com/convertersystems/opc-ua-client</RepositoryUrl>
     <Copyright>Copyright ©  2020 Converter Systems LLC.</Copyright>
-    <AssemblyVersion>2.5.2.0</AssemblyVersion>
+    <AssemblyVersion>2.6.0.0</AssemblyVersion>
     <AssemblyTitle>Workstation.UaClient ($(TargetFramework))</AssemblyTitle>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <FileVersion>2.5.2.0</FileVersion>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <FileVersion>2.6.0.0</FileVersion>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
     <IncludeSymbols>true</IncludeSymbols>
