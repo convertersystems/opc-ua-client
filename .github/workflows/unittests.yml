@@ -21,5 +21,20 @@ jobs:
       run: rsync -a ${DOTNET_ROOT/3.0.100/2.2.108}/* $DOTNET_ROOT/
     - name: Build with dotnet
       run: dotnet build --configuration Release
-    - name: Run unit tests
-      run: dotnet test --filter "FullyQualifiedName~UnitTests" 
+    - name: Download test server
+      uses: Legion2/download-release-action@v2.1.0
+      with:
+        repository: quinmars/UaTestServer
+        tag: 'rel/v1.0.1'
+        path: testserver
+        file: UaTestServer-1.0.1.zip
+    - run: |
+          ls testserver
+          unzip testserver/UaTestServer-1.0.1.zip -d uatestserver
+          ls testserver
+    - name: Run test server and tests
+      run: |
+          cd uatestserver
+          dotnet UaTestServer.dll &
+          cd ..
+          dotnet test 
