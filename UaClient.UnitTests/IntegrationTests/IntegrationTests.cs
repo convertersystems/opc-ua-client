@@ -327,6 +327,7 @@ namespace Workstation.UaClient.IntegrationTests
         /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+#if false
         [MemberData(nameof(AllTestEndpointData))]
         [Theory]
         public async Task VectorAdd(TestEndpoint endpoint)
@@ -362,6 +363,7 @@ namespace Workstation.UaClient.IntegrationTests
             result.Z
                 .Should().Be(6.0);
         }
+#endif
 
         [DataTypeId("nsu=http://www.unifiedautomation.com/DemoServer/;i=3002")]
         [BinaryEncodingId("nsu=http://www.unifiedautomation.com/DemoServer/;i=5054")]
@@ -395,6 +397,7 @@ namespace Workstation.UaClient.IntegrationTests
         /// Only run this test with a running opc test server.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+#if false
         [Fact]
         public async Task ReadHistorical()
         {
@@ -467,7 +470,7 @@ namespace Workstation.UaClient.IntegrationTests
             logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
-
+#endif
         /// <summary>
         /// Tests connecting to endpoint and creating a subscription based view model.
         /// Only run this test with a running opc test server.
@@ -639,6 +642,7 @@ namespace Workstation.UaClient.IntegrationTests
         /// Tests result of transfer subscription from channel1 to channel2.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+#if false
         [MemberData(nameof(UserIdentities))]
         [Theory]
         public async Task TransferSubscription(IUserIdentity identity)
@@ -732,6 +736,7 @@ namespace Workstation.UaClient.IntegrationTests
             logger.LogInformation($"Closing session '{channel2.SessionId}'.");
             await channel2.CloseAsync();
         }
+#endif
 
     }
 }
