@@ -54,8 +54,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const int SequenceHeaderSize = 8;
         private const int TokenRequestedLifetime = 60 * 60 * 1000; // 60 minutes
 
-        private static readonly Dictionary<NodeId, Type> BinaryEncodingIdToTypeDictionary = new Dictionary<NodeId, Type>();
-        private static readonly Dictionary<Type, NodeId> TypeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>();
         private static readonly NodeId OpenSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId CloseSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.CloseSecureChannelRequest_Encoding_DefaultBinary);
         private static readonly NodeId ReadResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
@@ -70,8 +68,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly ActionBlock<ServiceOperation> pendingRequests;
         private readonly ConcurrentDictionary<uint, ServiceOperation> pendingCompletions;
         private readonly X509CertificateParser certificateParser = new X509CertificateParser();
-        private readonly Dictionary<NodeId, Type> encodingIdToTypeDictionary;
-        private readonly Dictionary<Type, NodeId> typeToBinaryEncodingIdDictionary;
+        private EncodingDictionary encodingDictionary;
 
         private int handle;
         private int sequenceNumber;
@@ -116,29 +113,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private DateTime tokenRenewalTime = DateTime.MaxValue;
         private IDigest? thumbprintDigest;
 
-        static UaTcpSecureChannel()
-        {
-            foreach (var type in typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly.ExportedTypes)
-            {
-                var info = type.GetTypeInfo();
-                if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
-                {
-                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-                    if (attr != null)
-                    {
-                        var id = ExpandedNodeId.ToNodeId(attr.NodeId, null);
-                        BinaryEncodingIdToTypeDictionary[id] = type;
-                        TypeToBinaryEncodingIdDictionary[type] = id;
-                    }
-                }
-            }
-
-            //TypeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>()
-            //{
-            //    { typeof(Argument), NodeId.Parse(ObjectIds.Argument_Encoding_DefaultBinary) },
-            //};
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSecureChannel"/> class.
         /// </summary>
@@ -147,21 +121,21 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The remote endpoint</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The secure channel options.</param>
-        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
+        /// <param name="encodingTable">Types to be registered with encoder.</param>
         public UaTcpSecureChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
             UaTcpSecureChannelOptions? options = null,
-            IEnumerable<Type>? additionalTypes = null)
+            IEnumerable<(ExpandedNodeId,Type)>? encodingTable = null)
             : base(remoteEndpoint, loggerFactory, options)
         {
             this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
             this.CertificateStore = certificateStore;
             this.TimeoutHint = options?.TimeoutHint ?? DefaultTimeoutHint;
             this.DiagnosticsHint = options?.DiagnosticsHint ?? DefaultDiagnosticsHint;
-            this.AdditionalTypes = additionalTypes;
+            this.EncodingTable = encodingTable;
 
             this.logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
 
@@ -172,8 +146,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.pendingRequests = new ActionBlock<ServiceOperation>(t => this.SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
             this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
 
-            this.encodingIdToTypeDictionary = new Dictionary<NodeId, Type>(BinaryEncodingIdToTypeDictionary);
-            this.typeToBinaryEncodingIdDictionary = new Dictionary<Type, NodeId>(TypeToBinaryEncodingIdDictionary);
+            this.encodingDictionary = encodingTable is null
+                ? BinaryEncodingTable.EncodingDictionary
+                : new EncodingDictionary(encodingTable);
         }
 
         /// <summary>
@@ -197,9 +172,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         public uint DiagnosticsHint { get; }
 
         /// <summary>
-        /// Gets any additional types to be registered with encoder.
+        /// Gets types to be registered with encoder.
         /// </summary>
-        public IEnumerable<Type>? AdditionalTypes { get; }
+        public IEnumerable<(ExpandedNodeId,Type)>? EncodingTable { get; }
 
         /// <summary>
         /// Gets the local certificate.
@@ -259,7 +234,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>True if successfull.</returns>
         public bool TryGetTypeFromEncodingId(NodeId encodingId, [NotNullWhen(returnValue: true)] out Type? type)
         {
-            return this.encodingIdToTypeDictionary.TryGetValue(encodingId, out type);
+            return this.encodingDictionary.TryGetType(encodingId, out type);
         }
 
 
@@ -271,7 +246,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>True if successfull.</returns>
         public bool TryGetBinaryEncodingIdFromType(Type type, [NotNullWhen(returnValue: true)] out NodeId? binaryEncodingId)
         {
-            return this.typeToBinaryEncodingIdDictionary.TryGetValue(type, out binaryEncodingId);
+            return this.encodingDictionary.TryGetEncodingId(type, out binaryEncodingId);
         }
 
         /// <summary>
@@ -704,22 +679,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             await base.OnOpenedAsync(token);
 
-            if (this.AdditionalTypes != null)
+            if (this.EncodingTable != null)
             {
-                foreach (var type in this.AdditionalTypes)
-                {
-                    var info = type.GetTypeInfo();
-                    if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
-                    {
-                        var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-                        if (attr != null)
-                        {
-                            var id = ExpandedNodeId.ToNodeId(attr.NodeId, this.NamespaceUris);
-                            this.encodingIdToTypeDictionary[id] = type;
-                            this.typeToBinaryEncodingIdDictionary[type] = id;
-                        }
-                    }
-                }
+                this.encodingDictionary = new EncodingDictionary(this.EncodingTable, this.NamespaceUris);
             }
         }
 

@@ -425,7 +425,14 @@ namespace Workstation.UaClient.IntegrationTests
                 "opc.tcp://localhost:48010",
                 SecurityPolicyUris.None,
                 loggerFactory: this.loggerFactory,
-                additionalTypes: new[] { typeof(Vector) });
+                encodingTable: new MergedEncodingTable
+                {
+                    new BinaryEncodingTable(),
+                    new CustomEncodingTable<BinaryEncodingIdAttribute>
+                    {
+                        typeof(Vector)
+                    }
+                });
 
             await channel.OpenAsync();
 

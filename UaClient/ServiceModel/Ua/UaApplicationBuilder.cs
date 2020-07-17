@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -278,6 +280,16 @@ namespace Workstation.ServiceModel.Ua
                 action(options);
             }
 
+            var encodingTable = default(IEnumerable<(ExpandedNodeId, Type)>);
+            if (this.additionalTypes.Any())
+            {
+                encodingTable = new MergedEncodingTable
+                {
+                    new BinaryEncodingTable(),
+                    new CustomEncodingTable<BinaryEncodingIdAttribute>(this.additionalTypes)
+                };
+            }
+
             return new UaApplication(
                 this.localDescription,
                 this.certificateStore,
@@ -285,7 +297,7 @@ namespace Workstation.ServiceModel.Ua
                 this.mappedEndpoints,
                 loggerFactory,
                 options,
-                this.additionalTypes);
+                encodingTable);
         }
     }
 }
