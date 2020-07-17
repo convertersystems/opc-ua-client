@@ -9,7 +9,7 @@ namespace Workstation.ServiceModel.Ua
     /// Attribute for classes of type IEncodable to indicate the xml encoding id.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
-    public sealed class XmlEncodingIdAttribute : Attribute
+    public sealed class XmlEncodingIdAttribute : Attribute, IEncodingIdAttribute
     {
         public XmlEncodingIdAttribute(string s)
         {
