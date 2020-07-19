@@ -16,6 +16,7 @@ namespace Workstation.ServiceModel.Ua
             this.NodeId = ExpandedNodeId.Parse(s);
         }
 
+        /// <inheritdoc />
         public ExpandedNodeId NodeId { get; }
     }
 }

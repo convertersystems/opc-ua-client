@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Converter Systems LLC. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -6,8 +9,15 @@ using System.Text;
 
 namespace Workstation.ServiceModel.Ua
 {
+    /// <summary>
+    /// A bidirectional map to associate encoding ids with the corresponding types.
+    /// The encoding dictionary is usual created by the channel.
+    /// </summary>
     public class EncodingDictionary
     {
+        /// <summary>
+        /// Dictionary for the standard types of the OPC foundation and their binary encoding ids.
+        /// </summary>
         static public EncodingDictionary BinaryEncodingDictionary { get; }
         
         static EncodingDictionary()
@@ -21,6 +31,12 @@ namespace Workstation.ServiceModel.Ua
         private readonly Dictionary<NodeId, Type> encodingIdToTypeDictionary;
         private readonly Dictionary<Type, NodeId> typeToEncodingIdDictionary;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EncodingDictionary"/> class.
+        /// </summary>
+        /// <param name="standardTypes">An encoding dictionary containing the standard OPC types.</param>
+        /// <param name="table">The encoding table containing the additional types.</param>
+        /// <param name="namespaceUris">The namespace URIs.</param>
         public EncodingDictionary(EncodingDictionary standardTypes, IEnumerable<(ExpandedNodeId,Type)> table, IList<string> namespaceUris)
         {
             if (standardTypes is null)
@@ -66,6 +82,10 @@ namespace Workstation.ServiceModel.Ua
             }
         }
         
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EncodingDictionary"/> class.
+        /// </summary>
+        /// <param name="table">The encoding table containing the standard OPC types.</param>
         public EncodingDictionary(IEnumerable<(ExpandedNodeId,Type)> table)
         {
             if (table is null)
@@ -98,11 +118,23 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
+        /// <summary>
+        /// Gets the encoding id associated with the system type.
+        /// </summary>
+        /// <param name="type">The system type.</param>
+        /// <param name="encodingId">The encoding id.</param>
+        /// <returns>True if successfull.</returns>
         public bool TryGetEncodingId(Type type, [NotNullWhen(returnValue: true)] out NodeId? encodingId)
         {
             return this.typeToEncodingIdDictionary.TryGetValue(type, out encodingId);
         }
 
+        /// <summary>
+        /// Gets the system type associated with the encoding id.
+        /// </summary>
+        /// <param name="encodingId">The encoding id.</param>
+        /// <param name="type">The system type.</param>
+        /// <returns>True if successfull.</returns>
         public bool TryGetType(NodeId encodingId, [NotNullWhen(returnValue: true)] out Type? type)
         {
             return this.encodingIdToTypeDictionary.TryGetValue(encodingId, out type);
