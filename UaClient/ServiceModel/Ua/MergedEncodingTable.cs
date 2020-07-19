@@ -12,6 +12,11 @@ namespace Workstation.ServiceModel.Ua
 
         public void Add(IEnumerable<(ExpandedNodeId, Type)> list)
         {
+            if (list is null)
+            {
+                throw new ArgumentNullException(nameof(list));
+            }
+
             this.table = this.table.Concat(list);
         }
 

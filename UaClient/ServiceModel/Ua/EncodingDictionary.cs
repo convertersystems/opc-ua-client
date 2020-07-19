@@ -23,6 +23,19 @@ namespace Workstation.ServiceModel.Ua
 
         public EncodingDictionary(EncodingDictionary standardTypes, IEnumerable<(ExpandedNodeId,Type)> table, IList<string> namespaceUris)
         {
+            if (standardTypes is null)
+            {
+                throw new ArgumentNullException(nameof(standardTypes));
+            }
+            if (table is null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+            if (namespaceUris is null)
+            {
+                throw new ArgumentNullException(nameof(namespaceUris));
+            }
+
             encodingIdToTypeDictionary = new Dictionary<NodeId, Type>(standardTypes.encodingIdToTypeDictionary);
             typeToEncodingIdDictionary = new Dictionary<Type, NodeId>(standardTypes.typeToEncodingIdDictionary);
 
@@ -55,6 +68,11 @@ namespace Workstation.ServiceModel.Ua
         
         public EncodingDictionary(IEnumerable<(ExpandedNodeId,Type)> table)
         {
+            if (table is null)
+            {
+                throw new ArgumentNullException(nameof(table));
+            }
+
             encodingIdToTypeDictionary = new Dictionary<NodeId, Type>();
             typeToEncodingIdDictionary = new Dictionary<Type, NodeId>();
 

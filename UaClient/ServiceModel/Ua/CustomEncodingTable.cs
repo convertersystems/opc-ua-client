@@ -18,6 +18,11 @@ namespace Workstation.ServiceModel.Ua
         
         public CustomEncodingTable(IEnumerable<(ExpandedNodeId, Type)> encodingTable)
         {
+            if (encodingTable is null)
+            {
+                throw new ArgumentNullException(nameof(encodingTable));
+            }
+
             this.encodingTable = encodingTable.ToList();
         }
         
@@ -54,6 +59,11 @@ namespace Workstation.ServiceModel.Ua
         
         public CustomEncodingTable(IEnumerable<Type> types)
         {
+            if (types is null)
+            {
+                throw new ArgumentNullException(nameof(types));
+            }
+
             foreach (var type in types)
             {
                 this.Add(type);
@@ -62,6 +72,11 @@ namespace Workstation.ServiceModel.Ua
 
         public CustomEncodingTable(Assembly assembly)
         {
+            if (assembly is null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
             var table = from type in assembly.ExportedTypes
                         let info = type.GetTypeInfo()
                         where info.ImplementedInterfaces.Contains(typeof(IEncodable))
@@ -73,6 +88,10 @@ namespace Workstation.ServiceModel.Ua
         
         public void Add(Type type)
         {
+            if (type is null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
             var info = type.GetTypeInfo();
 
             if (!info.ImplementedInterfaces.Contains(typeof(IEncodable)))
