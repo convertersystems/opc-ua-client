@@ -283,11 +283,7 @@ namespace Workstation.ServiceModel.Ua
             var encodingTable = default(IEnumerable<(ExpandedNodeId, Type)>);
             if (this.additionalTypes.Any())
             {
-                encodingTable = new MergedEncodingTable
-                {
-                    new BinaryEncodingTable(),
-                    new CustomEncodingTable<BinaryEncodingIdAttribute>(this.additionalTypes)
-                };
+                encodingTable = new CustomEncodingTable<BinaryEncodingIdAttribute>(this.additionalTypes);
             }
 
             return new UaApplication(

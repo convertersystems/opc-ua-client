@@ -121,21 +121,21 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The remote endpoint</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The secure channel options.</param>
-        /// <param name="encodingTable">Types to be registered with encoder.</param>
+        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSecureChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
             UaTcpSecureChannelOptions? options = null,
-            IEnumerable<(ExpandedNodeId,Type)>? encodingTable = null)
+            IEnumerable<(ExpandedNodeId, Type)>? additionalTypes = null)
             : base(remoteEndpoint, loggerFactory, options)
         {
             this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
             this.CertificateStore = certificateStore;
             this.TimeoutHint = options?.TimeoutHint ?? DefaultTimeoutHint;
             this.DiagnosticsHint = options?.DiagnosticsHint ?? DefaultDiagnosticsHint;
-            this.EncodingTable = encodingTable;
+            this.AdditionalTypes = additionalTypes;
 
             this.logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
 
@@ -146,9 +146,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.pendingRequests = new ActionBlock<ServiceOperation>(t => this.SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
             this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
 
-            this.encodingDictionary = encodingTable is null
-                ? BinaryEncodingTable.EncodingDictionary
-                : new EncodingDictionary(encodingTable);
+            this.encodingDictionary = EncodingDictionary.BinaryEncodingDictionary;
         }
 
         /// <summary>
@@ -174,7 +172,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets types to be registered with encoder.
         /// </summary>
-        public IEnumerable<(ExpandedNodeId,Type)>? EncodingTable { get; }
+        public IEnumerable<(ExpandedNodeId,Type)>? AdditionalTypes { get; }
 
         /// <summary>
         /// Gets the local certificate.
@@ -679,9 +677,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             await base.OnOpenedAsync(token);
 
-            if (this.EncodingTable != null)
+            if (this.AdditionalTypes != null)
             {
-                this.encodingDictionary = new EncodingDictionary(this.EncodingTable, this.NamespaceUris);
+                this.encodingDictionary = new EncodingDictionary(this.encodingDictionary, this.AdditionalTypes, this.NamespaceUris);
             }
         }
 

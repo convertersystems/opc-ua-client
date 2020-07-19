@@ -1,17 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text;
 
 namespace Workstation.ServiceModel.Ua
 {
     public class EncodingDictionary
     {
-        private readonly Dictionary<NodeId, Type> encodingIdToTypeDictionary = new Dictionary<NodeId, Type>();
-        private readonly Dictionary<Type, NodeId> typeToEncodingIdDictionary = new Dictionary<Type, NodeId>();
-
-        public EncodingDictionary(IEnumerable<(ExpandedNodeId,Type)> table, IList<string> namespaceUris)
+        static public EncodingDictionary BinaryEncodingDictionary { get; }
+        
+        static EncodingDictionary()
         {
+            var assembley = typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly;
+            var table = new CustomEncodingTable<BinaryEncodingIdAttribute>(assembley);
+        
+            BinaryEncodingDictionary = new EncodingDictionary(table);
+        }
+
+        private readonly Dictionary<NodeId, Type> encodingIdToTypeDictionary;
+        private readonly Dictionary<Type, NodeId> typeToEncodingIdDictionary;
+
+        public EncodingDictionary(EncodingDictionary standardTypes, IEnumerable<(ExpandedNodeId,Type)> table, IList<string> namespaceUris)
+        {
+            encodingIdToTypeDictionary = new Dictionary<NodeId, Type>(standardTypes.encodingIdToTypeDictionary);
+            typeToEncodingIdDictionary = new Dictionary<Type, NodeId>(standardTypes.typeToEncodingIdDictionary);
+
             foreach (var (nodeId, type) in table)
             {
                 ushort ns = nodeId.NodeId.NamespaceIndex;
@@ -34,13 +48,16 @@ namespace Workstation.ServiceModel.Ua
                     _               => new NodeId((byte[])nodeId.NodeId.Identifier, ns)
                 };
 
-                this.encodingIdToTypeDictionary[encodingId] = type;
-                this.typeToEncodingIdDictionary[type] = encodingId;
+                this.encodingIdToTypeDictionary.Add(encodingId, type);
+                this.typeToEncodingIdDictionary.Add(type, encodingId);
             }
         }
         
         public EncodingDictionary(IEnumerable<(ExpandedNodeId,Type)> table)
         {
+            encodingIdToTypeDictionary = new Dictionary<NodeId, Type>();
+            typeToEncodingIdDictionary = new Dictionary<Type, NodeId>();
+
             foreach (var (nodeId, type) in table)
             {
                 ushort ns = nodeId.NodeId.NamespaceIndex;
@@ -58,8 +75,8 @@ namespace Workstation.ServiceModel.Ua
                     _               => new NodeId((byte[])nodeId.NodeId.Identifier, ns)
                 };
 
-                this.encodingIdToTypeDictionary[encodingId] = type;
-                this.typeToEncodingIdDictionary[type] = encodingId;
+                this.encodingIdToTypeDictionary.Add(encodingId, type);
+                this.typeToEncodingIdDictionary.Add(type, encodingId);
             }
         }
 

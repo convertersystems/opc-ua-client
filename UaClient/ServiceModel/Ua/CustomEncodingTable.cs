@@ -54,13 +54,10 @@ namespace Workstation.ServiceModel.Ua
         
         public CustomEncodingTable(IEnumerable<Type> types)
         {
-            var table = from type in types
-                        let info = type.GetTypeInfo()
-                        where info.ImplementedInterfaces.Contains(typeof(IEncodable))
-                        let attr = info.GetCustomAttribute<TAttribute>(false)
-                        where attr != null
-                        select (attr.NodeId, type);
-            this.encodingTable.AddRange(table);
+            foreach (var type in types)
+            {
+                this.Add(type);
+            }
         }
 
         public CustomEncodingTable(Assembly assembly)
@@ -78,14 +75,18 @@ namespace Workstation.ServiceModel.Ua
         {
             var info = type.GetTypeInfo();
 
-            if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
+            if (!info.ImplementedInterfaces.Contains(typeof(IEncodable)))
             {
-                var attr = info.GetCustomAttribute<TAttribute>(false);
-                if (attr != null)
-                {
-                    this.Add(attr.NodeId, type);
-                }
+                throw new ArgumentException($"Type '{type}' does not implement the {typeof(IEncodable)} interface.");
             }
+
+            var attr = info.GetCustomAttribute<TAttribute>(false);
+            if (attr == null)
+            {
+                throw new ArgumentException($"Type '{type}' does not have a {typeof(TAttribute)} attribute.");
+            }
+            
+            this.Add(attr.NodeId, type);
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Workstation.ServiceModel.Ua
             IEnumerable<MappedEndpoint> mappedEndpoints,
             ILoggerFactory? loggerFactory = null,
             UaApplicationOptions? options = null,
-            IEnumerable<(ExpandedNodeId,Type)>? encodingTable = null)
+            IEnumerable<(ExpandedNodeId,Type)>? additionalTypes = null)
         {
             if (localDescription == null)
             {
@@ -56,7 +56,7 @@ namespace Workstation.ServiceModel.Ua
             this.MappedEndpoints = mappedEndpoints;
             this.LoggerFactory = loggerFactory;
             this.Options = options ?? new UaApplicationOptions();
-            this.EncodingTable = encodingTable;
+            this.AdditionalTypes = additionalTypes;
 
             this.logger = loggerFactory?.CreateLogger<UaApplication>();
             this.channelMap = new ConcurrentDictionary<string, Lazy<Task<UaTcpSessionChannel>>>();
@@ -110,7 +110,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets any additional types to be registered with encoder.
         /// </summary>
-        public IEnumerable<(ExpandedNodeId,Type)>? EncodingTable { get; }
+        public IEnumerable<(ExpandedNodeId,Type)>? AdditionalTypes { get; }
 
         /// <summary>
         /// Gets a System.Threading.Tasks.Task that represents the completion of the UaApplication.
@@ -253,7 +253,7 @@ namespace Workstation.ServiceModel.Ua
                     endpoint,
                     this.LoggerFactory,
                     this.Options,
-                    this.EncodingTable);
+                    this.AdditionalTypes);
 
                 channel.Faulted += (s, e) =>
                 {
