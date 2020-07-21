@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Org.BouncyCastle.Crypto;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 
 namespace Workstation.ServiceModel.Ua
 {
-    public class NodeId : IEquatable<NodeId>
+    public class NodeId : IEquatable<NodeId?>
     {
         public static readonly NodeId Null = new NodeId(0);
 
@@ -83,48 +83,12 @@ namespace Workstation.ServiceModel.Ua
 
         public IdType IdType { get; }
 
-        public static bool operator ==(NodeId? a, NodeId? b)
-        {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
-            {
-                return false;
-            }
-
-            switch (a.IdType)
-            {
-                case IdType.Numeric:
-                    return (a.IdType == b.IdType) && ((uint)a.Identifier == (uint)b.Identifier) && (a.NamespaceIndex == b.NamespaceIndex);
-
-                case IdType.String:
-                    return (a.IdType == b.IdType) && ((string)a.Identifier == (string)b.Identifier) && (a.NamespaceIndex == b.NamespaceIndex);
-
-                case IdType.Guid:
-                    return (a.IdType == b.IdType) && ((Guid)a.Identifier == (Guid)b.Identifier) && (a.NamespaceIndex == b.NamespaceIndex);
-
-                case IdType.Opaque:
-                    return (a.IdType == b.IdType) && ((byte[])a.Identifier).SequenceEqual((byte[])b.Identifier) && (a.NamespaceIndex == b.NamespaceIndex);
-
-                default:
-                    return false;
-            }
-        }
-
-        public static bool operator !=(NodeId? a, NodeId? b)
-        {
-            return !(a == b);
-        }
-
         public static bool IsNull(NodeId nodeId)
         {
             return (nodeId == null) || nodeId == Null;
         }
 
-        public static ExpandedNodeId ToExpandedNodeId(NodeId value, IList<string>? namespaceUris)
+        public static ExpandedNodeId ToExpandedNodeId(NodeId value, IList<string> namespaceUris)
         {
             if (ReferenceEquals(value, null))
             {
@@ -132,9 +96,10 @@ namespace Workstation.ServiceModel.Ua
             }
 
             ushort ns = value.NamespaceIndex;
+            string nsu = null;
             if (namespaceUris != null && ns > 0 && ns < namespaceUris.Count)
             {
-                var nsu = namespaceUris[ns];
+                nsu = namespaceUris[ns];
 
                 switch (value.IdType)
                 {
@@ -158,7 +123,7 @@ namespace Workstation.ServiceModel.Ua
             return new ExpandedNodeId(value);
         }
 
-        public static bool TryParse(string s, [NotNullWhen(returnValue: true)] out NodeId value)
+        public static bool TryParse(string s, out NodeId value)
         {
             try
             {
@@ -219,39 +184,6 @@ namespace Workstation.ServiceModel.Ua
             return value;
         }
 
-        public override bool Equals(object? o)
-        {
-            if (o is NodeId)
-            {
-                return this == (NodeId)o;
-            }
-
-            return false;
-        }
-
-        public bool Equals(NodeId? that)
-        {
-            return this == that;
-        }
-
-        public override int GetHashCode()
-        {
-            int result = this.NamespaceIndex.GetHashCode();
-
-            if (this.IdType == IdType.Opaque)
-            {
-                foreach (var b in (byte[])this.Identifier)
-                {
-                    result = (397 * result) ^ b.GetHashCode();
-                }
-            }
-            else
-            {
-                result = (397 * result) ^ this.Identifier.GetHashCode();
-            }
-            return result;
-        }
-
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -277,6 +209,72 @@ namespace Workstation.ServiceModel.Ua
             }
 
             return sb.ToString();
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as NodeId);
+        }
+
+        public bool Equals(NodeId? other)
+        {
+            if (other != null &&
+                   NamespaceIndex == other.NamespaceIndex &&
+                   IdType == other.IdType)
+            {
+                switch (this.IdType)
+                {
+                    case IdType.Numeric:
+                        return EqualityComparer<uint>.Default.Equals((uint)Identifier, (uint)other.Identifier);
+
+                    case IdType.String:
+                        return EqualityComparer<string>.Default.Equals((string)Identifier, (string)other.Identifier);
+
+                    case IdType.Guid:
+                        return EqualityComparer<Guid>.Default.Equals((Guid)Identifier, (Guid)other.Identifier);
+
+                    case IdType.Opaque:
+                        return ByteSequenceComparer.Equals((byte[])Identifier, (byte[])other.Identifier);
+                }
+            }
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 387039986;
+            hashCode = hashCode * -1521134295 + NamespaceIndex.GetHashCode();
+            hashCode = hashCode * -1521134295 + IdType.GetHashCode();
+            switch (this.IdType)
+            {
+                case IdType.Numeric:
+                    hashCode = hashCode * -1521134295 + EqualityComparer<uint>.Default.GetHashCode((uint)Identifier);
+                    break;
+
+                case IdType.String:
+                    hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode((string)Identifier);
+                    break;
+
+                case IdType.Guid:
+                    hashCode = hashCode * -1521134295 + EqualityComparer<Guid>.Default.GetHashCode((Guid)Identifier);
+                    break;
+
+                case IdType.Opaque:
+                    hashCode = hashCode * -1521134295 + ByteSequenceComparer.GetHashCode((byte[])Identifier);
+                    break;
+            }
+
+            return hashCode;
+        }
+
+        public static bool operator ==(NodeId? left, NodeId? right)
+        {
+            return EqualityComparer<NodeId>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(NodeId? left, NodeId? right)
+        {
+            return !(left == right);
         }
     }
 }

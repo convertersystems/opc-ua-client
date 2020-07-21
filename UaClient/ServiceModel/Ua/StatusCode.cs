@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Workstation.ServiceModel.Ua
 {
-    public readonly struct StatusCode
+    public readonly struct StatusCode : IEquatable<StatusCode>
     {
         private const uint SeverityMask = 0xC0000000u;
         private const uint SeverityGood = 0x00000000u;
@@ -39,14 +41,14 @@ namespace Workstation.ServiceModel.Ua
             return a.Value;
         }
 
-        public static bool operator ==(StatusCode a, StatusCode b)
+        public static bool operator ==(StatusCode left, StatusCode right)
         {
-            return a.Value == b.Value;
+            return left.Equals(right);
         }
 
-        public static bool operator !=(StatusCode a, StatusCode b)
+        public static bool operator !=(StatusCode left, StatusCode right)
         {
-            return !(a == b);
+            return !(left == right);
         }
 
         public static bool IsGood(StatusCode a)
@@ -79,29 +81,24 @@ namespace Workstation.ServiceModel.Ua
             return ((a.Value & InfoTypeMask) == InfoTypeDataValue) && ((a.Value & Overflow) == Overflow);
         }
 
-        public override bool Equals(object? o)
+        public override string ToString()
         {
-            if (o is StatusCode)
-            {
-                return this == (StatusCode)o;
-            }
-
-            return false;
+            return $"0x{this.Value:X8}";
         }
 
-        public bool Equals(StatusCode that)
+        public override bool Equals(object? obj)
         {
-            return this == that;
+            return obj is StatusCode code && Equals(code);
+        }
+
+        public bool Equals(StatusCode other)
+        {
+            return Value == other.Value;
         }
 
         public override int GetHashCode()
         {
-            return this.Value.GetHashCode();
-        }
-
-        public override string ToString()
-        {
-            return $"0x{this.Value:X8}";
+            return -1937169414 + Value.GetHashCode();
         }
     }
 }

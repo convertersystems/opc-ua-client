@@ -3,45 +3,44 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
 namespace Workstation.ServiceModel.Ua
 {
-    public sealed class ExpandedNodeId : IEquatable<ExpandedNodeId>
+    public sealed class ExpandedNodeId : IEquatable<ExpandedNodeId?>
     {
         public static readonly ExpandedNodeId Null = new ExpandedNodeId(0);
 
-        public ExpandedNodeId(uint identifier, string? namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(uint identifier, string namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(string identifier, string? namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(string identifier, string namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(Guid identifier, string? namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(Guid identifier, string namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(byte[] identifier, string? namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(byte[] identifier, string namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(NodeId identifier, string? namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(NodeId identifier, string namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = identifier;
             this.NamespaceUri = namespaceUri;
@@ -50,36 +49,16 @@ namespace Workstation.ServiceModel.Ua
 
         public NodeId NodeId { get; }
 
-        public string? NamespaceUri { get; }
+        public string NamespaceUri { get; }
 
         public uint ServerIndex { get; }
-
-        public static bool operator ==(ExpandedNodeId? a, ExpandedNodeId? b)
-        {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
-            {
-                return false;
-            }
-
-            return (a.NodeId == b.NodeId) && (a.NamespaceUri == b.NamespaceUri) && (a.ServerIndex == b.ServerIndex);
-        }
-
-        public static bool operator !=(ExpandedNodeId? a, ExpandedNodeId? b)
-        {
-            return !(a == b);
-        }
 
         public static bool IsNull(ExpandedNodeId? nodeId)
         {
             return (nodeId == null) || NodeId.IsNull(nodeId.NodeId);
         }
 
-        public static NodeId ToNodeId(ExpandedNodeId value, IList<string>? namespaceUris)
+        public static NodeId ToNodeId(ExpandedNodeId value, IList<string> namespaceUris)
         {
             if (ReferenceEquals(value, null))
             {
@@ -87,10 +66,10 @@ namespace Workstation.ServiceModel.Ua
             }
 
             ushort ns = value.NodeId.NamespaceIndex;
-            var nsu = value.NamespaceUri;
+            string nsu = value.NamespaceUri;
             if (namespaceUris != null && !string.IsNullOrEmpty(nsu))
             {
-                int i = namespaceUris.IndexOf(nsu!);
+                int i = namespaceUris.IndexOf(nsu);
                 if (i != -1)
                 {
                     ns = (ushort)i;
@@ -113,7 +92,7 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public static bool TryParse(string s, [NotNullWhen(returnValue: true)] out ExpandedNodeId? value)
+        public static bool TryParse(string s, out ExpandedNodeId value)
         {
             try
             {
@@ -130,7 +109,7 @@ namespace Workstation.ServiceModel.Ua
                     s = s.Substring(pos + 1);
                 }
 
-                string? nsu = null;
+                string nsu = null;
                 if (s.StartsWith("nsu=", StringComparison.Ordinal))
                 {
                     int pos = s.IndexOf(';');
@@ -143,7 +122,8 @@ namespace Workstation.ServiceModel.Ua
                     s = s.Substring(pos + 1);
                 }
 
-                if (NodeId.TryParse(s, out var nodeId))
+                NodeId nodeId = null;
+                if (NodeId.TryParse(s, out nodeId))
                 {
                     value = new ExpandedNodeId(nodeId, nsu, svr);
                     return true;
@@ -161,35 +141,13 @@ namespace Workstation.ServiceModel.Ua
 
         public static ExpandedNodeId Parse(string s)
         {
-            if (!ExpandedNodeId.TryParse(s, out var value))
+            ExpandedNodeId value;
+            if (!ExpandedNodeId.TryParse(s, out value))
             {
                 throw new ServiceResultException(StatusCodes.BadNodeIdInvalid);
             }
 
             return value;
-        }
-
-        public override bool Equals(object? o)
-        {
-            if (o is ExpandedNodeId)
-            {
-                return this == (ExpandedNodeId)o;
-            }
-
-            return false;
-        }
-
-        public bool Equals(ExpandedNodeId that)
-        {
-            return this == that;
-        }
-
-        public override int GetHashCode()
-        {
-            int result = this.NodeId.GetHashCode();
-            result = (397 * result) ^ (this.NamespaceUri != null ? this.NamespaceUri.GetHashCode() : 0);
-            result = (397 * result) ^ (int)this.ServerIndex;
-            return result;
         }
 
         public override string ToString()
@@ -207,6 +165,38 @@ namespace Workstation.ServiceModel.Ua
 
             sb.Append(this.NodeId.ToString());
             return sb.ToString();
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as ExpandedNodeId);
+        }
+
+        public bool Equals(ExpandedNodeId? other)
+        {
+            return other != null &&
+                   EqualityComparer<NodeId>.Default.Equals(NodeId, other.NodeId) &&
+                   NamespaceUri == other.NamespaceUri &&
+                   ServerIndex == other.ServerIndex;
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = -641591048;
+            hashCode = hashCode * -1521134295 + EqualityComparer<NodeId>.Default.GetHashCode(NodeId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(NamespaceUri);
+            hashCode = hashCode * -1521134295 + ServerIndex.GetHashCode();
+            return hashCode;
+        }
+
+        public static bool operator ==(ExpandedNodeId? left, ExpandedNodeId? right)
+        {
+            return EqualityComparer<ExpandedNodeId>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(ExpandedNodeId? left, ExpandedNodeId? right)
+        {
+            return !(left == right);
         }
     }
 }

@@ -24,6 +24,7 @@ using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Workstation.UaClient.IntegrationTests
 {
@@ -41,9 +42,11 @@ namespace Workstation.UaClient.IntegrationTests
         private readonly ApplicationDescription localDescription;
         private readonly ICertificateStore certificateStore;
         private readonly X509Identity x509Identity;
+        private readonly ITestOutputHelper output;
 
-        public IntegrationTests()
+        public IntegrationTests(ITestOutputHelper output)
         {
+            this.output = output;
             this.loggerFactory = LoggerFactory.Create(builder => builder.AddDebug());
             this.logger = this.loggerFactory?.CreateLogger<IntegrationTests>();
 
@@ -94,6 +97,192 @@ namespace Workstation.UaClient.IntegrationTests
             {
                 x509Identity = new X509Identity(userCert, userKey);
             }
+        }
+        [Fact]
+        public bool TestDictionaryExpandedNodeId()
+        {
+            const int _max = 1000000;
+            var binaryEncodingIdToTypeDictionary = new Dictionary<ExpandedNodeId, Type>();
+            foreach (var type in typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly.ExportedTypes)
+            {
+                var info = type.GetTypeInfo();
+                if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
+                {
+                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                    if (attr != null)
+                    {
+                        binaryEncodingIdToTypeDictionary[attr.NodeId] = type;
+                    }
+                }
+            }
+            var a = ExpandedNodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
+            var b = ExpandedNodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary);
+            var c = ExpandedNodeId.Parse(ObjectIds.WriteRequest_Encoding_DefaultBinary);
+            var d = ExpandedNodeId.Parse(ObjectIds.BrowseRequest_Encoding_DefaultBinary);
+            var e = ExpandedNodeId.Parse(ObjectIds.CallRequest_Encoding_DefaultBinary);
+            var f = ExpandedNodeId.Parse(ObjectIds.CreateSubscriptionRequest_Encoding_DefaultBinary);
+            var g = ExpandedNodeId.Parse(ObjectIds.PublishRequest_Encoding_DefaultBinary);
+            var h = ExpandedNodeId.Parse(ObjectIds.CloseSessionRequest_Encoding_DefaultBinary);
+            var flag = true;
+            var s1 = Stopwatch.StartNew();
+            for (int i = 0; i < _max; i++)
+            {
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(a, out _);
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(b, out _);
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(c, out _);
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(d, out _);
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(e, out _);
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(f, out _);
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(g, out _);
+                flag &= binaryEncodingIdToTypeDictionary.TryGetValue(h, out _);
+
+            }
+            s1.Stop();
+            output.WriteLine(((double)(s1.Elapsed.TotalMilliseconds * 1000000) / _max).ToString("0.00 ns"));
+            return flag;
+        }
+
+        [Fact]
+        public bool TestDictionaryNodeId()
+        {
+            const int _max = 1000000;
+            var binaryEncodingIdToTypeDictionary = new Dictionary<NodeId, Type>();
+            foreach (var type in typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly.ExportedTypes)
+            {
+                var info = type.GetTypeInfo();
+                if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
+                {
+                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                    if (attr != null)
+                    {
+                        binaryEncodingIdToTypeDictionary[attr.NodeId.NodeId] = type;
+                    }
+                }
+            }
+            var namespaces = new List<Dictionary<NodeId, Type>>();
+            namespaces.Add(binaryEncodingIdToTypeDictionary);
+            var a = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
+            var b = NodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary);
+            var c = NodeId.Parse(ObjectIds.WriteRequest_Encoding_DefaultBinary);
+            var d = NodeId.Parse(ObjectIds.BrowseRequest_Encoding_DefaultBinary);
+            var e = NodeId.Parse(ObjectIds.CallRequest_Encoding_DefaultBinary);
+            var f = NodeId.Parse(ObjectIds.CreateSubscriptionRequest_Encoding_DefaultBinary);
+            var g = NodeId.Parse(ObjectIds.PublishRequest_Encoding_DefaultBinary);
+            var h = NodeId.Parse(ObjectIds.CloseSessionRequest_Encoding_DefaultBinary);
+            var flag = true;
+            var s1 = Stopwatch.StartNew();
+            for (int i = 0; i < _max; i++)
+            {
+                flag &= namespaces[0].TryGetValue(a, out _);
+                flag &= namespaces[0].TryGetValue(b, out _);
+                flag &= namespaces[0].TryGetValue(c, out _);
+                flag &= namespaces[0].TryGetValue(d, out _);
+                flag &= namespaces[0].TryGetValue(e, out _);
+                flag &= namespaces[0].TryGetValue(f, out _);
+                flag &= namespaces[0].TryGetValue(g, out _);
+                flag &= namespaces[0].TryGetValue(h, out _);
+
+            }
+            s1.Stop();
+            output.WriteLine(((double)(s1.Elapsed.TotalMilliseconds * 1000000) / _max).ToString("0.00 ns"));
+            return flag;
+        }
+
+        public class Namespace
+        {
+            Dictionary<uint, Type> nid;
+            Dictionary<string, Type> sid;
+            Dictionary<Guid, Type> gid;
+            Dictionary<byte[], Type> bid;
+
+            public Namespace()
+            {
+                nid = new Dictionary<uint, Type>();
+                sid = new Dictionary<string, Type>();
+                gid = new Dictionary<Guid, Type>();
+                bid = new Dictionary<byte[], Type>(ByteSequenceComparer.Instance);
+            }
+
+            public bool TryAdd(NodeId nodeId, Type typ)
+            {
+                switch (nodeId.IdType)
+                {
+                    case IdType.Numeric:
+                        return nid.TryAdd((uint)nodeId.Identifier, typ);
+                    case IdType.String:
+                        return sid.TryAdd((string)nodeId.Identifier, typ);
+                    case IdType.Guid:
+                        return gid.TryAdd((Guid)nodeId.Identifier, typ);
+                    case IdType.Opaque:
+                        return bid.TryAdd((byte[])nodeId.Identifier, typ);
+                    default:
+                        typ = null;
+                        return false;
+                }
+            }
+            public bool TryGetType(NodeId nodeId, out Type typ)
+            {
+                switch (nodeId.IdType)
+                {
+                    case IdType.Numeric:
+                        return nid.TryGetValue((uint)nodeId.Identifier, out typ);
+                    case IdType.String:
+                        return sid.TryGetValue((string)nodeId.Identifier, out typ);
+                    case IdType.Guid:
+                        return gid.TryGetValue((Guid)nodeId.Identifier, out typ);
+                    case IdType.Opaque:
+                        return bid.TryGetValue((byte[])nodeId.Identifier, out typ);
+                    default:
+                        typ = null;
+                        return false;
+                }
+            }
+        }
+
+        [Fact]
+        public bool TestDictionaryId()
+        {
+            const int _max = 1000000;
+            var ns = new Namespace();
+            foreach (var type in typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly.ExportedTypes)
+            {
+                var info = type.GetTypeInfo();
+                if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
+                {
+                    var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                    if (attr != null)
+                    {
+                        ns.TryAdd(attr.NodeId.NodeId, type);
+                    }
+                }
+            }
+            var namespaces = new List<Namespace>();
+            namespaces.Add(ns);
+            var a = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
+            var b = NodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary);
+            var c = NodeId.Parse(ObjectIds.WriteRequest_Encoding_DefaultBinary);
+            var d = NodeId.Parse(ObjectIds.BrowseRequest_Encoding_DefaultBinary);
+            var e = NodeId.Parse(ObjectIds.CallRequest_Encoding_DefaultBinary);
+            var f = NodeId.Parse(ObjectIds.CreateSubscriptionRequest_Encoding_DefaultBinary);
+            var g = NodeId.Parse(ObjectIds.PublishRequest_Encoding_DefaultBinary);
+            var h = NodeId.Parse(ObjectIds.CloseSessionRequest_Encoding_DefaultBinary);
+            var flag = true;
+            var s1 = Stopwatch.StartNew();
+            for (int i = 0; i < _max; i++)
+            {
+                flag &= namespaces[0].TryGetType(a, out _);
+                flag &= namespaces[0].TryGetType(b, out _);
+                flag &= namespaces[0].TryGetType(c, out _);
+                flag &= namespaces[0].TryGetType(d, out _);
+                flag &= namespaces[0].TryGetType(e, out _);
+                flag &= namespaces[0].TryGetType(f, out _);
+                flag &= namespaces[0].TryGetType(g, out _);
+                flag &= namespaces[0].TryGetType(h, out _);
+
+            }
+            s1.Stop();
+            output.WriteLine(((double)(s1.Elapsed.TotalMilliseconds * 1000000) / _max).ToString("0.00 ns"));
+            return flag;
         }
 
         /// <summary>
