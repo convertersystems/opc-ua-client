@@ -15,11 +15,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const long MinFileTime =  504911232000000000L;
         private const long MaxFileTime = 3155378975990000000L;
         private readonly Stream stream;
-        private readonly UaTcpSecureChannel? channel;
+        private readonly IEncodingContext context;
         private readonly Encoding encoding;
         private readonly BinaryReader reader;
 
-        public BinaryDecoder(Stream stream, UaTcpSecureChannel? channel = null, bool keepStreamOpen = false)
+        public BinaryDecoder(Stream stream, IEncodingContext? context = null, bool keepStreamOpen = false)
         {
             if (stream == null)
             {
@@ -27,7 +27,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             this.stream = stream;
-            this.channel = channel;
+            this.context = context ?? new DefaultEncodingContext();
             this.encoding = new UTF8Encoding(false, false);
             this.reader = new BinaryReader(this.stream, this.encoding, keepStreamOpen);
         }
@@ -655,11 +655,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             byte b = this.reader.ReadByte();
             if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
             {
-                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
+                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.context.NamespaceUris);
 
-                if (this.channel != null && this.channel.TryGetTypeFromEncodingId(nodeId, out var type))
+                if (this.context.EncodingDictionary.TryGetType(binaryEncodingId, out var type))
                 {
-                    var len = this.ReadInt32(null);
+                    _ = this.ReadInt32(null);
                     var encodable = (IEncodable)Activator.CreateInstance(type)!;
                     encodable.Decode(this);
                     return new ExtensionObject(encodable, binaryEncodingId);
@@ -670,7 +670,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (b == (byte)BodyType.XmlElement)
             {
-                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
+                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, this.context.NamespaceUris);
                 return new ExtensionObject(this.ReadXElement(null), xmlEncodingId);
             }
 
@@ -684,12 +684,14 @@ namespace Workstation.ServiceModel.Ua.Channels
             byte b = this.reader.ReadByte();
             if (b == (byte)BodyType.ByteString)
             {
-                if (this.channel == null || !this.channel.TryGetTypeFromEncodingId(nodeId, out var type))
+                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.context.NamespaceUris);
+
+                if (!this.context.EncodingDictionary.TryGetType(binaryEncodingId, out var type))
                 {
                     throw new ServiceResultException(StatusCodes.BadDecodingError);
                 }
 
-                var len = this.ReadInt32(null);
+                _ = this.ReadInt32(null);
                 var encodable = (IEncodable)Activator.CreateInstance(type)!;
                 encodable.Decode(this);
                 return (T)encodable;

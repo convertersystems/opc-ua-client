@@ -90,16 +90,15 @@ namespace Workstation.ServiceModel.Ua
 
         public static ExpandedNodeId ToExpandedNodeId(NodeId value, IList<string> namespaceUris)
         {
-            if (ReferenceEquals(value, null))
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
 
             ushort ns = value.NamespaceIndex;
-            string nsu = null;
             if (namespaceUris != null && ns > 0 && ns < namespaceUris.Count)
             {
-                nsu = namespaceUris[ns];
+                string nsu = namespaceUris[ns];
 
                 switch (value.IdType)
                 {
