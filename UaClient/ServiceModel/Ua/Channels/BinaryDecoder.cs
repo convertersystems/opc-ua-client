@@ -40,6 +40,48 @@ namespace Workstation.ServiceModel.Ua.Channels
                     _decodingDictionary.Add(attr.NodeId, type);
                 }
             }
+            //foreach (var (type, attr) in from type in typeof(ReadRequest).Assembly.GetExportedTypes()
+            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
+            //                             where attr != null
+            //                             select (type, attr))
+            //{
+            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
+            //    {
+            //        _decodingDictionary.Add(attr.NodeId, type);
+            //    }
+            //}
+            //var entryAssembly = Assembly.GetEntryAssembly();
+            //if (entryAssembly == null)
+            //{
+            //    return;
+            //}
+            //foreach (var (type, attr) in from type in entryAssembly.GetExportedTypes()
+            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
+            //                             where attr != null
+            //                             select (type, attr))
+            //{
+            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
+            //    {
+            //        _decodingDictionary.Add(attr.NodeId, type);
+            //    }
+            //}
+            //var assembliesFromAttributes = entryAssembly.GetCustomAttributes<TypeLibraryAttribute>()
+            //        .Select(name => Assembly.Load(name.AssemblyName))
+            //        .OrderBy(assembly => assembly.FullName, StringComparer.Ordinal);
+
+            //foreach (var (type, attr) in from assembly in assembliesFromAttributes
+            //                             from type in assembly.GetExportedTypes()
+            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
+            //                             where attr != null
+            //                             select (type, attr))
+            //{
+            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
+            //    {
+            //        _decodingDictionary.Add(attr.NodeId, type);
+            //    }
+            //}
+
+
         }
 
         public BinaryDecoder(Stream stream, IEncodingContext? context = null, bool keepStreamOpen = false)

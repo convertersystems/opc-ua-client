@@ -19,20 +19,11 @@ namespace Workstation.UaClient.UnitTests.Channels
     {
         private readonly ITestOutputHelper output;
 
-
         public BinaryDecoderTests(ITestOutputHelper output)
         {
             this.output = output;
         }
 
-            [Fact]
-        public void LoadAssys()
-        {
-            foreach (var assy in AppDomain.CurrentDomain.GetAssemblies().Where(a=>!a.IsDynamic))
-            {
-                output.WriteLine(assy.FullName);
-            }
-        }
         private static T EncodeDecode<T>(Action<Opc.Ua.BinaryEncoder> encode, Func<BinaryDecoder, T> decode)
         {
             using (var stream = new MemoryStream())

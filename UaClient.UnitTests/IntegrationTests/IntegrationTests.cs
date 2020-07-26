@@ -419,7 +419,7 @@ namespace Workstation.UaClient.IntegrationTests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task VectorAdd()
+        public async Task CustomVectorAdd()
         {
             var channel = new UaTcpSessionChannel(
                 localDescription,
@@ -460,10 +460,56 @@ namespace Workstation.UaClient.IntegrationTests
                 .Should().Be(6.0);
         }
 
-        /*
+        /// <summary>
+        /// Tests calling a method of the UACPPServer.
+        /// Only run this test with a running opc test server.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
+        [Fact]
+        public async Task LocalVectorAdd()
+        {
+            var channel = new UaTcpSessionChannel(
+                localDescription,
+                certificateStore,
+                new AnonymousIdentity(),
+                "opc.tcp://localhost:48010",
+                SecurityPolicyUris.None,
+                loggerFactory: loggerFactory);
+
+            await channel.OpenAsync();
+
+            logger.LogInformation("4 - Call VectorAdd method with structure arguments.");
+            var v1 = new LocalVector { X = 1.0, Y = 2.0, Z = 3.0 };
+            var v2 = new LocalVector { X = 1.0, Y = 2.0, Z = 3.0 };
+            var request = new CallRequest
+            {
+                MethodsToCall = new[] {
+                    new CallMethodRequest
+                    {
+                        ObjectId = NodeId.Parse("ns=2;s=Demo.Method"),
+                        MethodId = NodeId.Parse("ns=2;s=Demo.Method.VectorAdd"),
+                        InputArguments = new [] { new ExtensionObject(v1), new ExtensionObject(v2) }.ToVariantArray()
+                    }
+                }
+            };
+            var response = await channel.CallAsync(request);
+            var result = response.Results[0].OutputArguments[0].GetValueOrDefault<LocalVector>();
+
+            logger.LogInformation($"  {v1}");
+            logger.LogInformation($"+ {v2}");
+            logger.LogInformation(@"  ------------------");
+            logger.LogInformation($"  {result}");
+
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
+            await channel.CloseAsync();
+
+            result.Z
+                .Should().Be(6.0);
+        }
+        
         [DataTypeId("nsu=http://www.unifiedautomation.com/DemoServer/;i=3002")]
         [BinaryEncodingId("nsu=http://www.unifiedautomation.com/DemoServer/;i=5054")]
-        public class Vector : Structure
+        public class LocalVector : Structure
         {
             public double X { get; set; }
 
@@ -487,7 +533,6 @@ namespace Workstation.UaClient.IntegrationTests
 
             public override string ToString() => $"{{ X={X}; Y={Y}; Z={Z}; }}";
         }
-        */
 
         /// <summary>
         /// Tests reading the historical data of the UACPPServer.
