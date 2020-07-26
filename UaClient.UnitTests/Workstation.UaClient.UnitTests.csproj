@@ -43,10 +43,4 @@
     <ProjectReference Include="..\UaClient\Workstation.UaClient.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <AssemblyAttribute Include="Workstation.ServiceModel.Ua.TypeLibrary">
-      <_Parameter1>CustomTypeLibrary</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
-  
 </Project>

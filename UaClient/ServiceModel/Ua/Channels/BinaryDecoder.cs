@@ -27,28 +27,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         static BinaryDecoder()
         {
-            //var test = AppDomain.CurrentDomain.GetAssemblies();
-            //foreach (var (type, attr) in from assembly in AppDomain.CurrentDomain.GetAssemblies()
-            //                             where !assembly.IsDynamic
-            //                             where !assembly.FullName.StartsWith("System.")
-            //                             where !assembly.FullName.StartsWith("Microsoft.")
-            //                             from type in assembly.GetExportedTypes()
-            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-            //                             where attr != null
-            //                             select (type, attr))
-            //{
-            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
-            //    {
-            //        _decodingDictionary.Add(attr.NodeId, type);
-            //    }
-            //}
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()
-                       .Where(a =>
-                     !a.FullName.StartsWith("System.") &&
-                      !a.FullName.StartsWith("Microsoft.") &&
-                      !a.IsDynamic))
-
+            foreach (var assembly in from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                                     where assembly.IsDefined(typeof(TypeLibraryAttribute), false)
+                                     select assembly)
             {
                 try
                 {
@@ -60,62 +41,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             _decodingDictionary.Add(attr.NodeId, type);
                         }
-
-
                 }
                 catch
                 {
                     continue;
                 }
-
             }
-
-
-
-            //foreach (var (type, attr) in from type in typeof(ReadRequest).Assembly.GetExportedTypes()
-            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-            //                             where attr != null
-            //                             select (type, attr))
-            //{
-            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
-            //    {
-            //        _decodingDictionary.Add(attr.NodeId, type);
-            //    }
-            //}
-
-            //var assy = Assembly.GetCallingAssembly();
-            //while (assy != null)
-            //{
-            //    foreach (var (type, attr) in from type in assy.GetExportedTypes()
-            //                                 let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-            //                                 where attr != null
-            //                                 select (type, attr))
-            //    {
-            //        if (!_decodingDictionary.ContainsKey(attr.NodeId))
-            //        {
-            //            _decodingDictionary.Add(attr.NodeId, type);
-            //        }
-            //    }
-            //    assy = Assembly.GetCallingAssembly();
-            //}
-
-            //var assembliesFromAttributes = entryAssembly.GetCustomAttributes<TypeLibraryAttribute>()
-            //        .Select(name => Assembly.Load(name.AssemblyName))
-            //        .OrderBy(assembly => assembly.FullName, StringComparer.Ordinal);
-
-            //foreach (var (type, attr) in from assembly in assembliesFromAttributes
-            //                             from type in assembly.GetExportedTypes()
-            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-            //                             where attr != null
-            //                             select (type, attr))
-            //{
-            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
-            //    {
-            //        _decodingDictionary.Add(attr.NodeId, type);
-            //    }
-            //}
-
-
         }
 
         public BinaryDecoder(Stream stream, IEncodingContext? context = null, bool keepStreamOpen = false)

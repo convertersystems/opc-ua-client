@@ -60,6 +60,7 @@ try
 // Auto-generated code requires an explicit `#nullable` directive in source.
 #nullable enable
 
+[assembly: Workstation.ServiceModel.Ua.TypeLibrary()]
 namespace Workstation.ServiceModel.Ua
 {
     using System;
