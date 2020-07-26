@@ -848,76 +848,90 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public void WriteExtensionObject(string? fieldName, ExtensionObject? value)
         {
-            if (value == null || value.BodyType == BodyType.None)
+            try
             {
-                WriteNodeId(null, NodeId.Null);
-                WriteByte(null, 0x00);
-                return;
+                if (value == null || value.BodyType == BodyType.None)
+                {
+                    WriteNodeId(null, NodeId.Null);
+                    WriteByte(null, 0x00);
+                    return;
+                }
+
+                // If the body type is not none, than the type id
+                // is guaranteed to be not null
+                var typeId = value.TypeId!;
+
+                if (value.BodyType == BodyType.ByteString)
+                {
+                    WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
+                    WriteByte(null, 0x01);
+                    WriteByteString(null, (byte[]?)value.Body);
+                    return;
+                }
+
+                if (value.BodyType == BodyType.XmlElement)
+                {
+                    WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
+                    WriteByte(null, 0x02);
+                    WriteXElement(null, (XElement?)value.Body);
+                    return;
+                }
+
+                if (value.BodyType == BodyType.Encodable)
+                {
+                    WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
+                    WriteByte(null, 0x01); // BodyType Encodable is encoded as ByteString.
+                    var pos0 = _writer.BaseStream.Position;
+                    WriteInt32(null, -1);
+                    var pos1 = _writer.BaseStream.Position;
+                    ((IEncodable)value.Body!).Encode(this);
+                    var pos2 = _writer.BaseStream.Position;
+                    _writer.Seek((int)pos0, SeekOrigin.Begin);
+                    WriteInt32(null, (int)(pos2 - pos1));
+                    _writer.Seek((int)pos2, SeekOrigin.Begin);
+                    return;
+                }
             }
-
-            // If the body type is not none, than the type id
-            // is guaranteed to be not null
-            var typeId = value.TypeId!;
-
-            if (value.BodyType == BodyType.ByteString)
+            catch
             {
-                WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
-                WriteByte(null, 0x01);
-                WriteByteString(null, (byte[]?)value.Body);
-                return;
-            }
-
-            if (value.BodyType == BodyType.XmlElement)
-            {
-                WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
-                WriteByte(null, 0x02);
-                WriteXElement(null, (XElement?)value.Body);
-                return;
-            }
-
-            if (value.BodyType == BodyType.Encodable)
-            {
-                WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
-                WriteByte(null, 0x01); // BodyType Encodable is encoded as ByteString.
-                var pos0 = _writer.BaseStream.Position;
-                WriteInt32(null, -1);
-                var pos1 = _writer.BaseStream.Position;
-                ((IEncodable)value.Body!).Encode(this);
-                var pos2 = _writer.BaseStream.Position;
-                _writer.Seek((int)pos0, SeekOrigin.Begin);
-                WriteInt32(null, (int)(pos2 - pos1));
-                _writer.Seek((int)pos2, SeekOrigin.Begin);
-                return;
+                throw new ServiceResultException(StatusCodes.BadEncodingError);
             }
         }
 
         public void WriteExtensionObject<T>(string? fieldName, T? value)
             where T : class, IEncodable
         {
-            if (value == null)
+            try
             {
-                WriteNodeId(null, NodeId.Null);
-                WriteByte(null, 0x00);
+                if (value == null)
+                {
+                    WriteNodeId(null, NodeId.Null);
+                    WriteByte(null, 0x00);
+                    return;
+                }
+
+                var type = value.GetType();
+                if (!TryGetEncodingId(type, out var binaryEncodingId))
+                {
+                    throw new ServiceResultException(StatusCodes.BadEncodingError);
+                }
+
+                WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, _context.NamespaceUris));
+                WriteByte(null, 0x01);
+                var pos0 = _writer.BaseStream.Position;
+                WriteInt32(null, -1);
+                var pos1 = _writer.BaseStream.Position;
+                value.Encode(this);
+                var pos2 = _writer.BaseStream.Position;
+                _writer.Seek((int)pos0, SeekOrigin.Begin);
+                WriteInt32(null, (int)(pos2 - pos1));
+                _writer.Seek((int)pos2, SeekOrigin.Begin);
                 return;
             }
-
-            var type = value.GetType();
-            if (!TryGetEncodingId(type, out var binaryEncodingId))
+            catch
             {
                 throw new ServiceResultException(StatusCodes.BadEncodingError);
             }
-
-            WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, _context.NamespaceUris));
-            WriteByte(null, 0x01);
-            var pos0 = _writer.BaseStream.Position;
-            WriteInt32(null, -1);
-            var pos1 = _writer.BaseStream.Position;
-            value.Encode(this);
-            var pos2 = _writer.BaseStream.Position;
-            _writer.Seek((int)pos0, SeekOrigin.Begin);
-            WriteInt32(null, (int)(pos2 - pos1));
-            _writer.Seek((int)pos2, SeekOrigin.Begin);
-            return;
         }
 
         public void WriteEncodable<T>(string? fieldName, T? value)
@@ -933,12 +947,19 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public void WriteMessage(IEncodable value)
         {
-            if (!TryGetEncodingId(value.GetType(), out var id))
+            try
+            {
+                if (!TryGetEncodingId(value.GetType(), out var id))
+                {
+                    throw new ServiceResultException(StatusCodes.BadEncodingError);
+                }
+                WriteNodeId(null, ExpandedNodeId.ToNodeId(id, _context.NamespaceUris));
+                value.Encode(this);
+            }
+            catch
             {
                 throw new ServiceResultException(StatusCodes.BadEncodingError);
             }
-            WriteNodeId(null, ExpandedNodeId.ToNodeId(id, _context.NamespaceUris));
-            value.Encode(this);
         }
 
 

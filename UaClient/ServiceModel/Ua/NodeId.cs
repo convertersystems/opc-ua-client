@@ -123,11 +123,11 @@ namespace Workstation.ServiceModel.Ua
                         return new ExpandedNodeId((byte[])value.Identifier, nsu);
 
                     default:
-                        throw new InvalidOperationException();
+                        throw new IndexOutOfRangeException();
                 }
             }
 
-            throw new ServiceResultException(StatusCodes.BadNodeIdUnknown);
+            throw new IndexOutOfRangeException();
         }
 
         public static bool TryParse(string s, [NotNullWhen(returnValue: true)] out NodeId value)

@@ -76,7 +76,7 @@ namespace Workstation.ServiceModel.Ua
             int ns = namespaceUris.IndexOf(value.NamespaceUri!);
             if (ns < 0)
             {
-                throw new ServiceResultException(StatusCodes.BadNodeIdUnknown);
+                throw new IndexOutOfRangeException();
             }
             switch (value.NodeId.IdType)
             {
@@ -93,7 +93,7 @@ namespace Workstation.ServiceModel.Ua
                     return new NodeId((byte[])value.NodeId.Identifier, (ushort)ns);
 
                 default:
-                    throw new InvalidOperationException();
+                    throw new IndexOutOfRangeException();
             }
         }
 

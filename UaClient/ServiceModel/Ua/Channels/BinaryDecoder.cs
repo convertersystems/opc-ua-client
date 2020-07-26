@@ -681,60 +681,71 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public ExtensionObject? ReadExtensionObject(string? fieldName)
         {
-            NodeId nodeId = ReadNodeId(null);
-            byte b = _reader.ReadByte();
-            if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
+            try
             {
-                if (nodeId.NamespaceIndex == 0)
+                NodeId nodeId = ReadNodeId(null);
+                byte b = _reader.ReadByte();
+                if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
                 {
+                    ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
 
+                    if (_decodingDictionary.TryGetValue(binaryEncodingId, out var type))
+                    {
+                        _ = ReadInt32(null);
+                        var encodable = (IEncodable)Activator.CreateInstance(type)!;
+                        encodable.Decode(this);
+                        return new ExtensionObject(encodable, binaryEncodingId);
+                    }
+
+                    return new ExtensionObject(ReadByteString(null), binaryEncodingId);
                 }
 
-                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
-
-                if (_decodingDictionary.TryGetValue(binaryEncodingId, out var type))
+                if (b == (byte)BodyType.XmlElement)
                 {
-                    _ = ReadInt32(null);
-                    var encodable = (IEncodable)Activator.CreateInstance(type)!;
-                    encodable.Decode(this);
-                    return new ExtensionObject(encodable, binaryEncodingId);
+                    ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
+                    return new ExtensionObject(ReadXElement(null), xmlEncodingId);
                 }
 
-                return new ExtensionObject(ReadByteString(null), binaryEncodingId);
-            }
+                return null;
 
-            if (b == (byte)BodyType.XmlElement)
+            }
+            catch
             {
-                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
-                return new ExtensionObject(ReadXElement(null), xmlEncodingId);
+                throw new ServiceResultException(StatusCodes.BadDecodingError);
             }
-
-            return null;
         }
 
         public T? ReadExtensionObject<T>(string? fieldName)
             where T : class, IEncodable
         {
-            NodeId nodeId = ReadNodeId(null);
-            byte b = _reader.ReadByte();
-            if (b == (byte)BodyType.ByteString)
+            try
             {
-                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
-
-                if (!_decodingDictionary.TryGetValue(binaryEncodingId, out var type))
+                NodeId nodeId = ReadNodeId(null);
+                byte b = _reader.ReadByte();
+                if (b == (byte)BodyType.ByteString)
                 {
-                    throw new ServiceResultException(StatusCodes.BadDecodingError);
+                    ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
+
+                    if (!_decodingDictionary.TryGetValue(binaryEncodingId, out var type))
+                    {
+                        throw new ServiceResultException(StatusCodes.BadDecodingError);
+                    }
+
+                    _ = ReadInt32(null);
+                    var encodable = (IEncodable)Activator.CreateInstance(type)!;
+                    encodable.Decode(this);
+                    return (T)encodable;
                 }
 
-                _ = ReadInt32(null);
-                var encodable = (IEncodable)Activator.CreateInstance(type)!;
-                encodable.Decode(this);
-                return (T)encodable;
+                // TODO: else if (b = 2) use XmlDecoder
+
+                return default(T);
+
             }
-
-            // TODO: else if (b = 2) use XmlDecoder
-
-            return default(T);
+            catch
+            {
+                throw new ServiceResultException(StatusCodes.BadDecodingError);
+            }
         }
 
         public T ReadEncodable<T>(string? fieldName)
@@ -747,27 +758,35 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public object ReadMessage()
         {
-            IEncodable value;
-            NodeId nodeId = ReadNodeId(null);
-            // fast path
-            if (nodeId == _publishResponseNodeId)
+            try
             {
-                value = new PublishResponse();
-            }
-            else if (nodeId == _readResponseNodeId)
-            {
-                value = new ReadResponse();
-            }
-            else
-            {
-                if (!_decodingDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris), out var type))
+                IEncodable value;
+                NodeId nodeId = ReadNodeId(null);
+                // fast path
+                if (nodeId == _publishResponseNodeId)
                 {
-                    throw new ServiceResultException(StatusCodes.BadEncodingError);
+                    value = new PublishResponse();
                 }
-                value = (IServiceResponse)Activator.CreateInstance(type)!;
+                else if (nodeId == _readResponseNodeId)
+                {
+                    value = new ReadResponse();
+                }
+                else
+                {
+                    if (!_decodingDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris), out var type))
+                    {
+                        throw new ServiceResultException(StatusCodes.BadEncodingError);
+                    }
+                    value = (IServiceResponse)Activator.CreateInstance(type)!;
+                }
+                value.Decode(this);
+                return value;
+
             }
-            value.Decode(this);
-            return value;
+            catch
+            {
+                throw new ServiceResultException(StatusCodes.BadEncodingError);
+            }        
         }
 
         public T ReadEnumeration<T>(string? fieldName)
