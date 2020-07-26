@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -26,20 +27,51 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         static BinaryDecoder()
         {
-            foreach (var (type, attr) in from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                                         where !assembly.IsDynamic
-                                         where !assembly.FullName.StartsWith("System.")
-                                         where !assembly.FullName.StartsWith("Microsoft.")
-                                         from type in assembly.GetExportedTypes()
-                                         let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-                                         where attr != null
-                                         select (type, attr))
+            //var test = AppDomain.CurrentDomain.GetAssemblies();
+            //foreach (var (type, attr) in from assembly in AppDomain.CurrentDomain.GetAssemblies()
+            //                             where !assembly.IsDynamic
+            //                             where !assembly.FullName.StartsWith("System.")
+            //                             where !assembly.FullName.StartsWith("Microsoft.")
+            //                             from type in assembly.GetExportedTypes()
+            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
+            //                             where attr != null
+            //                             select (type, attr))
+            //{
+            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
+            //    {
+            //        _decodingDictionary.Add(attr.NodeId, type);
+            //    }
+            //}
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies()
+                       .Where(a =>
+                     !a.FullName.StartsWith("System.") &&
+                      !a.FullName.StartsWith("Microsoft.") &&
+                      !a.IsDynamic))
+
             {
-                if (!_decodingDictionary.ContainsKey(attr.NodeId))
+                try
                 {
-                    _decodingDictionary.Add(attr.NodeId, type);
+                    foreach (var (type, attr) in from type in assembly.GetExportedTypes()
+                                                 let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
+                                                 where attr != null
+                                                 select (type, attr))
+                        if (!_decodingDictionary.ContainsKey(attr.NodeId))
+                        {
+                            _decodingDictionary.Add(attr.NodeId, type);
+                        }
+
+
                 }
+                catch
+                {
+                    continue;
+                }
+
             }
+
+
+
             //foreach (var (type, attr) in from type in typeof(ReadRequest).Assembly.GetExportedTypes()
             //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
             //                             where attr != null
@@ -50,21 +82,23 @@ namespace Workstation.ServiceModel.Ua.Channels
             //        _decodingDictionary.Add(attr.NodeId, type);
             //    }
             //}
-            //var entryAssembly = Assembly.GetEntryAssembly();
-            //if (entryAssembly == null)
+
+            //var assy = Assembly.GetCallingAssembly();
+            //while (assy != null)
             //{
-            //    return;
-            //}
-            //foreach (var (type, attr) in from type in entryAssembly.GetExportedTypes()
-            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-            //                             where attr != null
-            //                             select (type, attr))
-            //{
-            //    if (!_decodingDictionary.ContainsKey(attr.NodeId))
+            //    foreach (var (type, attr) in from type in assy.GetExportedTypes()
+            //                                 let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
+            //                                 where attr != null
+            //                                 select (type, attr))
             //    {
-            //        _decodingDictionary.Add(attr.NodeId, type);
+            //        if (!_decodingDictionary.ContainsKey(attr.NodeId))
+            //        {
+            //            _decodingDictionary.Add(attr.NodeId, type);
+            //        }
             //    }
+            //    assy = Assembly.GetCallingAssembly();
             //}
+
             //var assembliesFromAttributes = entryAssembly.GetCustomAttributes<TypeLibraryAttribute>()
             //        .Select(name => Assembly.Load(name.AssemblyName))
             //        .OrderBy(assembly => assembly.FullName, StringComparer.Ordinal);
