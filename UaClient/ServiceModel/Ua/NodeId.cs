@@ -4,6 +4,7 @@
 using Org.BouncyCastle.Crypto;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -94,11 +95,18 @@ namespace Workstation.ServiceModel.Ua
             {
                 throw new ArgumentNullException(nameof(value));
             }
-
-            ushort ns = value.NamespaceIndex;
-            if (namespaceUris != null && ns > 0 && ns < namespaceUris.Count)
+            if (namespaceUris is null)
             {
-                string nsu = namespaceUris[ns];
+                throw new ArgumentNullException(nameof(namespaceUris));
+            }
+            ushort ns = value.NamespaceIndex;
+            if (ns == 0)
+            {
+                return new ExpandedNodeId(value);
+            }
+            if (ns > 0 && ns < namespaceUris.Count)
+            {
+                var nsu = namespaceUris[ns];
 
                 switch (value.IdType)
                 {
@@ -119,10 +127,10 @@ namespace Workstation.ServiceModel.Ua
                 }
             }
 
-            return new ExpandedNodeId(value);
+            throw new ServiceResultException(StatusCodes.BadNodeIdUnknown);
         }
 
-        public static bool TryParse(string s, out NodeId value)
+        public static bool TryParse(string s, [NotNullWhen(returnValue: true)] out NodeId value)
         {
             try
             {
@@ -174,8 +182,7 @@ namespace Workstation.ServiceModel.Ua
 
         public static NodeId Parse(string s)
         {
-            NodeId value;
-            if (!NodeId.TryParse(s, out value))
+            if (!TryParse(s, out NodeId value))
             {
                 throw new ServiceResultException(StatusCodes.BadNodeIdInvalid);
             }
@@ -209,7 +216,6 @@ namespace Workstation.ServiceModel.Ua
 
             return sb.ToString();
         }
-
         public override bool Equals(object? obj)
         {
             return Equals(obj as NodeId);
@@ -268,7 +274,7 @@ namespace Workstation.ServiceModel.Ua
 
         public static bool operator ==(NodeId? left, NodeId? right)
         {
-            return EqualityComparer<NodeId>.Default.Equals(left, right);
+            return EqualityComparer<NodeId?>.Default.Equals(left, right);
         }
 
         public static bool operator !=(NodeId? left, NodeId? right)

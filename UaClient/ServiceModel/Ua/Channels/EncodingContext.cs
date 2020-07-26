@@ -8,21 +8,22 @@ namespace Workstation.ServiceModel.Ua.Channels
     {
         List<string> NamespaceUris { get; }
         List<string> ServerUris { get; }
-        IEncodingDictionary EncodingDictionary { get; }
         int MaxStringLength { get; }
         int MaxArrayLength { get; }
+        int MaxByteStringLength { get; }
     }
 
     public class DefaultEncodingContext : IEncodingContext
     {
-        public List<string> NamespaceUris => throw new NotImplementedException();
+        public List<string> NamespaceUris => new List<string> { "http://opcfoundation.org/UA/" };
 
-        public List<string> ServerUris => throw new NotImplementedException();
+        public List<string> ServerUris => new List<string>();
 
-        public IEncodingDictionary EncodingDictionary => throw new NotImplementedException();
+        public int MaxStringLength => 65535;
 
-        public int MaxStringLength => throw new NotImplementedException();
+        public int MaxArrayLength => 65535;
 
-        public int MaxArrayLength => throw new NotImplementedException();
+        public int MaxByteStringLength => 65535;
+
     }
 }

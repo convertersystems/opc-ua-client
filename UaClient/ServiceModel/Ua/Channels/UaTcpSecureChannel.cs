@@ -54,10 +54,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const int SequenceHeaderSize = 8;
         private const int TokenRequestedLifetime = 60 * 60 * 1000; // 60 minutes
 
-        private static readonly NodeId OpenSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.OpenSecureChannelRequest_Encoding_DefaultBinary);
-        private static readonly NodeId CloseSecureChannelRequestNodeId = NodeId.Parse(ObjectIds.CloseSecureChannelRequest_Encoding_DefaultBinary);
-        private static readonly NodeId ReadResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
-        private static readonly NodeId PublishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
         private static readonly SecureRandom Rng = new SecureRandom();
         private static readonly RecyclableMemoryStreamManager StreamManager = new RecyclableMemoryStreamManager();
 
@@ -112,38 +108,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         private DateTime tokenRenewalTime = DateTime.MaxValue;
         private IDigest? thumbprintDigest;
 
-        static UaTcpSecureChannel()
-        {
-            //foreach (var type in typeof(OpenSecureChannelRequest).GetTypeInfo().Assembly.ExportedTypes)
-            //{
-            //    var info = type.GetTypeInfo();
-            //    if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
-            //    {
-            //        var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-            //        if (attr != null)
-            //        {
-            //            var id = ExpandedNodeId.ToNodeId(attr.NodeId, null);
-            //            BinaryEncodingIdToTypeDictionary[id] = type;
-            //            TypeToBinaryEncodingIdDictionary[type] = id;
-            //        }
-            //    }
-            //}
-
-            //foreach (var (type, attr) in from assembly in AppDomain.CurrentDomain.GetAssemblies()
-            //                             where !assembly.IsDynamic
-            //                             from type in assembly.GetExportedTypes()
-            //                             let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-            //                             where attr != null
-            //                             select (type, attr))
-            //{
-            //    if (!BinaryEncodingIdToTypeDictionary.ContainsKey(attr.NodeId))
-            //    {
-            //        BinaryEncodingIdToTypeDictionary.Add(attr.NodeId, type);
-            //        TypeToBinaryEncodingIdDictionary.Add(type, attr.NodeId);
-            //    }
-            //}
-        }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSecureChannel"/> class.
         /// </summary>
@@ -152,21 +116,18 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The remote endpoint</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The secure channel options.</param>
-        /// <param name="encodingDictionary">Additional types to be registered with encoder.</param>
         public UaTcpSecureChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSecureChannelOptions? options = null,
-            IEncodingDictionary? encodingDictionary = null)
+            UaTcpSecureChannelOptions? options = null)
             : base(remoteEndpoint, loggerFactory, options)
         {
             this.LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
             this.CertificateStore = certificateStore;
             this.TimeoutHint = options?.TimeoutHint ?? DefaultTimeoutHint;
             this.DiagnosticsHint = options?.DiagnosticsHint ?? DefaultDiagnosticsHint;
-            this.EncodingDictionary = encodingDictionary ?? new EncodingDictionary();
 
             this.logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
 
@@ -176,7 +137,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.channelCts = new CancellationTokenSource();
             this.pendingRequests = new ActionBlock<ServiceOperation>(t => this.SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = this.channelCts.Token });
             this.pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
-       }
+        }
 
         /// <summary>
         /// Gets the local description.
@@ -197,11 +158,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Gets the default diagnostics flags to be requested by the service.
         /// </summary>
         public uint DiagnosticsHint { get; }
-
-        /// <summary>
-        /// Gets any additional types to be registered with encoder.
-        /// </summary>
-        public IEnumerable<Type>? AdditionalTypes { get; }
 
         /// <summary>
         /// Gets the local certificate.
@@ -253,14 +209,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         public List<string> ServerUris { get; protected set; }
 
-        /// <summary>
-        /// Gets or sets the dictionary of types associated with encodingIds.
-        /// </summary>
-        public IEncodingDictionary EncodingDictionary { get; protected set; }
+        public int MaxStringLength => 65535;
 
-        public int MaxStringLength => throw new NotImplementedException();
+        public int MaxArrayLength => 65535;
 
-        public int MaxArrayLength => throw new NotImplementedException();
+        public int MaxByteStringLength => 65535;
 
         /// <summary>
         /// Sends a <see cref="T:Workstation.ServiceModel.Ua.IServiceRequest"/> to the server.
@@ -688,30 +641,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        protected override async Task OnOpenedAsync(CancellationToken token = default)
-        {
-            await base.OnOpenedAsync(token);
-
-            //if (this.AdditionalTypes != null)
-            //{
-            //    foreach (var type in this.AdditionalTypes)
-            //    {
-            //        var info = type.GetTypeInfo();
-            //        if (info.ImplementedInterfaces.Contains(typeof(IEncodable)))
-            //        {
-            //            var attr = info.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-            //            if (attr != null)
-            //            {
-            //                var id = ExpandedNodeId.ToNodeId(attr.NodeId, this.NamespaceUris);
-            //                this.encodingIdToTypeDictionary[id] = type;
-            //                this.typeToBinaryEncodingIdDictionary[type] = id;
-            //            }
-            //        }
-            //    }
-            //}
-        }
-
-        /// <inheritdoc/>
         protected override async Task OnCloseAsync(CancellationToken token = default)
         {
             try
@@ -888,8 +817,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                bodyEncoder.WriteNodeId(null, OpenSecureChannelRequestNodeId);
-                request.Encode(bodyEncoder);
+                bodyEncoder.WriteMessage(request);
                 bodyStream.Position = 0;
                 if (this.RemoteMaxMessageSize > 0 && bodyStream.Length > this.RemoteMaxMessageSize)
                 {
@@ -1065,8 +993,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                bodyEncoder.WriteNodeId(null, CloseSecureChannelRequestNodeId);
-                request.Encode(bodyEncoder);
+                bodyEncoder.WriteMessage(request);
                 bodyStream.Position = 0;
                 if (this.RemoteMaxMessageSize > 0 && bodyStream.Length > this.RemoteMaxMessageSize)
                 {
@@ -1233,12 +1160,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                if (!this.EncodingDictionary.TryGetEncodingId(request.GetType(), out var binaryEncodingId))
-                {
-                    throw new ServiceResultException(StatusCodes.BadEncodingError);
-                }
-                bodyEncoder.WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, this.NamespaceUris));
-                request.Encode(bodyEncoder);
+                bodyEncoder.WriteMessage(request);
                 bodyStream.Position = 0;
                 if (this.RemoteMaxMessageSize > 0 && bodyStream.Length > this.RemoteMaxMessageSize)
                 {
@@ -1703,32 +1625,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
                     while (!isFinal);
                     bodyStream.Seek(0L, SeekOrigin.Begin);
-                    var nodeId = bodyDecoder.ReadNodeId(null);
-                    IServiceResponse response;
-
-                    // fast path
-                    if (nodeId == PublishResponseNodeId)
-                    {
-                        response = new PublishResponse();
-                    }
-                    else if (nodeId == ReadResponseNodeId)
-                    {
-                        response = new ReadResponse();
-                    }
-                    else
-                    {
-                        // find node in dictionary
-                        if (!this.EncodingDictionary.TryGetType(NodeId.ToExpandedNodeId(nodeId, this.NamespaceUris), out var type2))
-                        {
-                            throw new ServiceResultException(StatusCodes.BadEncodingError, "NodeId not registered in dictionary.");
-                        }
-
-                        // create response
-                        response = (IServiceResponse)Activator.CreateInstance(type2)!;
-                    }
-
-                    // set properties from message stream
-                    response.Decode(bodyDecoder);
+                    var response = (IServiceResponse)bodyDecoder.ReadMessage();
 
                     this.logger?.LogTrace($"Received {response.GetType().Name}, Handle: {response.ResponseHeader!.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
 

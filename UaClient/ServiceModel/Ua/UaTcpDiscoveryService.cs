@@ -20,7 +20,7 @@ namespace Workstation.ServiceModel.Ua
 
         private UaTcpDiscoveryService(EndpointDescription remoteEndpoint, ILoggerFactory? loggerFactory = null, UaTcpSecureChannelOptions? options = null)
         {
-            this.innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryService) }, null, remoteEndpoint, loggerFactory, options, null);
+            this.innerChannel = new UaTcpSecureChannel(new ApplicationDescription { ApplicationName = nameof(UaTcpDiscoveryService) }, null, remoteEndpoint, loggerFactory, options);
             this.semaphore = new SemaphoreSlim(1);
             this.logger = loggerFactory?.CreateLogger<UaTcpDiscoveryService>();
         }

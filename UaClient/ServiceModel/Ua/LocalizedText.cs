@@ -13,29 +13,24 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="text">The text in the specified locale.</param>
         /// <param name="locale">The locale.</param>
-        public LocalizedText(string text, string locale = "")
+        public LocalizedText(string? text, string? locale = "")
         {
             this.Locale = locale;
             this.Text = text;
         }
 
-        public string Text { get; }
+        public string? Text { get; }
 
-        public string Locale { get; }
+        public string? Locale { get; }
 
-        public static implicit operator LocalizedText(string a)
+        public static implicit operator LocalizedText(string? a)
         {
             return new LocalizedText(a);
         }
 
-        public static implicit operator string(LocalizedText a)
+        public static implicit operator string?(LocalizedText? a)
         {
             return a?.Text;
-        }
-
-        public override string? ToString()
-        {
-            return this.Text;
         }
 
         public override bool Equals(object? obj)
@@ -60,7 +55,7 @@ namespace Workstation.ServiceModel.Ua
 
         public static bool operator ==(LocalizedText? left, LocalizedText? right)
         {
-            return EqualityComparer<LocalizedText>.Default.Equals(left, right);
+            return EqualityComparer<LocalizedText?>.Default.Equals(left, right);
         }
 
         public static bool operator !=(LocalizedText? left, LocalizedText? right)
@@ -68,5 +63,9 @@ namespace Workstation.ServiceModel.Ua
             return !(left == right);
         }
 
+        public override string? ToString()
+        {
+            return this.Text;
+        }
     }
 }

@@ -13,13 +13,13 @@ namespace Workstation.ServiceModel.Ua
         /// </summary>
         /// <param name="name">the text portion of the QualifiedName. </param>
         /// <param name="namespaceIndex">index that identifies the namespace that qualifies the name.</param>
-        public QualifiedName(string name, ushort namespaceIndex = 0)
+        public QualifiedName(string? name, ushort namespaceIndex = 0)
         {
             this.Name = name;
             this.NamespaceIndex = namespaceIndex;
         }
 
-        public string Name { get; private set; }
+        public string? Name { get; private set; }
 
         public ushort NamespaceIndex { get; private set; }
 
@@ -84,7 +84,7 @@ namespace Workstation.ServiceModel.Ua
 
         public static bool operator ==(QualifiedName? left, QualifiedName? right)
         {
-            return EqualityComparer<QualifiedName>.Default.Equals(left, right);
+            return EqualityComparer<QualifiedName?>.Default.Equals(left, right);
         }
 
         public static bool operator !=(QualifiedName? left, QualifiedName? right)

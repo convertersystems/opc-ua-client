@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
@@ -12,35 +13,35 @@ namespace Workstation.ServiceModel.Ua
     {
         public static readonly ExpandedNodeId Null = new ExpandedNodeId(0);
 
-        public ExpandedNodeId(uint identifier, string namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(uint identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(string identifier, string namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(string identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(Guid identifier, string namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(Guid identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(byte[] identifier, string namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(byte[] identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = new NodeId(identifier);
             this.NamespaceUri = namespaceUri;
             this.ServerIndex = serverIndex;
         }
 
-        public ExpandedNodeId(NodeId identifier, string namespaceUri = null, uint serverIndex = 0)
+        public ExpandedNodeId(NodeId identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
             this.NodeId = identifier;
             this.NamespaceUri = namespaceUri;
@@ -49,7 +50,7 @@ namespace Workstation.ServiceModel.Ua
 
         public NodeId NodeId { get; }
 
-        public string NamespaceUri { get; }
+        public string? NamespaceUri { get; }
 
         public uint ServerIndex { get; }
 
@@ -60,39 +61,43 @@ namespace Workstation.ServiceModel.Ua
 
         public static NodeId ToNodeId(ExpandedNodeId value, IList<string> namespaceUris)
         {
-            if (ReferenceEquals(value, null))
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
-
-            ushort ns = value.NodeId.NamespaceIndex;
-            string nsu = value.NamespaceUri;
-            if (namespaceUris != null && !string.IsNullOrEmpty(nsu))
+            if (namespaceUris is null)
             {
-                int i = namespaceUris.IndexOf(nsu);
-                if (i != -1)
-                {
-                    ns = (ushort)i;
-                }
+                throw new ArgumentNullException(nameof(namespaceUris));
             }
-
+            if (string.IsNullOrEmpty(value.NamespaceUri))
+            {
+                return value.NodeId;
+            }
+            int ns = namespaceUris.IndexOf(value.NamespaceUri!);
+            if (ns < 0)
+            {
+                throw new ServiceResultException(StatusCodes.BadNodeIdUnknown);
+            }
             switch (value.NodeId.IdType)
             {
                 case IdType.Numeric:
-                    return new NodeId((uint)value.NodeId.Identifier, ns);
+                    return new NodeId((uint)value.NodeId.Identifier, (ushort)ns);
 
                 case IdType.String:
-                    return new NodeId((string)value.NodeId.Identifier, ns);
+                    return new NodeId((string)value.NodeId.Identifier, (ushort)ns);
 
                 case IdType.Guid:
-                    return new NodeId((Guid)value.NodeId.Identifier, ns);
+                    return new NodeId((Guid)value.NodeId.Identifier, (ushort)ns);
+
+                case IdType.Opaque:
+                    return new NodeId((byte[])value.NodeId.Identifier, (ushort)ns);
 
                 default:
-                    return new NodeId((byte[])value.NodeId.Identifier, ns);
+                    throw new InvalidOperationException();
             }
         }
 
-        public static bool TryParse(string s, out ExpandedNodeId value)
+        public static bool TryParse(string s, [NotNullWhen(returnValue: true)] out ExpandedNodeId? value)
         {
             try
             {
@@ -109,7 +114,7 @@ namespace Workstation.ServiceModel.Ua
                     s = s.Substring(pos + 1);
                 }
 
-                string nsu = null;
+                string? nsu = null;
                 if (s.StartsWith("nsu=", StringComparison.Ordinal))
                 {
                     int pos = s.IndexOf(';');
@@ -122,8 +127,7 @@ namespace Workstation.ServiceModel.Ua
                     s = s.Substring(pos + 1);
                 }
 
-                NodeId nodeId = null;
-                if (NodeId.TryParse(s, out nodeId))
+                if (NodeId.TryParse(s, out var nodeId))
                 {
                     value = new ExpandedNodeId(nodeId, nsu, svr);
                     return true;
@@ -141,8 +145,7 @@ namespace Workstation.ServiceModel.Ua
 
         public static ExpandedNodeId Parse(string s)
         {
-            ExpandedNodeId value;
-            if (!ExpandedNodeId.TryParse(s, out value))
+            if (!ExpandedNodeId.TryParse(s, out var value))
             {
                 throw new ServiceResultException(StatusCodes.BadNodeIdInvalid);
             }
@@ -191,7 +194,7 @@ namespace Workstation.ServiceModel.Ua
 
         public static bool operator ==(ExpandedNodeId? left, ExpandedNodeId? right)
         {
-            return EqualityComparer<ExpandedNodeId>.Default.Equals(left, right);
+            return EqualityComparer<ExpandedNodeId?>.Default.Equals(left, right);
         }
 
         public static bool operator !=(ExpandedNodeId? left, ExpandedNodeId? right)
