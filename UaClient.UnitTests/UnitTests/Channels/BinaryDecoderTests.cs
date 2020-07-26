@@ -11,15 +11,32 @@ using System.Xml.Linq;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Workstation.UaClient.UnitTests.Channels
 {
     public partial class BinaryDecoderTests
     {
+        private readonly ITestOutputHelper output;
+
+
+        public BinaryDecoderTests(ITestOutputHelper output)
+        {
+            this.output = output;
+        }
+
+            [Fact]
+        public void LoadAssys()
+        {
+            foreach (var assy in AppDomain.CurrentDomain.GetAssemblies().Where(a=>!a.IsDynamic))
+            {
+                output.WriteLine(assy.FullName);
+            }
+        }
         private static T EncodeDecode<T>(Action<Opc.Ua.BinaryEncoder> encode, Func<BinaryDecoder, T> decode)
         {
             using (var stream = new MemoryStream())
-            using (var encoder = new Opc.Ua.BinaryEncoder(stream, new Opc.Ua.ServiceMessageContext {}))
+            using (var encoder = new Opc.Ua.BinaryEncoder(stream, new Opc.Ua.ServiceMessageContext { }))
             using (var decoder = new BinaryDecoder(stream))
             {
 
@@ -213,7 +230,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 d => d.ReadString(null))
                 .Should().Be(val);
         }
-        
+
         // This is a valid UTF8 string
         [InlineData(new byte[] { 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20 })]
         // A leading byte of [C0] or [C1] is not allowed
@@ -234,7 +251,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().Be(str);
         }
 
-        public static IEnumerable<object[]> DecodeDateTimeData { get; } = new []
+        public static IEnumerable<object[]> DecodeDateTimeData { get; } = new[]
         {
             new DateTime(0),
             new DateTime(1601, 1, 1, 0, 0, 1),
@@ -254,7 +271,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().Be(val);
         }
 
-        public static IEnumerable<object[]> DecodeGuidData { get; } = new []
+        public static IEnumerable<object[]> DecodeGuidData { get; } = new[]
         {
             Guid.Empty,
             Guid.NewGuid()
@@ -271,7 +288,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().Be(val);
         }
 
-        public static IEnumerable<object[]> DecodeByteStringData { get; } = new []
+        public static IEnumerable<object[]> DecodeByteStringData { get; } = new[]
         {
             null,
             new byte[] { },
@@ -290,7 +307,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> DecodeXElementData { get; } = new []
+        public static IEnumerable<object[]> DecodeXElementData { get; } = new[]
         {
              @"
                 <Window x:Class=""WpfApplication1.Window1""
@@ -316,7 +333,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> DecodeNodeIdData { get; } = new []
+        public static IEnumerable<object[]> DecodeNodeIdData { get; } = new[]
         {
             "ns=0;i=12",
             "ns=0;i=300",
@@ -349,7 +366,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().Be(NodeId.Null);
         }
 
-        public static IEnumerable<object[]> DecodeExpandedNodeIdData { get; } = new []
+        public static IEnumerable<object[]> DecodeExpandedNodeIdData { get; } = new[]
         {
             "ns=0;i=12",
             "svr=1;ns=0;i=300",
@@ -390,7 +407,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> DecodeDiagnosticInfoData { get; } = new []
+        public static IEnumerable<object[]> DecodeDiagnosticInfoData { get; } = new[]
         {
             new Opc.Ua.DiagnosticInfo(),
             new Opc.Ua.DiagnosticInfo(0, 0, 0, 0, null),
@@ -414,7 +431,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> DecodeQualifiedNameData { get; } = new []
+        public static IEnumerable<object[]> DecodeQualifiedNameData { get; } = new[]
         {
             new Opc.Ua.QualifiedName(null),
             Opc.Ua.QualifiedName.Parse("4:Test")
@@ -431,7 +448,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 .Should().BeEquivalentTo(val);
         }
 
-        public static IEnumerable<object[]> DecodeLocalizedTextData { get; } = new []
+        public static IEnumerable<object[]> DecodeLocalizedTextData { get; } = new[]
         {
             new Opc.Ua.LocalizedText("Text", ""),
             new Opc.Ua.LocalizedText("Text", "de"),
@@ -543,7 +560,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             from svrts in new[] { DateTime.MinValue, DateTime.UtcNow }
             from svrps in new ushort[] { 0, 612 }
             select new object[]
-            { 
+            {
                 new Opc.Ua.DataValue(new Opc.Ua.Variant(value), status, srcts, svrts)
                 {
                     SourcePicoseconds = srcps,
@@ -595,7 +612,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         [InlineData(null)]
         [InlineData(new bool[] { })]
         [InlineData(new bool[] { true })]
-        [InlineData(new bool[] { true, false})]
+        [InlineData(new bool[] { true, false })]
         [Theory]
         public void DecodeBooleanArray(bool[] val)
         {
@@ -758,7 +775,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 d => d.ReadStringArray(null))
                 .Should().BeEquivalentTo(val);
         }
-        
+
         public static IEnumerable<object[]> DecodeMalformedUtf8StringArrayData { get; } = new byte[][]
         {
             // This is a valid UTF8 string
@@ -862,7 +879,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 e => e.WriteXmlElementArray(null, val),
                 d => d.ReadXElementArray(null))
                 .Should().BeEquivalentTo(val);
-        } 
+        }
 
         public static IEnumerable<object[]> DecodeNodeIdArrayData { get; } = new Opc.Ua.NodeId[][]
         {

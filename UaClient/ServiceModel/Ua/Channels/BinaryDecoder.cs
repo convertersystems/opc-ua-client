@@ -28,6 +28,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             foreach (var (type, attr) in from assembly in AppDomain.CurrentDomain.GetAssemblies()
                                          where !assembly.IsDynamic
+                                         where !assembly.FullName.StartsWith("System.")
+                                         where !assembly.FullName.StartsWith("Microsoft.")
                                          from type in assembly.GetExportedTypes()
                                          let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
                                          where attr != null

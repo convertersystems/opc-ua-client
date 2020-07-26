@@ -68,7 +68,7 @@ namespace Workstation.UaClient.UnitTests
         [Fact]
         public void CreateFromOpaque()
         {
-            var id = new byte [] { 0x65, 0x66 };
+            var id = new byte[] { 0x65, 0x66 };
             ushort ns = 2;
             var node = new NodeId(id, ns);
 
@@ -79,7 +79,7 @@ namespace Workstation.UaClient.UnitTests
             node.IdType
                 .Should().Be(IdType.Opaque);
         }
-        
+
         [Fact]
         public void CreateFromOpaqueNull()
         {
@@ -134,7 +134,7 @@ namespace Workstation.UaClient.UnitTests
         public static IEnumerable<object[]> ValueEqualityData =>
             from a in NodeIds.Select((f, i) => (id: f(), index: i))
             from b in NodeIds.Select((f, i) => (id: f(), index: i))
-            select new object[] { a.id, b.id, a.index == b.index};
+            select new object[] { a.id, b.id, a.index == b.index };
 
         public static IEnumerable<object[]> ReferenceEqualityData
         {
@@ -142,8 +142,8 @@ namespace Workstation.UaClient.UnitTests
             {
                 var list = NodeIds.Select((f, i) => (id: f(), index: i)).ToList();
                 return from a in list
-                    from b in list
-                    select new object[] { a.id, b.id, a.index == b.index };
+                       from b in list
+                       select new object[] { a.id, b.id, a.index == b.index };
             }
         }
 
@@ -199,7 +199,7 @@ namespace Workstation.UaClient.UnitTests
                     .Should().NotBe(b.GetHashCode());
             }
         }
-        
+
         public static IEnumerable<object[]> EqualityNullData =>
             NodeIds.Select(id => new[] { id() });
 
@@ -225,7 +225,7 @@ namespace Workstation.UaClient.UnitTests
         }
 
         public static IEnumerable<object[]> ParseData
-            => NodeIds.Select(f => f()).Where(n => n != null).Select(n => new object[] { n.ToString(), n});
+            => NodeIds.Select(f => f()).Where(n => n != null).Select(n => new object[] { n.ToString(), n });
 
         [MemberData(nameof(ParseData))]
         [Theory]
@@ -275,25 +275,27 @@ namespace Workstation.UaClient.UnitTests
                 "Namespace3"
             };
 
-            var expnodeId = NodeId.ToExpandedNodeId(nodeId, nsUris);
-
-            expnodeId.NodeId.Identifier
-                .Should().Be(nodeId.Identifier);
-
             // The test data contains only namespace indeces
             // that are zero, 2 or greater 3
-            if (nodeId.NamespaceIndex == 2)
+            switch (nodeId.NamespaceIndex)
             {
-                expnodeId.NamespaceUri
-                    .Should().Be("Namespace2");
-            }
-            else
-            {
-                expnodeId.NamespaceUri
-                    .Should().BeNull();
+                case 0:
+                    var x = NodeId.ToExpandedNodeId(nodeId, nsUris);
+                    x.NamespaceUri.Should().BeNull();
+                    x.NodeId.Identifier.Should().Be(nodeId.Identifier);
+                    break;
+                case 2:
+                    var y = NodeId.ToExpandedNodeId(nodeId, nsUris);
+                    y.NamespaceUri.Should().Be("Namespace2");
+                    y.NodeId.Identifier.Should().Be(nodeId.Identifier);
+                    break;
+                default:
+                    nodeId.Invoking(n => NodeId.ToExpandedNodeId(n, nsUris))
+                        .Should().Throw<ServiceResultException>();
+                    break;
             }
         }
-        
+
         [Fact]
         public void ToExpandedNodeIdNull()
         {
