@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -19,35 +18,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const long MaxFileTime = 3155378975990000000L;
         private static readonly NodeId _readResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
         private static readonly NodeId _publishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
-        private static readonly Dictionary<ExpandedNodeId, Type> _decodingDictionary = new Dictionary<ExpandedNodeId, Type>();
         private readonly Stream _stream;
         private readonly IEncodingContext _context;
         private readonly Encoding _encoding;
         private readonly BinaryReader _reader;
-
-        static BinaryDecoder()
-        {
-            foreach (var assembly in from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                                     where assembly.IsDefined(typeof(TypeLibraryAttribute), false)
-                                     select assembly)
-            {
-                try
-                {
-                    foreach (var (type, attr) in from type in assembly.GetExportedTypes()
-                                                 let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-                                                 where attr != null
-                                                 select (type, attr))
-                        if (!_decodingDictionary.ContainsKey(attr.NodeId))
-                        {
-                            _decodingDictionary.Add(attr.NodeId, type);
-                        }
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-        }
 
         public BinaryDecoder(Stream stream, IEncodingContext? context = null, bool keepStreamOpen = false)
         {
@@ -689,7 +663,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
 
-                    if (_decodingDictionary.TryGetValue(binaryEncodingId, out var type))
+                    if (TypeLibrary.Default.DecodingDictionary.TryGetValue(binaryEncodingId, out var type))
                     {
                         _ = ReadInt32(null);
                         var encodable = (IEncodable)Activator.CreateInstance(type)!;
@@ -726,7 +700,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
 
-                    if (!_decodingDictionary.TryGetValue(binaryEncodingId, out var type))
+                    if (!TypeLibrary.Default.DecodingDictionary.TryGetValue(binaryEncodingId, out var type))
                     {
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
                     }
@@ -773,7 +747,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
                 else
                 {
-                    if (!_decodingDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris), out var type))
+                    if (!TypeLibrary.Default.DecodingDictionary.TryGetValue(NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris), out var type))
                     {
                         throw new ServiceResultException(StatusCodes.BadEncodingError);
                     }

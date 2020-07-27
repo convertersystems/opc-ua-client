@@ -16,27 +16,10 @@ namespace Workstation.ServiceModel.Ua.Channels
     public sealed class BinaryEncoder : IEncoder, IDisposable
     {
         private const long MinFileTime = 504911232000000000L;
-        private static readonly Dictionary<Type, ExpandedNodeId> _encodingDictionary = new Dictionary<Type, ExpandedNodeId>();
         private readonly Stream _stream;
         private readonly IEncodingContext _context;
         private readonly Encoding _encoding;
         private readonly BinaryWriter _writer;
-
-        static bool TryGetEncodingId(Type type, [MaybeNullWhen(false)] out ExpandedNodeId value)
-        {
-            if (_encodingDictionary.TryGetValue(type, out value))
-            {
-                return true;
-            }
-            var attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-            if (attr != null)
-            {
-                value = attr.NodeId;
-                _encodingDictionary.Add(type, value);
-                return true;
-            }
-            return false;
-        }
 
         public BinaryEncoder(Stream stream, IEncodingContext? context = null, bool keepStreamOpen = false)
         {
@@ -911,7 +894,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var type = value.GetType();
-                if (!TryGetEncodingId(type, out var binaryEncodingId))
+                if (!TypeLibrary.Default.EncodingDictionary.TryGetValue(type, out var binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }
@@ -949,7 +932,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             try
             {
-                if (!TryGetEncodingId(value.GetType(), out var id))
+                if (!TypeLibrary.Default.EncodingDictionary.TryGetValue(value.GetType(), out var id))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }

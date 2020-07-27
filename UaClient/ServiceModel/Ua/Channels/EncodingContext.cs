@@ -26,4 +26,5 @@ namespace Workstation.ServiceModel.Ua.Channels
         public int MaxByteStringLength => 65535;
 
     }
+
 }

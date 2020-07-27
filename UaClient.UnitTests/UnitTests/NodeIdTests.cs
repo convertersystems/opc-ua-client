@@ -291,7 +291,7 @@ namespace Workstation.UaClient.UnitTests
                     break;
                 default:
                     nodeId.Invoking(n => NodeId.ToExpandedNodeId(n, nsUris))
-                        .Should().Throw<ServiceResultException>();
+                        .Should().Throw<IndexOutOfRangeException>();
                     break;
             }
         }
