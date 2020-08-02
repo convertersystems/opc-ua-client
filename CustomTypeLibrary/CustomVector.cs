@@ -2,7 +2,7 @@
 using System;
 using Workstation.ServiceModel.Ua;
 
-[assembly: Workstation.ServiceModel.Ua.TypeLibrary()]
+[assembly: TypeLibrary()]
 
 namespace CustomTypeLibrary
 {

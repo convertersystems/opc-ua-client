@@ -244,9 +244,9 @@ namespace Workstation.UaClient.UnitTests.Channels
 
         public static IEnumerable<object[]> DecodeDateTimeData { get; } = new[]
         {
-            new DateTime(0),
-            new DateTime(1601, 1, 1, 0, 0, 1),
-            new DateTime(1990, 1, 1),
+            new DateTime(0), //ticks
+            new DateTime(1601, 1, 1, 0, 0, 1, DateTimeKind.Utc),
+            new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             DateTime.MinValue,
             DateTime.MaxValue,
         }
@@ -797,8 +797,8 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             null,
             new DateTime[] {},
-            new DateTime[] { new DateTime(1990, 1, 1)},
-            new DateTime[] { new DateTime(2001, 12, 1, 15, 10, 20), new DateTime(2100, 2, 3, 20, 0, 0) }
+            new DateTime[] { new DateTime(1990, 1, 1, 0, 0, 0, DateTimeKind.Utc)},
+            new DateTime[] { new DateTime(2001, 12, 1, 15, 10, 20, DateTimeKind.Utc), new DateTime(2100, 2, 3, 20, 0, 0, DateTimeKind.Utc) }
         }
         .Select(x => new object[] { x });
 
@@ -1010,15 +1010,15 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             null,
             new Opc.Ua.DataValue[] { },
-            new Opc.Ua.DataValue[] { new Opc.Ua.DataValue(new Opc.Ua.Variant(23.0), StatusCodes.BadDataLost, new DateTime(1990,1,1), DateTime.UtcNow)},
+            new Opc.Ua.DataValue[] { new Opc.Ua.DataValue(new Opc.Ua.Variant(23.0), StatusCodes.BadDataLost, new DateTime(1990,1,1,0,0,0,DateTimeKind.Utc), DateTime.UtcNow)},
             new Opc.Ua.DataValue[]
             {
-                new Opc.Ua.DataValue(new Opc.Ua.Variant(23.0), StatusCodes.BadDataLost, new DateTime(1990,1,1), DateTime.UtcNow)
+                new Opc.Ua.DataValue(new Opc.Ua.Variant(23.0), StatusCodes.BadDataLost, new DateTime(1990,1,1,0,0,0,DateTimeKind.Utc), DateTime.UtcNow)
                 {
                     SourcePicoseconds = 13,
                     ServerPicoseconds = 150
                 },
-                new Opc.Ua.DataValue(new Opc.Ua.Variant(28), StatusCodes.GoodClamped, new DateTime(1990,12,1), DateTime.UtcNow),
+                new Opc.Ua.DataValue(new Opc.Ua.Variant(28), StatusCodes.GoodClamped, new DateTime(1990,12,1,0,0,0,DateTimeKind.Utc), DateTime.UtcNow),
             }
         }
         .Select(x => new object[] { x });
