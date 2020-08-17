@@ -338,7 +338,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.RemoteNonce = createSessionResponse.ServerNonce;
 
                 // verify the server's certificate is the same as the certificate from the selected endpoint.
-                if (this.RemoteEndpoint.ServerCertificate != null && !this.RemoteEndpoint.ServerCertificate.SequenceEqual(createSessionResponse.ServerCertificate))
+                if (VerifyCreateSessionServerCertificate() && (createSessionResponse.ServerCertificate == null || !this.RemoteEndpoint.ServerCertificate.SequenceEqual(createSessionResponse.ServerCertificate)))
                 {
                     throw new ServiceResultException(StatusCodes.BadCertificateInvalid, "Server did not return the same certificate used to create the channel.");
                 }
@@ -847,5 +847,44 @@ namespace Workstation.ServiceModel.Ua.Channels
             };
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
+
+
+        /// <summary>
+        /// Checks to see if the server certificate returned in a <see cref="CreateSessionResponse"/> 
+        /// should be checked to ensure that it matches the <see cref="EndpointDescription.ServerCertificate"/> 
+        /// for the remote endpoint.
+        /// </summary>
+        /// <returns>A bool that specifies if the certificate check is required.</returns>
+        /// <remarks>
+        /// OPC 10000-4 specifies that the client should ignore the server certificate returned by 
+        /// a create session response when the security policy for the server is None and none of 
+        /// the user token policies requires encryption.
+        /// </remarks>
+        private bool VerifyCreateSessionServerCertificate() 
+        { 
+            if (this.RemoteEndpoint.ServerCertificate == null) 
+            {
+                // No certificate to compare against.
+                return false;
+            }
+
+            if (!string.Equals(this.RemoteEndpoint.SecurityPolicyUri, SecurityPolicyUris.None)) 
+            {
+                // Verification required if the security policy is not None.
+                return true;
+            }
+
+            if (this.RemoteEndpoint.UserIdentityTokens != null && this.RemoteEndpoint.UserIdentityTokens.Any(policy => !string.Equals(policy.SecurityPolicyUri, SecurityPolicyUris.None))) 
+            {
+                // Verification required if any user token policies specify anything other than 
+                // None as their security policy.
+                return true;
+            }
+
+            // Endpoint security policy is None and all user token policies have a security policy 
+            // of None. No verification required.
+            return false;
+        }
+
     }
 }
