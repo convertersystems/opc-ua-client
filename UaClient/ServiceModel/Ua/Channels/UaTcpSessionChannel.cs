@@ -874,11 +874,29 @@ namespace Workstation.ServiceModel.Ua.Channels
                 return true;
             }
 
-            if (this.RemoteEndpoint.UserIdentityTokens != null && this.RemoteEndpoint.UserIdentityTokens.Any(policy => !string.Equals(policy.SecurityPolicyUri, SecurityPolicyUris.None))) 
+            if (this.RemoteEndpoint.UserIdentityTokens != null) 
             {
-                // Verification required if any user token policies specify anything other than 
-                // None as their security policy.
-                return true;
+                // Check if any of the user token policies require encryption.
+                foreach (var policy in this.RemoteEndpoint.UserIdentityTokens) 
+                { 
+                    if (policy == null) 
+                    {
+                        continue;
+                    }
+
+                    // If the policy does not define its own security policy, inherit the security 
+                    // policy for the endpoint.
+                    var securityPolicyUri = string.IsNullOrWhiteSpace(policy.SecurityPolicyUri)
+                        ? this.RemoteEndpoint.SecurityPolicyUri
+                        : policy.SecurityPolicyUri;
+
+                    if (!string.Equals(securityPolicyUri, SecurityPolicyUris.None)) 
+                    {
+                        // User token policy requires encryption, so we need to verify the 
+                        // certificate.
+                        return true;
+                    }
+                }
             }
 
             // Endpoint security policy is None and all user token policies have a security policy 
