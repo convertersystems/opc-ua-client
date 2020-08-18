@@ -338,10 +338,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.RemoteNonce = createSessionResponse.ServerNonce;
 
                 // verify the server's certificate is the same as the certificate from the selected endpoint.
-                if (VerifyCreateSessionServerCertificate() && (createSessionResponse.ServerCertificate == null || !this.RemoteEndpoint.ServerCertificate.SequenceEqual(createSessionResponse.ServerCertificate)))
-                {
-                    throw new ServiceResultException(StatusCodes.BadCertificateInvalid, "Server did not return the same certificate used to create the channel.");
-                }
+                ThrowOnInvalidSessionServerCertificate(createSessionResponse.ServerCertificate);
 
                 // verify the server's signature.
                 ISigner? verifier = null;
@@ -850,31 +847,32 @@ namespace Workstation.ServiceModel.Ua.Channels
 
 
         /// <summary>
-        /// Checks to see if the server certificate returned in a <see cref="CreateSessionResponse"/> 
-        /// should be checked to ensure that it matches the <see cref="EndpointDescription.ServerCertificate"/> 
-        /// for the remote endpoint.
+        /// Ensures that the server certificate returned in a <see cref="CreateSessionResponse"/> 
+        /// matches the <see cref="EndpointDescription.ServerCertificate"/> for the remote 
+        /// endpoint (if required based on security policies).
         /// </summary>
-        /// <returns>A bool that specifies if the certificate check is required.</returns>
+        /// <param name="sessionCertificate">
+        /// The server certificate returned in a <see cref="CreateSessionResponse"/>.
+        /// </param>
+        /// <exception cref="ServiceResultException">
+        /// A certificate check is required and the <paramref name="sessionCertificate"/> does not 
+        /// match the <see cref="EndpointDescription.ServerCertificate"/> for the remote endpoint.
+        /// </exception>
         /// <remarks>
         /// OPC 10000-4 specifies that the client should ignore the server certificate returned by 
         /// a create session response when the security policy for the server is None and none of 
         /// the user token policies requires encryption.
         /// </remarks>
-        private bool VerifyCreateSessionServerCertificate() 
-        { 
-            if (this.RemoteEndpoint.ServerCertificate == null) 
-            {
-                // No certificate to compare against.
-                return false;
-            }
+        private void ThrowOnInvalidSessionServerCertificate(byte[]? sessionCertificate) 
+        {
+            var compareCertificates = false;
 
             if (!string.Equals(this.RemoteEndpoint.SecurityPolicyUri, SecurityPolicyUris.None)) 
             {
-                // Verification required if the security policy is not None.
-                return true;
+                // Verification required if the security policy for the endpoint is not None.
+                compareCertificates = true;
             }
-
-            if (this.RemoteEndpoint.UserIdentityTokens != null) 
+            else if (this.RemoteEndpoint.UserIdentityTokens != null) 
             {
                 // Check if any of the user token policies require encryption.
                 foreach (var policy in this.RemoteEndpoint.UserIdentityTokens) 
@@ -893,15 +891,24 @@ namespace Workstation.ServiceModel.Ua.Channels
                     if (!string.Equals(securityPolicyUri, SecurityPolicyUris.None)) 
                     {
                         // User token policy requires encryption, so we need to verify the 
-                        // certificate.
-                        return true;
+                        // session certificate.
+                        compareCertificates = true;
+                        break;
                     }
                 }
             }
 
-            // Endpoint security policy is None and all user token policies have a security policy 
-            // of None. No verification required.
-            return false;
+            if (compareCertificates) 
+            {
+                var isValid = this.RemoteEndpoint.ServerCertificate == null || sessionCertificate == null
+                    ? this.RemoteEndpoint.ServerCertificate == null && sessionCertificate == null // Valid if both certificates are null
+                    : this.RemoteEndpoint.ServerCertificate.SequenceEqual(sessionCertificate); // Valid if both certificates are equal
+
+                if (!isValid) 
+                { 
+                    throw new ServiceResultException(StatusCodes.BadCertificateInvalid, "Server did not return the same certificate used to create the channel.");
+                }
+            }
         }
 
     }
