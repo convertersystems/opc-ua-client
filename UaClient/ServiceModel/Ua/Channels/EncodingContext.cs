@@ -6,8 +6,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 {
     public interface IEncodingContext
     {
-        List<string> NamespaceUris { get; }
-        List<string> ServerUris { get; }
+        IReadOnlyList<string> NamespaceUris { get; }
+        IReadOnlyList<string> ServerUris { get; }
         int MaxStringLength { get; }
         int MaxArrayLength { get; }
         int MaxByteStringLength { get; }
@@ -15,9 +15,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 
     public class DefaultEncodingContext : IEncodingContext
     {
-        public List<string> NamespaceUris => new List<string> { "http://opcfoundation.org/UA/" };
+        public IReadOnlyList<string> NamespaceUris => new List<string> { "http://opcfoundation.org/UA/" };
 
-        public List<string> ServerUris => new List<string>();
+        public IReadOnlyList<string> ServerUris => new List<string>();
 
         public int MaxStringLength => 65535;
 

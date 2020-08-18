@@ -14,8 +14,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryDecoder : IDecoder, IDisposable
     {
-        private const long MinFileTime = 504911232000000000L;
-        private const long MaxFileTime = 3155378975990000000L;
+        private const long _minFileTime = 504911232000000000L;
+        private const long _maxFileTime = 3155378975990000000L;
         private static readonly NodeId _readResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
         private static readonly NodeId _publishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
         private readonly Stream _stream;
@@ -132,7 +132,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 return DateTime.MinValue;
             }
-            else if (num >= MaxFileTime - MinFileTime)
+            else if (num >= _maxFileTime - _minFileTime)
             {
                 return DateTime.MaxValue;
             }

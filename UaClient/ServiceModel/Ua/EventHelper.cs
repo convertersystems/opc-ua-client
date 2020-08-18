@@ -10,14 +10,14 @@ namespace Workstation.ServiceModel.Ua
 {
     public static class EventHelper
     {
-        private static readonly Dictionary<Type, SimpleAttributeOperand[]> SelectClauseCache = new Dictionary<Type, SimpleAttributeOperand[]>();
-        private static readonly Dictionary<Type, PropertyInfo[]> DeserializerCache = new Dictionary<Type, PropertyInfo[]>();
+        private static readonly Dictionary<Type, SimpleAttributeOperand[]> _selectClauseCache = new Dictionary<Type, SimpleAttributeOperand[]>();
+        private static readonly Dictionary<Type, PropertyInfo[]> _deserializerCache = new Dictionary<Type, PropertyInfo[]>();
 
         public static T Deserialize<T>(Variant[] eventFields)
             where T : BaseEvent, new()
         {
             var e = Activator.CreateInstance<T>();
-            if (DeserializerCache.TryGetValue(typeof(T), out var infos))
+            if (_deserializerCache.TryGetValue(typeof(T), out var infos))
             {
                 for (int i = 0; i < eventFields.Length; i++)
                 {
@@ -31,7 +31,7 @@ namespace Workstation.ServiceModel.Ua
         public static BaseEvent Deserialize(Type type, Variant[] eventFields)
         {
             var e = (BaseEvent)Activator.CreateInstance(type)!;
-            if (DeserializerCache.TryGetValue(type, out var infos))
+            if (_deserializerCache.TryGetValue(type, out var infos))
             {
                 for (int i = 0; i < eventFields.Length; i++)
                 {
@@ -46,24 +46,24 @@ namespace Workstation.ServiceModel.Ua
             where T : BaseEvent, new()
         {
             var type = typeof(T);
-            if (SelectClauseCache.TryGetValue(type, out var clauses))
+            if (_selectClauseCache.TryGetValue(type, out var clauses))
             {
                 return clauses;
             }
 
             RegisterSelectClauseAndDeserializer(type);
-            return SelectClauseCache[type];
+            return _selectClauseCache[type];
         }
 
         public static SimpleAttributeOperand[] GetSelectClauses(Type type)
         {
-            if (SelectClauseCache.TryGetValue(type, out var clauses))
+            if (_selectClauseCache.TryGetValue(type, out var clauses))
             {
                 return clauses;
             }
 
             RegisterSelectClauseAndDeserializer(type);
-            return SelectClauseCache[type];
+            return _selectClauseCache[type];
         }
 
         private static void RegisterSelectClauseAndDeserializer(Type type)
@@ -90,8 +90,8 @@ namespace Workstation.ServiceModel.Ua
                 infoList.Add(info);
             }
 
-            SelectClauseCache[type] = clauseList.ToArray();
-            DeserializerCache[type] = infoList.ToArray();
+            _selectClauseCache[type] = clauseList.ToArray();
+            _deserializerCache[type] = infoList.ToArray();
         }
     }
 }

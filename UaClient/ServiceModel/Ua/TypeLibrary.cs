@@ -7,7 +7,7 @@ using System.Text;
 namespace Workstation.ServiceModel.Ua
 {
     /// <summary>
-    /// Specifies an assembly to be loaded as a custom type library for the encoders.
+    /// Specifies an assembly that provides custom types for the encoders.
     /// <para>
     /// The assembly is searched for types with <see cref="BinaryEncodingIdAttribute" />.
     /// </para>

@@ -408,7 +408,6 @@ namespace Workstation.ServiceModel.Ua
         public const string SessionlessInvokeResponseType = "i=20999";
         public const string HistoryBase = "i=99999";
     }
-
     public static class MethodIds
     {
         public const string ProgramStateMachineType_Start = "i=2426";
@@ -1238,7 +1237,6 @@ namespace Workstation.ServiceModel.Ua
         public const string ReaderGroupType_RemoveDataSetReader = "i=21085";
         public const string PubSubGroupTypeAddReaderMethodType = "i=21087";
     }
-
     public static class ObjectIds
     {
         public const string ModellingRule_Mandatory = "i=78";
@@ -2513,7 +2511,6 @@ namespace Workstation.ServiceModel.Ua
         public const string HistoryBase_Encoding_DefaultBinary = "i=99998";
         public const string HistoryBase_Encoding_DefaultXml = "i=99997";
     }
-
     public static class ObjectTypeIds
     {
         public const string BaseObjectType = "i=58";
@@ -2722,7 +2719,6 @@ namespace Workstation.ServiceModel.Ua
         public const string NetworkAddressType = "i=21145";
         public const string NetworkAddressUrlType = "i=21147";
     }
-
     public static class ReferenceTypeIds
     {
         public const string References = "i=31";
@@ -2771,7 +2767,6 @@ namespace Workstation.ServiceModel.Ua
         public const string HasWriterGroup = "i=18804";
         public const string HasReaderGroup = "i=18805";
     }
-
     public static class VariableIds
     {
         public const string DataTypeDescriptionType_DataTypeVersion = "i=104";
@@ -10822,7 +10817,6 @@ namespace Workstation.ServiceModel.Ua
         public const string OpcUa_XmlSchema_DatagramWriterGroupTransportDataType_DataTypeVersion = "i=21196";
         public const string OpcUa_XmlSchema_DatagramWriterGroupTransportDataType_DictionaryFragment = "i=21197";
     }
-
     public static class VariableTypeIds
     {
         public const string BaseVariableType = "i=62";
@@ -10883,5 +10877,4 @@ namespace Workstation.ServiceModel.Ua
         public const string ThreeDFrameType = "i=18791";
         public const string PubSubDiagnosticsCounterType = "i=19725";
     }
-
 }

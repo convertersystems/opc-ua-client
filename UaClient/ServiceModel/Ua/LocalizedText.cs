@@ -15,8 +15,8 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="locale">The locale.</param>
         public LocalizedText(string? text, string? locale = "")
         {
-            this.Locale = locale;
-            this.Text = text;
+            Locale = locale;
+            Text = text;
         }
 
         public string? Text { get; }
@@ -65,7 +65,7 @@ namespace Workstation.ServiceModel.Ua
 
         public override string? ToString()
         {
-            return this.Text;
+            return Text;
         }
     }
 }

@@ -852,7 +852,7 @@ namespace Workstation.UaClient.IntegrationTests
             ExtensionObject v2;
             if (v1.BodyType == BodyType.Encodable)
             {
-                // encoding id was found in type library and type was decoded.
+                // encoding id was found in type library and body was decoded.
                 v2 = new ExtensionObject(
                         (IEncodable)v1.Body,
                         ExpandedNodeId.Parse("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_\"Vector\"")
@@ -860,7 +860,7 @@ namespace Workstation.UaClient.IntegrationTests
             }
             else
             {
-                // encoding id was found in type library and you get a byte array.
+                // encoding id was not found in type library and body is byte array.
                 v2 = new ExtensionObject(
                         (byte[])v1.Body,
                         ExpandedNodeId.Parse("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_\"Vector\"")

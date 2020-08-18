@@ -21,11 +21,11 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="publishingEnabled">whether publishing is enabled.</param>
         public SubscriptionAttribute(string endpointUrl, double publishingInterval = 1000f, uint keepAliveCount = 10, uint lifetimeCount = 0, bool publishingEnabled = true)
         {
-            this.EndpointUrl = endpointUrl;
-            this.PublishingInterval = publishingInterval;
-            this.KeepAliveCount = keepAliveCount;
-            this.LifetimeCount = lifetimeCount;
-            this.PublishingEnabled = publishingEnabled;
+            EndpointUrl = endpointUrl;
+            PublishingInterval = publishingInterval;
+            KeepAliveCount = keepAliveCount;
+            LifetimeCount = lifetimeCount;
+            PublishingEnabled = publishingEnabled;
         }
 
         /// <summary>

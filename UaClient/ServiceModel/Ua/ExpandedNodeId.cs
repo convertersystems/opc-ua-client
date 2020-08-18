@@ -15,37 +15,37 @@ namespace Workstation.ServiceModel.Ua
 
         public ExpandedNodeId(uint identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(string identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(Guid identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(byte[] identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(NodeId identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = identifier;
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = identifier;
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public NodeId NodeId { get; }
@@ -59,7 +59,7 @@ namespace Workstation.ServiceModel.Ua
             return (nodeId == null) || NodeId.IsNull(nodeId.NodeId);
         }
 
-        public static NodeId ToNodeId(ExpandedNodeId value, IList<string> namespaceUris)
+        public static NodeId ToNodeId(ExpandedNodeId value, IReadOnlyList<string> namespaceUris)
         {
             if (value is null)
             {
@@ -73,7 +73,15 @@ namespace Workstation.ServiceModel.Ua
             {
                 return value.NodeId;
             }
-            int ns = namespaceUris.IndexOf(value.NamespaceUri!);
+            int ns = -1;
+            for (int i = 0; i < namespaceUris.Count; i++)
+            {
+                if (namespaceUris[i].Equals(value.NamespaceUri!))
+                {
+                    ns = i;
+                    break;
+                }
+            }
             if (ns < 0)
             {
                 throw new IndexOutOfRangeException();
@@ -156,17 +164,17 @@ namespace Workstation.ServiceModel.Ua
         public override string ToString()
         {
             var sb = new StringBuilder();
-            if (this.ServerIndex > 0)
+            if (ServerIndex > 0)
             {
-                sb.AppendFormat("svr={0};", this.ServerIndex);
+                sb.AppendFormat("svr={0};", ServerIndex);
             }
 
-            if (!string.IsNullOrEmpty(this.NamespaceUri))
+            if (!string.IsNullOrEmpty(NamespaceUri))
             {
-                sb.AppendFormat("nsu={0};", this.NamespaceUri);
+                sb.AppendFormat("nsu={0};", NamespaceUri);
             }
 
-            sb.Append(this.NodeId.ToString());
+            sb.Append(NodeId.ToString());
             return sb.ToString();
         }
 

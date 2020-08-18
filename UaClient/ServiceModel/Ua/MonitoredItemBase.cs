@@ -40,16 +40,16 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(nodeId));
             }
 
-            this.Name = name;
-            this.NodeId = nodeId;
-            this.AttributeId = attributeId;
-            this.IndexRange = indexRange;
-            this.MonitoringMode = monitoringMode;
-            this.SamplingInterval = samplingInterval;
-            this.Filter = filter;
-            this.QueueSize = queueSize;
-            this.DiscardOldest = discardOldest;
-            this.ClientId = (uint)Interlocked.Increment(ref lastClientId);
+            Name = name;
+            NodeId = nodeId;
+            AttributeId = attributeId;
+            IndexRange = indexRange;
+            MonitoringMode = monitoringMode;
+            SamplingInterval = samplingInterval;
+            Filter = filter;
+            QueueSize = queueSize;
+            DiscardOldest = discardOldest;
+            ClientId = (uint)Interlocked.Increment(ref lastClientId);
         }
 
         /// <summary>
@@ -139,8 +139,8 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(property));
             }
 
-            this.Target = target;
-            this.Property = property;
+            Target = target;
+            Property = property;
         }
 
         /// <summary>
@@ -155,8 +155,8 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(DataValue dataValue)
         {
-            this.Property.SetValue(this.Target, dataValue);
-            this.SetDataErrorInfo(dataValue.StatusCode);
+            Property.SetValue(Target, dataValue);
+            SetDataErrorInfo(dataValue.StatusCode);
         }
 
         public override void Publish(Variant[] eventFields)
@@ -165,10 +165,10 @@ namespace Workstation.ServiceModel.Ua
 
         public override bool TryGetValue(out DataValue? value)
         {
-            var pi = this.Property;
+            var pi = Property;
             if (pi.CanRead)
             {
-                value = (DataValue?)pi.GetValue(this.Target);
+                value = (DataValue?)pi.GetValue(Target);
                 return true;
             }
             value = default(DataValue);
@@ -177,13 +177,13 @@ namespace Workstation.ServiceModel.Ua
 
         public override void OnCreateResult(MonitoredItemCreateResult result)
         {
-            this.ServerId = result.MonitoredItemId;
-            this.SetDataErrorInfo(result.StatusCode);
+            ServerId = result.MonitoredItemId;
+            SetDataErrorInfo(result.StatusCode);
         }
 
         public override void OnWriteResult(StatusCode statusCode)
         {
-            this.SetDataErrorInfo(statusCode);
+            SetDataErrorInfo(statusCode);
         }
 
         private void SetDataErrorInfo(StatusCode statusCode)
@@ -194,16 +194,16 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.statusCode = statusCode;
-            var targetAsDataErrorInfo = this.Target as ISetDataErrorInfo;
+            var targetAsDataErrorInfo = Target as ISetDataErrorInfo;
             if (targetAsDataErrorInfo != null)
             {
                 if (!StatusCode.IsGood(statusCode))
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
+                    targetAsDataErrorInfo.SetErrors(Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
                 }
                 else
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, null);
+                    targetAsDataErrorInfo.SetErrors(Property.Name, null);
                 }
             }
         }
@@ -230,8 +230,8 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(property));
             }
 
-            this.Target = target;
-            this.Property = property;
+            Target = target;
+            Property = property;
         }
 
         /// <summary>
@@ -246,8 +246,8 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(DataValue dataValue)
         {
-            this.Property.SetValue(this.Target, dataValue.GetValue());
-            this.SetDataErrorInfo(dataValue.StatusCode);
+            Property.SetValue(Target, dataValue.GetValue());
+            SetDataErrorInfo(dataValue.StatusCode);
         }
 
         public override void Publish(Variant[] eventFields)
@@ -256,10 +256,10 @@ namespace Workstation.ServiceModel.Ua
 
         public override bool TryGetValue(out DataValue? value)
         {
-            var pi = this.Property;
+            var pi = Property;
             if (pi.CanRead)
             {
-                value = new DataValue(this.Property.GetValue(this.Target));
+                value = new DataValue(Property.GetValue(Target));
                 return true;
             }
             value = default(DataValue);
@@ -268,13 +268,13 @@ namespace Workstation.ServiceModel.Ua
 
         public override void OnCreateResult(MonitoredItemCreateResult result)
         {
-            this.ServerId = result.MonitoredItemId;
-            this.SetDataErrorInfo(result.StatusCode);
+            ServerId = result.MonitoredItemId;
+            SetDataErrorInfo(result.StatusCode);
         }
 
         public override void OnWriteResult(StatusCode statusCode)
         {
-            this.SetDataErrorInfo(statusCode);
+            SetDataErrorInfo(statusCode);
         }
 
         private void SetDataErrorInfo(StatusCode statusCode)
@@ -285,16 +285,16 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.statusCode = statusCode;
-            var targetAsDataErrorInfo = this.Target as ISetDataErrorInfo;
+            var targetAsDataErrorInfo = Target as ISetDataErrorInfo;
             if (targetAsDataErrorInfo != null)
             {
                 if (!StatusCode.IsGood(statusCode))
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
+                    targetAsDataErrorInfo.SetErrors(Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
                 }
                 else
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, null);
+                    targetAsDataErrorInfo.SetErrors(Property.Name, null);
                 }
             }
         }
@@ -321,8 +321,8 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(property));
             }
 
-            this.Target = target;
-            this.Property = property;
+            Target = target;
+            Property = property;
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(DataValue dataValue)
         {
-            var queue = (ObservableQueue<DataValue>)this.Property.GetValue(this.Target)!;
+            var queue = (ObservableQueue<DataValue>)Property.GetValue(Target)!;
             queue.Enqueue(dataValue);
         }
 
@@ -353,13 +353,13 @@ namespace Workstation.ServiceModel.Ua
 
         public override void OnCreateResult(MonitoredItemCreateResult result)
         {
-            this.ServerId = result.MonitoredItemId;
-            this.SetDataErrorInfo(result.StatusCode);
+            ServerId = result.MonitoredItemId;
+            SetDataErrorInfo(result.StatusCode);
         }
 
         public override void OnWriteResult(StatusCode statusCode)
         {
-            this.SetDataErrorInfo(statusCode);
+            SetDataErrorInfo(statusCode);
         }
 
         private void SetDataErrorInfo(StatusCode statusCode)
@@ -370,16 +370,16 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.statusCode = statusCode;
-            var targetAsDataErrorInfo = this.Target as ISetDataErrorInfo;
+            var targetAsDataErrorInfo = Target as ISetDataErrorInfo;
             if (targetAsDataErrorInfo != null)
             {
                 if (!StatusCode.IsGood(statusCode))
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
+                    targetAsDataErrorInfo.SetErrors(Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
                 }
                 else
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, null);
+                    targetAsDataErrorInfo.SetErrors(Property.Name, null);
                 }
             }
         }
@@ -406,8 +406,8 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(property));
             }
 
-            this.Target = target;
-            this.Property = property;
+            Target = target;
+            Property = property;
         }
 
         /// <summary>
@@ -426,8 +426,8 @@ namespace Workstation.ServiceModel.Ua
 
         public override void Publish(Variant[] eventFields)
         {
-            var currentEvent = EventHelper.Deserialize(this.Property.PropertyType, eventFields);
-            this.Property.SetValue(this.Target, currentEvent);
+            var currentEvent = EventHelper.Deserialize(Property.PropertyType, eventFields);
+            Property.SetValue(Target, currentEvent);
         }
 
         public override bool TryGetValue(out DataValue? value)
@@ -438,13 +438,13 @@ namespace Workstation.ServiceModel.Ua
 
         public override void OnCreateResult(MonitoredItemCreateResult result)
         {
-            this.ServerId = result.MonitoredItemId;
-            this.SetDataErrorInfo(result.StatusCode);
+            ServerId = result.MonitoredItemId;
+            SetDataErrorInfo(result.StatusCode);
         }
 
         public override void OnWriteResult(StatusCode statusCode)
         {
-            this.SetDataErrorInfo(statusCode);
+            SetDataErrorInfo(statusCode);
         }
 
         private void SetDataErrorInfo(StatusCode statusCode)
@@ -455,16 +455,16 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.statusCode = statusCode;
-            var targetAsDataErrorInfo = this.Target as ISetDataErrorInfo;
+            var targetAsDataErrorInfo = Target as ISetDataErrorInfo;
             if (targetAsDataErrorInfo != null)
             {
                 if (!StatusCode.IsGood(statusCode))
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
+                    targetAsDataErrorInfo.SetErrors(Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
                 }
                 else
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, null);
+                    targetAsDataErrorInfo.SetErrors(Property.Name, null);
                 }
             }
         }
@@ -492,8 +492,8 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(property));
             }
 
-            this.Target = target;
-            this.Property = property;
+            Target = target;
+            Property = property;
         }
 
         /// <summary>
@@ -513,7 +513,7 @@ namespace Workstation.ServiceModel.Ua
         public override void Publish(Variant[] eventFields)
         {
             var currentEvent = EventHelper.Deserialize<T>(eventFields);
-            var queue = (ObservableQueue<T>)this.Property.GetValue(this.Target)!;
+            var queue = (ObservableQueue<T>)Property.GetValue(Target)!;
             queue.Enqueue(currentEvent);
         }
 
@@ -525,13 +525,13 @@ namespace Workstation.ServiceModel.Ua
 
         public override void OnCreateResult(MonitoredItemCreateResult result)
         {
-            this.ServerId = result.MonitoredItemId;
-            this.SetDataErrorInfo(result.StatusCode);
+            ServerId = result.MonitoredItemId;
+            SetDataErrorInfo(result.StatusCode);
         }
 
         public override void OnWriteResult(StatusCode statusCode)
         {
-            this.SetDataErrorInfo(statusCode);
+            SetDataErrorInfo(statusCode);
         }
 
         private void SetDataErrorInfo(StatusCode statusCode)
@@ -542,16 +542,16 @@ namespace Workstation.ServiceModel.Ua
             }
 
             this.statusCode = statusCode;
-            var targetAsDataErrorInfo = this.Target as ISetDataErrorInfo;
+            var targetAsDataErrorInfo = Target as ISetDataErrorInfo;
             if (targetAsDataErrorInfo != null)
             {
                 if (!StatusCode.IsGood(statusCode))
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
+                    targetAsDataErrorInfo.SetErrors(Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
                 }
                 else
                 {
-                    targetAsDataErrorInfo.SetErrors(this.Property.Name, null);
+                    targetAsDataErrorInfo.SetErrors(Property.Name, null);
                 }
             }
         }

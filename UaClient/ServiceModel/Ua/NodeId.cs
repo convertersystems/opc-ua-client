@@ -22,9 +22,9 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="namespaceIndex">the index of the namespace in the NamespaceArray. An index of 0 corresponds to "http://opcfoundation.org/UA/".</param>
         public NodeId(uint identifier, ushort namespaceIndex = 0)
         {
-            this.Identifier = identifier;
-            this.IdType = IdType.Numeric;
-            this.NamespaceIndex = namespaceIndex;
+            Identifier = identifier;
+            IdType = IdType.Numeric;
+            NamespaceIndex = namespaceIndex;
         }
 
         /// <summary>
@@ -39,9 +39,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(identifier));
             }
 
-            this.Identifier = identifier;
-            this.IdType = IdType.String;
-            this.NamespaceIndex = namespaceIndex;
+            Identifier = identifier;
+            IdType = IdType.String;
+            NamespaceIndex = namespaceIndex;
         }
 
         /// <summary>
@@ -56,9 +56,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(identifier));
             }
 
-            this.NamespaceIndex = namespaceIndex;
-            this.Identifier = identifier;
-            this.IdType = IdType.Guid;
+            NamespaceIndex = namespaceIndex;
+            Identifier = identifier;
+            IdType = IdType.Guid;
         }
 
         /// <summary>
@@ -73,9 +73,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(identifier));
             }
 
-            this.NamespaceIndex = namespaceIndex;
-            this.Identifier = identifier;
-            this.IdType = IdType.Opaque;
+            NamespaceIndex = namespaceIndex;
+            Identifier = identifier;
+            IdType = IdType.Opaque;
         }
 
         public ushort NamespaceIndex { get; }
@@ -89,7 +89,7 @@ namespace Workstation.ServiceModel.Ua
             return (nodeId == null) || nodeId == Null;
         }
 
-        public static ExpandedNodeId ToExpandedNodeId(NodeId value, IList<string> namespaceUris)
+        public static ExpandedNodeId ToExpandedNodeId(NodeId value, IReadOnlyList<string> namespaceUris)
         {
             if (value is null)
             {
@@ -193,24 +193,24 @@ namespace Workstation.ServiceModel.Ua
         public override string ToString()
         {
             var sb = new StringBuilder();
-            if (this.NamespaceIndex > 0)
+            if (NamespaceIndex > 0)
             {
-                sb.AppendFormat("ns={0};", this.NamespaceIndex);
+                sb.AppendFormat("ns={0};", NamespaceIndex);
             }
 
-            switch (this.IdType)
+            switch (IdType)
             {
                 case IdType.Numeric:
-                    sb.AppendFormat("i={0}", this.Identifier);
+                    sb.AppendFormat("i={0}", Identifier);
                     break;
                 case IdType.String:
-                    sb.AppendFormat("s={0}", this.Identifier);
+                    sb.AppendFormat("s={0}", Identifier);
                     break;
                 case IdType.Guid:
-                    sb.AppendFormat("g={0}", this.Identifier);
+                    sb.AppendFormat("g={0}", Identifier);
                     break;
                 case IdType.Opaque:
-                    sb.AppendFormat("b={0}", Convert.ToBase64String((byte[])this.Identifier));
+                    sb.AppendFormat("b={0}", Convert.ToBase64String((byte[])Identifier));
                     break;
             }
 
@@ -227,7 +227,7 @@ namespace Workstation.ServiceModel.Ua
                    NamespaceIndex == other.NamespaceIndex &&
                    IdType == other.IdType)
             {
-                switch (this.IdType)
+                switch (IdType)
                 {
                     case IdType.Numeric:
                         return EqualityComparer<uint>.Default.Equals((uint)Identifier, (uint)other.Identifier);
@@ -250,7 +250,7 @@ namespace Workstation.ServiceModel.Ua
             int hashCode = 387039986;
             hashCode = hashCode * -1521134295 + NamespaceIndex.GetHashCode();
             hashCode = hashCode * -1521134295 + IdType.GetHashCode();
-            switch (this.IdType)
+            switch (IdType)
             {
                 case IdType.Numeric:
                     hashCode = hashCode * -1521134295 + EqualityComparer<uint>.Default.GetHashCode((uint)Identifier);

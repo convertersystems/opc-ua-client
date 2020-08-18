@@ -485,7 +485,6 @@ namespace Workstation.ServiceModel.Ua
         public const uint BadSyntaxError = 0x80B60000u;
         /// <summary>The operation could not be finished because all available connections are in use.</summary>
         public const uint BadMaxConnectionsReached = 0x80B70000u;
-
         public static string GetDefaultMessage(uint statusCode)
         {
             string value;
@@ -495,7 +494,6 @@ namespace Workstation.ServiceModel.Ua
             }
             return "An unexpected error occurred.";
         }
-
         static Dictionary<uint, string> DefaultMessages = new Dictionary<uint, string>()
         {
             [0x00000000]="The operation completed successfully.",
@@ -735,6 +733,5 @@ namespace Workstation.ServiceModel.Ua
             [0x80B60000]="A value had an invalid syntax.",
             [0x80B70000]="The operation could not be finished because all available connections are in use.",
         };
-
     }
 }

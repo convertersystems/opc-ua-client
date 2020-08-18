@@ -26,9 +26,9 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class DirectoryStore : ICertificateStore
     {
-        private readonly string pkiPath;
-        private readonly X509CertificateParser certParser = new X509CertificateParser();
-        private readonly SecureRandom rng = new SecureRandom();
+        private readonly string _pkiPath;
+        private readonly X509CertificateParser _certParser = new X509CertificateParser();
+        private readonly SecureRandom _rng = new SecureRandom();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DirectoryStore"/> class.
@@ -43,9 +43,9 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(path));
             }
 
-            this.pkiPath = path;
-            this.AcceptAllRemoteCertificates = acceptAllRemoteCertificates;
-            this.CreateLocalCertificateIfNotExist = createLocalCertificateIfNotExist;
+            _pkiPath = path;
+            AcceptAllRemoteCertificates = acceptAllRemoteCertificates;
+            CreateLocalCertificateIfNotExist = createLocalCertificateIfNotExist;
         }
 
         /// <summary>
@@ -109,14 +109,14 @@ namespace Workstation.ServiceModel.Ua
 
             // Build 'own/certs' certificate store.
             var ownCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
-            var ownCertsInfo = new DirectoryInfo(Path.Combine(this.pkiPath, "own", "certs"));
+            var ownCertsInfo = new DirectoryInfo(Path.Combine(_pkiPath, "own", "certs"));
             if (ownCertsInfo.Exists)
             {
                 foreach (var info in ownCertsInfo.EnumerateFiles())
                 {
                     using (var crtStream = info.OpenRead())
                     {
-                        var c = this.certParser.ReadCertificate(crtStream);
+                        var c = _certParser.ReadCertificate(crtStream);
                         if (c != null)
                         {
                             ownCerts.Add(c);
@@ -143,7 +143,7 @@ namespace Workstation.ServiceModel.Ua
                     GeneralNames gns = GeneralNames.GetInstance(asn1Object);
                     if (gns.GetNames().Any(n => n.TagNo == GeneralName.UniformResourceIdentifier && n.Name.ToString() == applicationUri))
                     {
-                        var ki = new FileInfo(Path.Combine(this.pkiPath, "own", "private", $"{crt.SerialNumber}.key"));
+                        var ki = new FileInfo(Path.Combine(_pkiPath, "own", "private", $"{crt.SerialNumber}.key"));
                         if (ki.Exists)
                         {
                             using (var keyStream = new StreamReader(ki.OpenRead()))
@@ -167,7 +167,7 @@ namespace Workstation.ServiceModel.Ua
                 return (crt, key);
             }
 
-            if (!this.CreateLocalCertificateIfNotExist)
+            if (!CreateLocalCertificateIfNotExist)
             {
                 return (null, null);
             }
@@ -179,7 +179,7 @@ namespace Workstation.ServiceModel.Ua
             var kp = await Task.Run<AsymmetricCipherKeyPair>(() =>
             {
                 RsaKeyPairGenerator kg = new RsaKeyPairGenerator();
-                kg.Init(new KeyGenerationParameters(this.rng, 2048));
+                kg.Init(new KeyGenerationParameters(_rng, 2048));
                 return kg.GenerateKeyPair();
             });
 
@@ -187,7 +187,7 @@ namespace Workstation.ServiceModel.Ua
 
             // Create a certificate.
             X509V3CertificateGenerator cg = new X509V3CertificateGenerator();
-            var subjectSN = BigInteger.ProbablePrime(120, this.rng);
+            var subjectSN = BigInteger.ProbablePrime(120, _rng);
             cg.SetSerialNumber(subjectSN);
             cg.SetSubjectDN(subjectDN);
             cg.SetIssuerDN(subjectDN);
@@ -225,11 +225,11 @@ namespace Workstation.ServiceModel.Ua
                 true,
                 new ExtendedKeyUsage(KeyPurposeID.IdKPClientAuth, KeyPurposeID.IdKPServerAuth));
 
-            crt = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, this.rng));
+            crt = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, _rng));
 
             logger?.LogTrace($"Created certificate with subject alt name '{applicationUri}'.");
 
-            var keyInfo = new FileInfo(Path.Combine(this.pkiPath, "own", "private", $"{crt.SerialNumber}.key"));
+            var keyInfo = new FileInfo(Path.Combine(_pkiPath, "own", "private", $"{crt.SerialNumber}.key"));
             if (!keyInfo.Directory.Exists)
             {
                 Directory.CreateDirectory(keyInfo.DirectoryName);
@@ -245,7 +245,7 @@ namespace Workstation.ServiceModel.Ua
                 pemwriter.WriteObject(key);
             }
 
-            var crtInfo = new FileInfo(Path.Combine(this.pkiPath, "own", "certs", $"{crt.SerialNumber}.crt"));
+            var crtInfo = new FileInfo(Path.Combine(_pkiPath, "own", "certs", $"{crt.SerialNumber}.crt"));
             if (!crtInfo.Directory.Exists)
             {
                 Directory.CreateDirectory(crtInfo.DirectoryName);
@@ -267,7 +267,7 @@ namespace Workstation.ServiceModel.Ua
         /// <inheritdoc/>
         public Task<bool> ValidateRemoteCertificateAsync(X509Certificate target, ILogger? logger = null)
         {
-            if (this.AcceptAllRemoteCertificates)
+            if (AcceptAllRemoteCertificates)
             {
                 return Task.FromResult(true);
             }
@@ -278,7 +278,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             var trustedCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
-            var trustedCertsInfo = new DirectoryInfo(Path.Combine(this.pkiPath, "trusted"));
+            var trustedCertsInfo = new DirectoryInfo(Path.Combine(_pkiPath, "trusted"));
             if (!trustedCertsInfo.Exists)
             {
                 trustedCertsInfo.Create();
@@ -288,7 +288,7 @@ namespace Workstation.ServiceModel.Ua
             {
                 using (var crtStream = info.OpenRead())
                 {
-                    var crt = this.certParser.ReadCertificate(crtStream);
+                    var crt = _certParser.ReadCertificate(crtStream);
                     if (crt != null)
                     {
                         trustedCerts.Add(crt);
@@ -297,7 +297,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             var intermediateCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
-            var intermediateCertsInfo = new DirectoryInfo(Path.Combine(this.pkiPath, "issuer"));
+            var intermediateCertsInfo = new DirectoryInfo(Path.Combine(_pkiPath, "issuer"));
             if (!intermediateCertsInfo.Exists)
             {
                 intermediateCertsInfo.Create();
@@ -307,7 +307,7 @@ namespace Workstation.ServiceModel.Ua
             {
                 using (var crtStream = info.OpenRead())
                 {
-                    var crt = this.certParser.ReadCertificate(crtStream);
+                    var crt = _certParser.ReadCertificate(crtStream);
                     if (crt != null)
                     {
                         intermediateCerts.Add(crt);
@@ -329,7 +329,7 @@ namespace Workstation.ServiceModel.Ua
                 }
 
                 logger?.LogError($"Error validatingRemoteCertificate.");
-                this.StoreInRejectedFolder(target);
+                StoreInRejectedFolder(target);
                 return Task.FromResult(false);
             }
 
@@ -340,7 +340,7 @@ namespace Workstation.ServiceModel.Ua
             catch (Exception ex)
             {
                 logger?.LogError($"Error validatingRemoteCertificate. {ex.Message}");
-                this.StoreInRejectedFolder(target);
+                StoreInRejectedFolder(target);
                 return Task.FromResult(false);
             }
 
@@ -409,7 +409,7 @@ namespace Workstation.ServiceModel.Ua
 
         private void StoreInRejectedFolder(X509Certificate crt)
         {
-            var crtInfo = new FileInfo(Path.Combine(this.pkiPath, "rejected", $"{crt.SerialNumber}.crt"));
+            var crtInfo = new FileInfo(Path.Combine(_pkiPath, "rejected", $"{crt.SerialNumber}.crt"));
             if (!crtInfo.Directory.Exists)
             {
                 Directory.CreateDirectory(crtInfo.DirectoryName);

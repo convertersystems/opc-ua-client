@@ -15,7 +15,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 {
     public sealed class BinaryEncoder : IEncoder, IDisposable
     {
-        private const long MinFileTime = 504911232000000000L;
+        private const long _minFileTime = 504911232000000000L;
         private readonly Stream _stream;
         private readonly IEncodingContext _context;
         private readonly Encoding _encoding;
@@ -129,7 +129,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 value = value.ToUniversalTime();
             }
 
-            if (value.Ticks < MinFileTime)
+            if (value.Ticks < _minFileTime)
             {
                 _writer.Write(0L);
                 return;

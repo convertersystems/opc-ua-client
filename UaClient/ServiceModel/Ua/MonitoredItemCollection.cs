@@ -13,8 +13,8 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class MonitoredItemBaseCollection : ObservableCollection<MonitoredItemBase>
     {
-        private readonly Dictionary<string, MonitoredItemBase> nameMap = new Dictionary<string, MonitoredItemBase>();
-        private readonly Dictionary<uint, MonitoredItemBase> clientIdMap = new Dictionary<uint, MonitoredItemBase>();
+        private readonly Dictionary<string, MonitoredItemBase> _nameMap = new Dictionary<string, MonitoredItemBase>();
+        private readonly Dictionary<uint, MonitoredItemBase> _clientIdMap = new Dictionary<uint, MonitoredItemBase>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MonitoredItemBaseCollection"/> class.
@@ -38,7 +38,7 @@ namespace Workstation.ServiceModel.Ua
                     throw new ArgumentNullException(nameof(name));
                 }
 
-                if (this.nameMap.TryGetValue(name, out var item))
+                if (_nameMap.TryGetValue(name, out var item))
                 {
                     return item;
                 }
@@ -57,7 +57,7 @@ namespace Workstation.ServiceModel.Ua
         {
             get
             {
-                if (this.clientIdMap.TryGetValue(clientId, out var item))
+                if (_clientIdMap.TryGetValue(clientId, out var item))
                 {
                     return item;
                 }
@@ -100,7 +100,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
         public bool TryGetValueByName(string name, [NotNullWhen(returnValue: true)] out MonitoredItemBase? value)
         {
-            return this.nameMap.TryGetValue(name, out value);
+            return _nameMap.TryGetValue(name, out value);
         }
 
         /// <summary>Gets the value associated with the specified clientId.</summary>
@@ -109,36 +109,36 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="value">When this method returns, contains the value associated with the specified key, if the key is found; otherwise, the default value for the type of the <paramref name="value" /> parameter. This parameter is passed uninitialized.</param>
         public bool TryGetValueByClientId(uint clientId, [NotNullWhen(returnValue: true)] out MonitoredItemBase? value)
         {
-            return this.clientIdMap.TryGetValue(clientId, out value);
+            return _clientIdMap.TryGetValue(clientId, out value);
         }
 
         protected override void InsertItem(int index, MonitoredItemBase item)
         {
-            this.nameMap.Add(item.Name, item);
-            this.clientIdMap.Add(item.ClientId, item);
+            _nameMap.Add(item.Name, item);
+            _clientIdMap.Add(item.ClientId, item);
             base.InsertItem(index, item);
         }
 
         protected override void RemoveItem(int index)
         {
-            this.nameMap.Remove(base[index].Name);
-            this.clientIdMap.Remove(base[index].ClientId);
+            _nameMap.Remove(base[index].Name);
+            _clientIdMap.Remove(base[index].ClientId);
             base.RemoveItem(index);
         }
 
         protected override void SetItem(int index, MonitoredItemBase item)
         {
-            this.nameMap.Remove(base[index].Name);
-            this.clientIdMap.Remove(base[index].ClientId);
-            this.nameMap.Add(item.Name, item);
-            this.clientIdMap.Add(item.ClientId, item);
+            _nameMap.Remove(base[index].Name);
+            _clientIdMap.Remove(base[index].ClientId);
+            _nameMap.Add(item.Name, item);
+            _clientIdMap.Add(item.ClientId, item);
             base.SetItem(index, item);
         }
 
         protected override void ClearItems()
         {
-            this.nameMap.Clear();
-            this.clientIdMap.Clear();
+            _nameMap.Clear();
+            _clientIdMap.Clear();
             base.ClearItems();
         }
 
