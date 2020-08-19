@@ -15,6 +15,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="BrowseRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="BrowseResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.8.2/">OPC UA specification Part 4: Services, 5.8.2</seealso>
         public static async Task<BrowseResponse> BrowseAsync(this IRequestChannel channel, BrowseRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -31,6 +32,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="BrowseNextRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="BrowseNextResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.8.3/">OPC UA specification Part 4: Services, 5.8.3</seealso>
         public static async Task<BrowseNextResponse> BrowseNextAsync(this IRequestChannel channel, BrowseNextRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -47,6 +49,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="TranslateBrowsePathsToNodeIdsRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="TranslateBrowsePathsToNodeIdsResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.8.4/">OPC UA specification Part 4: Services, 5.8.4</seealso>
         public static async Task<TranslateBrowsePathsToNodeIdsResponse> TranslateBrowsePathsToNodeIdsAsync(this IRequestChannel channel, TranslateBrowsePathsToNodeIdsRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -63,6 +66,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="RegisterNodesRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="RegisterNodesResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.8.5/">OPC UA specification Part 4: Services, 5.8.5</seealso>
         public static async Task<RegisterNodesResponse> RegisterNodesAsync(this IRequestChannel channel, RegisterNodesRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -79,6 +83,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="UnregisterNodesRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="UnregisterNodesResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.8.6/">OPC UA specification Part 4: Services, 5.8.6</seealso>
         public static async Task<UnregisterNodesResponse> UnregisterNodesAsync(this IRequestChannel channel, UnregisterNodesRequest request, CancellationToken token = default)
         {
             if (request == null)
