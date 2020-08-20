@@ -15,6 +15,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="client">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="ReadRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="ReadResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.10.2/">OPC UA specification Part 4: Services, 5.10.2</seealso>
         public static async Task<ReadResponse> ReadAsync(this IRequestChannel client, ReadRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -31,6 +32,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="client">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="WriteRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="WriteResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.10.4/">OPC UA specification Part 4: Services, 5.10.4</seealso>
         public static async Task<WriteResponse> WriteAsync(this IRequestChannel client, WriteRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -47,6 +49,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="client">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="HistoryReadRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="HistoryReadResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.10.3/">OPC UA specification Part 4: Services, 5.10.3</seealso>
         public static async Task<HistoryReadResponse> HistoryReadAsync(this IRequestChannel client, HistoryReadRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -63,6 +66,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="client">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="HistoryUpdateRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="HistoryUpdateResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.10.5/">OPC UA specification Part 4: Services, 5.10.5</seealso>
         public static async Task<HistoryUpdateResponse> HistoryUpdateAsync(this IRequestChannel client, HistoryUpdateRequest request, CancellationToken token = default)
         {
             if (request == null)
