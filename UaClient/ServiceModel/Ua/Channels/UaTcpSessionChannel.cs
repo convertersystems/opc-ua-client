@@ -338,10 +338,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 this.RemoteNonce = createSessionResponse.ServerNonce;
 
                 // verify the server's certificate is the same as the certificate from the selected endpoint.
-                if (this.RemoteEndpoint.ServerCertificate != null && !this.RemoteEndpoint.ServerCertificate.SequenceEqual(createSessionResponse.ServerCertificate))
-                {
-                    throw new ServiceResultException(StatusCodes.BadCertificateInvalid, "Server did not return the same certificate used to create the channel.");
-                }
+                ThrowOnInvalidSessionServerCertificate(createSessionResponse.ServerCertificate);
 
                 // verify the server's signature.
                 ISigner? verifier = null;
@@ -847,5 +844,72 @@ namespace Workstation.ServiceModel.Ua.Channels
             };
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
+
+
+        /// <summary>
+        /// Ensures that the server certificate returned in a <see cref="CreateSessionResponse"/> 
+        /// matches the <see cref="EndpointDescription.ServerCertificate"/> for the remote 
+        /// endpoint (if required based on security policies).
+        /// </summary>
+        /// <param name="sessionCertificate">
+        /// The server certificate returned in a <see cref="CreateSessionResponse"/>.
+        /// </param>
+        /// <exception cref="ServiceResultException">
+        /// A certificate check is required and the <paramref name="sessionCertificate"/> does not 
+        /// match the <see cref="EndpointDescription.ServerCertificate"/> for the remote endpoint.
+        /// </exception>
+        /// <remarks>
+        /// OPC 10000-4 specifies that the client should ignore the server certificate returned by 
+        /// a create session response when the security policy for the server is None and none of 
+        /// the user token policies requires encryption.
+        /// </remarks>
+        private void ThrowOnInvalidSessionServerCertificate(byte[]? sessionCertificate) 
+        {
+            var compareCertificates = false;
+
+            if (!string.Equals(this.RemoteEndpoint.SecurityPolicyUri, SecurityPolicyUris.None)) 
+            {
+                // Verification required if the security policy for the endpoint is not None.
+                compareCertificates = true;
+            }
+            else if (this.RemoteEndpoint.UserIdentityTokens != null) 
+            {
+                // Check if any of the user token policies require encryption.
+                foreach (var policy in this.RemoteEndpoint.UserIdentityTokens) 
+                { 
+                    if (policy == null) 
+                    {
+                        continue;
+                    }
+
+                    // If the policy does not define its own security policy, inherit the security 
+                    // policy for the endpoint.
+                    var securityPolicyUri = string.IsNullOrWhiteSpace(policy.SecurityPolicyUri)
+                        ? this.RemoteEndpoint.SecurityPolicyUri
+                        : policy.SecurityPolicyUri;
+
+                    if (!string.Equals(securityPolicyUri, SecurityPolicyUris.None)) 
+                    {
+                        // User token policy requires encryption, so we need to verify the 
+                        // session certificate.
+                        compareCertificates = true;
+                        break;
+                    }
+                }
+            }
+
+            if (compareCertificates) 
+            {
+                var isValid = this.RemoteEndpoint.ServerCertificate == null || sessionCertificate == null
+                    ? this.RemoteEndpoint.ServerCertificate == null && sessionCertificate == null // Valid if both certificates are null
+                    : this.RemoteEndpoint.ServerCertificate.SequenceEqual(sessionCertificate); // Valid if both certificates are equal
+
+                if (!isValid) 
+                { 
+                    throw new ServiceResultException(StatusCodes.BadCertificateInvalid, "Server did not return the same certificate used to create the channel.");
+                }
+            }
+        }
+
     }
 }
