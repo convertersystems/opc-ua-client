@@ -12,6 +12,10 @@ using System.Xml.Linq;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
+    /// <summary>
+    /// An encoder for the OPC UA Binary DataEncoding.
+    /// </summary>
+    /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.1/">OPC UA specification Part 6: Mappings, 5.2.1</seealso>
     public sealed class BinaryEncoder : IEncoder, IDisposable
     {
         private const long MinFileTime = 504911232000000000L;
@@ -55,61 +59,133 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
         }
 
+        /// <summary>
+        /// Writes a boolean value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.1">OPC UA specification Part 6: Mappings, 5.2.2.1</seealso>
         public void WriteBoolean(string? fieldName, bool value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a signed byte value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteSByte(string? fieldName, sbyte value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes an unsigned byte value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteByte(string? fieldName, byte value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a signed short value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteInt16(string? fieldName, short value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a unsigned short value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteUInt16(string? fieldName, ushort value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a signed integer value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteInt32(string? fieldName, int value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes an unsigned integer value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteUInt32(string? fieldName, uint value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a signed long integer value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteInt64(string? fieldName, long value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes an unsigned long integer value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public void WriteUInt64(string? fieldName, ulong value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a floating point value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
         public void WriteFloat(string? fieldName, float value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a double precision floating point value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
         public void WriteDouble(string? fieldName, double value)
         {
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a string to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.4">OPC UA specification Part 6: Mappings, 5.2.2.4</seealso>
         public void WriteString(string? fieldName, string? value)
         {
             if (value == null)
@@ -121,6 +197,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteByteString(null, this.encoding.GetBytes(value));
         }
 
+        /// <summary>
+        /// Writes a date time value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.5">OPC UA specification Part 6: Mappings, 5.2.2.5</seealso>
         public void WriteDateTime(string? fieldName, DateTime value)
         {
             if (value.Kind == DateTimeKind.Local)
@@ -137,11 +219,23 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.writer.Write(value.ToFileTimeUtc());
         }
 
+        /// <summary>
+        /// Writes a GUID to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.6">OPC UA specification Part 6: Mappings, 5.2.2.6</seealso>
         public void WriteGuid(string? fieldName, Guid value)
         {
             this.writer.Write(value.ToByteArray());
         }
 
+        /// <summary>
+        /// Writes a byte string to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.7">OPC UA specification Part 6: Mappings, 5.2.2.7</seealso>
         public void WriteByteString(string? fieldName, byte[]? value)
         {
             if (value == null)
@@ -154,6 +248,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.writer.Write(value);
         }
 
+        /// <summary>
+        /// Writes a XML element to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.8">OPC UA specification Part 6: Mappings, 5.2.2.8</seealso>
         public void WriteXElement(string? fieldName, XElement? value)
         {
             if (value == null)
@@ -165,6 +265,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteByteString(null, this.encoding.GetBytes(value.ToString()));
         }
 
+        /// <summary>
+        /// Writes a node id to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.9">OPC UA specification Part 6: Mappings, 5.2.2.9</seealso>
         public void WriteNodeId(string? fieldName, NodeId? value)
         {
             if (value == null)
@@ -222,6 +328,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an expanded node id to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.10">OPC UA specification Part 6: Mappings, 5.2.2.10</seealso>
         public void WriteExpandedNodeId(string? fieldName, ExpandedNodeId? value)
         {
             if (value == null)
@@ -307,11 +419,23 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a status code to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.11">OPC UA specification Part 6: Mappings, 5.2.2.11</seealso>
         public void WriteStatusCode(string? fieldName, StatusCode value)
         {
             this.WriteUInt32(null, value.Value);
         }
 
+        /// <summary>
+        /// Writes a <see cref="DiagnosticInfo"/> object to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.12">OPC UA specification Part 6: Mappings, 5.2.2.12</seealso>
         public void WriteDiagnosticInfo(string? fieldName, DiagnosticInfo? value)
         {
             if (value == null)
@@ -393,6 +517,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a <see cref="QualifiedName"/> object to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.13">OPC UA specification Part 6: Mappings, 5.2.2.13</seealso>
         public void WriteQualifiedName(string? fieldName, QualifiedName? value)
         {
             if (value == null)
@@ -406,6 +536,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteString(null, value.Name);
         }
 
+        /// <summary>
+        /// Writes a <see cref="LocalizedText"/> to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.14">OPC UA specification Part 6: Mappings, 5.2.2.14</seealso>
         public void WriteLocalizedText(string? fieldName, LocalizedText? value)
         {
             if (value == null)
@@ -437,6 +573,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a <see cref="Variant"/> value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.16">OPC UA specification Part 6: Mappings, 5.2.2.16</seealso>
         public void WriteVariant(string? fieldName, Variant value)
         {
             var obj = value.Value;
@@ -757,6 +899,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             this.WriteInt32Array(null, dims);
         }
 
+        /// <summary>
+        /// Writes a <see cref="DataValue"/> to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.17">OPC UA specification Part 6: Mappings, 5.2.2.17</seealso>
         public void WriteDataValue(string? fieldName, DataValue? value)
         {
             if (value == null)
@@ -828,6 +976,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an <see cref="ExtensionObject"/> to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
         public void WriteExtensionObject(string? fieldName, ExtensionObject? value)
         {
             if (value == null || value.BodyType == BodyType.None)
@@ -873,6 +1027,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an <see cref="ExtensionObject"/> to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
         public void WriteExtensionObject<T>(string? fieldName, T? value)
             where T : class, IEncodable
         {
@@ -902,6 +1062,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             return;
         }
 
+        /// <summary>
+        /// Writes an <see cref="IEncodable"/> object to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.6/">OPC UA specification Part 6: Mappings, 5.2.6</seealso>
         public void WriteEncodable<T>(string? fieldName, T? value)
             where T : class, IEncodable
         {
@@ -913,12 +1079,25 @@ namespace Workstation.ServiceModel.Ua.Channels
             value.Encode(this);
         }
 
+        /// <summary>
+        /// Writes an enumeration value to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.4/">OPC UA specification Part 6: Mappings, 5.2.4</seealso>
         public void WriteEnumeration<T>(string? fieldName, T value)
             where T : struct, IConvertible
         {
             this.WriteInt32(null, Convert.ToInt32(value, CultureInfo.InvariantCulture));
         }
 
+        /// <summary>
+        /// Writes a boolean array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.1">OPC UA specification Part 6: Mappings, 5.2.2.1</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteBooleanArray(string? fieldName, bool[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -930,6 +1109,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a signed byte array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteSByteArray(string? fieldName, sbyte[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -941,6 +1127,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an unsigned byte array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteByteArray(string? fieldName, byte[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -952,6 +1145,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a signed short array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteInt16Array(string? fieldName, short[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -963,6 +1163,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an unsigned short array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteUInt16Array(string? fieldName, ushort[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -974,6 +1181,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a signed integer array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteInt32Array(string? fieldName, int[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -985,6 +1199,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an unsigned integer array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteUInt32Array(string? fieldName, uint[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -996,6 +1217,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a signed long integer array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteInt64Array(string? fieldName, long[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1007,6 +1235,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an unsigned long integer array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteUInt64Array(string? fieldName, ulong[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1018,6 +1253,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a floating point array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteFloatArray(string? fieldName, float[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1029,6 +1271,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a double precision floating point array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteDoubleArray(string? fieldName, double[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1040,6 +1289,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a string array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.4">OPC UA specification Part 6: Mappings, 5.2.2.4</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteStringArray(string? fieldName, string?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1051,6 +1307,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a date time array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.5">OPC UA specification Part 6: Mappings, 5.2.2.5</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteDateTimeArray(string? fieldName, DateTime[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1062,6 +1325,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a GUID array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.6">OPC UA specification Part 6: Mappings, 5.2.2.6</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteGuidArray(string? fieldName, Guid[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1073,6 +1343,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a byte string array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.7">OPC UA specification Part 6: Mappings, 5.2.2.7</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteByteStringArray(string? fieldName, byte[]?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1084,6 +1361,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a XML element array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.8">OPC UA specification Part 6: Mappings, 5.2.2.8</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteXElementArray(string? fieldName, XElement?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1095,6 +1379,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a node id array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.9">OPC UA specification Part 6: Mappings, 5.2.2.9</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteNodeIdArray(string? fieldName, NodeId?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1106,6 +1397,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an expanded node id array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.10">OPC UA specification Part 6: Mappings, 5.2.2.10</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteExpandedNodeIdArray(string? fieldName, ExpandedNodeId?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1117,6 +1415,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a status code array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.11">OPC UA specification Part 6: Mappings, 5.2.2.11</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteStatusCodeArray(string? fieldName, StatusCode[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1128,6 +1433,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a <see cref="DiagnosticInfo"/> object array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.12">OPC UA specification Part 6: Mappings, 5.2.2.12</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteDiagnosticInfoArray(string? fieldName, DiagnosticInfo?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1139,6 +1451,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a <see cref="QualifiedName"/> array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.13">OPC UA specification Part 6: Mappings, 5.2.2.13</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteQualifiedNameArray(string? fieldName, QualifiedName?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1150,6 +1469,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a <see cref="LocalizedText"/> array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.14">OPC UA specification Part 6: Mappings, 5.2.2.14</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteLocalizedTextArray(string? fieldName, LocalizedText?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1161,6 +1487,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a <see cref="Variant"/> array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.16">OPC UA specification Part 6: Mappings, 5.2.2.16</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteVariantArray(string? fieldName, Variant[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1172,6 +1505,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes a <see cref="DataValue"/> array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.17">OPC UA specification Part 6: Mappings, 5.2.2.17</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteDataValueArray(string? fieldName, DataValue?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1183,6 +1523,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an <see cref="ExtensionObject"/> array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteExtensionObjectArray(string? fieldName, ExtensionObject?[]? values)
         {
             if (this.TryWriteArrayLength(values))
@@ -1194,6 +1541,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an <see cref="ExtensionObject"/> array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteExtensionObjectArray<T>(string? fieldName, T?[]? values)
             where T : class?, IEncodable
         {
@@ -1206,6 +1560,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an <see cref="IEncodable"/> array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.6/">OPC UA specification Part 6: Mappings, 5.2.6</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteEncodableArray<T>(string? fieldName, T?[]? values)
             where T : class?, IEncodable
         {
@@ -1218,6 +1579,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Writes an enumeration array to the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="values">The array.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.4/">OPC UA specification Part 6: Mappings, 5.2.4</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public void WriteEnumerationArray<T>(string? fieldName, T[]? values)
             where T : struct, IConvertible
         {
