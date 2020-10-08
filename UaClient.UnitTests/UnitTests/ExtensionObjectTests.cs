@@ -113,10 +113,12 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(ExpandedNodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary));
         }
 
+        private class DataTypeWithoutEncodingId : Structure { }
+
         [Fact]
         public void CreateFromEncodableWithoutAnyTypeId()
         {
-            var body = new Structure();
+            var body = new DataTypeWithoutEncodingId();
 
             body
                 .Invoking(b => new ExtensionObject(b))
