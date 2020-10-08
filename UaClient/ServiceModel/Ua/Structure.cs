@@ -7,7 +7,7 @@ namespace Workstation.ServiceModel.Ua
     /// A base implementation of a Structure.
     /// </summary>
     [DataTypeId(DataTypeIds.Structure)]
-    public class Structure : IEncodable
+    public abstract class Structure : IEncodable
     {
         public virtual void Encode(IEncoder encoder)
         {
