@@ -5,6 +5,7 @@ using System;
 
 namespace Workstation.ServiceModel.Ua
 {
+    [DataTypeId(DataTypeIds.DataValue)]
     public sealed class DataValue
     {
         public DataValue(object? value, StatusCode statusCode = default(StatusCode), DateTime sourceTimestamp = default(DateTime), ushort sourcePicoseconds = 0, DateTime serverTimestamp = default(DateTime), ushort serverPicoseconds = 0)

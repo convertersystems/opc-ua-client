@@ -5,6 +5,7 @@ using System;
 
 namespace Workstation.ServiceModel.Ua
 {
+    [DataTypeId(DataTypeIds.QualifiedName)]
     public sealed class QualifiedName
     {
         /// <summary>

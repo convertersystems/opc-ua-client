@@ -40,6 +40,7 @@ namespace Workstation.ServiceModel.Ua
         DiagnosticInfo = 25,
     }
 
+    [DataTypeId(DataTypeIds.BaseDataType)]
     public readonly struct Variant
     {
         public static readonly Variant Null = default(Variant);

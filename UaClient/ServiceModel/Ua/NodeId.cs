@@ -10,6 +10,7 @@ using System.Text;
 
 namespace Workstation.ServiceModel.Ua
 {
+    [DataTypeId(DataTypeIds.NodeId)]
     public class NodeId : IEquatable<NodeId>
     {
         public static readonly NodeId Null = new NodeId(0);
