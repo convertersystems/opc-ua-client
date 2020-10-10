@@ -3,6 +3,7 @@
 
 namespace Workstation.ServiceModel.Ua
 {
+    [DataTypeId(DataTypeIds.LocalizedText)]
     public sealed class LocalizedText
     {
         /// <summary>

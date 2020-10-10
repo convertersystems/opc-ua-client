@@ -3,6 +3,7 @@
 
 namespace Workstation.ServiceModel.Ua
 {
+    [DataTypeId(DataTypeIds.StatusCode)]
     public readonly struct StatusCode
     {
         private const uint SeverityMask = 0xC0000000u;
