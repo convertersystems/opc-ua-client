@@ -66,7 +66,7 @@ namespace Workstation.ServiceModel.Ua
 
             Body = body;
             BodyType = BodyType.Encodable;
-            if (!TypeLibrary.Default.EncodingDictionary.TryGetValue(body.GetType(), out var binaryEncodingId))
+            if (!TypeLibrary.TryGetBinaryEncodingIdFromType(body.GetType(), out var binaryEncodingId))
             {
                 throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
             }

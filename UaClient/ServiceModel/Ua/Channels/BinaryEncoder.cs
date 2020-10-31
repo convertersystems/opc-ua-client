@@ -894,7 +894,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var type = value.GetType();
-                if (!TypeLibrary.Default.EncodingDictionary.TryGetValue(type, out var binaryEncodingId))
+                if (!TypeLibrary.TryGetBinaryEncodingIdFromType(type, out var binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }
@@ -932,7 +932,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             try
             {
-                if (!TypeLibrary.Default.EncodingDictionary.TryGetValue(value.GetType(), out var id))
+                if (!TypeLibrary.TryGetBinaryEncodingIdFromType(value.GetType(), out var id))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }

@@ -25,46 +25,74 @@ namespace Workstation.ServiceModel.Ua
     }
 
     /// <summary>
-    /// Stores the standard OPC UA and custom types for the encoders.
+    /// Stores the standard OPC UA and custom types.
     /// <para>
-    /// Assemblies marked with the <see cref="TypeLibraryAttribute" /> are searched for types with <see cref="BinaryEncodingIdAttribute" />.
+    /// Assemblies marked with the <see cref="TypeLibraryAttribute" /> are searched for types with <see cref="DataTypeIdAttribute" />.
     /// </para>
     /// </summary>
     public class TypeLibrary
     {
-        public static TypeLibrary Default { get; } = new TypeLibrary();
+        static readonly Lazy<TypeLibrary> _instance = new Lazy<TypeLibrary>(() => new TypeLibrary());
+        readonly Dictionary<Type, ExpandedNodeId> _dataTypeIdByType;
+        readonly Dictionary<ExpandedNodeId, Type> _typeByDataTypeId;
+        readonly Dictionary<Type, ExpandedNodeId> _binaryEncodingIdByType;
+        readonly Dictionary<ExpandedNodeId, Type> _typeByBinaryEncodingId;
 
-        public TypeLibrary()
+        public static TypeLibrary Default => _instance.Value;
+
+        private TypeLibrary()
         {
-            var fwd = new Dictionary<Type, ExpandedNodeId>();
-            var rev = new Dictionary<ExpandedNodeId, Type>();
+            _typeByDataTypeId = new Dictionary<ExpandedNodeId, Type>();
+            _dataTypeIdByType = new Dictionary<Type, ExpandedNodeId>();
+            _binaryEncodingIdByType = new Dictionary<Type, ExpandedNodeId>();
+            _typeByBinaryEncodingId = new Dictionary<ExpandedNodeId, Type>();
             foreach (var assembly in from assembly in AppDomain.CurrentDomain.GetAssemblies()
                                      where assembly.IsDefined(typeof(TypeLibraryAttribute), false)
                                      select assembly)
             {
                 try
                 {
-                    foreach (var (type, attr) in from type in assembly.GetExportedTypes()
-                                                 let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-                                                 where attr != null
-                                                 select (type, attr))
-                        if (!fwd.ContainsKey(type) && !rev.ContainsKey(attr.NodeId))
-                        {
-                            fwd.Add(type, attr.NodeId);
-                            rev.Add(attr.NodeId, type);
-                        }
+                    AddTypesToLibrary(assembly);
                 }
                 catch
                 {
                     continue;
                 }
             }
-            EncodingDictionary = fwd;
-            DecodingDictionary = rev;
         }
 
-        public IReadOnlyDictionary<Type, ExpandedNodeId> EncodingDictionary { get; }
-        public IReadOnlyDictionary<ExpandedNodeId, Type> DecodingDictionary { get; }
+        private void AddTypesToLibrary(Assembly assembly)
+        {
+            foreach (var (type, attr) in from type in assembly.GetExportedTypes()
+                                         let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
+                                         where attr != null
+                                         select (type, attr))
+                if (!_binaryEncodingIdByType.ContainsKey(type) && !_typeByBinaryEncodingId.ContainsKey(attr.NodeId))
+                {
+                    _binaryEncodingIdByType.Add(type, attr.NodeId);
+                    _typeByBinaryEncodingId.Add(attr.NodeId, type);
+                }
+        }
+
+        public static bool TryGetTypeFromDataTypeId(ExpandedNodeId id, out Type type)
+        {
+            return TypeLibrary._instance.Value._typeByDataTypeId.TryGetValue(id, out type);
+        }
+
+        public static bool TryGetDataTypeIdFromType(Type type, out ExpandedNodeId id)
+        { 
+            return TypeLibrary._instance.Value._dataTypeIdByType.TryGetValue(type, out id);
+        }
+
+        public static bool TryGetTypeFromBinaryEncodingId(ExpandedNodeId id, out Type type)
+        {
+            return TypeLibrary._instance.Value._typeByBinaryEncodingId.TryGetValue(id, out type);
+        }
+
+        public static bool TryGetBinaryEncodingIdFromType(Type type, out ExpandedNodeId id)
+        {
+            return TypeLibrary._instance.Value._binaryEncodingIdByType.TryGetValue(type, out id);
+        }
 
     }
 }
