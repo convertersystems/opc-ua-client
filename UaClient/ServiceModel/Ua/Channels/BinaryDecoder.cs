@@ -896,11 +896,16 @@ namespace Workstation.ServiceModel.Ua.Channels
             return value;
         }
 
-        public object ReadMessage()
+        /// <summary>
+        /// Reads a <see cref="IServiceResponse"/> from the stream.
+        /// </summary>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.9/">OPC UA specification Part 6: Mappings, 5.2.9</seealso>
+        public IServiceResponse ReadResponse()
         {
             try
             {
-                IEncodable value;
+                IServiceResponse value;
                 NodeId nodeId = ReadNodeId(null);
                 // fast path
                 if (nodeId == _publishResponseNodeId)
@@ -921,7 +926,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
                 value.Decode(this);
                 return value;
-
             }
             catch
             {

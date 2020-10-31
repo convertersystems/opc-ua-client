@@ -803,7 +803,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                bodyEncoder.WriteMessage(request);
+                bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
                 if (RemoteMaxMessageSize > 0 && bodyStream.Length > RemoteMaxMessageSize)
                 {
@@ -979,7 +979,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                bodyEncoder.WriteMessage(request);
+                bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
                 if (RemoteMaxMessageSize > 0 && bodyStream.Length > RemoteMaxMessageSize)
                 {
@@ -1146,7 +1146,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var bodyEncoder = new BinaryEncoder(bodyStream, this);
             try
             {
-                bodyEncoder.WriteMessage(request);
+                bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
                 if (RemoteMaxMessageSize > 0 && bodyStream.Length > RemoteMaxMessageSize)
                 {
@@ -1611,7 +1611,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
                     while (!isFinal);
                     bodyStream.Seek(0L, SeekOrigin.Begin);
-                    var response = (IServiceResponse)bodyDecoder.ReadMessage();
+                    var response = (IServiceResponse)bodyDecoder.ReadResponse();
 
                     _logger?.LogTrace($"Received {response.GetType().Name}, Handle: {response.ResponseHeader!.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
 

@@ -1094,7 +1094,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             value.Encode(this);
         }
 
-        public void WriteMessage(IEncodable value)
+        /// <summary>
+        /// Writes an <see cref="IServiceRequest"/> to the stream.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.9/">OPC UA specification Part 6: Mappings, 5.2.9</seealso>
+        public void WriteRequest(IServiceRequest value)
         {
             try
             {
