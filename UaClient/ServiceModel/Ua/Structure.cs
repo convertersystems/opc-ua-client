@@ -9,12 +9,8 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Structure)]
     public abstract class Structure : IEncodable
     {
-        public virtual void Encode(IEncoder encoder)
-        {
-        }
+        public abstract void Encode(IEncoder encoder);
 
-        public virtual void Decode(IDecoder decoder)
-        {
-        }
+        public abstract void Decode(IDecoder decoder);
     }
 }

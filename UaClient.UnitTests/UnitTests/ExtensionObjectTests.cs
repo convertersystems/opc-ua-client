@@ -113,7 +113,18 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(ExpandedNodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary));
         }
 
-        private class DataTypeWithoutEncodingId : Structure { }
+        private class DataTypeWithoutEncodingId : Structure
+        {
+            public override void Decode(IDecoder decoder)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void Encode(IEncoder encoder)
+            {
+                throw new NotImplementedException();
+            }
+        }
 
         [Fact]
         public void CreateFromEncodableWithoutAnyTypeId()
