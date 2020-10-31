@@ -281,7 +281,7 @@ namespace Workstation.ServiceModel.Ua
 
             return await this.InnerChannel.ConfirmAsync(condition, comment);
         }
-        
+
         /// <summary>
         /// Gets the inner channel.
         /// </summary>
@@ -460,12 +460,12 @@ namespace Workstation.ServiceModel.Ua
                 if (item.TryGetValue(out var value))
                 {
                     StatusCode statusCode;
-                    var writeRequest = new WriteRequest
-                    {
-                        NodesToWrite = new[] { new WriteValue { NodeId = ExpandedNodeId.ToNodeId(item.NodeId, this.InnerChannel.NamespaceUris), AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value } }
-                    };
                     try
                     {
+                        var writeRequest = new WriteRequest
+                        {
+                            NodesToWrite = new[] { new WriteValue { NodeId = ExpandedNodeId.ToNodeId(item.NodeId, this.InnerChannel.NamespaceUris), AttributeId = item.AttributeId, IndexRange = item.IndexRange, Value = value } }
+                        };
                         var writeResponse = await this.InnerChannel.WriteAsync(writeRequest).ConfigureAwait(false);
                         statusCode = writeResponse?.Results?[0] ?? StatusCodes.BadDataEncodingInvalid;
                     }

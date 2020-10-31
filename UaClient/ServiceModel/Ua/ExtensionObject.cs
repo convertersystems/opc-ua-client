@@ -21,52 +21,57 @@ namespace Workstation.ServiceModel.Ua
         {
             if (body == null)
             {
-                this.BodyType = BodyType.None;
+                BodyType = BodyType.None;
                 return;
             }
 
-            this.Body = body;
-            this.BodyType = BodyType.ByteString;
-            this.TypeId = typeId;
+            Body = body;
+            BodyType = BodyType.ByteString;
+            TypeId = typeId;
         }
 
         public ExtensionObject(XElement? body, ExpandedNodeId? typeId)
         {
             if (body == null)
             {
-                this.BodyType = BodyType.None;
+                BodyType = BodyType.None;
                 return;
             }
 
-            this.Body = body;
-            this.BodyType = BodyType.XmlElement;
-            this.TypeId = typeId;
+            Body = body;
+            BodyType = BodyType.XmlElement;
+            TypeId = typeId;
         }
 
         public ExtensionObject(IEncodable? body, ExpandedNodeId? typeId)
         {
             if (body == null)
             {
-                this.BodyType = BodyType.None;
+                BodyType = BodyType.None;
                 return;
             }
 
-            this.Body = body;
-            this.BodyType = BodyType.Encodable;
-            this.TypeId = typeId;
+            Body = body;
+            BodyType = BodyType.Encodable;
+            TypeId = typeId;
         }
 
         public ExtensionObject(IEncodable? body)
         {
             if (body == null)
             {
-                this.BodyType = BodyType.None;
+                BodyType = BodyType.None;
                 return;
             }
 
-            this.Body = body;
-            this.BodyType = BodyType.Encodable;
-            this.TypeId = body.GetType().GetTypeInfo().GetCustomAttribute<BinaryEncodingIdAttribute>(false)?.NodeId ?? throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
+            Body = body;
+            BodyType = BodyType.Encodable;
+            if (!TypeLibrary.TryGetBinaryEncodingIdFromType(body.GetType(), out var binaryEncodingId))
+            {
+                throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
+            }
+            TypeId = binaryEncodingId;
+
         }
 
         public object? Body { get; }

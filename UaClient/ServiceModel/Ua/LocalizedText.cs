@@ -1,10 +1,14 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
+
 namespace Workstation.ServiceModel.Ua
 {
+
     [DataTypeId(DataTypeIds.LocalizedText)]
-    public sealed class LocalizedText
+    public sealed class LocalizedText : IEquatable<LocalizedText?>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="LocalizedText"/> class.
@@ -13,8 +17,8 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="locale">The locale.</param>
         public LocalizedText(string? text, string? locale = "")
         {
-            this.Locale = locale;
-            this.Text = text;
+            Locale = locale;
+            Text = text;
         }
 
         public string? Text { get; }
@@ -31,51 +35,39 @@ namespace Workstation.ServiceModel.Ua
             return a?.Text;
         }
 
-        public static bool operator ==(LocalizedText? a, LocalizedText? b)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
-            {
-                return false;
-            }
-
-            return (a.Text == b.Text) && (a.Locale == b.Locale);
+            return Equals(obj as LocalizedText);
         }
 
-        public static bool operator !=(LocalizedText? a, LocalizedText? b)
+        public bool Equals(LocalizedText? other)
         {
-            return !(a == b);
-        }
-
-        public override bool Equals(object? o)
-        {
-            if (o is LocalizedText)
-            {
-                return this == (LocalizedText)o;
-            }
-
-            return false;
-        }
-
-        public bool Equals(LocalizedText? that)
-        {
-            return this == that;
+            return other != null &&
+                   Text == other.Text &&
+                   Locale == other.Locale;
         }
 
         public override int GetHashCode()
         {
-            int result = this.Locale != null ? this.Locale.GetHashCode() : 0;
-            result = (397 * result) ^ (this.Text != null ? this.Text.GetHashCode() : 0);
-            return result;
+            int hashCode = 670029253;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Text);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Locale);
+            return hashCode;
+        }
+
+        public static bool operator ==(LocalizedText? left, LocalizedText? right)
+        {
+            return EqualityComparer<LocalizedText?>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(LocalizedText? left, LocalizedText? right)
+        {
+            return !(left == right);
         }
 
         public override string? ToString()
         {
-            return this.Text;
+            return Text;
         }
     }
 }

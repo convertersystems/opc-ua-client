@@ -19,15 +19,15 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const uint DefaultBufferSize = 64 * 1024;
         public const uint DefaultMaxMessageSize = 16 * 1024 * 1024;
         public const uint DefaultMaxChunkCount = 4 * 1024;
-        private const int MinBufferSize = 8 * 1024;
-        private const int ConnectTimeout = 5000;
-        private static readonly Task CompletedTask = Task.FromResult(true);
+        private const int _minBufferSize = 8 * 1024;
+        private const int _connectTimeout = 5000;
+        private static readonly Task _completedTask = Task.FromResult(true);
 
-        private readonly ILogger? logger;
-        private byte[]? sendBuffer;
-        private byte[]? receiveBuffer;
-        private Stream? stream;
-        private TcpClient? tcpClient;
+        private readonly ILogger? _logger;
+        private byte[]? _sendBuffer;
+        private byte[]? _receiveBuffer;
+        private Stream? _stream;
+        private TcpClient? _tcpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpTransportChannel"/> class.
@@ -41,12 +41,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             UaTcpTransportChannelOptions? options = null)
             : base(loggerFactory)
         {
-            this.RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
-            this.logger = loggerFactory?.CreateLogger<UaTcpTransportChannel>();
-            this.LocalReceiveBufferSize = options?.LocalReceiveBufferSize ?? DefaultBufferSize;
-            this.LocalSendBufferSize = options?.LocalSendBufferSize ?? DefaultBufferSize;
-            this.LocalMaxMessageSize = options?.LocalMaxMessageSize ?? DefaultMaxMessageSize;
-            this.LocalMaxChunkCount = options?.LocalMaxChunkCount ?? DefaultMaxChunkCount;
+            RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
+            _logger = loggerFactory?.CreateLogger<UaTcpTransportChannel>();
+            LocalReceiveBufferSize = options?.LocalReceiveBufferSize ?? DefaultBufferSize;
+            LocalSendBufferSize = options?.LocalSendBufferSize ?? DefaultBufferSize;
+            LocalMaxMessageSize = options?.LocalMaxMessageSize ?? DefaultMaxMessageSize;
+            LocalMaxChunkCount = options?.LocalMaxChunkCount ?? DefaultMaxChunkCount;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets the inner TCP socket.
         /// </summary>
-        protected virtual Socket? Socket => this.tcpClient?.Client;
+        protected virtual Socket? Socket => _tcpClient?.Client;
 
         /// <summary>
         /// Asynchronously sends a sequence of bytes to the remote endpoint.
@@ -109,8 +109,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A task.</returns>
         protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default)
         {
-            this.ThrowIfClosedOrNotOpening();
-            var stream = this.stream ?? throw new InvalidOperationException("The stream field is null!");
+            ThrowIfClosedOrNotOpening();
+            var stream = _stream ?? throw new InvalidOperationException("The stream field is null!");
             await stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
         }
 
@@ -124,8 +124,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A task.</returns>
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default)
         {
-            this.ThrowIfClosedOrNotOpening();
-            var stream = this.stream ?? throw new InvalidOperationException("The stream field is null!");
+            ThrowIfClosedOrNotOpening();
+            var stream = _stream ?? throw new InvalidOperationException("The stream field is null!");
             int initialOffset = offset;
             int maxCount = count;
             int num = 0;
@@ -184,33 +184,33 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected override async Task OnOpenAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            this.sendBuffer = new byte[MinBufferSize];
-            this.receiveBuffer = new byte[MinBufferSize];
+            _sendBuffer = new byte[_minBufferSize];
+            _receiveBuffer = new byte[_minBufferSize];
 
-            this.tcpClient = new TcpClient { NoDelay = true };
-            var uri = new UriBuilder(this.RemoteEndpoint.EndpointUrl!);
-            await this.tcpClient.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(ConnectTimeout).ConfigureAwait(false);
-            this.stream = this.tcpClient.GetStream();
+            _tcpClient = new TcpClient { NoDelay = true };
+            var uri = new UriBuilder(RemoteEndpoint.EndpointUrl!);
+            await _tcpClient.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(_connectTimeout).ConfigureAwait(false);
+            _stream = _tcpClient.GetStream();
 
             // send 'hello'.
             int count;
-            var encoder = new BinaryEncoder(new MemoryStream(this.sendBuffer, 0, MinBufferSize, true, false));
+            var encoder = new BinaryEncoder(new MemoryStream(_sendBuffer, 0, _minBufferSize, true, false));
             try
             {
                 encoder.WriteUInt32(null, UaTcpMessageTypes.HELF);
                 encoder.WriteUInt32(null, 0u);
                 encoder.WriteUInt32(null, ProtocolVersion);
-                encoder.WriteUInt32(null, this.LocalReceiveBufferSize);
-                encoder.WriteUInt32(null, this.LocalSendBufferSize);
-                encoder.WriteUInt32(null, this.LocalMaxMessageSize);
-                encoder.WriteUInt32(null, this.LocalMaxChunkCount);
+                encoder.WriteUInt32(null, LocalReceiveBufferSize);
+                encoder.WriteUInt32(null, LocalSendBufferSize);
+                encoder.WriteUInt32(null, LocalMaxMessageSize);
+                encoder.WriteUInt32(null, LocalMaxChunkCount);
                 encoder.WriteString(null, uri.ToString());
                 count = encoder.Position;
                 encoder.Position = 4;
                 encoder.WriteUInt32(null, (uint)count);
                 encoder.Position = count;
 
-                await this.SendAsync(this.sendBuffer, 0, count, token).ConfigureAwait(false);
+                await SendAsync(_sendBuffer, 0, count, token).ConfigureAwait(false);
             }
             finally
             {
@@ -218,14 +218,14 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             // receive response
-            count = await this.ReceiveAsync(this.receiveBuffer, 0, MinBufferSize, token).ConfigureAwait(false);
+            count = await ReceiveAsync(_receiveBuffer, 0, _minBufferSize, token).ConfigureAwait(false);
             if (count == 0)
             {
                 throw new ObjectDisposedException("socket");
             }
 
             // decode 'ack' or 'err'.
-            var decoder = new BinaryDecoder(new MemoryStream(this.receiveBuffer, 0, count, false, false));
+            var decoder = new BinaryDecoder(new MemoryStream(_receiveBuffer, 0, count, false, false));
             try
             {
                 var type = decoder.ReadUInt32(null);
@@ -238,10 +238,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                         throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
                     }
 
-                    this.RemoteSendBufferSize = decoder.ReadUInt32(null);
-                    this.RemoteReceiveBufferSize = decoder.ReadUInt32(null);
-                    this.RemoteMaxMessageSize = decoder.ReadUInt32(null);
-                    this.RemoteMaxChunkCount = decoder.ReadUInt32(null);
+                    RemoteSendBufferSize = decoder.ReadUInt32(null);
+                    RemoteReceiveBufferSize = decoder.ReadUInt32(null);
+                    RemoteMaxMessageSize = decoder.ReadUInt32(null);
+                    RemoteMaxChunkCount = decoder.ReadUInt32(null);
                     return;
                 }
                 else if (type == UaTcpMessageTypes.ERRF)
@@ -270,9 +270,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 #if NET45
             this.tcpClient?.Close();
 #else
-            this.tcpClient?.Dispose();
+            _tcpClient?.Dispose();
 #endif
-            return CompletedTask;
+            return _completedTask;
         }
 
         /// <inheritdoc/>
@@ -281,9 +281,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 #if NET45
             this.tcpClient?.Close();
 #else
-            this.tcpClient?.Dispose();
+            _tcpClient?.Dispose();
 #endif
-            return CompletedTask;
+            return _completedTask;
         }
     }
 }

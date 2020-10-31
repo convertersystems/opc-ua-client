@@ -8,17 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v1
-    - name: Setup .NET Core 2.2
+    - uses: actions/checkout@v2
+    - name: Setup dotnet
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '2.2.108'
-    - name: Setup .NET Core 3.0
+        dotnet-version: '2.2.103'
+    - name: Setup dotnet
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.0.100'
-    - name: Workaround see https://github.com/actions/setup-dotnet/issues/25#issuecomment-557570168
-      run: rsync -a ${DOTNET_ROOT/3.0.100/2.2.108}/* $DOTNET_ROOT/
+        dotnet-version: '3.1.x'
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Run unit tests

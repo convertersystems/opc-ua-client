@@ -329,7 +329,8 @@ namespace Workstation.UaClient.UnitTests
             new ExpandedNodeId(1, "http://some.more"),
             new ExpandedNodeId(new byte [] {1, 2}, "http://some.more"),
             new ExpandedNodeId(1),
-            new ExpandedNodeId(1, "")
+            new ExpandedNodeId(1, ""),
+            new ExpandedNodeId(1, "Foo")
         }
         .Select(o => new[] { o });
 
@@ -337,17 +338,25 @@ namespace Workstation.UaClient.UnitTests
         [Theory]
         public void ToNodeId(ExpandedNodeId exnodeId)
         {
-            var nodeId = ExpandedNodeId.ToNodeId(exnodeId, NamespaceUris);
-
-            nodeId.Identifier
-                .Should().Be(exnodeId.NodeId.Identifier);
-            nodeId.IdType
-                .Should().Be(exnodeId.NodeId.IdType);
-
-            if (!string.IsNullOrEmpty(exnodeId.NamespaceUri))
+            // The test data contains only namespace indeces
+            // that are zero, 2 or greater 3
+            switch (exnodeId.NamespaceUri)
             {
-                nodeId.NamespaceIndex
-                    .Should().Be(2);
+                case null:
+                case "":
+                    var x = ExpandedNodeId.ToNodeId(exnodeId, NamespaceUris);
+                    x.NamespaceIndex.Should().Be(0);
+                    x.Identifier.Should().Be(exnodeId.NodeId.Identifier);
+                    break;
+                case "http://some.more":
+                    var y = ExpandedNodeId.ToNodeId(exnodeId, NamespaceUris);
+                    y.NamespaceIndex.Should().Be(2);
+                    y.Identifier.Should().Be(exnodeId.NodeId.Identifier);
+                    break;
+                default:
+                    exnodeId.Invoking(n => ExpandedNodeId.ToNodeId(n, NamespaceUris))
+                        .Should().Throw<IndexOutOfRangeException>();
+                    break;
             }
         }
 

@@ -13,9 +13,9 @@ namespace Workstation.Collections
     /// <typeparam name="T">The type of the error object.</typeparam>
     public class ErrorsContainer<T>
     {
-        private static readonly T[] NoErrors = new T[0];
-        private readonly Action<string> raiseErrorsChanged;
-        private readonly Dictionary<string, List<T>> validationResults;
+        private static readonly T[] _noErrors = new T[0];
+        private readonly Action<string> _raiseErrorsChanged;
+        private readonly Dictionary<string, List<T>> _validationResults;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ErrorsContainer{T}"/> class.
@@ -30,8 +30,8 @@ namespace Workstation.Collections
                 throw new ArgumentNullException(nameof(raiseErrorsChanged));
             }
 
-            this.raiseErrorsChanged = raiseErrorsChanged;
-            this.validationResults = new Dictionary<string, List<T>>();
+            _raiseErrorsChanged = raiseErrorsChanged;
+            _validationResults = new Dictionary<string, List<T>>();
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Workstation.Collections
         {
             get
             {
-                return this.validationResults.Count != 0;
+                return _validationResults.Count != 0;
             }
         }
 
@@ -54,13 +54,13 @@ namespace Workstation.Collections
         {
             var localPropertyName = propertyName ?? string.Empty;
             List<T>? currentValidationResults = null;
-            if (this.validationResults.TryGetValue(localPropertyName, out currentValidationResults))
+            if (_validationResults.TryGetValue(localPropertyName, out currentValidationResults))
             {
                 return currentValidationResults;
             }
             else
             {
-                return NoErrors;
+                return _noErrors;
             }
         }
 
@@ -73,7 +73,7 @@ namespace Workstation.Collections
         /// </example>
         public void ClearErrors(string propertyName)
         {
-            this.SetErrors(propertyName, new List<T>());
+            SetErrors(propertyName, new List<T>());
         }
 
         /// <summary>
@@ -87,20 +87,20 @@ namespace Workstation.Collections
         public void SetErrors(string propertyName, IEnumerable<T>? newValidationResults)
         {
             var localPropertyName = propertyName ?? string.Empty;
-            var hasCurrentValidationResults = this.validationResults.ContainsKey(localPropertyName);
+            var hasCurrentValidationResults = _validationResults.ContainsKey(localPropertyName);
             var hasNewValidationResults = newValidationResults != null && newValidationResults.Count() > 0;
 
             if (hasCurrentValidationResults || hasNewValidationResults)
             {
                 if (hasNewValidationResults)
                 {
-                    this.validationResults[localPropertyName] = new List<T>(newValidationResults!);
-                    this.raiseErrorsChanged(localPropertyName);
+                    _validationResults[localPropertyName] = new List<T>(newValidationResults!);
+                    _raiseErrorsChanged(localPropertyName);
                 }
                 else
                 {
-                    this.validationResults.Remove(localPropertyName);
-                    this.raiseErrorsChanged(localPropertyName);
+                    _validationResults.Remove(localPropertyName);
+                    _raiseErrorsChanged(localPropertyName);
                 }
             }
         }

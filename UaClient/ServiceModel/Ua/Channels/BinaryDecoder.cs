@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Xml;
@@ -16,37 +18,39 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.1/">OPC UA specification Part 6: Mappings, 5.2.1</seealso>
     public sealed class BinaryDecoder : IDecoder, IDisposable
     {
-        private const long MinFileTime =  504911232000000000L;
-        private const long MaxFileTime = 3155378975990000000L;
-        private readonly Stream stream;
-        private readonly UaTcpSecureChannel? channel;
-        private readonly Encoding encoding;
-        private readonly BinaryReader reader;
+        private const long _minFileTime = 504911232000000000L;
+        private const long _maxFileTime = 3155378975990000000L;
+        private static readonly NodeId _readResponseNodeId = NodeId.Parse(ObjectIds.ReadResponse_Encoding_DefaultBinary);
+        private static readonly NodeId _publishResponseNodeId = NodeId.Parse(ObjectIds.PublishResponse_Encoding_DefaultBinary);
+        private readonly Stream _stream;
+        private readonly IEncodingContext _context;
+        private readonly Encoding _encoding;
+        private readonly BinaryReader _reader;
 
-        public BinaryDecoder(Stream stream, UaTcpSecureChannel? channel = null, bool keepStreamOpen = false)
+        public BinaryDecoder(Stream stream, IEncodingContext? context = null, bool keepStreamOpen = false)
         {
             if (stream == null)
             {
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            this.stream = stream;
-            this.channel = channel;
-            this.encoding = new UTF8Encoding(false, false);
-            this.reader = new BinaryReader(this.stream, this.encoding, keepStreamOpen);
+            _stream = stream;
+            _context = context ?? new DefaultEncodingContext();
+            _encoding = new UTF8Encoding(false, false);
+            _reader = new BinaryReader(_stream, _encoding, keepStreamOpen);
         }
 
         public int Position
         {
-            get { return (int)this.stream.Position; }
-            set { this.stream.Position = value; }
+            get { return (int)_stream.Position; }
+            set { _stream.Position = value; }
         }
 
         public void Dispose()
         {
-            if (this.reader != null)
+            if (_reader != null)
             {
-                this.reader.Dispose();
+                _reader.Dispose();
             }
         }
 
@@ -66,7 +70,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.1">OPC UA specification Part 6: Mappings, 5.2.2.1</seealso>
         public bool ReadBoolean(string? fieldName)
         {
-            return this.reader.ReadBoolean();
+            return _reader.ReadBoolean();
         }
 
         /// <summary>
@@ -77,7 +81,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public sbyte ReadSByte(string? fieldName)
         {
-            return this.reader.ReadSByte();
+            return _reader.ReadSByte();
         }
 
         /// <summary>
@@ -88,7 +92,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public byte ReadByte(string? fieldName)
         {
-            return this.reader.ReadByte();
+            return _reader.ReadByte();
         }
 
         /// <summary>
@@ -99,7 +103,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public short ReadInt16(string? fieldName)
         {
-            return this.reader.ReadInt16();
+            return _reader.ReadInt16();
         }
 
         /// <summary>
@@ -110,7 +114,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public ushort ReadUInt16(string? fieldName)
         {
-            return this.reader.ReadUInt16();
+            return _reader.ReadUInt16();
         }
 
         /// <summary>
@@ -121,7 +125,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public int ReadInt32(string? fieldName)
         {
-            return this.reader.ReadInt32();
+            return _reader.ReadInt32();
         }
 
         /// <summary>
@@ -132,7 +136,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public uint ReadUInt32(string? fieldName)
         {
-            return this.reader.ReadUInt32();
+            return _reader.ReadUInt32();
         }
 
         /// <summary>
@@ -143,7 +147,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public long ReadInt64(string? fieldName)
         {
-            return this.reader.ReadInt64();
+            return _reader.ReadInt64();
         }
 
         /// <summary>
@@ -154,7 +158,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public ulong ReadUInt64(string? fieldName)
         {
-            return this.reader.ReadUInt64();
+            return _reader.ReadUInt64();
         }
 
         /// <summary>
@@ -165,7 +169,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
         public float ReadFloat(string? fieldName)
         {
-            return this.reader.ReadSingle();
+            return _reader.ReadSingle();
         }
 
         /// <summary>
@@ -176,7 +180,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
         public double ReadDouble(string? fieldName)
         {
-            return this.reader.ReadDouble();
+            return _reader.ReadDouble();
         }
 
         /// <summary>
@@ -187,13 +191,13 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.4">OPC UA specification Part 6: Mappings, 5.2.2.4</seealso>
         public string? ReadString(string? fieldName)
         {
-            var array = this.ReadByteString(fieldName);
+            var array = ReadByteString(fieldName);
             if (array == null)
             {
                 return null;
             }
 
-            return this.encoding.GetString(array, 0, array.Length);
+            return _encoding.GetString(array, 0, array.Length);
         }
 
         /// <summary>
@@ -204,13 +208,13 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.5">OPC UA specification Part 6: Mappings, 5.2.2.5</seealso>
         public DateTime ReadDateTime(string? fieldName)
         {
-            long num = this.reader.ReadInt64();
+            long num = _reader.ReadInt64();
 
             if (num <= 0)
             {
                 return DateTime.MinValue;
             }
-            else if (num >= MaxFileTime - MinFileTime)
+            else if (num >= _maxFileTime - _minFileTime)
             {
                 return DateTime.MaxValue;
             }
@@ -226,7 +230,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.6">OPC UA specification Part 6: Mappings, 5.2.2.6</seealso>
         public Guid ReadGuid(string? fieldName)
         {
-            byte[] b = this.reader.ReadBytes(16);
+            byte[] b = _reader.ReadBytes(16);
             return new Guid(b);
         }
 
@@ -238,13 +242,13 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.7">OPC UA specification Part 6: Mappings, 5.2.2.7</seealso>
         public byte[]? ReadByteString(string? fieldName)
         {
-            int num = this.reader.ReadInt32();
+            int num = _reader.ReadInt32();
             if (num == -1)
             {
                 return null;
             }
 
-            return this.reader.ReadBytes(num);
+            return _reader.ReadBytes(num);
         }
 
         /// <summary>
@@ -255,7 +259,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.8">OPC UA specification Part 6: Mappings, 5.2.2.8</seealso>
         public XElement? ReadXElement(string? fieldName)
         {
-            var array = this.ReadByteString(fieldName);
+            var array = ReadByteString(fieldName);
             if (array == null || array.Length == 0)
             {
                 return null;
@@ -263,7 +267,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             try
             {
-                return XElement.Parse(this.encoding.GetString(array, 0, array.Length).TrimEnd('\0'));
+                return XElement.Parse(_encoding.GetString(array, 0, array.Length).TrimEnd('\0'));
             }
             catch (XmlException)
             {
@@ -280,23 +284,23 @@ namespace Workstation.ServiceModel.Ua.Channels
         public NodeId ReadNodeId(string? fieldName)
         {
             ushort ns = 0;
-            byte b = this.reader.ReadByte();
+            byte b = _reader.ReadByte();
             switch (b)
             {
                 case 0x00:
-                    return new NodeId(this.reader.ReadByte(), ns);
+                    return new NodeId(_reader.ReadByte(), ns);
 
                 case 0x01:
-                    ns = this.reader.ReadByte();
-                    return new NodeId(this.reader.ReadUInt16(), ns);
+                    ns = _reader.ReadByte();
+                    return new NodeId(_reader.ReadUInt16(), ns);
 
                 case 0x02:
-                    ns = this.reader.ReadUInt16();
-                    return new NodeId(this.reader.ReadUInt32(), ns);
+                    ns = _reader.ReadUInt16();
+                    return new NodeId(_reader.ReadUInt32(), ns);
 
                 case 0x03:
-                    ns = this.reader.ReadUInt16();
-                    var str = this.ReadString(null);
+                    ns = _reader.ReadUInt16();
+                    var str = ReadString(null);
                     if (str is null)
                     {
                         break;
@@ -305,12 +309,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                     return new NodeId(str, ns);
 
                 case 0x04:
-                    ns = this.reader.ReadUInt16();
-                    return new NodeId(this.ReadGuid(null), ns);
+                    ns = _reader.ReadUInt16();
+                    return new NodeId(ReadGuid(null), ns);
 
                 case 0x05:
-                    ns = this.reader.ReadUInt16();
-                    var bstr = this.ReadByteString(null);
+                    ns = _reader.ReadUInt16();
+                    var bstr = ReadByteString(null);
                     if (bstr is null)
                     {
                         break;
@@ -336,39 +340,39 @@ namespace Workstation.ServiceModel.Ua.Channels
             NodeId? nodeId = null;
             string? nsu = null;
             uint svr = 0;
-            byte b = this.reader.ReadByte();
+            byte b = _reader.ReadByte();
             switch (b & 0x0F)
             {
                 case 0x00:
-                    nodeId = new NodeId(this.reader.ReadByte(), ns);
+                    nodeId = new NodeId(_reader.ReadByte(), ns);
                     break;
 
                 case 0x01:
-                    ns = this.reader.ReadByte();
-                    nodeId = new NodeId(this.reader.ReadUInt16(), ns);
+                    ns = _reader.ReadByte();
+                    nodeId = new NodeId(_reader.ReadUInt16(), ns);
                     break;
 
                 case 0x02:
-                    ns = this.reader.ReadUInt16();
-                    nodeId = new NodeId(this.reader.ReadUInt32(), ns);
+                    ns = _reader.ReadUInt16();
+                    nodeId = new NodeId(_reader.ReadUInt32(), ns);
                     break;
 
                 case 0x03:
-                    ns = this.reader.ReadUInt16();
-                    if (this.ReadString(null) is { } str)
+                    ns = _reader.ReadUInt16();
+                    if (ReadString(null) is { } str)
                     {
                         nodeId = new NodeId(str, ns);
                     }
                     break;
 
                 case 0x04:
-                    ns = this.reader.ReadUInt16();
-                    nodeId = new NodeId(this.ReadGuid(null), ns);
+                    ns = _reader.ReadUInt16();
+                    nodeId = new NodeId(ReadGuid(null), ns);
                     break;
 
                 case 0x05:
-                    ns = this.reader.ReadUInt16();
-                    if (this.ReadByteString(null) is { } bstr)
+                    ns = _reader.ReadUInt16();
+                    if (ReadByteString(null) is { } bstr)
                     {
                         nodeId = new NodeId(bstr, ns);
                     }
@@ -385,12 +389,12 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if ((b & 0x80) != 0)
             {
-                nsu = this.ReadString(null);
+                nsu = ReadString(null);
             }
 
             if ((b & 0x40) != 0)
             {
-                svr = this.ReadUInt32(null);
+                svr = ReadUInt32(null);
             }
 
             return new ExpandedNodeId(nodeId, nsu, svr);
@@ -404,7 +408,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.11">OPC UA specification Part 6: Mappings, 5.2.2.11</seealso>
         public StatusCode ReadStatusCode(string? fieldName)
         {
-            return this.ReadUInt32(fieldName);
+            return ReadUInt32(fieldName);
         }
 
         /// <summary>
@@ -422,40 +426,40 @@ namespace Workstation.ServiceModel.Ua.Channels
             string? additionalInfo = null;
             StatusCode innerStatusCode = default(StatusCode);
             DiagnosticInfo? innerDiagnosticInfo = default(DiagnosticInfo);
-            byte b = this.reader.ReadByte();
+            byte b = _reader.ReadByte();
             if ((b & 1) != 0)
             {
-                symbolicId = this.ReadInt32(null);
+                symbolicId = ReadInt32(null);
             }
 
             if ((b & 2) != 0)
             {
-                namespaceUri = this.ReadInt32(null);
+                namespaceUri = ReadInt32(null);
             }
 
             if ((b & 8) != 0)
             {
-                locale = this.ReadInt32(null);
+                locale = ReadInt32(null);
             }
 
             if ((b & 4) != 0)
             {
-                localizedText = this.ReadInt32(null);
+                localizedText = ReadInt32(null);
             }
 
             if ((b & 16) != 0)
             {
-                additionalInfo = this.ReadString(null);
+                additionalInfo = ReadString(null);
             }
 
             if ((b & 32) != 0)
             {
-                innerStatusCode = this.ReadStatusCode(null);
+                innerStatusCode = ReadStatusCode(null);
             }
 
             if ((b & 64) != 0)
             {
-                innerDiagnosticInfo = this.ReadDiagnosticInfo(null);
+                innerDiagnosticInfo = ReadDiagnosticInfo(null);
             }
 
             return new DiagnosticInfo(namespaceUri, symbolicId, locale, localizedText, additionalInfo, innerStatusCode, innerDiagnosticInfo);
@@ -469,8 +473,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.13">OPC UA specification Part 6: Mappings, 5.2.2.13</seealso>
         public QualifiedName ReadQualifiedName(string? fieldName)
         {
-            ushort ns = this.ReadUInt16(null);
-            string? name = this.ReadString(null);
+            ushort ns = ReadUInt16(null);
+            string? name = ReadString(null);
             return new QualifiedName(name, ns);
         }
 
@@ -484,15 +488,15 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             string? text = null;
             string? locale = null;
-            byte b = this.reader.ReadByte();
+            byte b = _reader.ReadByte();
             if ((b & 1) != 0)
             {
-                locale = this.ReadString(null);
+                locale = ReadString(null);
             }
 
             if ((b & 2) != 0)
             {
-                text = this.ReadString(null);
+                text = ReadString(null);
             }
 
             return new LocalizedText(text, locale);
@@ -506,7 +510,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.16">OPC UA specification Part 6: Mappings, 5.2.2.16</seealso>
         public Variant ReadVariant(string? fieldName)
         {
-            byte b = this.reader.ReadByte();
+            byte b = _reader.ReadByte();
             var type = (VariantType)(b & 0x3F);
 
             if ((b & 0x80) == 0)
@@ -517,70 +521,70 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return Variant.Null;
 
                     case VariantType.Boolean:
-                        return new Variant(this.ReadBoolean(null));
+                        return new Variant(ReadBoolean(null));
 
                     case VariantType.SByte:
-                        return new Variant(this.ReadSByte(null));
+                        return new Variant(ReadSByte(null));
 
                     case VariantType.Byte:
-                        return new Variant(this.ReadByte(null));
+                        return new Variant(ReadByte(null));
 
                     case VariantType.Int16:
-                        return new Variant(this.ReadInt16(null));
+                        return new Variant(ReadInt16(null));
 
                     case VariantType.UInt16:
-                        return new Variant(this.ReadUInt16(null));
+                        return new Variant(ReadUInt16(null));
 
                     case VariantType.Int32:
-                        return new Variant(this.ReadInt32(null));
+                        return new Variant(ReadInt32(null));
 
                     case VariantType.UInt32:
-                        return new Variant(this.ReadUInt32(null));
+                        return new Variant(ReadUInt32(null));
 
                     case VariantType.Int64:
-                        return new Variant(this.ReadInt64(null));
+                        return new Variant(ReadInt64(null));
 
                     case VariantType.UInt64:
-                        return new Variant(this.ReadUInt64(null));
+                        return new Variant(ReadUInt64(null));
 
                     case VariantType.Float:
-                        return new Variant(this.ReadFloat(null));
+                        return new Variant(ReadFloat(null));
 
                     case VariantType.Double:
-                        return new Variant(this.ReadDouble(null));
+                        return new Variant(ReadDouble(null));
 
                     case VariantType.String:
-                        return new Variant(this.ReadString(null));
+                        return new Variant(ReadString(null));
 
                     case VariantType.DateTime:
-                        return new Variant(this.ReadDateTime(null));
+                        return new Variant(ReadDateTime(null));
 
                     case VariantType.Guid:
-                        return new Variant(this.ReadGuid(null));
+                        return new Variant(ReadGuid(null));
 
                     case VariantType.ByteString:
-                        return new Variant(this.ReadByteString(null));
+                        return new Variant(ReadByteString(null));
 
                     case VariantType.XmlElement:
-                        return new Variant(this.ReadXElement(null));
+                        return new Variant(ReadXElement(null));
 
                     case VariantType.NodeId:
-                        return new Variant(this.ReadNodeId(null));
+                        return new Variant(ReadNodeId(null));
 
                     case VariantType.ExpandedNodeId:
-                        return new Variant(this.ReadExpandedNodeId(null));
+                        return new Variant(ReadExpandedNodeId(null));
 
                     case VariantType.StatusCode:
-                        return new Variant(this.ReadStatusCode(null));
+                        return new Variant(ReadStatusCode(null));
 
                     case VariantType.QualifiedName:
-                        return new Variant(this.ReadQualifiedName(null));
+                        return new Variant(ReadQualifiedName(null));
 
                     case VariantType.LocalizedText:
-                        return new Variant(this.ReadLocalizedText(null));
+                        return new Variant(ReadLocalizedText(null));
 
                     case VariantType.ExtensionObject:
-                        return new Variant(this.ReadExtensionObject(null));
+                        return new Variant(ReadExtensionObject(null));
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
@@ -595,73 +599,73 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return Variant.Null;
 
                     case VariantType.Boolean:
-                        return new Variant(this.ReadBooleanArray(null));
+                        return new Variant(ReadBooleanArray(null));
 
                     case VariantType.SByte:
-                        return new Variant(this.ReadSByteArray(null));
+                        return new Variant(ReadSByteArray(null));
 
                     case VariantType.Byte:
-                        return new Variant(this.ReadByteArray(null));
+                        return new Variant(ReadByteArray(null));
 
                     case VariantType.Int16:
-                        return new Variant(this.ReadInt16Array(null));
+                        return new Variant(ReadInt16Array(null));
 
                     case VariantType.UInt16:
-                        return new Variant(this.ReadUInt16Array(null));
+                        return new Variant(ReadUInt16Array(null));
 
                     case VariantType.Int32:
-                        return new Variant(this.ReadInt32Array(null));
+                        return new Variant(ReadInt32Array(null));
 
                     case VariantType.UInt32:
-                        return new Variant(this.ReadUInt32Array(null));
+                        return new Variant(ReadUInt32Array(null));
 
                     case VariantType.Int64:
-                        return new Variant(this.ReadInt64Array(null));
+                        return new Variant(ReadInt64Array(null));
 
                     case VariantType.UInt64:
-                        return new Variant(this.ReadUInt64Array(null));
+                        return new Variant(ReadUInt64Array(null));
 
                     case VariantType.Float:
-                        return new Variant(this.ReadFloatArray(null));
+                        return new Variant(ReadFloatArray(null));
 
                     case VariantType.Double:
-                        return new Variant(this.ReadDoubleArray(null));
+                        return new Variant(ReadDoubleArray(null));
 
                     case VariantType.String:
-                        return new Variant(this.ReadStringArray(null));
+                        return new Variant(ReadStringArray(null));
 
                     case VariantType.DateTime:
-                        return new Variant(this.ReadDateTimeArray(null));
+                        return new Variant(ReadDateTimeArray(null));
 
                     case VariantType.Guid:
-                        return new Variant(this.ReadGuidArray(null));
+                        return new Variant(ReadGuidArray(null));
 
                     case VariantType.ByteString:
-                        return new Variant(this.ReadByteStringArray(null));
+                        return new Variant(ReadByteStringArray(null));
 
                     case VariantType.XmlElement:
-                        return new Variant(this.ReadXElementArray(null));
+                        return new Variant(ReadXElementArray(null));
 
                     case VariantType.NodeId:
-                        return new Variant(this.ReadNodeIdArray(null));
+                        return new Variant(ReadNodeIdArray(null));
 
                     case VariantType.ExpandedNodeId:
-                        return new Variant(this.ReadExpandedNodeIdArray(null));
+                        return new Variant(ReadExpandedNodeIdArray(null));
 
                     case VariantType.StatusCode:
-                        return new Variant(this.ReadStatusCodeArray(null));
+                        return new Variant(ReadStatusCodeArray(null));
 
                     case VariantType.QualifiedName:
-                        return new Variant(this.ReadQualifiedNameArray(null));
+                        return new Variant(ReadQualifiedNameArray(null));
 
                     case VariantType.LocalizedText:
-                        return new Variant(this.ReadLocalizedTextArray(null));
+                        return new Variant(ReadLocalizedTextArray(null));
 
                     case VariantType.ExtensionObject:
-                        return new Variant(this.ReadExtensionObjectArray(null));
+                        return new Variant(ReadExtensionObjectArray(null));
 
                     case VariantType.Variant:
-                        return new Variant(this.ReadVariantArray(null));
+                        return new Variant(ReadVariantArray(null));
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
@@ -675,73 +679,73 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return Variant.Null;
 
                     case VariantType.Boolean:
-                        return new Variant(this.BuildArray(this.ReadBooleanArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadBooleanArray(null), ReadInt32Array(null)));
 
                     case VariantType.SByte:
-                        return new Variant(this.BuildArray(this.ReadSByteArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadSByteArray(null), ReadInt32Array(null)));
 
                     case VariantType.Byte:
-                        return new Variant(this.BuildArray(this.ReadByteArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadByteArray(null), ReadInt32Array(null)));
 
                     case VariantType.Int16:
-                        return new Variant(this.BuildArray(this.ReadInt16Array(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadInt16Array(null), ReadInt32Array(null)));
 
                     case VariantType.UInt16:
-                        return new Variant(this.BuildArray(this.ReadUInt16Array(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadUInt16Array(null), ReadInt32Array(null)));
 
                     case VariantType.Int32:
-                        return new Variant(this.BuildArray(this.ReadInt32Array(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadInt32Array(null), ReadInt32Array(null)));
 
                     case VariantType.UInt32:
-                        return new Variant(this.BuildArray(this.ReadUInt32Array(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadUInt32Array(null), ReadInt32Array(null)));
 
                     case VariantType.Int64:
-                        return new Variant(this.BuildArray(this.ReadInt64Array(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadInt64Array(null), ReadInt32Array(null)));
 
                     case VariantType.UInt64:
-                        return new Variant(this.BuildArray(this.ReadUInt64Array(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadUInt64Array(null), ReadInt32Array(null)));
 
                     case VariantType.Float:
-                        return new Variant(this.BuildArray(this.ReadFloatArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadFloatArray(null), ReadInt32Array(null)));
 
                     case VariantType.Double:
-                        return new Variant(this.BuildArray(this.ReadDoubleArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadDoubleArray(null), ReadInt32Array(null)));
 
                     case VariantType.String:
-                        return new Variant(this.BuildArray(this.ReadStringArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadStringArray(null), ReadInt32Array(null)));
 
                     case VariantType.DateTime:
-                        return new Variant(this.BuildArray(this.ReadDateTimeArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadDateTimeArray(null), ReadInt32Array(null)));
 
                     case VariantType.Guid:
-                        return new Variant(this.BuildArray(this.ReadGuidArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadGuidArray(null), ReadInt32Array(null)));
 
                     case VariantType.ByteString:
-                        return new Variant(this.BuildArray(this.ReadByteStringArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadByteStringArray(null), ReadInt32Array(null)));
 
                     case VariantType.XmlElement:
-                        return new Variant(this.BuildArray(this.ReadXElementArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadXElementArray(null), ReadInt32Array(null)));
 
                     case VariantType.NodeId:
-                        return new Variant(this.BuildArray(this.ReadNodeIdArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadNodeIdArray(null), ReadInt32Array(null)));
 
                     case VariantType.ExpandedNodeId:
-                        return new Variant(this.BuildArray(this.ReadExpandedNodeIdArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadExpandedNodeIdArray(null), ReadInt32Array(null)));
 
                     case VariantType.StatusCode:
-                        return new Variant(this.BuildArray(this.ReadStatusCodeArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadStatusCodeArray(null), ReadInt32Array(null)));
 
                     case VariantType.QualifiedName:
-                        return new Variant(this.BuildArray(this.ReadQualifiedNameArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadQualifiedNameArray(null), ReadInt32Array(null)));
 
                     case VariantType.LocalizedText:
-                        return new Variant(this.BuildArray(this.ReadLocalizedTextArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadLocalizedTextArray(null), ReadInt32Array(null)));
 
                     case VariantType.ExtensionObject:
-                        return new Variant(this.BuildArray(this.ReadExtensionObjectArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadExtensionObjectArray(null), ReadInt32Array(null)));
 
                     case VariantType.Variant:
-                        return new Variant(this.BuildArray(this.ReadVariantArray(null), this.ReadInt32Array(null)));
+                        return new Variant(BuildArray(ReadVariantArray(null), ReadInt32Array(null)));
 
                     default:
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
@@ -763,35 +767,35 @@ namespace Workstation.ServiceModel.Ua.Channels
             ushort sourcePicoseconds = 0;
             DateTime serverTimestamp = DateTime.MinValue;
             ushort serverPicoseconds = 0;
-            byte b = this.reader.ReadByte();
+            byte b = _reader.ReadByte();
             if ((b & 1) != 0)
             {
-                variant = this.ReadVariant(null);
+                variant = ReadVariant(null);
             }
 
             if ((b & 2) != 0)
             {
-                statusCode = this.ReadStatusCode(null);
+                statusCode = ReadStatusCode(null);
             }
 
             if ((b & 4) != 0)
             {
-                sourceTimestamp = this.ReadDateTime(null);
+                sourceTimestamp = ReadDateTime(null);
             }
 
             if ((b & 16) != 0)
             {
-                sourcePicoseconds = this.ReadUInt16(null);
+                sourcePicoseconds = ReadUInt16(null);
             }
 
             if ((b & 8) != 0)
             {
-                serverTimestamp = this.ReadDateTime(null);
+                serverTimestamp = ReadDateTime(null);
             }
 
             if ((b & 32) != 0)
             {
-                serverPicoseconds = this.ReadUInt16(null);
+                serverPicoseconds = ReadUInt16(null);
             }
 
             return new DataValue(variant, statusCode, sourceTimestamp, sourcePicoseconds, serverTimestamp, serverPicoseconds);
@@ -805,30 +809,38 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
         public ExtensionObject? ReadExtensionObject(string? fieldName)
         {
-            NodeId nodeId = this.ReadNodeId(null);
-            byte b = this.reader.ReadByte();
-            if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
+            try
             {
-                ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
-
-                if (this.channel != null && this.channel.TryGetTypeFromEncodingId(nodeId, out var type))
+                NodeId nodeId = ReadNodeId(null);
+                byte b = _reader.ReadByte();
+                if (b == (byte)BodyType.ByteString) // BodyType Encodable is encoded as ByteString.
                 {
-                    var len = this.ReadInt32(null);
-                    var encodable = (IEncodable)Activator.CreateInstance(type)!;
-                    encodable.Decode(this);
-                    return new ExtensionObject(encodable, binaryEncodingId);
+                    ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
+
+                    if (TypeLibrary.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out var type))
+                    {
+                        _ = ReadInt32(null);
+                        var encodable = (IEncodable)Activator.CreateInstance(type)!;
+                        encodable.Decode(this);
+                        return new ExtensionObject(encodable, binaryEncodingId);
+                    }
+
+                    return new ExtensionObject(ReadByteString(null), binaryEncodingId);
                 }
 
-                return new ExtensionObject(this.ReadByteString(null), binaryEncodingId);
-            }
+                if (b == (byte)BodyType.XmlElement)
+                {
+                    ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
+                    return new ExtensionObject(ReadXElement(null), xmlEncodingId);
+                }
 
-            if (b == (byte)BodyType.XmlElement)
+                return null;
+
+            }
+            catch
             {
-                ExpandedNodeId xmlEncodingId = NodeId.ToExpandedNodeId(nodeId, this.channel?.NamespaceUris);
-                return new ExtensionObject(this.ReadXElement(null), xmlEncodingId);
+                throw new ServiceResultException(StatusCodes.BadDecodingError);
             }
-
-            return null;
         }
 
         /// <summary>
@@ -840,24 +852,34 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T? ReadExtensionObject<T>(string? fieldName)
             where T : class, IEncodable
         {
-            NodeId nodeId = this.ReadNodeId(null);
-            byte b = this.reader.ReadByte();
-            if (b == (byte)BodyType.ByteString)
+            try
             {
-                if (this.channel == null || !this.channel.TryGetTypeFromEncodingId(nodeId, out var type))
+                NodeId nodeId = ReadNodeId(null);
+                byte b = _reader.ReadByte();
+                if (b == (byte)BodyType.ByteString)
                 {
-                    throw new ServiceResultException(StatusCodes.BadDecodingError);
+                    ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
+
+                    if (!TypeLibrary.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out var type))
+                    {
+                        throw new ServiceResultException(StatusCodes.BadDecodingError);
+                    }
+
+                    _ = ReadInt32(null);
+                    var encodable = (IEncodable)Activator.CreateInstance(type)!;
+                    encodable.Decode(this);
+                    return (T)encodable;
                 }
 
-                var len = this.ReadInt32(null);
-                var encodable = (IEncodable)Activator.CreateInstance(type)!;
-                encodable.Decode(this);
-                return (T)encodable;
+                // TODO: else if (b = 2) use XmlDecoder
+
+                return default(T);
+
             }
-
-            // TODO: else if (b = 2) use XmlDecoder
-
-            return default(T);
+            catch
+            {
+                throw new ServiceResultException(StatusCodes.BadDecodingError);
+            }
         }
 
         /// <summary>
@@ -875,6 +897,44 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <summary>
+        /// Reads a <see cref="IServiceResponse"/> from the stream.
+        /// </summary>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.9/">OPC UA specification Part 6: Mappings, 5.2.9</seealso>
+        public IServiceResponse ReadResponse()
+        {
+            try
+            {
+                IServiceResponse value;
+                NodeId nodeId = ReadNodeId(null);
+                // fast path
+                if (nodeId == _publishResponseNodeId)
+                {
+                    value = new PublishResponse();
+                }
+                else if (nodeId == _readResponseNodeId)
+                {
+                    value = new ReadResponse();
+                }
+                else
+                {
+                    if (!TypeLibrary.TryGetTypeFromBinaryEncodingId(NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris), out var type))
+                    {
+                        throw new ServiceResultException(StatusCodes.BadEncodingError);
+                    }
+                    value = (IServiceResponse)Activator.CreateInstance(type)!;
+                }
+                value.Decode(this);
+                return value;
+            }
+            catch
+            {
+                throw new ServiceResultException(StatusCodes.BadEncodingError);
+            }        
+        }
+
+
+        /// <summary>
         /// Reads an enumeration value from the stream.
         /// </summary>
         /// <param name="fieldName">The field name.</param>
@@ -883,7 +943,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T ReadEnumeration<T>(string? fieldName)
             where T : struct, IConvertible
         {
-            return (T)Enum.ToObject(typeof(T), this.ReadInt32(null));
+            return (T)Enum.ToObject(typeof(T), ReadInt32(null));
         }
 
         /// <summary>
@@ -895,7 +955,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public bool[]? ReadBooleanArray(string? fieldNames)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -904,7 +964,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new bool[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadBoolean(null);
+                list[i] = ReadBoolean(null);
             }
 
             return list;
@@ -919,7 +979,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public sbyte[]? ReadSByteArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -928,7 +988,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new sbyte[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadSByte(null);
+                list[i] = ReadSByte(null);
             }
 
             return list;
@@ -943,7 +1003,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public byte[]? ReadByteArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -952,7 +1012,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new byte[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadByte(null);
+                list[i] = ReadByte(null);
             }
 
             return list;
@@ -967,7 +1027,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public short[]? ReadInt16Array(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -976,7 +1036,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new short[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadInt16(null);
+                list[i] = ReadInt16(null);
             }
 
             return list;
@@ -991,7 +1051,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ushort[]? ReadUInt16Array(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1000,7 +1060,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ushort[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadUInt16(null);
+                list[i] = ReadUInt16(null);
             }
 
             return list;
@@ -1015,7 +1075,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public int[]? ReadInt32Array(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1024,7 +1084,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new int[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadInt32(null);
+                list[i] = ReadInt32(null);
             }
 
             return list;
@@ -1039,7 +1099,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public uint[]? ReadUInt32Array(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1048,7 +1108,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new uint[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadUInt32(null);
+                list[i] = ReadUInt32(null);
             }
 
             return list;
@@ -1063,7 +1123,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public long[]? ReadInt64Array(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1072,7 +1132,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new long[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadInt64(null);
+                list[i] = ReadInt64(null);
             }
 
             return list;
@@ -1087,7 +1147,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ulong[]? ReadUInt64Array(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1096,7 +1156,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ulong[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadUInt64(null);
+                list[i] = ReadUInt64(null);
             }
 
             return list;
@@ -1111,7 +1171,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public float[]? ReadFloatArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1120,7 +1180,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new float[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadFloat(null);
+                list[i] = ReadFloat(null);
             }
 
             return list;
@@ -1135,7 +1195,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public double[]? ReadDoubleArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1144,7 +1204,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new double[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadDouble(null);
+                list[i] = ReadDouble(null);
             }
 
             return list;
@@ -1159,7 +1219,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public string?[]? ReadStringArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1168,7 +1228,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new string?[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadString(null);
+                list[i] = ReadString(null);
             }
 
             return list;
@@ -1183,7 +1243,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public DateTime[]? ReadDateTimeArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1192,7 +1252,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new DateTime[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadDateTime(null);
+                list[i] = ReadDateTime(null);
             }
 
             return list;
@@ -1207,7 +1267,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public Guid[]? ReadGuidArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1216,7 +1276,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new Guid[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadGuid(null);
+                list[i] = ReadGuid(null);
             }
 
             return list;
@@ -1231,7 +1291,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public byte[]?[]? ReadByteStringArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1240,7 +1300,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             byte[]?[] list = new byte[num][];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadByteString(null);
+                list[i] = ReadByteString(null);
             }
 
             return list;
@@ -1255,7 +1315,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public XElement?[]? ReadXElementArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1264,7 +1324,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new XElement?[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadXElement(null);
+                list[i] = ReadXElement(null);
             }
 
             return list;
@@ -1279,7 +1339,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public NodeId[]? ReadNodeIdArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1288,7 +1348,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new NodeId[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadNodeId(null);
+                list[i] = ReadNodeId(null);
             }
 
             return list;
@@ -1303,7 +1363,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ExpandedNodeId[]? ReadExpandedNodeIdArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1312,7 +1372,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ExpandedNodeId[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadExpandedNodeId(null);
+                list[i] = ReadExpandedNodeId(null);
             }
 
             return list;
@@ -1327,7 +1387,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public StatusCode[]? ReadStatusCodeArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1336,7 +1396,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new StatusCode[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadStatusCode(null);
+                list[i] = ReadStatusCode(null);
             }
 
             return list;
@@ -1351,7 +1411,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public DiagnosticInfo[]? ReadDiagnosticInfoArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1360,7 +1420,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new DiagnosticInfo[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadDiagnosticInfo(null);
+                list[i] = ReadDiagnosticInfo(null);
             }
 
             return list;
@@ -1375,7 +1435,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public QualifiedName[]? ReadQualifiedNameArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1384,7 +1444,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new QualifiedName[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadQualifiedName(null);
+                list[i] = ReadQualifiedName(null);
             }
 
             return list;
@@ -1399,7 +1459,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public LocalizedText[]? ReadLocalizedTextArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1408,7 +1468,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new LocalizedText[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadLocalizedText(null);
+                list[i] = ReadLocalizedText(null);
             }
 
             return list;
@@ -1423,7 +1483,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public Variant[]? ReadVariantArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1432,7 +1492,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new Variant[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadVariant(null);
+                list[i] = ReadVariant(null);
             }
 
             return list;
@@ -1447,7 +1507,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public DataValue[]? ReadDataValueArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1456,7 +1516,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new DataValue[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadDataValue(null);
+                list[i] = ReadDataValue(null);
             }
 
             return list;
@@ -1471,7 +1531,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ExtensionObject?[]? ReadExtensionObjectArray(string? fieldName)
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1480,7 +1540,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new ExtensionObject?[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadExtensionObject(null);
+                list[i] = ReadExtensionObject(null);
             }
 
             return list;
@@ -1496,7 +1556,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T?[]? ReadExtensionObjectArray<T>(string? fieldName)
             where T : class, IEncodable
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1505,7 +1565,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new T?[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadExtensionObject<T>(null);
+                list[i] = ReadExtensionObject<T>(null);
             }
 
             return list;
@@ -1521,7 +1581,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T[]? ReadEncodableArray<T>(string? fieldName)
             where T : class, IEncodable
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1530,7 +1590,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new T[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadEncodable<T>(null);
+                list[i] = ReadEncodable<T>(null);
             }
 
             return list;
@@ -1546,7 +1606,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public T[]? ReadEnumerationArray<T>(string? fieldName)
             where T : struct, IConvertible
         {
-            int num = this.ReadArrayLength();
+            int num = ReadArrayLength();
             if (num == -1)
             {
                 return null;
@@ -1555,7 +1615,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var list = new T[num];
             for (int i = 0; i < num; i++)
             {
-                list[i] = this.ReadEnumeration<T>(null);
+                list[i] = ReadEnumeration<T>(null);
             }
 
             return list;
@@ -1563,12 +1623,12 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public int Read(byte[] buffer, int offset, int count)
         {
-            return this.reader.Read(buffer, offset, count);
+            return _reader.Read(buffer, offset, count);
         }
 
         private int ReadArrayLength()
         {
-            int num = this.reader.ReadInt32();
+            int num = _reader.ReadInt32();
             return num;
         }
 

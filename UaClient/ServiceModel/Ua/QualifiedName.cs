@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 
 namespace Workstation.ServiceModel.Ua
 {
+
     [DataTypeId(DataTypeIds.QualifiedName)]
-    public sealed class QualifiedName
+    public sealed class QualifiedName : IEquatable<QualifiedName?>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="QualifiedName"/> class.
@@ -15,33 +17,13 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="namespaceIndex">index that identifies the namespace that qualifies the name.</param>
         public QualifiedName(string? name, ushort namespaceIndex = 0)
         {
-            this.Name = name;
-            this.NamespaceIndex = namespaceIndex;
+            Name = name;
+            NamespaceIndex = namespaceIndex;
         }
 
         public string? Name { get; private set; }
 
         public ushort NamespaceIndex { get; private set; }
-
-        public static bool operator ==(QualifiedName? a, QualifiedName? b)
-        {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
-            {
-                return false;
-            }
-
-            return (a.Name == b.Name) && (a.NamespaceIndex == b.NamespaceIndex);
-        }
-
-        public static bool operator !=(QualifiedName? a, QualifiedName? b)
-        {
-            return !(a == b);
-        }
 
         public static bool TryParse(string s, out QualifiedName qname)
         {
@@ -77,31 +59,39 @@ namespace Workstation.ServiceModel.Ua
             return value;
         }
 
-        public override bool Equals(object? o)
+        public override string ToString()
         {
-            if (o is QualifiedName)
-            {
-                return this == (QualifiedName)o;
-            }
-
-            return false;
+            return $"{NamespaceIndex}:{Name}";
         }
 
-        public bool Equals(QualifiedName? that)
+        public override bool Equals(object? obj)
         {
-            return this == that;
+            return Equals(obj as QualifiedName);
+        }
+
+        public bool Equals(QualifiedName? other)
+        {
+            return other != null &&
+                   Name == other.Name &&
+                   NamespaceIndex == other.NamespaceIndex;
         }
 
         public override int GetHashCode()
         {
-            int result = this.NamespaceIndex.GetHashCode();
-            result = (397 * result) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
-            return result;
+            int hashCode = 978021522;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Name);
+            hashCode = hashCode * -1521134295 + NamespaceIndex.GetHashCode();
+            return hashCode;
         }
 
-        public override string ToString()
+        public static bool operator ==(QualifiedName? left, QualifiedName? right)
         {
-            return $"{this.NamespaceIndex}:{this.Name}";
+            return EqualityComparer<QualifiedName?>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(QualifiedName? left, QualifiedName? right)
+        {
+            return !(left == right);
         }
     }
 }

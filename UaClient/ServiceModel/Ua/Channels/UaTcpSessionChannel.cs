@@ -39,22 +39,22 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// </summary>
         public const uint DefaultLifetimeCount = DefaultKeepaliveCount* 3;
 
-        private const string RsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
-        private const string RsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-        private const string RsaPssSha256Signature = @"http://opcfoundation.org/UA/security/rsa-pss-sha2-256";
-        private const string RsaV15KeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-1_5";
-        private const string RsaOaepKeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-oaep";
-        private const string RsaOaepSha256KeyWrap = @"http://opcfoundation.org/UA/security/rsa-oaep-sha2-256";
-        private const int NonceLength = 32;
-        private const uint PublishTimeoutHint = 10 * 60 * 1000; // 10 minutes
+        private const string _rsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
+        private const string _rsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
+        private const string _rsaPssSha256Signature = @"http://opcfoundation.org/UA/security/rsa-pss-sha2-256";
+        private const string _rsaV15KeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-1_5";
+        private const string _rsaOaepKeyWrap = @"http://www.w3.org/2001/04/xmlenc#rsa-oaep";
+        private const string _rsaOaepSha256KeyWrap = @"http://opcfoundation.org/UA/security/rsa-oaep-sha2-256";
+        private const int _nonceLength = 32;
+        private const uint _publishTimeoutHint = 10 * 60 * 1000; // 10 minutes
 
-        private readonly ILoggerFactory? loggerFactory;
-        private readonly ILogger? logger;
-        private readonly BroadcastBlock<PublishResponse> publishResponses;
-        private readonly ActionBlock<PublishResponse> actionBlock;
-        private readonly UaTcpSessionChannelOptions options;
-        private readonly CancellationTokenSource stateMachineCts;
-        private Task? stateMachineTask;
+        private readonly ILoggerFactory? _loggerFactory;
+        private readonly ILogger? _logger;
+        private readonly BroadcastBlock<PublishResponse> _publishResponses;
+        private readonly ActionBlock<PublishResponse> _actionBlock;
+        private readonly UaTcpSessionChannelOptions _options;
+        private readonly CancellationTokenSource _stateMachineCts;
+        private Task? _stateMachineTask;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
@@ -65,24 +65,22 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             IUserIdentity userIdentity,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null,
-            IEnumerable<Type>? additionalTypes = null)
-            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, additionalTypes)
+            UaTcpSessionChannelOptions? options = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
         {
-            this.UserIdentity = userIdentity;
-            this.options = options ?? new UaTcpSessionChannelOptions();
-            this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
-            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
-            this.stateMachineCts = new CancellationTokenSource();
-            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+            UserIdentity = userIdentity;
+            _options = options ?? new UaTcpSessionChannelOptions();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
+            _stateMachineCts = new CancellationTokenSource();
+            _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
 
         /// <summary>
@@ -95,7 +93,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
@@ -103,17 +100,16 @@ namespace Workstation.ServiceModel.Ua.Channels
             string endpointUrl,
             string? securityPolicyUri = null,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null,
-            IEnumerable<Type>? additionalTypes = null)
-            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
+            UaTcpSessionChannelOptions? options = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
         {
-            this.UserIdentity = userIdentity;
-            this.options = options ?? new UaTcpSessionChannelOptions();
-            this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
-            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
-            this.stateMachineCts = new CancellationTokenSource();
-            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+            UserIdentity = userIdentity;
+            _options = options ?? new UaTcpSessionChannelOptions();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
+            _stateMachineCts = new CancellationTokenSource();
+            _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
 
         /// <summary>
@@ -125,24 +121,22 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>>? userIdentityProvider,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null,
-            IEnumerable<Type>? additionalTypes = null)
-            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, additionalTypes)
+            UaTcpSessionChannelOptions? options = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
         {
-            this.UserIdentityProvider = userIdentityProvider;
-            this.options = options ?? new UaTcpSessionChannelOptions();
-            this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
-            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
-            this.stateMachineCts = new CancellationTokenSource();
-            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+            UserIdentityProvider = userIdentityProvider;
+            _options = options ?? new UaTcpSessionChannelOptions();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
+            _stateMachineCts = new CancellationTokenSource();
+            _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
 
         /// <summary>
@@ -155,7 +149,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaTcpSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
@@ -163,17 +156,16 @@ namespace Workstation.ServiceModel.Ua.Channels
             string endpointUrl,
             string? securityPolicyUri = null,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null,
-            IEnumerable<Type>? additionalTypes = null)
-            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, additionalTypes)
+            UaTcpSessionChannelOptions? options = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
         {
-            this.UserIdentityProvider = userIdentityProvider;
-            this.options = options ?? new UaTcpSessionChannelOptions();
-            this.loggerFactory = loggerFactory;
-            this.logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
-            this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr));
-            this.stateMachineCts = new CancellationTokenSource();
-            this.publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = this.stateMachineCts.Token });
+            UserIdentityProvider = userIdentityProvider;
+            _options = options ?? new UaTcpSessionChannelOptions();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
+            _stateMachineCts = new CancellationTokenSource();
+            _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
 
         /// <summary>
@@ -199,42 +191,42 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets a Task that represents the asynchronous operation and completion of the channel.
         /// </summary>
-        public Task Completion => this.publishResponses.Completion;
+        public Task Completion => _publishResponses.Completion;
 
         /// <inheritdoc/>
         public IDisposable LinkTo(ITargetBlock<PublishResponse> target, DataflowLinkOptions linkOptions)
         {
-            return this.publishResponses.LinkTo(target, linkOptions);
+            return _publishResponses.LinkTo(target, linkOptions);
         }
 
         /// <inheritdoc/>
         public PublishResponse ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target, out bool messageConsumed)
         {
-            return ((ISourceBlock<PublishResponse>)this.publishResponses).ConsumeMessage(messageHeader, target, out messageConsumed);
+            return ((ISourceBlock<PublishResponse>)_publishResponses).ConsumeMessage(messageHeader, target, out messageConsumed);
         }
 
         /// <inheritdoc/>
         public bool ReserveMessage(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target)
         {
-            return ((ISourceBlock<PublishResponse>)this.publishResponses).ReserveMessage(messageHeader, target);
+            return ((ISourceBlock<PublishResponse>)_publishResponses).ReserveMessage(messageHeader, target);
         }
 
         /// <inheritdoc/>
         public void ReleaseReservation(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target)
         {
-            ((ISourceBlock<PublishResponse>)this.publishResponses).ReleaseReservation(messageHeader, target);
+            ((ISourceBlock<PublishResponse>)_publishResponses).ReleaseReservation(messageHeader, target);
         }
 
         /// <inheritdoc/>
         public void Complete()
         {
-            this.publishResponses.Complete();
+            _publishResponses.Complete();
         }
 
         /// <inheritdoc/>
         public void Fault(Exception exception)
         {
-            ((ISourceBlock<PublishResponse>)this.publishResponses).Fault(exception);
+            ((ISourceBlock<PublishResponse>)_publishResponses).Fault(exception);
         }
 
         /// <inheritdoc/>
@@ -246,21 +238,21 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc/>
         protected override async Task OnOpeningAsync(CancellationToken token = default)
         {
-            if (this.RemoteEndpoint.Server == null)
+            if (RemoteEndpoint.Server == null)
             {
                 // If specific endpoint is not provided, use discovery to select endpoint with highest
                 // security level.
-                var endpointUrl = this.RemoteEndpoint.EndpointUrl;
-                var securityPolicyUri = this.RemoteEndpoint.SecurityPolicyUri;
+                var endpointUrl = RemoteEndpoint.EndpointUrl;
+                var securityPolicyUri = RemoteEndpoint.SecurityPolicyUri;
                 try
                 {
-                    this.logger?.LogInformation($"Discovering endpoints of '{endpointUrl}'.");
+                    _logger?.LogInformation($"Discovering endpoints of '{endpointUrl}'.");
                     var getEndpointsRequest = new GetEndpointsRequest
                     {
                         EndpointUrl = endpointUrl,
                         ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
                     };
-                    var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, this.loggerFactory).ConfigureAwait(false);
+                    var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, _loggerFactory).ConfigureAwait(false);
                     if (getEndpointsResponse.Endpoints == null || getEndpointsResponse.Endpoints.Length == 0)
                     {
                         throw new InvalidOperationException($"'{endpointUrl}' returned no endpoints.");
@@ -277,27 +269,27 @@ namespace Workstation.ServiceModel.Ua.Channels
                         throw new InvalidOperationException($"'{endpointUrl}' returned no endpoint for the requested security policy '{securityPolicyUri}'.");
                     }
 
-                    this.RemoteEndpoint.Server = selectedEndpoint.Server;
-                    this.RemoteEndpoint.ServerCertificate = selectedEndpoint.ServerCertificate;
-                    this.RemoteEndpoint.SecurityMode = selectedEndpoint.SecurityMode;
-                    this.RemoteEndpoint.SecurityPolicyUri = selectedEndpoint.SecurityPolicyUri;
-                    this.RemoteEndpoint.UserIdentityTokens = selectedEndpoint.UserIdentityTokens;
-                    this.RemoteEndpoint.TransportProfileUri = selectedEndpoint.TransportProfileUri;
-                    this.RemoteEndpoint.SecurityLevel = selectedEndpoint.SecurityLevel;
+                    RemoteEndpoint.Server = selectedEndpoint.Server;
+                    RemoteEndpoint.ServerCertificate = selectedEndpoint.ServerCertificate;
+                    RemoteEndpoint.SecurityMode = selectedEndpoint.SecurityMode;
+                    RemoteEndpoint.SecurityPolicyUri = selectedEndpoint.SecurityPolicyUri;
+                    RemoteEndpoint.UserIdentityTokens = selectedEndpoint.UserIdentityTokens;
+                    RemoteEndpoint.TransportProfileUri = selectedEndpoint.TransportProfileUri;
+                    RemoteEndpoint.SecurityLevel = selectedEndpoint.SecurityLevel;
 
-                    this.logger?.LogTrace($"Success discovering endpoints of '{endpointUrl}'.");
+                    _logger?.LogTrace($"Success discovering endpoints of '{endpointUrl}'.");
                 }
                 catch (Exception ex)
                 {
-                    this.logger?.LogError($"Error discovering endpoints of '{endpointUrl}'. {ex.Message}");
+                    _logger?.LogError($"Error discovering endpoints of '{endpointUrl}'. {ex.Message}");
                     throw;
                 }
             }
 
             // Ask for user identity. May show dialog.
-            if (this.UserIdentityProvider != null)
+            if (UserIdentityProvider != null)
             {
-                this.UserIdentity = await this.UserIdentityProvider(this.RemoteEndpoint);
+                UserIdentity = await UserIdentityProvider(RemoteEndpoint);
             }
 
             await base.OnOpeningAsync(token);
@@ -306,10 +298,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc/>
         protected override async Task OnOpenAsync(CancellationToken token = default)
         {
-            this.logger?.LogInformation($"Opening session channel with endpoint '{this.RemoteEndpoint.EndpointUrl}'.");
-            this.logger?.LogInformation($"SecurityPolicy: '{this.RemoteEndpoint.SecurityPolicyUri}'.");
-            this.logger?.LogInformation($"SecurityMode: '{this.RemoteEndpoint.SecurityMode}'.");
-            this.logger?.LogInformation($"UserIdentity: '{this.UserIdentity}'.");
+            _logger?.LogInformation($"Opening session channel with endpoint '{RemoteEndpoint.EndpointUrl}'.");
+            _logger?.LogInformation($"SecurityPolicy: '{RemoteEndpoint.SecurityPolicyUri}'.");
+            _logger?.LogInformation($"SecurityMode: '{RemoteEndpoint.SecurityMode}'.");
+            _logger?.LogInformation($"UserIdentity: '{UserIdentity}'.");
 
             await base.OnOpenAsync(token).ConfigureAwait(false);
 
@@ -317,25 +309,25 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             // if SessionId is provided then we skip the CreateSessionRequest and go directly to (re)ActivateSession.
             // requires from previous Session: SessionId, AuthenticationToken, RemoteNonce
-            if (this.SessionId == null)
+            if (SessionId == null)
             {
-                var localNonce = this.GetNextNonce(NonceLength);
-                var localCertificate = this.LocalCertificate;
+                var localNonce = GetNextNonce(_nonceLength);
+                var localCertificate = LocalCertificate;
                 var createSessionRequest = new CreateSessionRequest
                 {
-                    ClientDescription = this.LocalDescription,
-                    EndpointUrl = this.RemoteEndpoint.EndpointUrl,
-                    SessionName = this.LocalDescription.ApplicationName,
+                    ClientDescription = LocalDescription,
+                    EndpointUrl = RemoteEndpoint.EndpointUrl,
+                    SessionName = LocalDescription.ApplicationName,
                     ClientNonce = localNonce,
                     ClientCertificate = localCertificate,
-                    RequestedSessionTimeout = this.options.SessionTimeout,
-                    MaxResponseMessageSize = this.RemoteMaxMessageSize
+                    RequestedSessionTimeout = _options.SessionTimeout,
+                    MaxResponseMessageSize = RemoteMaxMessageSize
                 };
 
                 var createSessionResponse = await this.CreateSessionAsync(createSessionRequest).ConfigureAwait(false);
-                this.SessionId = createSessionResponse.SessionId;
-                this.AuthenticationToken = createSessionResponse.AuthenticationToken;
-                this.RemoteNonce = createSessionResponse.ServerNonce;
+                SessionId = createSessionResponse.SessionId;
+                AuthenticationToken = createSessionResponse.AuthenticationToken;
+                RemoteNonce = createSessionResponse.ServerNonce;
 
                 // verify the server's certificate is the same as the certificate from the selected endpoint.
                 ThrowOnInvalidSessionServerCertificate(createSessionResponse.ServerCertificate);
@@ -344,12 +336,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                 ISigner? verifier = null;
                 bool verified = false;
 
-                switch (this.RemoteEndpoint.SecurityPolicyUri)
+                switch (RemoteEndpoint.SecurityPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
                     case SecurityPolicyUris.Basic256:
                         verifier = SignerUtilities.GetSigner("SHA-1withRSA");
-                        verifier.Init(false, this.RemotePublicKey);
+                        verifier.Init(false, RemotePublicKey);
                         verifier.BlockUpdate(localCertificate, 0, localCertificate!.Length);
                         verifier.BlockUpdate(localNonce, 0, localNonce!.Length);
                         verified = verifier.VerifySignature(createSessionResponse.ServerSignature!.Signature);
@@ -358,7 +350,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Basic256Sha256:
                     case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         verifier = SignerUtilities.GetSigner("SHA-256withRSA");
-                        verifier.Init(false, this.RemotePublicKey);
+                        verifier.Init(false, RemotePublicKey);
                         verifier.BlockUpdate(localCertificate, 0, localCertificate!.Length);
                         verifier.BlockUpdate(localNonce, 0, localNonce!.Length);
                         verified = verifier.VerifySignature(createSessionResponse.ServerSignature!.Signature);
@@ -366,7 +358,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                         verifier = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
-                        verifier.Init(false, this.RemotePublicKey);
+                        verifier.Init(false, RemotePublicKey);
                         verifier.BlockUpdate(localCertificate, 0, localCertificate!.Length);
                         verifier.BlockUpdate(localNonce, 0, localNonce!.Length);
                         verified = verifier.VerifySignature(createSessionResponse.ServerSignature!.Signature);
@@ -388,18 +380,18 @@ namespace Workstation.ServiceModel.Ua.Channels
             SignatureData? clientSignature = null;
             ISigner? signer = null;
 
-            switch (this.RemoteEndpoint.SecurityPolicyUri)
+            switch (RemoteEndpoint.SecurityPolicyUri)
             {
                 case SecurityPolicyUris.Basic128Rsa15:
                 case SecurityPolicyUris.Basic256:
                     signer = SignerUtilities.GetSigner("SHA-1withRSA");
-                    signer.Init(true, this.LocalPrivateKey);
-                    signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate!.Length);
-                    signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce!.Length);
+                    signer.Init(true, LocalPrivateKey);
+                    signer.BlockUpdate(RemoteEndpoint.ServerCertificate, 0, RemoteEndpoint.ServerCertificate!.Length);
+                    signer.BlockUpdate(RemoteNonce, 0, RemoteNonce!.Length);
                     clientSignature = new SignatureData
                     {
                         Signature = signer.GenerateSignature(),
-                        Algorithm = RsaSha1Signature,
+                        Algorithm = _rsaSha1Signature,
                     };
 
                     break;
@@ -407,26 +399,26 @@ namespace Workstation.ServiceModel.Ua.Channels
                 case SecurityPolicyUris.Basic256Sha256:
                 case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                     signer = SignerUtilities.GetSigner("SHA-256withRSA");
-                    signer.Init(true, this.LocalPrivateKey);
-                    signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate!.Length);
-                    signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce!.Length);
+                    signer.Init(true, LocalPrivateKey);
+                    signer.BlockUpdate(RemoteEndpoint.ServerCertificate, 0, RemoteEndpoint.ServerCertificate!.Length);
+                    signer.BlockUpdate(RemoteNonce, 0, RemoteNonce!.Length);
                     clientSignature = new SignatureData
                     {
                         Signature = signer.GenerateSignature(),
-                        Algorithm = RsaSha256Signature,
+                        Algorithm = _rsaSha256Signature,
                     };
 
                     break;
 
                 case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                     signer = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
-                    signer.Init(true, this.LocalPrivateKey);
-                    signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate!.Length);
-                    signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce!.Length);
+                    signer.Init(true, LocalPrivateKey);
+                    signer.BlockUpdate(RemoteEndpoint.ServerCertificate, 0, RemoteEndpoint.ServerCertificate!.Length);
+                    signer.BlockUpdate(RemoteNonce, 0, RemoteNonce!.Length);
                     clientSignature = new SignatureData
                     {
                         Signature = signer.GenerateSignature(),
-                        Algorithm = RsaPssSha256Signature,
+                        Algorithm = _rsaPssSha256Signature,
                     };
 
                     break;
@@ -443,33 +435,33 @@ namespace Workstation.ServiceModel.Ua.Channels
             SignatureData? tokenSignature = null;
 
             // if UserIdentity type is IssuedIdentity
-            if (this.UserIdentity is IssuedIdentity issuedIdentity)
+            if (UserIdentity is IssuedIdentity issuedIdentity)
             {
-                var tokenPolicy = this.RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.IssuedToken);
+                var tokenPolicy = RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.IssuedToken);
                 if (tokenPolicy == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadIdentityTokenRejected);
                 }
 
-                int plainTextLength = issuedIdentity.TokenData.Length + this.RemoteNonce!.Length;
+                int plainTextLength = issuedIdentity.TokenData.Length + RemoteNonce!.Length;
                 IBufferedCipher encryptor;
                 byte[] cipherText;
                 int pos;
 
-                var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? this.RemoteEndpoint.SecurityPolicyUri;
+                var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? RemoteEndpoint.SecurityPolicyUri;
                 switch (secPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
                         encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
-                        encryptor.Init(true, this.RemotePublicKey);
+                        encryptor.Init(true, RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
                         pos = encryptor.ProcessBytes(issuedIdentity.TokenData, cipherText, pos);
-                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        pos = encryptor.DoFinal(RemoteNonce, cipherText, pos);
                         identityToken = new IssuedIdentityToken
                         {
                             TokenData = cipherText,
-                            EncryptionAlgorithm = RsaV15KeyWrap,
+                            EncryptionAlgorithm = _rsaV15KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 
@@ -479,15 +471,15 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Basic256Sha256:
                     case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        encryptor.Init(true, this.RemotePublicKey);
+                        encryptor.Init(true, RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
                         pos = encryptor.ProcessBytes(issuedIdentity.TokenData, cipherText, pos);
-                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        pos = encryptor.DoFinal(RemoteNonce, cipherText, pos);
                         identityToken = new IssuedIdentityToken
                         {
                             TokenData = cipherText,
-                            EncryptionAlgorithm = RsaOaepKeyWrap,
+                            EncryptionAlgorithm = _rsaOaepKeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 
@@ -495,15 +487,15 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                         encryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
-                        encryptor.Init(true, this.RemotePublicKey);
+                        encryptor.Init(true, RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
                         pos = encryptor.ProcessBytes(issuedIdentity.TokenData, cipherText, pos);
-                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        pos = encryptor.DoFinal(RemoteNonce, cipherText, pos);
                         identityToken = new IssuedIdentityToken
                         {
                             TokenData = cipherText,
-                            EncryptionAlgorithm = RsaOaepSha256KeyWrap,
+                            EncryptionAlgorithm = _rsaOaepSha256KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 
@@ -523,9 +515,9 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             // if UserIdentity type is X509Identity
-            else if (this.UserIdentity is X509Identity x509Identity)
+            else if (UserIdentity is X509Identity x509Identity)
             {
-                var tokenPolicy = this.RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.Certificate);
+                var tokenPolicy = RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.Certificate);
                 if (tokenPolicy == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadIdentityTokenRejected);
@@ -533,7 +525,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 identityToken = new X509IdentityToken { CertificateData = x509Identity.Certificate?.GetEncoded(), PolicyId = tokenPolicy.PolicyId };
 
-                var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? this.RemoteEndpoint.SecurityPolicyUri;
+                var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? RemoteEndpoint.SecurityPolicyUri;
                 switch (secPolicyUri)
                 {
 
@@ -541,12 +533,12 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Basic256:
                         signer = SignerUtilities.GetSigner("SHA-1withRSA");
                         signer.Init(true, x509Identity.PrivateKey);
-                        signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate!.Length);
-                        signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce!.Length);
+                        signer.BlockUpdate(RemoteEndpoint.ServerCertificate, 0, RemoteEndpoint.ServerCertificate!.Length);
+                        signer.BlockUpdate(RemoteNonce, 0, RemoteNonce!.Length);
                         tokenSignature = new SignatureData
                         {
                             Signature = signer.GenerateSignature(),
-                            Algorithm = RsaSha1Signature,
+                            Algorithm = _rsaSha1Signature,
                         };
 
                         break;
@@ -555,24 +547,24 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         signer = SignerUtilities.GetSigner("SHA-256withRSA");
                         signer.Init(true, x509Identity.PrivateKey);
-                        signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate!.Length);
-                        signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce!.Length);
+                        signer.BlockUpdate(RemoteEndpoint.ServerCertificate, 0, RemoteEndpoint.ServerCertificate!.Length);
+                        signer.BlockUpdate(RemoteNonce, 0, RemoteNonce!.Length);
                         tokenSignature = new SignatureData
                         {
                             Signature = signer.GenerateSignature(),
-                            Algorithm = RsaSha256Signature,
+                            Algorithm = _rsaSha256Signature,
                         };
                         break;
 
                     case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                         signer = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
                         signer.Init(true, x509Identity.PrivateKey);
-                        signer.BlockUpdate(this.RemoteEndpoint.ServerCertificate, 0, this.RemoteEndpoint.ServerCertificate!.Length);
-                        signer.BlockUpdate(this.RemoteNonce, 0, this.RemoteNonce!.Length);
+                        signer.BlockUpdate(RemoteEndpoint.ServerCertificate, 0, RemoteEndpoint.ServerCertificate!.Length);
+                        signer.BlockUpdate(RemoteNonce, 0, RemoteNonce!.Length);
                         tokenSignature = new SignatureData
                         {
                             Signature = signer.GenerateSignature(),
-                            Algorithm = RsaSha256Signature,
+                            Algorithm = _rsaSha256Signature,
                         };
                         break;
 
@@ -585,35 +577,35 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             // if UserIdentity type is UserNameIdentity
-            else if (this.UserIdentity is UserNameIdentity userNameIdentity)
+            else if (UserIdentity is UserNameIdentity userNameIdentity)
             {
-                var tokenPolicy = this.RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.UserName);
+                var tokenPolicy = RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.UserName);
                 if (tokenPolicy == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadIdentityTokenRejected);
                 }
 
                 byte[] passwordBytes = userNameIdentity.Password != null ? System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password) : new byte[0];
-                int plainTextLength = passwordBytes.Length + this.RemoteNonce!.Length;
+                int plainTextLength = passwordBytes.Length + RemoteNonce!.Length;
                 IBufferedCipher encryptor;
                 byte[] cipherText;
                 int pos;
 
-                var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? this.RemoteEndpoint.SecurityPolicyUri;
+                var secPolicyUri = tokenPolicy.SecurityPolicyUri ?? RemoteEndpoint.SecurityPolicyUri;
                 switch (secPolicyUri)
                 {
                     case SecurityPolicyUris.Basic128Rsa15:
                         encryptor = CipherUtilities.GetCipher("RSA//PKCS1Padding");
-                        encryptor.Init(true, this.RemotePublicKey);
+                        encryptor.Init(true, RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
                         pos = encryptor.ProcessBytes(passwordBytes, cipherText, pos);
-                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        pos = encryptor.DoFinal(RemoteNonce, cipherText, pos);
                         identityToken = new UserNameIdentityToken
                         {
                             UserName = userNameIdentity.UserName,
                             Password = cipherText,
-                            EncryptionAlgorithm = RsaV15KeyWrap,
+                            EncryptionAlgorithm = _rsaV15KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 
@@ -623,16 +615,16 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Basic256Sha256:
                     case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         encryptor = CipherUtilities.GetCipher("RSA//OAEPPADDING");
-                        encryptor.Init(true, this.RemotePublicKey);
+                        encryptor.Init(true, RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
                         pos = encryptor.ProcessBytes(passwordBytes, cipherText, pos);
-                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        pos = encryptor.DoFinal(RemoteNonce, cipherText, pos);
                         identityToken = new UserNameIdentityToken
                         {
                             UserName = userNameIdentity.UserName,
                             Password = cipherText,
-                            EncryptionAlgorithm = RsaOaepKeyWrap,
+                            EncryptionAlgorithm = _rsaOaepKeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 
@@ -640,16 +632,16 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                         encryptor = CipherUtilities.GetCipher("RSA//OAEPWITHSHA256ANDMGF1PADDING");
-                        encryptor.Init(true, this.RemotePublicKey);
+                        encryptor.Init(true, RemotePublicKey);
                         cipherText = new byte[encryptor.GetOutputSize(4 + plainTextLength)];
                         pos = encryptor.ProcessBytes(BitConverter.GetBytes(plainTextLength), cipherText, 0);
                         pos = encryptor.ProcessBytes(passwordBytes, cipherText, pos);
-                        pos = encryptor.DoFinal(this.RemoteNonce, cipherText, pos);
+                        pos = encryptor.DoFinal(RemoteNonce, cipherText, pos);
                         identityToken = new UserNameIdentityToken
                         {
                             UserName = userNameIdentity.UserName,
                             Password = cipherText,
-                            EncryptionAlgorithm = RsaOaepSha256KeyWrap,
+                            EncryptionAlgorithm = _rsaOaepSha256KeyWrap,
                             PolicyId = tokenPolicy.PolicyId
                         };
 
@@ -672,7 +664,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             // if UserIdentity type is AnonymousIdentity or null
             else
             {
-                var tokenPolicy = this.RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.Anonymous);
+                var tokenPolicy = RemoteEndpoint.UserIdentityTokens.FirstOrDefault(t => t?.TokenType == UserTokenType.Anonymous);
                 if (tokenPolicy == null)
                 {
                     throw new ServiceResultException(StatusCodes.BadIdentityTokenRejected);
@@ -690,7 +682,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 UserTokenSignature = tokenSignature
             };
             var activateSessionResponse = await this.ActivateSessionAsync(activateSessionRequest).ConfigureAwait(false);
-            this.RemoteNonce = activateSessionResponse.ServerNonce;
+            RemoteNonce = activateSessionResponse.ServerNonce;
 
             // fetch namespace array, etc.
             var readValueIds = new ReadValueId[]
@@ -716,19 +708,17 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (readResponse.Results[0] is { } res0 && StatusCode.IsGood(res0.StatusCode))
                 {
-                    this.NamespaceUris.Clear();
                     if (res0.GetValueOrDefault<string[]>() is { } namespaceUris)
                     {
-                        this.NamespaceUris.AddRange(namespaceUris);
+                        NamespaceUris = namespaceUris;
                     }
                 }
 
                 if (readResponse.Results[1] is { } res1 && StatusCode.IsGood(res1.StatusCode))
                 {
-                    this.ServerUris.Clear();
                     if (res1.GetValueOrDefault<string[]>() is { } serverUris)
                     {
-                        this.ServerUris.AddRange(serverUris);
+                        ServerUris = serverUris;
                     }
                 }
             }
@@ -745,16 +735,16 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             // link up the dataflow blocks
             var id = subscriptionResponse.SubscriptionId;
-            var linkToken = this.LinkTo(this.actionBlock, pr => pr.SubscriptionId == id);
+            var linkToken = this.LinkTo(_actionBlock, pr => pr.SubscriptionId == id);
 
             // start publishing.
-            this.stateMachineTask = Task.Run(() => this.StateMachineAsync(this.stateMachineCts.Token));
+            _stateMachineTask = Task.Run(() => StateMachineAsync(_stateMachineCts.Token));
         }
 
         /// <inheritdoc/>
         protected override Task OnClosingAsync(CancellationToken token = default)
         {
-            this.stateMachineCts.Cancel();
+            _stateMachineCts.Cancel();
             return base.OnClosingAsync(token);
         }
 
@@ -784,7 +774,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             var publishRequest = new PublishRequest
             {
-                RequestHeader = new RequestHeader { TimeoutHint = PublishTimeoutHint, ReturnDiagnostics = this.options.DiagnosticsHint },
+                RequestHeader = new RequestHeader { TimeoutHint = _publishTimeoutHint, ReturnDiagnostics = _options.DiagnosticsHint },
                 SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
             };
             while (!token.IsCancellationRequested)
@@ -794,14 +784,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                     var publishResponse = await this.PublishAsync(publishRequest, token).ConfigureAwait(false);
 
                     // post to linked data flow blocks and subscriptions.
-                    this.publishResponses.Post(publishResponse);
+                    _publishResponses.Post(publishResponse);
 
                     publishRequest = new PublishRequest
                     {
                         RequestHeader = new RequestHeader
                         {
-                            TimeoutHint = PublishTimeoutHint,
-                            ReturnDiagnostics = this.options.DiagnosticsHint
+                            TimeoutHint = _publishTimeoutHint,
+                            ReturnDiagnostics = _options.DiagnosticsHint
                         },
                         SubscriptionAcknowledgements = publishResponse.NotificationMessage?.NotificationData != null
                         ? new[] 
@@ -822,8 +812,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return;
                     }
 
-                    this.logger?.LogError($"Error publishing subscription. {ex.Message}");
-                    this.Fault(ex);
+                    _logger?.LogError($"Error publishing subscription. {ex.Message}");
+                    Fault(ex);
                     return;
                 }
             }
@@ -838,9 +828,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             var tasks = new[]
             {
-                this.PublishAsync(token),
-                this.PublishAsync(token),
-                this.PublishAsync(token),
+                PublishAsync(token),
+                PublishAsync(token),
+                PublishAsync(token),
             };
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }

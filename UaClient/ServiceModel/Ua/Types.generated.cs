@@ -11,6 +11,7 @@
 // Auto-generated code requires an explicit `#nullable` directive in source.
 #nullable enable
 
+[assembly: Workstation.ServiceModel.Ua.TypeLibrary()]
 namespace Workstation.ServiceModel.Ua
 {
     using System;
@@ -18,7 +19,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.MessageSecurityMode)]
     public enum MessageSecurityMode
-    {
+    {   
         Invalid=0,
         None=1,
         Sign=2,
@@ -27,7 +28,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.OpenFileMode)]
     public enum OpenFileMode
-    {
+    {   
         Read=1,
         Write=2,
         EraseExisting=4,
@@ -36,7 +37,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.IdentityCriteriaType)]
     public enum IdentityCriteriaType
-    {
+    {   
         UserName=1,
         Thumbprint=2,
         Role=3,
@@ -47,7 +48,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.TrustListMasks)]
     public enum TrustListMasks
-    {
+    {   
         None=0,
         TrustedCertificates=1,
         TrustedCrls=2,
@@ -58,7 +59,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.StructureType)]
     public enum StructureType
-    {
+    {   
         Structure=0,
         StructureWithOptionalFields=1,
         Union=2,
@@ -66,7 +67,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.PubSubState)]
     public enum PubSubState
-    {
+    {   
         Disabled=0,
         Paused=1,
         Operational=2,
@@ -75,7 +76,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.FilterOperator)]
     public enum FilterOperator
-    {
+    {   
         Equals=0,
         IsNull=1,
         GreaterThan=2,
@@ -98,7 +99,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.BrokerTransportQualityOfService)]
     public enum BrokerTransportQualityOfService
-    {
+    {   
         NotSpecified=0,
         BestEffort=1,
         AtLeastOnce=2,
@@ -108,7 +109,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.ApplicationType)]
     public enum ApplicationType
-    {
+    {   
         Server=0,
         Client=1,
         ClientAndServer=2,
@@ -117,7 +118,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.UserTokenType)]
     public enum UserTokenType
-    {
+    {   
         Anonymous=0,
         UserName=1,
         Certificate=2,
@@ -126,7 +127,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.OverrideValueHandling)]
     public enum OverrideValueHandling
-    {
+    {   
         Disabled=0,
         LastUsableValue=1,
         OverrideValue=2,
@@ -134,7 +135,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.DataSetOrderingType)]
     public enum DataSetOrderingType
-    {
+    {   
         Undefined=0,
         AscendingWriterId=1,
         AscendingWriterIdSingle=2,
@@ -142,7 +143,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.DiagnosticsLevel)]
     public enum DiagnosticsLevel
-    {
+    {   
         Basic=0,
         Advanced=1,
         Info=2,
@@ -152,14 +153,14 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.PubSubDiagnosticsCounterClassification)]
     public enum PubSubDiagnosticsCounterClassification
-    {
+    {   
         Information=0,
         Error=1,
     }
 
     [DataTypeId(DataTypeIds.IdType)]
     public enum IdType
-    {
+    {   
         Numeric=0,
         String=1,
         Guid=2,
@@ -168,7 +169,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.NodeClass)]
     public enum NodeClass
-    {
+    {   
         Unspecified=0,
         Object=1,
         Variable=2,
@@ -182,14 +183,14 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.SecurityTokenRequestType)]
     public enum SecurityTokenRequestType
-    {
+    {   
         Issue=0,
         Renew=1,
     }
 
     [DataTypeId(DataTypeIds.NodeAttributesMask)]
     public enum NodeAttributesMask
-    {
+    {   
         None=0,
         AccessLevel=1,
         ArrayDimensions=2,
@@ -229,7 +230,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.BrowseDirection)]
     public enum BrowseDirection
-    {
+    {   
         Forward=0,
         Inverse=1,
         Both=2,
@@ -238,7 +239,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.BrowseResultMask)]
     public enum BrowseResultMask
-    {
+    {   
         None=0,
         ReferenceTypeId=1,
         IsForward=2,
@@ -253,7 +254,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.TimestampsToReturn)]
     public enum TimestampsToReturn
-    {
+    {   
         Source=0,
         Server=1,
         Both=2,
@@ -263,7 +264,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.HistoryUpdateType)]
     public enum HistoryUpdateType
-    {
+    {   
         Insert=1,
         Replace=2,
         Update=3,
@@ -272,7 +273,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.DataChangeTrigger)]
     public enum DataChangeTrigger
-    {
+    {   
         Status=0,
         StatusValue=1,
         StatusValueTimestamp=2,
@@ -280,7 +281,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.PerformUpdateType)]
     public enum PerformUpdateType
-    {
+    {   
         Insert=1,
         Replace=2,
         Update=3,
@@ -289,7 +290,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.MonitoringMode)]
     public enum MonitoringMode
-    {
+    {   
         Disabled=0,
         Sampling=1,
         Reporting=2,
@@ -297,7 +298,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.DeadbandType)]
     public enum DeadbandType
-    {
+    {   
         None=0,
         Absolute=1,
         Percent=2,
@@ -305,7 +306,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.RedundancySupport)]
     public enum RedundancySupport
-    {
+    {   
         None=0,
         Cold=1,
         Warm=2,
@@ -316,7 +317,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.ServerState)]
     public enum ServerState
-    {
+    {   
         Running=0,
         Failed=1,
         NoConfiguration=2,
@@ -329,7 +330,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.ModelChangeStructureVerbMask)]
     public enum ModelChangeStructureVerbMask
-    {
+    {   
         NodeAdded=1,
         NodeDeleted=2,
         ReferenceAdded=4,
@@ -339,7 +340,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.AxisScaleEnumeration)]
     public enum AxisScaleEnumeration
-    {
+    {   
         Linear=0,
         Log=1,
         Ln=2,
@@ -347,7 +348,7 @@ namespace Workstation.ServiceModel.Ua
 
     [DataTypeId(DataTypeIds.ExceptionDeviationFormat)]
     public enum ExceptionDeviationFormat
-    {
+    {   
         AbsoluteValue=0,
         PercentOfValue=1,
         PercentOfRange=2,
@@ -362,7 +363,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public QualifiedName? Key { get; set; }
         public Variant Value { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -370,7 +370,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariant("Value", Value);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -389,7 +388,6 @@ namespace Workstation.ServiceModel.Ua
         public MessageSecurityMode SecurityMode { get; set; }
         public String? SecurityPolicyUri { get; set; }
         public String? TransportProfileUri { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -399,7 +397,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("TransportProfileUri", TransportProfileUri);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -418,7 +415,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Int32 Numerator { get; set; }
         public UInt32 Denominator { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -426,7 +422,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("Denominator", Denominator);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -441,13 +436,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Vector)]
     public class Vector : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -463,7 +456,6 @@ namespace Workstation.ServiceModel.Ua
         public Double X { get; set; }
         public Double Y { get; set; }
         public Double Z { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -473,7 +465,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("Z", Z);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -490,13 +481,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.CartesianCoordinates)]
     public class CartesianCoordinates : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -512,7 +501,6 @@ namespace Workstation.ServiceModel.Ua
         public Double X { get; set; }
         public Double Y { get; set; }
         public Double Z { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -522,7 +510,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("Z", Z);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -539,13 +526,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Orientation)]
     public class Orientation : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -561,7 +546,6 @@ namespace Workstation.ServiceModel.Ua
         public Double A { get; set; }
         public Double B { get; set; }
         public Double C { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -571,7 +555,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("C", C);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -588,13 +571,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Frame)]
     public class Frame : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -609,7 +590,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ThreeDCartesianCoordinates? CartesianCoordinates { get; set; }
         public ThreeDOrientation? Orientation { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -618,7 +598,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<ThreeDOrientation>("Orientation", Orientation);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -636,7 +615,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public IdentityCriteriaType CriteriaType { get; set; }
         public String? Criteria { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -644,7 +622,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("Criteria", Criteria);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -664,7 +641,6 @@ namespace Workstation.ServiceModel.Ua
         public Byte[]?[]? TrustedCrls { get; set; }
         public Byte[]?[]? IssuerCertificates { get; set; }
         public Byte[]?[]? IssuerCrls { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -675,7 +651,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteStringArray("IssuerCrls", IssuerCrls);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -695,7 +670,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Int16 Scale { get; set; }
         public Byte[]? Value { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -703,7 +677,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("Value", Value);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -722,7 +695,6 @@ namespace Workstation.ServiceModel.Ua
         public StructureDescription?[]? StructureDataTypes { get; set; }
         public EnumDescription?[]? EnumDataTypes { get; set; }
         public SimpleTypeDescription?[]? SimpleDataTypes { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -732,7 +704,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<SimpleTypeDescription>("SimpleDataTypes", SimpleDataTypes);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -750,7 +721,6 @@ namespace Workstation.ServiceModel.Ua
     public class StructureDescription : DataTypeDescription
     {
         public StructureDefinition? StructureDefinition { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -758,7 +728,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<StructureDefinition>("StructureDefinition", StructureDefinition);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -777,7 +746,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? BaseDataType { get; set; }
         public StructureType StructureType { get; set; }
         public StructureField?[]? Fields { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -788,7 +756,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<StructureField>("Fields", Fields);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -813,7 +780,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32[]? ArrayDimensions { get; set; }
         public UInt32 MaxStringLength { get; set; }
         public Boolean IsOptional { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -826,7 +792,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("IsOptional", IsOptional);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -846,13 +811,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataTypeDefinition)]
     public class DataTypeDefinition : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -866,7 +829,6 @@ namespace Workstation.ServiceModel.Ua
     public class EnumDefinition : DataTypeDefinition
     {
         public EnumField?[]? Fields { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -874,7 +836,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<EnumField>("Fields", Fields);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -890,7 +851,6 @@ namespace Workstation.ServiceModel.Ua
     public class EnumField : EnumValueType
     {
         public String? Name { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -898,7 +858,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("Name", Name);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -916,7 +875,6 @@ namespace Workstation.ServiceModel.Ua
         public Int64 Value { get; set; }
         public LocalizedText? DisplayName { get; set; }
         public LocalizedText? Description { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -925,7 +883,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteLocalizedText("Description", Description);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -943,7 +900,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public NodeId? DataTypeId { get; set; }
         public QualifiedName? Name { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -951,7 +907,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteQualifiedName("Name", Name);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -968,7 +923,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public NodeId? BaseDataType { get; set; }
         public Byte BuiltInType { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -977,7 +931,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("BuiltInType", BuiltInType);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -995,7 +948,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public EnumDefinition? EnumDefinition { get; set; }
         public Byte BuiltInType { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1004,7 +956,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("BuiltInType", BuiltInType);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1025,7 +976,6 @@ namespace Workstation.ServiceModel.Ua
         public FieldMetaData?[]? Fields { get; set; }
         public Guid DataSetClassId { get; set; }
         public ConfigurationVersionDataType? ConfigurationVersion { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1037,7 +987,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<ConfigurationVersionDataType>("ConfigurationVersion", ConfigurationVersion);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1066,7 +1015,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 MaxStringLength { get; set; }
         public Guid DataSetFieldId { get; set; }
         public KeyValuePair?[]? Properties { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1082,7 +1030,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<KeyValuePair>("Properties", Properties);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1107,7 +1054,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 MajorVersion { get; set; }
         public UInt32 MinorVersion { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1115,7 +1061,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("MinorVersion", MinorVersion);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1133,7 +1078,6 @@ namespace Workstation.ServiceModel.Ua
         public String? SchemaLocation { get; set; }
         public KeyValuePair?[]? FileHeader { get; set; }
         public Variant Body { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1143,7 +1087,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariant("Body", Body);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1165,7 +1108,6 @@ namespace Workstation.ServiceModel.Ua
         public DataSetMetaDataType? DataSetMetaData { get; set; }
         public KeyValuePair?[]? ExtensionFields { get; set; }
         public PublishedDataSetSourceDataType? DataSetSource { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1176,7 +1118,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject<PublishedDataSetSourceDataType>("DataSetSource", DataSetSource);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1194,13 +1135,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.PublishedDataSetSourceDataType)]
     public class PublishedDataSetSourceDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1216,7 +1155,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? EventNotifier { get; set; }
         public SimpleAttributeOperand?[]? SelectedFields { get; set; }
         public ContentFilter? Filter { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1226,7 +1164,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<ContentFilter>("Filter", Filter);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1247,7 +1184,6 @@ namespace Workstation.ServiceModel.Ua
         public QualifiedName?[]? BrowsePath { get; set; }
         public UInt32 AttributeId { get; set; }
         public String? IndexRange { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1258,7 +1194,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("IndexRange", IndexRange);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1276,13 +1211,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.FilterOperand)]
     public class FilterOperand : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1300,7 +1233,6 @@ namespace Workstation.ServiceModel.Ua
         public RelativePath? BrowsePath { get; set; }
         public UInt32 AttributeId { get; set; }
         public String? IndexRange { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1312,7 +1244,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("IndexRange", IndexRange);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1332,14 +1263,12 @@ namespace Workstation.ServiceModel.Ua
     public class RelativePath : IEncodable
     {
         public RelativePathElement?[]? Elements { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodableArray<RelativePathElement>("Elements", Elements);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1357,7 +1286,6 @@ namespace Workstation.ServiceModel.Ua
         public Boolean IsInverse { get; set; }
         public Boolean IncludeSubtypes { get; set; }
         public QualifiedName? TargetName { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1367,7 +1295,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteQualifiedName("TargetName", TargetName);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1385,7 +1312,6 @@ namespace Workstation.ServiceModel.Ua
     public class LiteralOperand : FilterOperand
     {
         public Variant Value { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1393,7 +1319,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariant("Value", Value);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1409,7 +1334,6 @@ namespace Workstation.ServiceModel.Ua
     public class ElementOperand : FilterOperand
     {
         public UInt32 Index { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1417,7 +1341,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("Index", Index);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1433,14 +1356,12 @@ namespace Workstation.ServiceModel.Ua
     public class ContentFilter : IEncodable
     {
         public ContentFilterElement?[]? Elements { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodableArray<ContentFilterElement>("Elements", Elements);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1456,7 +1377,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public FilterOperator FilterOperator { get; set; }
         public FilterOperand?[]? FilterOperands { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1464,7 +1384,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObjectArray<FilterOperand>("FilterOperands", FilterOperands);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1480,7 +1399,6 @@ namespace Workstation.ServiceModel.Ua
     public class PublishedDataItemsDataType : PublishedDataSetSourceDataType
     {
         public PublishedVariableDataType?[]? PublishedData { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1488,7 +1406,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<PublishedVariableDataType>("PublishedData", PublishedData);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1511,7 +1428,6 @@ namespace Workstation.ServiceModel.Ua
         public String? IndexRange { get; set; }
         public Variant SubstituteValue { get; set; }
         public QualifiedName?[]? MetaDataProperties { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1525,7 +1441,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteQualifiedNameArray("MetaDataProperties", MetaDataProperties);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1555,7 +1470,6 @@ namespace Workstation.ServiceModel.Ua
         public KeyValuePair?[]? DataSetWriterProperties { get; set; }
         public DataSetWriterTransportDataType? TransportSettings { get; set; }
         public DataSetWriterMessageDataType? MessageSettings { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1570,7 +1484,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject<DataSetWriterMessageDataType>("MessageSettings", MessageSettings);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1592,13 +1505,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataSetWriterTransportDataType)]
     public class DataSetWriterTransportDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1617,7 +1528,6 @@ namespace Workstation.ServiceModel.Ua
         public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
         public String? MetaDataQueueName { get; set; }
         public Double MetaDataUpdateTime { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1630,7 +1540,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("MetaDataUpdateTime", MetaDataUpdateTime);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1650,13 +1559,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataSetWriterMessageDataType)]
     public class DataSetWriterMessageDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1670,7 +1577,6 @@ namespace Workstation.ServiceModel.Ua
     public class JsonDataSetWriterMessageDataType : DataSetWriterMessageDataType
     {
         public UInt32 DataSetMessageContentMask { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1678,7 +1584,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("DataSetMessageContentMask", DataSetMessageContentMask);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1697,7 +1602,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt16 ConfiguredSize { get; set; }
         public UInt16 NetworkMessageNumber { get; set; }
         public UInt16 DataSetOffset { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1708,7 +1612,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt16("DataSetOffset", DataSetOffset);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1733,7 +1636,6 @@ namespace Workstation.ServiceModel.Ua
         public EndpointDescription?[]? SecurityKeyServices { get; set; }
         public UInt32 MaxNetworkMessageSize { get; set; }
         public KeyValuePair?[]? GroupProperties { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1746,7 +1648,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<KeyValuePair>("GroupProperties", GroupProperties);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1774,7 +1675,6 @@ namespace Workstation.ServiceModel.Ua
         public UserTokenPolicy?[]? UserIdentityTokens { get; set; }
         public String? TransportProfileUri { get; set; }
         public Byte SecurityLevel { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1788,7 +1688,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("SecurityLevel", SecurityLevel);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1816,7 +1715,6 @@ namespace Workstation.ServiceModel.Ua
         public String? GatewayServerUri { get; set; }
         public String? DiscoveryProfileUri { get; set; }
         public String?[]? DiscoveryUrls { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1829,7 +1727,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteStringArray("DiscoveryUrls", DiscoveryUrls);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1854,7 +1751,6 @@ namespace Workstation.ServiceModel.Ua
         public String? IssuedTokenType { get; set; }
         public String? IssuerEndpointUrl { get; set; }
         public String? SecurityPolicyUri { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1865,7 +1761,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("SecurityPolicyUri", SecurityPolicyUri);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1886,7 +1781,6 @@ namespace Workstation.ServiceModel.Ua
         public ReaderGroupTransportDataType? TransportSettings { get; set; }
         public ReaderGroupMessageDataType? MessageSettings { get; set; }
         public DataSetReaderDataType?[]? DataSetReaders { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -1896,7 +1790,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<DataSetReaderDataType>("DataSetReaders", DataSetReaders);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -1913,13 +1806,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReaderGroupTransportDataType)]
     public class ReaderGroupTransportDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1932,13 +1823,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ReaderGroupMessageDataType)]
     public class ReaderGroupMessageDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1968,7 +1857,6 @@ namespace Workstation.ServiceModel.Ua
         public DataSetReaderTransportDataType? TransportSettings { get; set; }
         public DataSetReaderMessageDataType? MessageSettings { get; set; }
         public SubscribedDataSetDataType? SubscribedDataSet { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -1991,7 +1879,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<SubscribedDataSetDataType>("SubscribedDataSet", SubscribedDataSet);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2021,13 +1908,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataSetReaderTransportDataType)]
     public class DataSetReaderTransportDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2045,7 +1930,6 @@ namespace Workstation.ServiceModel.Ua
         public String? AuthenticationProfileUri { get; set; }
         public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
         public String? MetaDataQueueName { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2057,7 +1941,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("MetaDataQueueName", MetaDataQueueName);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2076,13 +1959,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DataSetReaderMessageDataType)]
     public class DataSetReaderMessageDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2097,7 +1978,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 NetworkMessageContentMask { get; set; }
         public UInt32 DataSetMessageContentMask { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2106,7 +1986,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("DataSetMessageContentMask", DataSetMessageContentMask);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2131,7 +2010,6 @@ namespace Workstation.ServiceModel.Ua
         public Double PublishingInterval { get; set; }
         public Double ReceiveOffset { get; set; }
         public Double ProcessingOffset { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2147,7 +2025,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("ProcessingOffset", ProcessingOffset);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2170,13 +2047,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.SubscribedDataSetDataType)]
     public class SubscribedDataSetDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2191,7 +2066,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public String? ParentNodeName { get; set; }
         public RolePermissionType?[]? RolePermissions { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2200,7 +2074,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<RolePermissionType>("RolePermissions", RolePermissions);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2218,7 +2091,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public NodeId? RoleId { get; set; }
         public UInt32 Permissions { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2226,7 +2098,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("Permissions", Permissions);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2242,7 +2113,6 @@ namespace Workstation.ServiceModel.Ua
     public class TargetVariablesDataType : SubscribedDataSetDataType
     {
         public FieldTargetDataType?[]? TargetVariables { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2250,7 +2120,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<FieldTargetDataType>("TargetVariables", TargetVariables);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2272,7 +2141,6 @@ namespace Workstation.ServiceModel.Ua
         public String? WriteIndexRange { get; set; }
         public OverrideValueHandling OverrideValueHandling { get; set; }
         public Variant OverrideValue { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2285,7 +2153,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariant("OverrideValue", OverrideValue);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2314,7 +2181,6 @@ namespace Workstation.ServiceModel.Ua
         public WriterGroupTransportDataType? TransportSettings { get; set; }
         public WriterGroupMessageDataType? MessageSettings { get; set; }
         public DataSetWriterDataType?[]? DataSetWriters { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2330,7 +2196,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<DataSetWriterDataType>("DataSetWriters", DataSetWriters);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2353,13 +2218,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.WriterGroupTransportDataType)]
     public class WriterGroupTransportDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2376,7 +2239,6 @@ namespace Workstation.ServiceModel.Ua
         public String? ResourceUri { get; set; }
         public String? AuthenticationProfileUri { get; set; }
         public BrokerTransportQualityOfService RequestedDeliveryGuarantee { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2387,7 +2249,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEnumeration<BrokerTransportQualityOfService>("RequestedDeliveryGuarantee", RequestedDeliveryGuarantee);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2407,7 +2268,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Byte MessageRepeatCount { get; set; }
         public Double MessageRepeatDelay { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2416,7 +2276,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("MessageRepeatDelay", MessageRepeatDelay);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2432,13 +2291,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.WriterGroupMessageDataType)]
     public class WriterGroupMessageDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2452,7 +2309,6 @@ namespace Workstation.ServiceModel.Ua
     public class JsonWriterGroupMessageDataType : WriterGroupMessageDataType
     {
         public UInt32 NetworkMessageContentMask { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2460,7 +2316,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("NetworkMessageContentMask", NetworkMessageContentMask);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2480,7 +2335,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 NetworkMessageContentMask { get; set; }
         public Double SamplingOffset { get; set; }
         public Double[]? PublishingOffset { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2492,7 +2346,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDoubleArray("PublishingOffset", PublishingOffset);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2520,7 +2373,6 @@ namespace Workstation.ServiceModel.Ua
         public ConnectionTransportDataType? TransportSettings { get; set; }
         public WriterGroupDataType?[]? WriterGroups { get; set; }
         public ReaderGroupDataType?[]? ReaderGroups { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2535,7 +2387,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<ReaderGroupDataType>("ReaderGroups", ReaderGroups);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2558,14 +2409,12 @@ namespace Workstation.ServiceModel.Ua
     public class NetworkAddressDataType : IEncodable
     {
         public String? NetworkInterface { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteString("NetworkInterface", NetworkInterface);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2580,7 +2429,6 @@ namespace Workstation.ServiceModel.Ua
     public class NetworkAddressUrlDataType : NetworkAddressDataType
     {
         public String? Url { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2588,7 +2436,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("Url", Url);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2603,13 +2450,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.ConnectionTransportDataType)]
     public class ConnectionTransportDataType : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2624,7 +2469,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public String? ResourceUri { get; set; }
         public String? AuthenticationProfileUri { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2633,7 +2477,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("AuthenticationProfileUri", AuthenticationProfileUri);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2650,7 +2493,6 @@ namespace Workstation.ServiceModel.Ua
     public class DatagramConnectionTransportDataType : ConnectionTransportDataType
     {
         public NetworkAddressDataType? DiscoveryAddress { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2658,7 +2500,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject<NetworkAddressDataType>("DiscoveryAddress", DiscoveryAddress);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2676,7 +2517,6 @@ namespace Workstation.ServiceModel.Ua
         public PublishedDataSetDataType?[]? PublishedDataSets { get; set; }
         public PubSubConnectionDataType?[]? Connections { get; set; }
         public Boolean Enabled { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2685,7 +2525,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("Enabled", Enabled);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2712,7 +2551,6 @@ namespace Workstation.ServiceModel.Ua
         public RolePermissionType?[]? UserRolePermissions { get; set; }
         public UInt16 AccessRestrictions { get; set; }
         public ReferenceNode?[]? References { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2729,7 +2567,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<ReferenceNode>("References", References);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2756,7 +2593,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsInverse { get; set; }
         public ExpandedNodeId? TargetId { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2765,7 +2601,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExpandedNodeId("TargetId", TargetId);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -2781,14 +2616,12 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.TypeNode)]
     public class TypeNode : Node
     {
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2804,7 +2637,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Boolean IsAbstract { get; set; }
         public DataTypeDefinition? DataTypeDefinition { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2813,7 +2645,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject<DataTypeDefinition>("DataTypeDefinition", DataTypeDefinition);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2832,7 +2663,6 @@ namespace Workstation.ServiceModel.Ua
         public Boolean IsAbstract { get; set; }
         public Boolean Symmetric { get; set; }
         public LocalizedText? InverseName { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2842,7 +2672,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteLocalizedText("InverseName", InverseName);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2864,7 +2693,6 @@ namespace Workstation.ServiceModel.Ua
         public Int32 ValueRank { get; set; }
         public UInt32[]? ArrayDimensions { get; set; }
         public Boolean IsAbstract { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2876,7 +2704,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("IsAbstract", IsAbstract);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2896,7 +2723,6 @@ namespace Workstation.ServiceModel.Ua
     public class ObjectTypeNode : TypeNode
     {
         public Boolean IsAbstract { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2904,7 +2730,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("IsAbstract", IsAbstract);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2919,14 +2744,12 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.InstanceNode)]
     public class InstanceNode : Node
     {
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2942,7 +2765,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Boolean ContainsNoLoops { get; set; }
         public Byte EventNotifier { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2951,7 +2773,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("EventNotifier", EventNotifier);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -2969,7 +2790,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Boolean Executable { get; set; }
         public Boolean UserExecutable { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -2978,7 +2798,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("UserExecutable", UserExecutable);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -3003,7 +2822,6 @@ namespace Workstation.ServiceModel.Ua
         public Double MinimumSamplingInterval { get; set; }
         public Boolean Historizing { get; set; }
         public UInt32 AccessLevelEx { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -3019,7 +2837,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("AccessLevelEx", AccessLevelEx);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -3043,7 +2860,6 @@ namespace Workstation.ServiceModel.Ua
     public class ObjectNode : InstanceNode
     {
         public Byte EventNotifier { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -3051,7 +2867,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("EventNotifier", EventNotifier);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -3071,7 +2886,6 @@ namespace Workstation.ServiceModel.Ua
         public Int32 ValueRank { get; set; }
         public UInt32[]? ArrayDimensions { get; set; }
         public LocalizedText? Description { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3082,7 +2896,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteLocalizedText("Description", Description);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3102,7 +2915,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Byte[]? Value { get; set; }
         public Byte[]? ValidBits { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3110,7 +2922,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("ValidBits", ValidBits);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3125,13 +2936,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.Union)]
     public class Union : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3146,7 +2955,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Int16 Offset { get; set; }
         public Boolean DaylightSavingInOffset { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3154,7 +2962,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("DaylightSavingInOffset", DaylightSavingInOffset);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3176,7 +2983,6 @@ namespace Workstation.ServiceModel.Ua
         public String? AuditEntryId { get; set; }
         public UInt32 TimeoutHint { get; set; }
         public ExtensionObject? AdditionalHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3189,7 +2995,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject("AdditionalHeader", AdditionalHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3215,7 +3020,6 @@ namespace Workstation.ServiceModel.Ua
         public DiagnosticInfo? ServiceDiagnostics { get; set; }
         public String?[]? StringTable { get; set; }
         public ExtensionObject? AdditionalHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3227,7 +3031,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject("AdditionalHeader", AdditionalHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3247,14 +3050,12 @@ namespace Workstation.ServiceModel.Ua
     public class ServiceFault : IServiceResponse
     {
         public ResponseHeader? ResponseHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3273,7 +3074,6 @@ namespace Workstation.ServiceModel.Ua
         public String?[]? ServerUris { get; set; }
         public String?[]? LocaleIds { get; set; }
         public UInt32 ServiceId { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3284,7 +3084,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("ServiceId", ServiceId);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3305,7 +3104,6 @@ namespace Workstation.ServiceModel.Ua
         public String?[]? NamespaceUris { get; set; }
         public String?[]? ServerUris { get; set; }
         public UInt32 ServiceId { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3314,7 +3112,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("ServiceId", ServiceId);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3334,7 +3131,6 @@ namespace Workstation.ServiceModel.Ua
         public String? EndpointUrl { get; set; }
         public String?[]? LocaleIds { get; set; }
         public String?[]? ServerUris { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3344,7 +3140,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteStringArray("ServerUris", ServerUris);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3363,7 +3158,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ResponseHeader? ResponseHeader { get; set; }
         public ApplicationDescription?[]? Servers { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3371,7 +3165,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<ApplicationDescription>("Servers", Servers);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3390,7 +3183,6 @@ namespace Workstation.ServiceModel.Ua
         public String? ServerName { get; set; }
         public String? DiscoveryUrl { get; set; }
         public String?[]? ServerCapabilities { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3400,7 +3192,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteStringArray("ServerCapabilities", ServerCapabilities);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3421,7 +3212,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 StartingRecordId { get; set; }
         public UInt32 MaxRecordsToReturn { get; set; }
         public String?[]? ServerCapabilityFilter { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3431,7 +3221,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteStringArray("ServerCapabilityFilter", ServerCapabilityFilter);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3451,7 +3240,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public DateTime LastCounterResetTime { get; set; }
         public ServerOnNetwork?[]? Servers { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3460,7 +3248,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<ServerOnNetwork>("Servers", Servers);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3480,7 +3267,6 @@ namespace Workstation.ServiceModel.Ua
         public String? EndpointUrl { get; set; }
         public String?[]? LocaleIds { get; set; }
         public String?[]? ProfileUris { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3490,7 +3276,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteStringArray("ProfileUris", ProfileUris);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3509,7 +3294,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ResponseHeader? ResponseHeader { get; set; }
         public EndpointDescription?[]? Endpoints { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3517,7 +3301,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<EndpointDescription>("Endpoints", Endpoints);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3540,7 +3323,6 @@ namespace Workstation.ServiceModel.Ua
         public String?[]? DiscoveryUrls { get; set; }
         public String? SemaphoreFilePath { get; set; }
         public Boolean IsOnline { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3554,7 +3336,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("IsOnline", IsOnline);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3577,7 +3358,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public RegisteredServer? Server { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3585,7 +3365,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<RegisteredServer>("Server", Server);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3601,14 +3380,12 @@ namespace Workstation.ServiceModel.Ua
     public class RegisterServerResponse : IServiceResponse
     {
         public ResponseHeader? ResponseHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3622,13 +3399,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.DiscoveryConfiguration)]
     public class DiscoveryConfiguration : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3643,7 +3418,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public String? MdnsServerName { get; set; }
         public String?[]? ServerCapabilities { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -3652,7 +3426,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteStringArray("ServerCapabilities", ServerCapabilities);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -3671,7 +3444,6 @@ namespace Workstation.ServiceModel.Ua
         public RequestHeader? RequestHeader { get; set; }
         public RegisteredServer? Server { get; set; }
         public DiscoveryConfiguration?[]? DiscoveryConfiguration { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3680,7 +3452,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObjectArray<DiscoveryConfiguration>("DiscoveryConfiguration", DiscoveryConfiguration);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3699,7 +3470,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? ConfigurationResults { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3708,7 +3478,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3728,7 +3497,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 TokenId { get; set; }
         public DateTime CreatedAt { get; set; }
         public UInt32 RevisedLifetime { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3738,7 +3506,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RevisedLifetime", RevisedLifetime);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3761,7 +3528,6 @@ namespace Workstation.ServiceModel.Ua
         public MessageSecurityMode SecurityMode { get; set; }
         public Byte[]? ClientNonce { get; set; }
         public UInt32 RequestedLifetime { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3773,7 +3539,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RequestedLifetime", RequestedLifetime);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3796,7 +3561,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 ServerProtocolVersion { get; set; }
         public ChannelSecurityToken? SecurityToken { get; set; }
         public Byte[]? ServerNonce { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3806,7 +3570,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("ServerNonce", ServerNonce);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3824,14 +3587,12 @@ namespace Workstation.ServiceModel.Ua
     public class CloseSecureChannelRequest : IServiceRequest
     {
         public RequestHeader? RequestHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodable<RequestHeader>("RequestHeader", RequestHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3846,14 +3607,12 @@ namespace Workstation.ServiceModel.Ua
     public class CloseSecureChannelResponse : IServiceResponse
     {
         public ResponseHeader? ResponseHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3869,7 +3628,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Byte[]? CertificateData { get; set; }
         public Byte[]? Signature { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3877,7 +3635,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("Signature", Signature);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3894,7 +3651,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public String? Algorithm { get; set; }
         public Byte[]? Signature { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3902,7 +3658,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("Signature", Signature);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3926,7 +3681,6 @@ namespace Workstation.ServiceModel.Ua
         public Byte[]? ClientCertificate { get; set; }
         public Double RequestedSessionTimeout { get; set; }
         public UInt32 MaxResponseMessageSize { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3941,7 +3695,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("MaxResponseMessageSize", MaxResponseMessageSize);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3973,7 +3726,6 @@ namespace Workstation.ServiceModel.Ua
         public SignedSoftwareCertificate?[]? ServerSoftwareCertificates { get; set; }
         public SignatureData? ServerSignature { get; set; }
         public UInt32 MaxRequestMessageSize { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -3989,7 +3741,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("MaxRequestMessageSize", MaxRequestMessageSize);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4013,14 +3764,12 @@ namespace Workstation.ServiceModel.Ua
     public class UserIdentityToken : IEncodable
     {
         public String? PolicyId { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteString("PolicyId", PolicyId);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4036,7 +3785,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Byte[]? TokenData { get; set; }
         public String? EncryptionAlgorithm { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4045,7 +3793,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("EncryptionAlgorithm", EncryptionAlgorithm);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4062,7 +3809,6 @@ namespace Workstation.ServiceModel.Ua
     public class X509IdentityToken : UserIdentityToken
     {
         public Byte[]? CertificateData { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4070,7 +3816,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("CertificateData", CertificateData);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4088,7 +3833,6 @@ namespace Workstation.ServiceModel.Ua
         public String? UserName { get; set; }
         public Byte[]? Password { get; set; }
         public String? EncryptionAlgorithm { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4098,7 +3842,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("EncryptionAlgorithm", EncryptionAlgorithm);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4115,14 +3858,12 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.AnonymousIdentityToken)]
     public class AnonymousIdentityToken : UserIdentityToken
     {
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4142,7 +3883,6 @@ namespace Workstation.ServiceModel.Ua
         public String?[]? LocaleIds { get; set; }
         public UserIdentityToken? UserIdentityToken { get; set; }
         public SignatureData? UserTokenSignature { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4154,7 +3894,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<SignatureData>("UserTokenSignature", UserTokenSignature);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4177,7 +3916,6 @@ namespace Workstation.ServiceModel.Ua
         public Byte[]? ServerNonce { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4187,7 +3925,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4206,7 +3943,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public Boolean DeleteSubscriptions { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4214,7 +3950,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("DeleteSubscriptions", DeleteSubscriptions);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4230,14 +3965,12 @@ namespace Workstation.ServiceModel.Ua
     public class CloseSessionResponse : IServiceResponse
     {
         public ResponseHeader? ResponseHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4253,7 +3986,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public UInt32 RequestHandle { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4261,7 +3993,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RequestHandle", RequestHandle);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4278,7 +4009,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ResponseHeader? ResponseHeader { get; set; }
         public UInt32 CancelCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4286,7 +4016,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("CancelCount", CancelCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4306,7 +4035,6 @@ namespace Workstation.ServiceModel.Ua
         public LocalizedText? Description { get; set; }
         public UInt32 WriteMask { get; set; }
         public UInt32 UserWriteMask { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4317,7 +4045,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("UserWriteMask", UserWriteMask);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4336,7 +4063,6 @@ namespace Workstation.ServiceModel.Ua
     public class GenericAttributes : NodeAttributes
     {
         public GenericAttributeValue?[]? AttributeValues { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4344,7 +4070,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<GenericAttributeValue>("AttributeValues", AttributeValues);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4361,7 +4086,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 AttributeId { get; set; }
         public Variant Value { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4369,7 +4093,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariant("Value", Value);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4386,7 +4109,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Boolean ContainsNoLoops { get; set; }
         public Byte EventNotifier { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4395,7 +4117,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("EventNotifier", EventNotifier);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4412,7 +4133,6 @@ namespace Workstation.ServiceModel.Ua
     public class DataTypeAttributes : NodeAttributes
     {
         public Boolean IsAbstract { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4420,7 +4140,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("IsAbstract", IsAbstract);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4438,7 +4157,6 @@ namespace Workstation.ServiceModel.Ua
         public Boolean IsAbstract { get; set; }
         public Boolean Symmetric { get; set; }
         public LocalizedText? InverseName { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4448,7 +4166,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteLocalizedText("InverseName", InverseName);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4470,7 +4187,6 @@ namespace Workstation.ServiceModel.Ua
         public Int32 ValueRank { get; set; }
         public UInt32[]? ArrayDimensions { get; set; }
         public Boolean IsAbstract { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4482,7 +4198,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("IsAbstract", IsAbstract);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4502,7 +4217,6 @@ namespace Workstation.ServiceModel.Ua
     public class ObjectTypeAttributes : NodeAttributes
     {
         public Boolean IsAbstract { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4510,7 +4224,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("IsAbstract", IsAbstract);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4527,7 +4240,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Boolean Executable { get; set; }
         public Boolean UserExecutable { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4536,7 +4248,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("UserExecutable", UserExecutable);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4560,7 +4271,6 @@ namespace Workstation.ServiceModel.Ua
         public Byte UserAccessLevel { get; set; }
         public Double MinimumSamplingInterval { get; set; }
         public Boolean Historizing { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4575,7 +4285,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("Historizing", Historizing);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4598,7 +4307,6 @@ namespace Workstation.ServiceModel.Ua
     public class ObjectAttributes : NodeAttributes
     {
         public Byte EventNotifier { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -4606,7 +4314,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("EventNotifier", EventNotifier);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -4628,7 +4335,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeClass NodeClass { get; set; }
         public NodeAttributes? NodeAttributes { get; set; }
         public ExpandedNodeId? TypeDefinition { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4641,7 +4347,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExpandedNodeId("TypeDefinition", TypeDefinition);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4663,7 +4368,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public StatusCode StatusCode { get; set; }
         public NodeId? AddedNodeId { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4671,7 +4375,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteNodeId("AddedNodeId", AddedNodeId);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4688,7 +4391,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public AddNodesItem?[]? NodesToAdd { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4696,7 +4398,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<AddNodesItem>("NodesToAdd", NodesToAdd);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4714,7 +4415,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public AddNodesResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4723,7 +4423,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4745,7 +4444,6 @@ namespace Workstation.ServiceModel.Ua
         public String? TargetServerUri { get; set; }
         public ExpandedNodeId? TargetNodeId { get; set; }
         public NodeClass TargetNodeClass { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4757,7 +4455,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEnumeration<NodeClass>("TargetNodeClass", TargetNodeClass);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4778,7 +4475,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public AddReferencesItem?[]? ReferencesToAdd { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4786,7 +4482,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<AddReferencesItem>("ReferencesToAdd", ReferencesToAdd);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4804,7 +4499,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4813,7 +4507,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4831,7 +4524,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public NodeId? NodeId { get; set; }
         public Boolean DeleteTargetReferences { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4839,7 +4531,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("DeleteTargetReferences", DeleteTargetReferences);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4856,7 +4547,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public DeleteNodesItem?[]? NodesToDelete { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4864,7 +4554,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<DeleteNodesItem>("NodesToDelete", NodesToDelete);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4882,7 +4571,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4891,7 +4579,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4912,7 +4599,6 @@ namespace Workstation.ServiceModel.Ua
         public Boolean IsForward { get; set; }
         public ExpandedNodeId? TargetNodeId { get; set; }
         public Boolean DeleteBidirectional { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4923,7 +4609,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("DeleteBidirectional", DeleteBidirectional);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4943,7 +4628,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public DeleteReferencesItem?[]? ReferencesToDelete { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4951,7 +4635,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<DeleteReferencesItem>("ReferencesToDelete", ReferencesToDelete);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4969,7 +4652,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4978,7 +4660,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -4997,7 +4678,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? ViewId { get; set; }
         public DateTime Timestamp { get; set; }
         public UInt32 ViewVersion { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5006,7 +4686,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("ViewVersion", ViewVersion);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5028,7 +4707,6 @@ namespace Workstation.ServiceModel.Ua
         public Boolean IncludeSubtypes { get; set; }
         public UInt32 NodeClassMask { get; set; }
         public UInt32 ResultMask { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5040,7 +4718,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("ResultMask", ResultMask);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5066,7 +4743,6 @@ namespace Workstation.ServiceModel.Ua
         public LocalizedText? DisplayName { get; set; }
         public NodeClass NodeClass { get; set; }
         public ExpandedNodeId? TypeDefinition { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5079,7 +4755,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExpandedNodeId("TypeDefinition", TypeDefinition);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5102,7 +4777,6 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode StatusCode { get; set; }
         public Byte[]? ContinuationPoint { get; set; }
         public ReferenceDescription?[]? References { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5111,7 +4785,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<ReferenceDescription>("References", References);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5131,7 +4804,6 @@ namespace Workstation.ServiceModel.Ua
         public ViewDescription? View { get; set; }
         public UInt32 RequestedMaxReferencesPerNode { get; set; }
         public BrowseDescription?[]? NodesToBrowse { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5141,7 +4813,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<BrowseDescription>("NodesToBrowse", NodesToBrowse);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5161,7 +4832,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public BrowseResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5170,7 +4840,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5189,7 +4858,6 @@ namespace Workstation.ServiceModel.Ua
         public RequestHeader? RequestHeader { get; set; }
         public Boolean ReleaseContinuationPoints { get; set; }
         public Byte[]?[]? ContinuationPoints { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5198,7 +4866,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteStringArray("ContinuationPoints", ContinuationPoints);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5217,7 +4884,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public BrowseResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5226,7 +4892,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5244,7 +4909,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public NodeId? StartingNode { get; set; }
         public RelativePath? RelativePath { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5252,7 +4916,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<RelativePath>("RelativePath", RelativePath);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5269,7 +4932,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ExpandedNodeId? TargetId { get; set; }
         public UInt32 RemainingPathIndex { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5277,7 +4939,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RemainingPathIndex", RemainingPathIndex);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5294,7 +4955,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public StatusCode StatusCode { get; set; }
         public BrowsePathTarget?[]? Targets { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5302,7 +4962,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<BrowsePathTarget>("Targets", Targets);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5319,7 +4978,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public BrowsePath?[]? BrowsePaths { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5327,7 +4985,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<BrowsePath>("BrowsePaths", BrowsePaths);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5345,7 +5002,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public BrowsePathResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5354,7 +5010,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5372,7 +5027,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public NodeId?[]? NodesToRegister { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5380,7 +5034,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteNodeIdArray("NodesToRegister", NodesToRegister);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5397,7 +5050,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ResponseHeader? ResponseHeader { get; set; }
         public NodeId?[]? RegisteredNodeIds { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5405,7 +5057,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteNodeIdArray("RegisteredNodeIds", RegisteredNodeIds);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5422,7 +5073,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public NodeId?[]? NodesToUnregister { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5430,7 +5080,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteNodeIdArray("NodesToUnregister", NodesToUnregister);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5446,14 +5095,12 @@ namespace Workstation.ServiceModel.Ua
     public class UnregisterNodesResponse : IServiceResponse
     {
         public ResponseHeader? ResponseHeader { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteEncodable<ResponseHeader>("ResponseHeader", ResponseHeader);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5476,7 +5123,6 @@ namespace Workstation.ServiceModel.Ua
         public Int32 MaxBufferSize { get; set; }
         public Int32 ChannelLifetime { get; set; }
         public Int32 SecurityTokenLifetime { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5491,7 +5137,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteInt32("SecurityTokenLifetime", SecurityTokenLifetime);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5516,7 +5161,6 @@ namespace Workstation.ServiceModel.Ua
         public RelativePath? RelativePath { get; set; }
         public UInt32 AttributeId { get; set; }
         public String? IndexRange { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5525,7 +5169,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("IndexRange", IndexRange);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5544,7 +5187,6 @@ namespace Workstation.ServiceModel.Ua
         public ExpandedNodeId? TypeDefinitionNode { get; set; }
         public Boolean IncludeSubTypes { get; set; }
         public QueryDataDescription?[]? DataToReturn { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5553,7 +5195,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<QueryDataDescription>("DataToReturn", DataToReturn);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5572,7 +5213,6 @@ namespace Workstation.ServiceModel.Ua
         public ExpandedNodeId? NodeId { get; set; }
         public ExpandedNodeId? TypeDefinitionNode { get; set; }
         public Variant[]? Values { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5581,7 +5221,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariantArray("Values", Values);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5601,7 +5240,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? ReferenceTypeId { get; set; }
         public Boolean IsForward { get; set; }
         public NodeId?[]? ReferencedNodeIds { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5611,7 +5249,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteNodeIdArray("ReferencedNodeIds", ReferencedNodeIds);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5631,7 +5268,6 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode StatusCode { get; set; }
         public StatusCode[]? OperandStatusCodes { get; set; }
         public DiagnosticInfo?[]? OperandDiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5640,7 +5276,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("OperandDiagnosticInfos", OperandDiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5658,7 +5293,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ContentFilterElementResult?[]? ElementResults { get; set; }
         public DiagnosticInfo?[]? ElementDiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5666,7 +5300,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("ElementDiagnosticInfos", ElementDiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5684,7 +5317,6 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode StatusCode { get; set; }
         public StatusCode[]? DataStatusCodes { get; set; }
         public DiagnosticInfo?[]? DataDiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5693,7 +5325,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DataDiagnosticInfos", DataDiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5715,7 +5346,6 @@ namespace Workstation.ServiceModel.Ua
         public ContentFilter? Filter { get; set; }
         public UInt32 MaxDataSetsToReturn { get; set; }
         public UInt32 MaxReferencesToReturn { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5727,7 +5357,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("MaxReferencesToReturn", MaxReferencesToReturn);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5752,7 +5381,6 @@ namespace Workstation.ServiceModel.Ua
         public ParsingResult?[]? ParsingResults { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
         public ContentFilterResult? FilterResult { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5764,7 +5392,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<ContentFilterResult>("FilterResult", FilterResult);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5786,7 +5413,6 @@ namespace Workstation.ServiceModel.Ua
         public RequestHeader? RequestHeader { get; set; }
         public Boolean ReleaseContinuationPoint { get; set; }
         public Byte[]? ContinuationPoint { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5795,7 +5421,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("ContinuationPoint", ContinuationPoint);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5814,7 +5439,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public QueryDataSet?[]? QueryDataSets { get; set; }
         public Byte[]? RevisedContinuationPoint { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5823,7 +5447,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("RevisedContinuationPoint", RevisedContinuationPoint);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5843,7 +5466,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 AttributeId { get; set; }
         public String? IndexRange { get; set; }
         public QualifiedName? DataEncoding { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5853,7 +5475,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteQualifiedName("DataEncoding", DataEncoding);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5874,7 +5495,6 @@ namespace Workstation.ServiceModel.Ua
         public Double MaxAge { get; set; }
         public TimestampsToReturn TimestampsToReturn { get; set; }
         public ReadValueId?[]? NodesToRead { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5884,7 +5504,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<ReadValueId>("NodesToRead", NodesToRead);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5904,7 +5523,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public DataValue?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5913,7 +5531,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5933,7 +5550,6 @@ namespace Workstation.ServiceModel.Ua
         public String? IndexRange { get; set; }
         public QualifiedName? DataEncoding { get; set; }
         public Byte[]? ContinuationPoint { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5943,7 +5559,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("ContinuationPoint", ContinuationPoint);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5960,13 +5575,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryBase)]
     public class HistoryBase : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -5980,7 +5593,6 @@ namespace Workstation.ServiceModel.Ua
     public class HistoryEvent : HistoryBase
     {
         public HistoryEventFieldList?[]? Events { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -5988,7 +5600,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<HistoryEventFieldList>("Events", Events);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6004,14 +5615,12 @@ namespace Workstation.ServiceModel.Ua
     public class HistoryEventFieldList : IEncodable
     {
         public Variant[]? EventFields { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteVariantArray("EventFields", EventFields);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6026,7 +5635,6 @@ namespace Workstation.ServiceModel.Ua
     public class HistoryData : HistoryBase
     {
         public DataValue?[]? DataValues { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6034,7 +5642,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDataValueArray("DataValues", DataValues);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6050,7 +5657,6 @@ namespace Workstation.ServiceModel.Ua
     public class HistoryModifiedData : HistoryData
     {
         public ModificationInfo?[]? ModificationInfos { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6058,7 +5664,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<ModificationInfo>("ModificationInfos", ModificationInfos);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6076,7 +5681,6 @@ namespace Workstation.ServiceModel.Ua
         public DateTime ModificationTime { get; set; }
         public HistoryUpdateType UpdateType { get; set; }
         public String? UserName { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6085,7 +5689,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteString("UserName", UserName);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6104,7 +5707,6 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode StatusCode { get; set; }
         public Byte[]? ContinuationPoint { get; set; }
         public HistoryBase? HistoryData { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6113,7 +5715,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject<HistoryBase>("HistoryData", HistoryData);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6129,13 +5730,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.HistoryReadDetails)]
     public class HistoryReadDetails : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6150,7 +5749,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public DateTime[]? ReqTimes { get; set; }
         public Boolean UseSimpleBounds { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6159,7 +5757,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("UseSimpleBounds", UseSimpleBounds);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6180,7 +5777,6 @@ namespace Workstation.ServiceModel.Ua
         public Double ProcessingInterval { get; set; }
         public NodeId?[]? AggregateType { get; set; }
         public AggregateConfiguration? AggregateConfiguration { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6192,7 +5788,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<AggregateConfiguration>("AggregateConfiguration", AggregateConfiguration);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6216,7 +5811,6 @@ namespace Workstation.ServiceModel.Ua
         public Byte PercentDataBad { get; set; }
         public Byte PercentDataGood { get; set; }
         public Boolean UseSlopedExtrapolation { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6227,7 +5821,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("UseSlopedExtrapolation", UseSlopedExtrapolation);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6250,7 +5843,6 @@ namespace Workstation.ServiceModel.Ua
         public DateTime EndTime { get; set; }
         public UInt32 NumValuesPerNode { get; set; }
         public Boolean ReturnBounds { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6262,7 +5854,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("ReturnBounds", ReturnBounds);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6285,7 +5876,6 @@ namespace Workstation.ServiceModel.Ua
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public EventFilter? Filter { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6296,7 +5886,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<EventFilter>("Filter", Filter);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6316,7 +5905,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public SimpleAttributeOperand?[]? SelectClauses { get; set; }
         public ContentFilter? WhereClause { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6325,7 +5913,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<ContentFilter>("WhereClause", WhereClause);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6341,13 +5928,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.MonitoringFilter)]
     public class MonitoringFilter : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6364,7 +5949,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? AggregateType { get; set; }
         public Double ProcessingInterval { get; set; }
         public AggregateConfiguration? AggregateConfiguration { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6375,7 +5959,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<AggregateConfiguration>("AggregateConfiguration", AggregateConfiguration);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6396,7 +5979,6 @@ namespace Workstation.ServiceModel.Ua
         public DataChangeTrigger Trigger { get; set; }
         public UInt32 DeadbandType { get; set; }
         public Double DeadbandValue { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6406,7 +5988,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("DeadbandValue", DeadbandValue);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6428,7 +6009,6 @@ namespace Workstation.ServiceModel.Ua
         public TimestampsToReturn TimestampsToReturn { get; set; }
         public Boolean ReleaseContinuationPoints { get; set; }
         public HistoryReadValueId?[]? NodesToRead { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6439,7 +6019,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<HistoryReadValueId>("NodesToRead", NodesToRead);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6460,7 +6039,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public HistoryReadResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6469,7 +6047,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6489,7 +6066,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 AttributeId { get; set; }
         public String? IndexRange { get; set; }
         public DataValue? Value { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6499,7 +6075,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDataValue("Value", Value);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6518,7 +6093,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public WriteValue?[]? NodesToWrite { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6526,7 +6100,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<WriteValue>("NodesToWrite", NodesToWrite);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6544,7 +6117,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6553,7 +6125,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6570,14 +6141,12 @@ namespace Workstation.ServiceModel.Ua
     public class HistoryUpdateDetails : IEncodable
     {
         public NodeId? NodeId { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteNodeId("NodeId", NodeId);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6592,7 +6161,6 @@ namespace Workstation.ServiceModel.Ua
     public class DeleteEventDetails : HistoryUpdateDetails
     {
         public Byte[]?[]? EventIds { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6600,7 +6168,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteStringArray("EventIds", EventIds);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6616,7 +6183,6 @@ namespace Workstation.ServiceModel.Ua
     public class DeleteAtTimeDetails : HistoryUpdateDetails
     {
         public DateTime[]? ReqTimes { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6624,7 +6190,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDateTimeArray("ReqTimes", ReqTimes);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6642,7 +6207,6 @@ namespace Workstation.ServiceModel.Ua
         public Boolean IsDeleteModified { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6652,7 +6216,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDateTime("EndTime", EndTime);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6672,7 +6235,6 @@ namespace Workstation.ServiceModel.Ua
         public PerformUpdateType PerformInsertReplace { get; set; }
         public EventFilter? Filter { get; set; }
         public HistoryEventFieldList?[]? EventData { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6682,7 +6244,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<HistoryEventFieldList>("EventData", EventData);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6701,7 +6262,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public PerformUpdateType PerformInsertReplace { get; set; }
         public DataValue?[]? UpdateValues { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6710,7 +6270,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDataValueArray("UpdateValues", UpdateValues);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6728,7 +6287,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public PerformUpdateType PerformInsertReplace { get; set; }
         public DataValue?[]? UpdateValues { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6737,7 +6295,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDataValueArray("UpdateValues", UpdateValues);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6756,7 +6313,6 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode StatusCode { get; set; }
         public StatusCode[]? OperationResults { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6765,7 +6321,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6783,7 +6338,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public HistoryUpdateDetails?[]? HistoryUpdateDetails { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6791,7 +6345,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObjectArray<HistoryUpdateDetails>("HistoryUpdateDetails", HistoryUpdateDetails);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6809,7 +6362,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public HistoryUpdateResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6818,7 +6370,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6837,7 +6388,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? ObjectId { get; set; }
         public NodeId? MethodId { get; set; }
         public Variant[]? InputArguments { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6846,7 +6396,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariantArray("InputArguments", InputArguments);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6866,7 +6415,6 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode[]? InputArgumentResults { get; set; }
         public DiagnosticInfo?[]? InputArgumentDiagnosticInfos { get; set; }
         public Variant[]? OutputArguments { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6876,7 +6424,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariantArray("OutputArguments", OutputArguments);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6895,7 +6442,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public CallMethodRequest?[]? MethodsToCall { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6903,7 +6449,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<CallMethodRequest>("MethodsToCall", MethodsToCall);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6921,7 +6466,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public CallMethodResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6930,7 +6474,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6946,13 +6489,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.MonitoringFilterResult)]
     public class MonitoringFilterResult : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -6968,7 +6509,6 @@ namespace Workstation.ServiceModel.Ua
         public DateTime RevisedStartTime { get; set; }
         public Double RevisedProcessingInterval { get; set; }
         public AggregateConfiguration? RevisedAggregateConfiguration { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -6978,7 +6518,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<AggregateConfiguration>("RevisedAggregateConfiguration", RevisedAggregateConfiguration);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -6998,7 +6537,6 @@ namespace Workstation.ServiceModel.Ua
         public StatusCode[]? SelectClauseResults { get; set; }
         public DiagnosticInfo?[]? SelectClauseDiagnosticInfos { get; set; }
         public ContentFilterResult? WhereClauseResult { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -7008,7 +6546,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<ContentFilterResult>("WhereClauseResult", WhereClauseResult);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -7030,7 +6567,6 @@ namespace Workstation.ServiceModel.Ua
         public MonitoringFilter? Filter { get; set; }
         public UInt32 QueueSize { get; set; }
         public Boolean DiscardOldest { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7041,7 +6577,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("DiscardOldest", DiscardOldest);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7062,7 +6597,6 @@ namespace Workstation.ServiceModel.Ua
         public ReadValueId? ItemToMonitor { get; set; }
         public MonitoringMode MonitoringMode { get; set; }
         public MonitoringParameters? RequestedParameters { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7071,7 +6605,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<MonitoringParameters>("RequestedParameters", RequestedParameters);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7092,7 +6625,6 @@ namespace Workstation.ServiceModel.Ua
         public Double RevisedSamplingInterval { get; set; }
         public UInt32 RevisedQueueSize { get; set; }
         public MonitoringFilterResult? FilterResult { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7103,7 +6635,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject<MonitoringFilterResult>("FilterResult", FilterResult);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7125,7 +6656,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 SubscriptionId { get; set; }
         public TimestampsToReturn TimestampsToReturn { get; set; }
         public MonitoredItemCreateRequest?[]? ItemsToCreate { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7135,7 +6665,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<MonitoredItemCreateRequest>("ItemsToCreate", ItemsToCreate);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7155,7 +6684,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public MonitoredItemCreateResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7164,7 +6692,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7182,7 +6709,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 MonitoredItemId { get; set; }
         public MonitoringParameters? RequestedParameters { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7190,7 +6716,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<MonitoringParameters>("RequestedParameters", RequestedParameters);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7209,7 +6734,6 @@ namespace Workstation.ServiceModel.Ua
         public Double RevisedSamplingInterval { get; set; }
         public UInt32 RevisedQueueSize { get; set; }
         public MonitoringFilterResult? FilterResult { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7219,7 +6743,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObject<MonitoringFilterResult>("FilterResult", FilterResult);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7240,7 +6763,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 SubscriptionId { get; set; }
         public TimestampsToReturn TimestampsToReturn { get; set; }
         public MonitoredItemModifyRequest?[]? ItemsToModify { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7250,7 +6772,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<MonitoredItemModifyRequest>("ItemsToModify", ItemsToModify);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7270,7 +6791,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public MonitoredItemModifyResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7279,7 +6799,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7299,7 +6818,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 SubscriptionId { get; set; }
         public MonitoringMode MonitoringMode { get; set; }
         public UInt32[]? MonitoredItemIds { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7309,7 +6827,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32Array("MonitoredItemIds", MonitoredItemIds);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7329,7 +6846,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7338,7 +6854,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7359,7 +6874,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 TriggeringItemId { get; set; }
         public UInt32[]? LinksToAdd { get; set; }
         public UInt32[]? LinksToRemove { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7370,7 +6884,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32Array("LinksToRemove", LinksToRemove);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7393,7 +6906,6 @@ namespace Workstation.ServiceModel.Ua
         public DiagnosticInfo?[]? AddDiagnosticInfos { get; set; }
         public StatusCode[]? RemoveResults { get; set; }
         public DiagnosticInfo?[]? RemoveDiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7404,7 +6916,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("RemoveDiagnosticInfos", RemoveDiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7425,7 +6936,6 @@ namespace Workstation.ServiceModel.Ua
         public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public UInt32[]? MonitoredItemIds { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7434,7 +6944,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32Array("MonitoredItemIds", MonitoredItemIds);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7453,7 +6962,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7462,7 +6970,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7485,7 +6992,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 MaxNotificationsPerPublish { get; set; }
         public Boolean PublishingEnabled { get; set; }
         public Byte Priority { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7498,7 +7004,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("Priority", Priority);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7523,7 +7028,6 @@ namespace Workstation.ServiceModel.Ua
         public Double RevisedPublishingInterval { get; set; }
         public UInt32 RevisedLifetimeCount { get; set; }
         public UInt32 RevisedMaxKeepAliveCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7534,7 +7038,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RevisedMaxKeepAliveCount", RevisedMaxKeepAliveCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7559,7 +7062,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 RequestedMaxKeepAliveCount { get; set; }
         public UInt32 MaxNotificationsPerPublish { get; set; }
         public Byte Priority { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7572,7 +7074,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("Priority", Priority);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7596,7 +7097,6 @@ namespace Workstation.ServiceModel.Ua
         public Double RevisedPublishingInterval { get; set; }
         public UInt32 RevisedLifetimeCount { get; set; }
         public UInt32 RevisedMaxKeepAliveCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7606,7 +7106,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RevisedMaxKeepAliveCount", RevisedMaxKeepAliveCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7626,7 +7125,6 @@ namespace Workstation.ServiceModel.Ua
         public RequestHeader? RequestHeader { get; set; }
         public Boolean PublishingEnabled { get; set; }
         public UInt32[]? SubscriptionIds { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7635,7 +7133,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32Array("SubscriptionIds", SubscriptionIds);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7654,7 +7151,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7663,7 +7159,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7682,7 +7177,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 SequenceNumber { get; set; }
         public DateTime PublishTime { get; set; }
         public NotificationData?[]? NotificationData { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7691,7 +7185,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteExtensionObjectArray<NotificationData>("NotificationData", NotificationData);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7707,13 +7200,11 @@ namespace Workstation.ServiceModel.Ua
     [DataTypeId(DataTypeIds.NotificationData)]
     public class NotificationData : IEncodable
     {
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7728,7 +7219,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public StatusCode Status { get; set; }
         public DiagnosticInfo? DiagnosticInfo { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -7737,7 +7227,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfo("DiagnosticInfo", DiagnosticInfo);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -7754,7 +7243,6 @@ namespace Workstation.ServiceModel.Ua
     public class EventNotificationList : NotificationData
     {
         public EventFieldList?[]? Events { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -7762,7 +7250,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<EventFieldList>("Events", Events);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -7779,7 +7266,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 ClientHandle { get; set; }
         public Variant[]? EventFields { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7787,7 +7273,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteVariantArray("EventFields", EventFields);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7804,7 +7289,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public MonitoredItemNotification?[]? MonitoredItems { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public override void Encode(IEncoder encoder)
         {
             base.Encode(encoder);
@@ -7813,7 +7297,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public override void Decode(IDecoder decoder)
         {
             base.Decode(decoder);
@@ -7831,7 +7314,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 ClientHandle { get; set; }
         public DataValue? Value { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7839,7 +7321,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDataValue("Value", Value);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7856,7 +7337,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 SubscriptionId { get; set; }
         public UInt32 SequenceNumber { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7864,7 +7344,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("SequenceNumber", SequenceNumber);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7881,7 +7360,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public SubscriptionAcknowledgement?[]? SubscriptionAcknowledgements { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7889,7 +7367,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<SubscriptionAcknowledgement>("SubscriptionAcknowledgements", SubscriptionAcknowledgements);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7911,7 +7388,6 @@ namespace Workstation.ServiceModel.Ua
         public NotificationMessage? NotificationMessage { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7924,7 +7400,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7947,7 +7422,6 @@ namespace Workstation.ServiceModel.Ua
         public RequestHeader? RequestHeader { get; set; }
         public UInt32 SubscriptionId { get; set; }
         public UInt32 RetransmitSequenceNumber { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7956,7 +7430,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RetransmitSequenceNumber", RetransmitSequenceNumber);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7974,7 +7447,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public ResponseHeader? ResponseHeader { get; set; }
         public NotificationMessage? NotificationMessage { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7982,7 +7454,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<NotificationMessage>("NotificationMessage", NotificationMessage);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -7999,7 +7470,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public StatusCode StatusCode { get; set; }
         public UInt32[]? AvailableSequenceNumbers { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8007,7 +7477,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32Array("AvailableSequenceNumbers", AvailableSequenceNumbers);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8025,7 +7494,6 @@ namespace Workstation.ServiceModel.Ua
         public RequestHeader? RequestHeader { get; set; }
         public UInt32[]? SubscriptionIds { get; set; }
         public Boolean SendInitialValues { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8034,7 +7502,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteBoolean("SendInitialValues", SendInitialValues);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8053,7 +7520,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public TransferResult?[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8062,7 +7528,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8080,7 +7545,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public RequestHeader? RequestHeader { get; set; }
         public UInt32[]? SubscriptionIds { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8088,7 +7552,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32Array("SubscriptionIds", SubscriptionIds);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8106,7 +7569,6 @@ namespace Workstation.ServiceModel.Ua
         public ResponseHeader? ResponseHeader { get; set; }
         public StatusCode[]? Results { get; set; }
         public DiagnosticInfo?[]? DiagnosticInfos { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8115,7 +7577,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfoArray("DiagnosticInfos", DiagnosticInfos);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8137,7 +7598,6 @@ namespace Workstation.ServiceModel.Ua
         public String? SoftwareVersion { get; set; }
         public String? BuildNumber { get; set; }
         public DateTime BuildDate { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8149,7 +7609,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDateTime("BuildDate", BuildDate);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8171,7 +7630,6 @@ namespace Workstation.ServiceModel.Ua
         public String? ServerId { get; set; }
         public Byte ServiceLevel { get; set; }
         public ServerState ServerState { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8180,7 +7638,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEnumeration<ServerState>("ServerState", ServerState);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8197,14 +7654,12 @@ namespace Workstation.ServiceModel.Ua
     public class EndpointUrlListDataType : IEncodable
     {
         public String?[]? EndpointUrlList { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
             encoder.WriteStringArray("EndpointUrlList", EndpointUrlList);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8220,7 +7675,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public String? ServerUri { get; set; }
         public EndpointUrlListDataType?[]? NetworkPaths { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8228,7 +7682,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodableArray<EndpointUrlListDataType>("NetworkPaths", NetworkPaths);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8247,7 +7700,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 MonitoredItemCount { get; set; }
         public UInt32 MaxMonitoredItemCount { get; set; }
         public UInt32 DisabledMonitoredItemCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8257,7 +7709,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("DisabledMonitoredItemCount", DisabledMonitoredItemCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8286,7 +7737,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 PublishingIntervalCount { get; set; }
         public UInt32 SecurityRejectedRequestsCount { get; set; }
         public UInt32 RejectedRequestsCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8304,7 +7754,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("RejectedRequestsCount", RejectedRequestsCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8335,7 +7784,6 @@ namespace Workstation.ServiceModel.Ua
         public BuildInfo? BuildInfo { get; set; }
         public UInt32 SecondsTillShutdown { get; set; }
         public LocalizedText? ShutdownReason { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8347,7 +7795,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteLocalizedText("ShutdownReason", ShutdownReason);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8409,7 +7856,6 @@ namespace Workstation.ServiceModel.Ua
         public ServiceCounterDataType? QueryNextCount { get; set; }
         public ServiceCounterDataType? RegisterNodesCount { get; set; }
         public ServiceCounterDataType? UnregisterNodesCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8458,7 +7904,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<ServiceCounterDataType>("UnregisterNodesCount", UnregisterNodesCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8516,7 +7961,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public UInt32 TotalCount { get; set; }
         public UInt32 ErrorCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8524,7 +7968,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("ErrorCount", ErrorCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8548,7 +7991,6 @@ namespace Workstation.ServiceModel.Ua
         public MessageSecurityMode SecurityMode { get; set; }
         public String? SecurityPolicyUri { get; set; }
         public Byte[]? ClientCertificate { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8563,7 +8005,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByteString("ClientCertificate", ClientCertificate);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8587,7 +8028,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public StatusCode StatusCode { get; set; }
         public DiagnosticInfo? DiagnosticInfo { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8595,7 +8035,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDiagnosticInfo("DiagnosticInfo", DiagnosticInfo);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8641,7 +8080,6 @@ namespace Workstation.ServiceModel.Ua
         public UInt32 MonitoringQueueOverflowCount { get; set; }
         public UInt32 NextSequenceNumber { get; set; }
         public UInt32 EventQueueOverFlowCount { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8678,7 +8116,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteUInt32("EventQueueOverFlowCount", EventQueueOverFlowCount);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8725,7 +8162,6 @@ namespace Workstation.ServiceModel.Ua
         public NodeId? Affected { get; set; }
         public NodeId? AffectedType { get; set; }
         public Byte Verb { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8734,7 +8170,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteByte("Verb", Verb);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8752,7 +8187,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public NodeId? Affected { get; set; }
         public NodeId? AffectedType { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8760,7 +8194,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteNodeId("AffectedType", AffectedType);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8777,7 +8210,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Double Low { get; set; }
         public Double High { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8785,7 +8217,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("High", High);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8804,7 +8235,6 @@ namespace Workstation.ServiceModel.Ua
         public Int32 UnitId { get; set; }
         public LocalizedText? DisplayName { get; set; }
         public LocalizedText? Description { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8814,7 +8244,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteLocalizedText("Description", Description);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8833,7 +8262,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Single Real { get; set; }
         public Single Imaginary { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8841,7 +8269,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteFloat("Imaginary", Imaginary);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8858,7 +8285,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Double Real { get; set; }
         public Double Imaginary { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8866,7 +8292,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDouble("Imaginary", Imaginary);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8886,7 +8311,6 @@ namespace Workstation.ServiceModel.Ua
         public LocalizedText? Title { get; set; }
         public AxisScaleEnumeration AxisScaleType { get; set; }
         public Double[]? AxisSteps { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8897,7 +8321,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDoubleArray("AxisSteps", AxisSteps);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8917,7 +8340,6 @@ namespace Workstation.ServiceModel.Ua
     {
         public Double X { get; set; }
         public Single Value { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8925,7 +8347,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteFloat("Value", Value);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8950,7 +8371,6 @@ namespace Workstation.ServiceModel.Ua
         public Argument?[]? LastMethodOutputArguments { get; set; }
         public DateTime LastMethodCallTime { get; set; }
         public StatusResult? LastMethodReturnStatus { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -8966,7 +8386,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<StatusResult>("LastMethodReturnStatus", LastMethodReturnStatus);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -9001,7 +8420,6 @@ namespace Workstation.ServiceModel.Ua
         public Variant[]? LastMethodOutputValues { get; set; }
         public DateTime LastMethodCallTime { get; set; }
         public StatusResult? LastMethodReturnStatus { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -9019,7 +8437,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteEncodable<StatusResult>("LastMethodReturnStatus", LastMethodReturnStatus);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -9047,7 +8464,6 @@ namespace Workstation.ServiceModel.Ua
         public String? Message { get; set; }
         public String? UserName { get; set; }
         public DateTime AnnotationTime { get; set; }
-
         public virtual void Encode(IEncoder encoder)
         {
             encoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");
@@ -9056,7 +8472,6 @@ namespace Workstation.ServiceModel.Ua
             encoder.WriteDateTime("AnnotationTime", AnnotationTime);
             encoder.PopNamespace();
         }
-
         public virtual void Decode(IDecoder decoder)
         {
             decoder.PushNamespace("http://opcfoundation.org/UA/2008/02/Types.xsd");

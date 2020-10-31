@@ -35,15 +35,13 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="mappedEndpoints">The mapped endpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The application options.</param>
-        /// <param name="additionalTypes">Any additional types to be registered with encoder.</param>
         public UaApplication(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>>? identityProvider,
             IEnumerable<MappedEndpoint> mappedEndpoints,
             ILoggerFactory? loggerFactory = null,
-            UaApplicationOptions? options = null,
-            IEnumerable<Type>? additionalTypes = null)
+            UaApplicationOptions? options = null)
         {
             if (localDescription == null)
             {
@@ -56,8 +54,6 @@ namespace Workstation.ServiceModel.Ua
             this.MappedEndpoints = mappedEndpoints;
             this.LoggerFactory = loggerFactory;
             this.Options = options ?? new UaApplicationOptions();
-            this.AdditionalTypes = additionalTypes;
-
             this.logger = loggerFactory?.CreateLogger<UaApplication>();
             this.channelMap = new ConcurrentDictionary<string, Lazy<Task<UaTcpSessionChannel>>>();
 
@@ -106,11 +102,6 @@ namespace Workstation.ServiceModel.Ua
         /// Gets the application options.
         /// </summary>
         public UaApplicationOptions Options { get; }
-
-        /// <summary>
-        /// Gets any additional types to be registered with encoder.
-        /// </summary>
-        public IEnumerable<Type>? AdditionalTypes { get; }
 
         /// <summary>
         /// Gets a System.Threading.Tasks.Task that represents the completion of the UaApplication.
@@ -252,8 +243,7 @@ namespace Workstation.ServiceModel.Ua
                     this.UserIdentityProvider,
                     endpoint,
                     this.LoggerFactory,
-                    this.Options,
-                    this.AdditionalTypes);
+                    this.Options);
 
                 channel.Faulted += (s, e) =>
                 {

@@ -24,6 +24,7 @@ using Workstation.Collections;
 using Workstation.ServiceModel.Ua;
 using Workstation.ServiceModel.Ua.Channels;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Workstation.UaClient.IntegrationTests
 {
@@ -41,13 +42,15 @@ namespace Workstation.UaClient.IntegrationTests
         private readonly ApplicationDescription localDescription;
         private readonly ICertificateStore certificateStore;
         private readonly X509Identity x509Identity;
+        private readonly ITestOutputHelper output;
 
-        public IntegrationTests()
+        public IntegrationTests(ITestOutputHelper output)
         {
-            this.loggerFactory = LoggerFactory.Create(builder => builder.AddDebug());
-            this.logger = this.loggerFactory?.CreateLogger<IntegrationTests>();
+            this.output = output;
+            loggerFactory = LoggerFactory.Create(builder => builder.AddDebug());
+            logger = loggerFactory?.CreateLogger<IntegrationTests>();
 
-            this.localDescription = new ApplicationDescription
+            localDescription = new ApplicationDescription
             {
                 ApplicationName = "Workstation.UaClient.UnitTests",
                 ApplicationUri = $"urn:{Dns.GetHostName()}:Workstation.UaClient.UnitTests",
@@ -58,7 +61,7 @@ namespace Workstation.UaClient.IntegrationTests
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                     "Workstation.UaClient.UnitTests",
                     "pki");
-            this.certificateStore = new DirectoryStore(pkiPath);
+            certificateStore = new DirectoryStore(pkiPath);
 
             // read x509Identity
             var userCert = default(X509Certificate);
@@ -111,7 +114,7 @@ namespace Workstation.UaClient.IntegrationTests
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             logger.LogInformation($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, this.loggerFactory);
+            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, loggerFactory);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
             foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.Where(e => e.SecurityPolicyUri == SecurityPolicyUris.None))
@@ -134,11 +137,11 @@ namespace Workstation.UaClient.IntegrationTests
                     }
 
                     var channel = new UaTcpSessionChannel(
-                        this.localDescription,
+                        localDescription,
                         null,
                         selectedUserIdentity,
                         selectedEndpoint,
-                        loggerFactory: this.loggerFactory);
+                        loggerFactory: loggerFactory);
 
                     await channel.OpenAsync();
                     logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -179,7 +182,7 @@ namespace Workstation.UaClient.IntegrationTests
                     switch (selectedTokenPolicy.TokenType)
                     {
                         case UserTokenType.Certificate:
-                            selectedUserIdentity = this.x509Identity;
+                            selectedUserIdentity = x509Identity;
                             break;
 
                         case UserTokenType.UserName:
@@ -195,11 +198,11 @@ namespace Workstation.UaClient.IntegrationTests
                     }
 
                     var channel = new UaTcpSessionChannel(
-                        this.localDescription,
-                        this.certificateStore,
+                        localDescription,
+                        certificateStore,
                         selectedUserIdentity,
                         selectedEndpoint,
-                        loggerFactory: this.loggerFactory);
+                        loggerFactory: loggerFactory);
 
                     await channel.OpenAsync();
                     logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -222,12 +225,12 @@ namespace Workstation.UaClient.IntegrationTests
         public async Task BrowseObjects()
         {
             var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new AnonymousIdentity(),
                 EndpointUrl,
                 SecurityPolicyUris.None,
-                loggerFactory: this.loggerFactory);
+                loggerFactory: loggerFactory);
 
             await channel.OpenAsync();
 
@@ -266,11 +269,11 @@ namespace Workstation.UaClient.IntegrationTests
         public async Task Read()
         {
             var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new AnonymousIdentity(),
                 EndpointUrl,
-                loggerFactory: this.loggerFactory);
+                loggerFactory: loggerFactory);
 
             await channel.OpenAsync();
             logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -302,11 +305,11 @@ namespace Workstation.UaClient.IntegrationTests
         public async Task Polling()
         {
             var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new AnonymousIdentity(),
                 EndpointUrl,
-                loggerFactory: this.loggerFactory);
+                loggerFactory: loggerFactory);
 
             await channel.OpenAsync();
             logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -335,11 +338,11 @@ namespace Workstation.UaClient.IntegrationTests
         public async Task TestSubscription()
         {
             var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new AnonymousIdentity(),
                 EndpointUrl,
-                loggerFactory: this.loggerFactory);
+                loggerFactory: loggerFactory);
 
             await channel.OpenAsync();
             logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -416,22 +419,21 @@ namespace Workstation.UaClient.IntegrationTests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous unit test.</returns>
         [Fact]
-        public async Task VectorAdd()
+        public async Task CustomVectorAdd()
         {
             var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new AnonymousIdentity(),
                 "opc.tcp://localhost:48010",
                 SecurityPolicyUris.None,
-                loggerFactory: this.loggerFactory,
-                additionalTypes: new[] { typeof(Vector) });
+                loggerFactory: loggerFactory);
 
             await channel.OpenAsync();
 
             logger.LogInformation("4 - Call VectorAdd method with structure arguments.");
-            var v1 = new Vector { X = 1.0, Y = 2.0, Z = 3.0 };
-            var v2 = new Vector { X = 1.0, Y = 2.0, Z = 3.0 };
+            var v1 = new CustomTypeLibrary.CustomVector { X = 1.0, Y = 2.0, Z = 3.0 };
+            var v2 = new CustomTypeLibrary.CustomVector { X = 1.0, Y = 2.0, Z = 3.0 };
             var request = new CallRequest
             {
                 MethodsToCall = new[] {
@@ -444,7 +446,7 @@ namespace Workstation.UaClient.IntegrationTests
                 }
             };
             var response = await channel.CallAsync(request);
-            var result = response.Results[0].OutputArguments[0].GetValueOrDefault<Vector>();
+            var result = response.Results[0].OutputArguments[0].GetValueOrDefault<CustomTypeLibrary.CustomVector>();
 
             logger.LogInformation($"  {v1}");
             logger.LogInformation($"+ {v2}");
@@ -458,33 +460,6 @@ namespace Workstation.UaClient.IntegrationTests
                 .Should().Be(6.0);
         }
 
-        [DataTypeId("nsu=http://www.unifiedautomation.com/DemoServer/;i=3002")]
-        [BinaryEncodingId("nsu=http://www.unifiedautomation.com/DemoServer/;i=5054")]
-        public class Vector : Structure
-        {
-            public double X { get; set; }
-
-            public double Y { get; set; }
-
-            public double Z { get; set; }
-
-            public override void Encode(IEncoder encoder)
-            {
-                encoder.WriteDouble("X", this.X);
-                encoder.WriteDouble("Y", this.Y);
-                encoder.WriteDouble("Z", this.Z);
-            }
-
-            public override void Decode(IDecoder decoder)
-            {
-                this.X = decoder.ReadDouble("X");
-                this.Y = decoder.ReadDouble("Y");
-                this.Z = decoder.ReadDouble("Z");
-            }
-
-            public override string ToString() => $"{{ X={this.X}; Y={this.Y}; Z={this.Z}; }}";
-        }
-
         /// <summary>
         /// Tests reading the historical data of the UACPPServer.
         /// Only run this test with a running opc test server.
@@ -494,11 +469,11 @@ namespace Workstation.UaClient.IntegrationTests
         public async Task ReadHistorical()
         {
             var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new AnonymousIdentity(),
                 "opc.tcp://localhost:48010",
-                loggerFactory: this.loggerFactory);
+                loggerFactory: loggerFactory);
 
             await channel.OpenAsync();
             logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -585,7 +560,7 @@ namespace Workstation.UaClient.IntegrationTests
                     "pki"))
                 .SetIdentity(new UserNameIdentity("root", "secret"))
                 .AddMappedEndpoints(config)
-                .SetLoggerFactory(this.loggerFactory)
+                .SetLoggerFactory(loggerFactory)
                 .ConfigureOptions(o => o.SessionTimeout = 30000)
                 .Build();
 
@@ -621,8 +596,8 @@ namespace Workstation.UaClient.IntegrationTests
             [MonitoredItem(nodeId: "i=2258")]
             public DateTime CurrentTime
             {
-                get { return this.currentTime; }
-                private set { this.currentTime = value; }
+                get { return currentTime; }
+                private set { currentTime = value; }
             }
 
             private DateTime currentTime;
@@ -633,8 +608,8 @@ namespace Workstation.UaClient.IntegrationTests
             [MonitoredItem(nodeId: "i=2258")]
             public DataValue CurrentTimeAsDataValue
             {
-                get { return this.currentTimeAsDataValue; }
-                private set { this.currentTimeAsDataValue = value; }
+                get { return currentTimeAsDataValue; }
+                private set { currentTimeAsDataValue = value; }
             }
 
             private DataValue currentTimeAsDataValue;
@@ -650,11 +625,11 @@ namespace Workstation.UaClient.IntegrationTests
         public async Task StackTest()
         {
             var channel = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new AnonymousIdentity(),
                 EndpointUrl,
-                loggerFactory: this.loggerFactory);
+                loggerFactory: loggerFactory);
 
             await channel.OpenAsync();
             logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
@@ -740,11 +715,11 @@ namespace Workstation.UaClient.IntegrationTests
         public async Task TransferSubscription()
         {
             var channel1 = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new UserNameIdentity("root", "secret"),
                 EndpointUrl,
-                loggerFactory: this.loggerFactory);
+                loggerFactory: loggerFactory);
 
             await channel1.OpenAsync();
             logger.LogInformation($"Opened session with endpoint '{channel1.RemoteEndpoint.EndpointUrl}'.");
@@ -798,8 +773,8 @@ namespace Workstation.UaClient.IntegrationTests
             await Task.Delay(3000);
 
             var channel2 = new UaTcpSessionChannel(
-                this.localDescription,
-                this.certificateStore,
+                localDescription,
+                certificateStore,
                 new UserNameIdentity("root", "secret"),
                 EndpointUrl);
 

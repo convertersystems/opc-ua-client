@@ -13,8 +13,8 @@ namespace Workstation.Collections
     /// <typeparam name="T">Type of element.</typeparam>
     public class ObservableQueue<T> : Queue<T>, INotifyCollectionChanged, INotifyPropertyChanged
     {
-        private readonly int capacity;
-        private readonly bool isFixedSize;
+        private readonly int _capacity;
+        private readonly bool _isFixedSize;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ObservableQueue{T}"/> class.
@@ -31,8 +31,8 @@ namespace Workstation.Collections
         public ObservableQueue(int capacity, bool isFixedSize = false)
             : base(capacity)
         {
-            this.capacity = capacity;
-            this.isFixedSize = isFixedSize;
+            _capacity = capacity;
+            _isFixedSize = isFixedSize;
         }
 
         /// <summary>
@@ -50,15 +50,15 @@ namespace Workstation.Collections
         /// </summary>
         public new void Clear()
         {
-            if (this.Count == 0)
+            if (Count == 0)
             {
                 return;
             }
 
             base.Clear();
-            this.OnPropertyChanged("Count");
-            this.OnPropertyChanged("Item[]");
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+            OnPropertyChanged("Count");
+            OnPropertyChanged("Item[]");
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
         }
 
         /// <summary>
@@ -68,9 +68,9 @@ namespace Workstation.Collections
         public new T Dequeue()
         {
             var item = base.Dequeue();
-            this.OnPropertyChanged("Count");
-            this.OnPropertyChanged("Item[]");
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, 0));
+            OnPropertyChanged("Count");
+            OnPropertyChanged("Item[]");
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item, 0));
             return item;
         }
 
@@ -80,18 +80,18 @@ namespace Workstation.Collections
         /// <param name="item">The object to add to the queue.</param>
         public new void Enqueue(T item)
         {
-            if (this.isFixedSize && this.capacity > 0)
+            if (_isFixedSize && _capacity > 0)
             {
-                while (this.Count >= this.capacity)
+                while (Count >= _capacity)
                 {
-                    this.Dequeue();
+                    Dequeue();
                 }
             }
 
             base.Enqueue(item);
-            this.OnPropertyChanged("Count");
-            this.OnPropertyChanged("Item[]");
-            this.OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, this.Count - 1));
+            OnPropertyChanged("Count");
+            OnPropertyChanged("Item[]");
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item, Count - 1));
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace Workstation.Collections
         /// <param name="e">Arguments of the event being raised.</param>
         protected virtual void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
         {
-            this.CollectionChanged?.Invoke(this, e);
+            CollectionChanged?.Invoke(this, e);
         }
 
         /// <summary>
@@ -109,12 +109,12 @@ namespace Workstation.Collections
         /// <param name="e">Arguments of the event being raised.</param>
         protected virtual void OnPropertyChanged(PropertyChangedEventArgs e)
         {
-            this.PropertyChanged?.Invoke(this, e);
+            PropertyChanged?.Invoke(this, e);
         }
 
         private void OnPropertyChanged(string propertyName)
         {
-            this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
+            OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
     }
 }

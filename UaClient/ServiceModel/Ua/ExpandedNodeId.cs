@@ -10,43 +10,43 @@ using System.Text;
 namespace Workstation.ServiceModel.Ua
 {
     [DataTypeId(DataTypeIds.ExpandedNodeId)]
-    public sealed class ExpandedNodeId : IEquatable<ExpandedNodeId>
+    public sealed class ExpandedNodeId : IEquatable<ExpandedNodeId?>
     {
         public static readonly ExpandedNodeId Null = new ExpandedNodeId(0);
 
         public ExpandedNodeId(uint identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(string identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(Guid identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(byte[] identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = new NodeId(identifier);
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = new NodeId(identifier);
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public ExpandedNodeId(NodeId identifier, string? namespaceUri = null, uint serverIndex = 0)
         {
-            this.NodeId = identifier;
-            this.NamespaceUri = namespaceUri;
-            this.ServerIndex = serverIndex;
+            NodeId = identifier;
+            NamespaceUri = namespaceUri;
+            ServerIndex = serverIndex;
         }
 
         public NodeId NodeId { get; }
@@ -55,62 +55,54 @@ namespace Workstation.ServiceModel.Ua
 
         public uint ServerIndex { get; }
 
-        public static bool operator ==(ExpandedNodeId? a, ExpandedNodeId? b)
-        {
-            if (ReferenceEquals(a, b))
-            {
-                return true;
-            }
-
-            if (ReferenceEquals(a, null) || ReferenceEquals(b, null))
-            {
-                return false;
-            }
-
-            return (a.NodeId == b.NodeId) && (a.NamespaceUri == b.NamespaceUri) && (a.ServerIndex == b.ServerIndex);
-        }
-
-        public static bool operator !=(ExpandedNodeId? a, ExpandedNodeId? b)
-        {
-            return !(a == b);
-        }
-
         public static bool IsNull(ExpandedNodeId? nodeId)
         {
             return (nodeId == null) || NodeId.IsNull(nodeId.NodeId);
         }
 
-        public static NodeId ToNodeId(ExpandedNodeId value, IList<string>? namespaceUris)
+        public static NodeId ToNodeId(ExpandedNodeId value, IReadOnlyList<string> namespaceUris)
         {
-            if (ReferenceEquals(value, null))
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
-
-            ushort ns = value.NodeId.NamespaceIndex;
-            var nsu = value.NamespaceUri;
-            if (namespaceUris != null && !string.IsNullOrEmpty(nsu))
+            if (namespaceUris is null)
             {
-                int i = namespaceUris.IndexOf(nsu!);
-                if (i != -1)
+                throw new ArgumentNullException(nameof(namespaceUris));
+            }
+            if (string.IsNullOrEmpty(value.NamespaceUri))
+            {
+                return value.NodeId;
+            }
+            int ns = -1;
+            for (int i = 0; i < namespaceUris.Count; i++)
+            {
+                if (namespaceUris[i].Equals(value.NamespaceUri!))
                 {
-                    ns = (ushort)i;
+                    ns = i;
+                    break;
                 }
             }
-
+            if (ns < 0)
+            {
+                throw new IndexOutOfRangeException();
+            }
             switch (value.NodeId.IdType)
             {
                 case IdType.Numeric:
-                    return new NodeId((uint)value.NodeId.Identifier, ns);
+                    return new NodeId((uint)value.NodeId.Identifier, (ushort)ns);
 
                 case IdType.String:
-                    return new NodeId((string)value.NodeId.Identifier, ns);
+                    return new NodeId((string)value.NodeId.Identifier, (ushort)ns);
 
                 case IdType.Guid:
-                    return new NodeId((Guid)value.NodeId.Identifier, ns);
+                    return new NodeId((Guid)value.NodeId.Identifier, (ushort)ns);
+
+                case IdType.Opaque:
+                    return new NodeId((byte[])value.NodeId.Identifier, (ushort)ns);
 
                 default:
-                    return new NodeId((byte[])value.NodeId.Identifier, ns);
+                    throw new IndexOutOfRangeException();
             }
         }
 
@@ -170,44 +162,53 @@ namespace Workstation.ServiceModel.Ua
             return value;
         }
 
-        public override bool Equals(object? o)
+        public override string ToString()
         {
-            if (o is ExpandedNodeId)
+            var sb = new StringBuilder();
+            if (ServerIndex > 0)
             {
-                return this == (ExpandedNodeId)o;
+                sb.AppendFormat("svr={0};", ServerIndex);
             }
 
-            return false;
+            if (!string.IsNullOrEmpty(NamespaceUri))
+            {
+                sb.AppendFormat("nsu={0};", NamespaceUri);
+            }
+
+            sb.Append(NodeId.ToString());
+            return sb.ToString();
         }
 
-        public bool Equals(ExpandedNodeId that)
+        public override bool Equals(object? obj)
         {
-            return this == that;
+            return Equals(obj as ExpandedNodeId);
+        }
+
+        public bool Equals(ExpandedNodeId? other)
+        {
+            return other != null &&
+                   EqualityComparer<NodeId>.Default.Equals(NodeId, other.NodeId) &&
+                   NamespaceUri == other.NamespaceUri &&
+                   ServerIndex == other.ServerIndex;
         }
 
         public override int GetHashCode()
         {
-            int result = this.NodeId.GetHashCode();
-            result = (397 * result) ^ (this.NamespaceUri != null ? this.NamespaceUri.GetHashCode() : 0);
-            result = (397 * result) ^ (int)this.ServerIndex;
-            return result;
+            int hashCode = -641591048;
+            hashCode = hashCode * -1521134295 + EqualityComparer<NodeId>.Default.GetHashCode(NodeId);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(NamespaceUri);
+            hashCode = hashCode * -1521134295 + ServerIndex.GetHashCode();
+            return hashCode;
         }
 
-        public override string ToString()
+        public static bool operator ==(ExpandedNodeId? left, ExpandedNodeId? right)
         {
-            var sb = new StringBuilder();
-            if (this.ServerIndex > 0)
-            {
-                sb.AppendFormat("svr={0};", this.ServerIndex);
-            }
+            return EqualityComparer<ExpandedNodeId?>.Default.Equals(left, right);
+        }
 
-            if (!string.IsNullOrEmpty(this.NamespaceUri))
-            {
-                sb.AppendFormat("nsu={0};", this.NamespaceUri);
-            }
-
-            sb.Append(this.NodeId.ToString());
-            return sb.ToString();
+        public static bool operator !=(ExpandedNodeId? left, ExpandedNodeId? right)
+        {
+            return !(left == right);
         }
     }
 }
