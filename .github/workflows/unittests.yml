@@ -13,12 +13,12 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '2.2.108'
-    - name: Setup .NET Core 3.0
+    - name: Setup .NET Core 3.1
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: '3.0.100'
+        dotnet-version: '3.1.101'
     - name: Workaround see https://github.com/actions/setup-dotnet/issues/25#issuecomment-557570168
-      run: rsync -a ${DOTNET_ROOT/3.0.100/2.2.108}/* $DOTNET_ROOT/
+      run: rsync -a ${DOTNET_ROOT/3.1.101/2.2.108}/* $DOTNET_ROOT/
     - name: Build with dotnet
       run: dotnet build --configuration Release
     - name: Run unit tests
