@@ -9,6 +9,7 @@ using System.Text;
 
 namespace Workstation.ServiceModel.Ua
 {
+    [DataTypeId(DataTypeIds.ExpandedNodeId)]
     public sealed class ExpandedNodeId : IEquatable<ExpandedNodeId?>
     {
         public static readonly ExpandedNodeId Null = new ExpandedNodeId(0);

@@ -12,6 +12,10 @@ using System.Xml.Linq;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
+    /// <summary>
+    /// A decoder for the OPC UA Binary DataEncoding.
+    /// </summary>
+    /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.1/">OPC UA specification Part 6: Mappings, 5.2.1</seealso>
     public sealed class BinaryDecoder : IDecoder, IDisposable
     {
         private const long _minFileTime = 504911232000000000L;
@@ -58,61 +62,133 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
         }
 
+        /// <summary>
+        /// Reads a boolean value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.1">OPC UA specification Part 6: Mappings, 5.2.2.1</seealso>
         public bool ReadBoolean(string? fieldName)
         {
             return _reader.ReadBoolean();
         }
 
+        /// <summary>
+        /// Reads a signed byte value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public sbyte ReadSByte(string? fieldName)
         {
             return _reader.ReadSByte();
         }
 
+        /// <summary>
+        /// Reads an unsigned byte value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public byte ReadByte(string? fieldName)
         {
             return _reader.ReadByte();
         }
 
+        /// <summary>
+        /// Reads a signed short value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public short ReadInt16(string? fieldName)
         {
             return _reader.ReadInt16();
         }
 
+        /// <summary>
+        /// Reads an unsigned short value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public ushort ReadUInt16(string? fieldName)
         {
             return _reader.ReadUInt16();
         }
 
+        /// <summary>
+        /// Reads a signed integer value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public int ReadInt32(string? fieldName)
         {
             return _reader.ReadInt32();
         }
 
+        /// <summary>
+        /// Reads an unsigned integer value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public uint ReadUInt32(string? fieldName)
         {
             return _reader.ReadUInt32();
         }
 
+        /// <summary>
+        /// Reads a signed long integer value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public long ReadInt64(string? fieldName)
         {
             return _reader.ReadInt64();
         }
 
+        /// <summary>
+        /// Reads an unsigned long integer value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
         public ulong ReadUInt64(string? fieldName)
         {
             return _reader.ReadUInt64();
         }
 
+        /// <summary>
+        /// Reads a floating point value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
         public float ReadFloat(string? fieldName)
         {
             return _reader.ReadSingle();
         }
 
+        /// <summary>
+        /// Reads a double precision floating point value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
         public double ReadDouble(string? fieldName)
         {
             return _reader.ReadDouble();
         }
 
+        /// <summary>
+        /// Reads a string from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.4">OPC UA specification Part 6: Mappings, 5.2.2.4</seealso>
         public string? ReadString(string? fieldName)
         {
             var array = ReadByteString(fieldName);
@@ -124,6 +200,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             return _encoding.GetString(array, 0, array.Length);
         }
 
+        /// <summary>
+        /// Reads a date time value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.5">OPC UA specification Part 6: Mappings, 5.2.2.5</seealso>
         public DateTime ReadDateTime(string? fieldName)
         {
             long num = _reader.ReadInt64();
@@ -140,12 +222,24 @@ namespace Workstation.ServiceModel.Ua.Channels
             return DateTime.FromFileTimeUtc(num);
         }
 
+        /// <summary>
+        /// Reads a GUID from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.6">OPC UA specification Part 6: Mappings, 5.2.2.6</seealso>
         public Guid ReadGuid(string? fieldName)
         {
             byte[] b = _reader.ReadBytes(16);
             return new Guid(b);
         }
 
+        /// <summary>
+        /// Reads a byte string from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.7">OPC UA specification Part 6: Mappings, 5.2.2.7</seealso>
         public byte[]? ReadByteString(string? fieldName)
         {
             int num = _reader.ReadInt32();
@@ -157,6 +251,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             return _reader.ReadBytes(num);
         }
 
+        /// <summary>
+        /// Reads a XML element from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.8">OPC UA specification Part 6: Mappings, 5.2.2.8</seealso>
         public XElement? ReadXElement(string? fieldName)
         {
             var array = ReadByteString(fieldName);
@@ -175,6 +275,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Reads a node id from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.9">OPC UA specification Part 6: Mappings, 5.2.2.9</seealso>
         public NodeId ReadNodeId(string? fieldName)
         {
             ushort ns = 0;
@@ -222,6 +328,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             throw new ServiceResultException(StatusCodes.BadDecodingError);
         }
 
+        /// <summary>
+        /// Reads an expanded node id from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.10">OPC UA specification Part 6: Mappings, 5.2.2.10</seealso>
         public ExpandedNodeId ReadExpandedNodeId(string? fieldName)
         {
             ushort ns = 0;
@@ -288,11 +400,23 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new ExpandedNodeId(nodeId, nsu, svr);
         }
 
+        /// <summary>
+        /// Reads a status code from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.11">OPC UA specification Part 6: Mappings, 5.2.2.11</seealso>
         public StatusCode ReadStatusCode(string? fieldName)
         {
             return ReadUInt32(fieldName);
         }
 
+        /// <summary>
+        /// Reads a <see cref="DiagnosticInfo"/> object from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.12">OPC UA specification Part 6: Mappings, 5.2.2.12</seealso>
         public DiagnosticInfo ReadDiagnosticInfo(string? fieldName)
         {
             int symbolicId = -1;
@@ -341,6 +465,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new DiagnosticInfo(namespaceUri, symbolicId, locale, localizedText, additionalInfo, innerStatusCode, innerDiagnosticInfo);
         }
 
+        /// <summary>
+        /// Reads a <see cref="QualifiedName"/> object from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.13">OPC UA specification Part 6: Mappings, 5.2.2.13</seealso>
         public QualifiedName ReadQualifiedName(string? fieldName)
         {
             ushort ns = ReadUInt16(null);
@@ -348,6 +478,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new QualifiedName(name, ns);
         }
 
+        /// <summary>
+        /// Reads a <see cref="LocalizedText"/> from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.14">OPC UA specification Part 6: Mappings, 5.2.2.14</seealso>
         public LocalizedText ReadLocalizedText(string? fieldName)
         {
             string? text = null;
@@ -366,6 +502,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new LocalizedText(text, locale);
         }
 
+        /// <summary>
+        /// Reads a <see cref="Variant"/> value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.16">OPC UA specification Part 6: Mappings, 5.2.2.16</seealso>
         public Variant ReadVariant(string? fieldName)
         {
             byte b = _reader.ReadByte();
@@ -611,6 +753,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Reads a <see cref="DataValue"/> from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.17">OPC UA specification Part 6: Mappings, 5.2.2.17</seealso>
         public DataValue ReadDataValue(string? fieldName)
         {
             Variant variant = Variant.Null;
@@ -653,6 +801,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             return new DataValue(variant, statusCode, sourceTimestamp, sourcePicoseconds, serverTimestamp, serverPicoseconds);
         }
 
+        /// <summary>
+        /// Reads a <see cref="ExtensionObject"/> from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
         public ExtensionObject? ReadExtensionObject(string? fieldName)
         {
             try
@@ -689,6 +843,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Reads a <see cref="ExtensionObject"/> from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
         public T? ReadExtensionObject<T>(string? fieldName)
             where T : class, IEncodable
         {
@@ -722,6 +882,12 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Reads a <see cref="IEncodable"/> object from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.6/">OPC UA specification Part 6: Mappings, 5.2.6</seealso>
         public T ReadEncodable<T>(string? fieldName)
             where T : class, IEncodable
         {
@@ -763,12 +929,26 @@ namespace Workstation.ServiceModel.Ua.Channels
             }        
         }
 
+
+        /// <summary>
+        /// Reads an enumeration value from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.4/">OPC UA specification Part 6: Mappings, 5.2.4</seealso>
         public T ReadEnumeration<T>(string? fieldName)
             where T : struct, IConvertible
         {
             return (T)Enum.ToObject(typeof(T), ReadInt32(null));
         }
 
+        /// <summary>
+        /// Reads a boolean value array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.1">OPC UA specification Part 6: Mappings, 5.2.2.1</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public bool[]? ReadBooleanArray(string? fieldNames)
         {
             int num = ReadArrayLength();
@@ -786,6 +966,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a signed byte array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public sbyte[]? ReadSByteArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -803,6 +990,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an unsigned byte array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public byte[]? ReadByteArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -820,6 +1014,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a signed short array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public short[]? ReadInt16Array(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -837,6 +1038,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an unsigned short array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ushort[]? ReadUInt16Array(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -854,6 +1062,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a signed integer array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public int[]? ReadInt32Array(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -871,6 +1086,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an unsigned integer array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public uint[]? ReadUInt32Array(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -888,6 +1110,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a signed long integer array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public long[]? ReadInt64Array(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -905,6 +1134,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an unsigned long integer array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.2">OPC UA specification Part 6: Mappings, 5.2.2.2</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ulong[]? ReadUInt64Array(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -922,6 +1158,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a floating point array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public float[]? ReadFloatArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -939,6 +1182,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a double percision floating point array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.3">OPC UA specification Part 6: Mappings, 5.2.2.3</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public double[]? ReadDoubleArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -956,6 +1206,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a string array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.4">OPC UA specification Part 6: Mappings, 5.2.2.4</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public string?[]? ReadStringArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -973,6 +1230,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a date time array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.5">OPC UA specification Part 6: Mappings, 5.2.2.5</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public DateTime[]? ReadDateTimeArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -990,6 +1254,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a GUID array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.6">OPC UA specification Part 6: Mappings, 5.2.2.6</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public Guid[]? ReadGuidArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1007,6 +1278,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a byte string array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.7">OPC UA specification Part 6: Mappings, 5.2.2.7</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public byte[]?[]? ReadByteStringArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1024,6 +1302,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a XML element array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.8">OPC UA specification Part 6: Mappings, 5.2.2.8</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public XElement?[]? ReadXElementArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1041,6 +1326,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a node id array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.9">OPC UA specification Part 6: Mappings, 5.2.2.9</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public NodeId[]? ReadNodeIdArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1058,6 +1350,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an expanded node id array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.10">OPC UA specification Part 6: Mappings, 5.2.2.10</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ExpandedNodeId[]? ReadExpandedNodeIdArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1075,6 +1374,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a status code array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.11">OPC UA specification Part 6: Mappings, 5.2.2.11</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public StatusCode[]? ReadStatusCodeArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1092,6 +1398,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a <see cref="DiagnosticInfo"/> object array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.12">OPC UA specification Part 6: Mappings, 5.2.2.12</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public DiagnosticInfo[]? ReadDiagnosticInfoArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1109,6 +1422,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a <see cref="QualifiedName"/> array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.13">OPC UA specification Part 6: Mappings, 5.2.2.13</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public QualifiedName[]? ReadQualifiedNameArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1126,6 +1446,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a <see cref="LocalizedText"/> array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.14">OPC UA specification Part 6: Mappings, 5.2.2.14</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public LocalizedText[]? ReadLocalizedTextArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1143,6 +1470,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a <see cref="Variant"/> array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.16">OPC UA specification Part 6: Mappings, 5.2.2.16</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public Variant[]? ReadVariantArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1160,6 +1494,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads a <see cref="DataValue"/> array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.17">OPC UA specification Part 6: Mappings, 5.2.2.17</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public DataValue[]? ReadDataValueArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1177,6 +1518,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an <see cref="ExtensionObject"/> array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public ExtensionObject?[]? ReadExtensionObjectArray(string? fieldName)
         {
             int num = ReadArrayLength();
@@ -1194,6 +1542,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an <see cref="ExtensionObject"/> array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.2/#5.2.2.15">OPC UA specification Part 6: Mappings, 5.2.2.15</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public T?[]? ReadExtensionObjectArray<T>(string? fieldName)
             where T : class, IEncodable
         {
@@ -1212,6 +1567,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an <see cref="IEncodable"/> array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.6/">OPC UA specification Part 6: Mappings, 5.2.6</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public T[]? ReadEncodableArray<T>(string? fieldName)
             where T : class, IEncodable
         {
@@ -1230,6 +1592,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             return list;
         }
 
+        /// <summary>
+        /// Reads an enumeration array from the stream.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <returns>The value.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.4/">OPC UA specification Part 6: Mappings, 5.2.4</seealso>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/5.2.5/">OPC UA specification Part 6: Mappings, 5.2.5</seealso>
         public T[]? ReadEnumerationArray<T>(string? fieldName)
             where T : struct, IConvertible
         {

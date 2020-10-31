@@ -15,6 +15,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="QueryFirstRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="QueryFirstResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.9.3/">OPC UA specification Part 4: Services, 5.9.3</seealso>
         public static async Task<QueryFirstResponse> QueryFirstAsync(this IRequestChannel channel, QueryFirstRequest request, CancellationToken token = default)
         {
             if (request == null)
@@ -31,6 +32,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">A instance of <see cref="IRequestChannel"/>.</param>
         /// <param name="request">A <see cref="QueryNextRequest"/>.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation that returns a <see cref="QueryNextResponse"/>.</returns>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.9.4/">OPC UA specification Part 4: Services, 5.9.4</seealso>
         public static async Task<QueryNextResponse> QueryNextAsync(this IRequestChannel channel, QueryNextRequest request, CancellationToken token = default)
         {
             if (request == null)

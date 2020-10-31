@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 namespace Workstation.ServiceModel.Ua
 {
+
+    [DataTypeId(DataTypeIds.LocalizedText)]
     public sealed class LocalizedText : IEquatable<LocalizedText?>
     {
         /// <summary>

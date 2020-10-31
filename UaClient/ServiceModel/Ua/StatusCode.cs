@@ -5,6 +5,8 @@ using System;
 
 namespace Workstation.ServiceModel.Ua
 {
+
+    [DataTypeId(DataTypeIds.StatusCode)]
     public readonly struct StatusCode : IEquatable<StatusCode>
     {
         private const uint _severityMask = 0xC0000000u;

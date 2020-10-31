@@ -8,7 +8,7 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// Attribute for classes to indicate the data type id.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Struct, AllowMultiple = false, Inherited = true)]
     public sealed class DataTypeIdAttribute : Attribute
     {
         public DataTypeIdAttribute(string s)

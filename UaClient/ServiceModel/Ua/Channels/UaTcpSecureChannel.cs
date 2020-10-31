@@ -596,6 +596,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.5.2/">OPC UA specification Part 4: Services, 5.5.2</seealso>
         protected override async Task OnOpenAsync(CancellationToken token = default)
         {
             await base.OnOpenAsync(token).ConfigureAwait(false);
@@ -625,6 +626,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
+        /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part4/5.5.3/">OPC UA specification Part 4: Services, 5.5.3</seealso>
         protected override async Task OnCloseAsync(CancellationToken token = default)
         {
             try

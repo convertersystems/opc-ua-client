@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 namespace Workstation.ServiceModel.Ua
 {
+
+    [DataTypeId(DataTypeIds.QualifiedName)]
     public sealed class QualifiedName : IEquatable<QualifiedName?>
     {
         /// <summary>
