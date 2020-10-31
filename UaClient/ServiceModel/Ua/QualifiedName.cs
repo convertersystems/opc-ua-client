@@ -79,7 +79,7 @@ namespace Workstation.ServiceModel.Ua
         public override int GetHashCode()
         {
             int hashCode = 978021522;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Name);
+            if (Name != null) hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Name);
             hashCode = hashCode * -1521134295 + NamespaceIndex.GetHashCode();
             return hashCode;
         }

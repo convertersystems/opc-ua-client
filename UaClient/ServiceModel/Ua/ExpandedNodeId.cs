@@ -196,7 +196,7 @@ namespace Workstation.ServiceModel.Ua
         {
             int hashCode = -641591048;
             hashCode = hashCode * -1521134295 + EqualityComparer<NodeId>.Default.GetHashCode(NodeId);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(NamespaceUri);
+            if (NamespaceUri != null) hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(NamespaceUri);
             hashCode = hashCode * -1521134295 + ServerIndex.GetHashCode();
             return hashCode;
         }

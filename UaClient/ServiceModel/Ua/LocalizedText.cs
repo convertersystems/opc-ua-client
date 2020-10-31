@@ -50,8 +50,8 @@ namespace Workstation.ServiceModel.Ua
         public override int GetHashCode()
         {
             int hashCode = 670029253;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Text);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Locale);
+            if (Text != null) hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Text);
+            if (Locale != null) hashCode = hashCode * -1521134295 + EqualityComparer<string?>.Default.GetHashCode(Locale);
             return hashCode;
         }
 
