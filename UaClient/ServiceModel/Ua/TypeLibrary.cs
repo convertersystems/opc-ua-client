@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -86,22 +87,22 @@ namespace Workstation.ServiceModel.Ua
             }
         }
 
-        public static bool TryGetTypeFromDataTypeId(ExpandedNodeId id, out Type type)
+        public static bool TryGetTypeFromDataTypeId(ExpandedNodeId id, [NotNullWhen(returnValue: true)] out Type? type)
         {
             return TypeLibrary._instance.Value._typeByDataTypeId.TryGetValue(id, out type);
         }
 
-        public static bool TryGetDataTypeIdFromType(Type type, out ExpandedNodeId id)
-        {
+        public static bool TryGetDataTypeIdFromType(Type type, [NotNullWhen(returnValue: true)] out ExpandedNodeId? id)
+        { 
             return TypeLibrary._instance.Value._dataTypeIdByType.TryGetValue(type, out id);
         }
 
-        public static bool TryGetTypeFromBinaryEncodingId(ExpandedNodeId id, out Type type)
+        public static bool TryGetTypeFromBinaryEncodingId(ExpandedNodeId id, [NotNullWhen(returnValue: true)] out Type? type)
         {
             return TypeLibrary._instance.Value._typeByBinaryEncodingId.TryGetValue(id, out type);
         }
 
-        public static bool TryGetBinaryEncodingIdFromType(Type type, out ExpandedNodeId id)
+        public static bool TryGetBinaryEncodingIdFromType(Type type, [NotNullWhen(returnValue: true)] out ExpandedNodeId? id)
         {
             return TypeLibrary._instance.Value._binaryEncodingIdByType.TryGetValue(type, out id);
         }
