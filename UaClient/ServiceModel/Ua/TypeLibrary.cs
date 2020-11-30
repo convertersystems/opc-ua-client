@@ -63,15 +63,27 @@ namespace Workstation.ServiceModel.Ua
 
         private void AddTypesToLibrary(Assembly assembly)
         {
-            foreach (var (type, attr) in from type in assembly.GetExportedTypes()
-                                         let attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false)
-                                         where attr != null
-                                         select (type, attr))
-                if (!_binaryEncodingIdByType.ContainsKey(type) && !_typeByBinaryEncodingId.ContainsKey(attr.NodeId))
+            foreach (var type in assembly.GetExportedTypes())
+            {
+                var attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                if (attr != null)
                 {
-                    _binaryEncodingIdByType.Add(type, attr.NodeId);
-                    _typeByBinaryEncodingId.Add(attr.NodeId, type);
+                    if (!_binaryEncodingIdByType.ContainsKey(type) && !_typeByBinaryEncodingId.ContainsKey(attr.NodeId))
+                    {
+                        _binaryEncodingIdByType.Add(type, attr.NodeId);
+                        _typeByBinaryEncodingId.Add(attr.NodeId, type);
+                    }
                 }
+                var attr2 = type.GetCustomAttribute<DataTypeIdAttribute>(false);
+                if (attr2 != null)
+                {
+                    if (!_dataTypeIdByType.ContainsKey(type) && !_typeByDataTypeId.ContainsKey(attr2.NodeId))
+                    {
+                        _dataTypeIdByType.Add(type, attr2.NodeId);
+                        _typeByDataTypeId.Add(attr2.NodeId, type);
+                    }
+                }
+            }
         }
 
         public static bool TryGetTypeFromDataTypeId(ExpandedNodeId id, out Type type)
@@ -80,7 +92,7 @@ namespace Workstation.ServiceModel.Ua
         }
 
         public static bool TryGetDataTypeIdFromType(Type type, out ExpandedNodeId id)
-        { 
+        {
             return TypeLibrary._instance.Value._dataTypeIdByType.TryGetValue(type, out id);
         }
 
