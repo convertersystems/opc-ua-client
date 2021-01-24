@@ -146,4 +146,87 @@ public class MainViewModel : SubscriptionBase
     private ServerStatusDataType serverServerStatus;
 }
 ```
-[1]: robot6.jpg  
+
+### Customize Subscription attribute at runtime (MVVM)
+
+#### Option 1 (MappedEndpoint )
+If you want to change the subscription values at runtime, you can add a MappedEndpoint in the UaApplicationBuilder.
+
+The idea is that you map the Url in the SubscriptionAttribute to a new EndpointDescription where you can specify a different Url and SecurityPolicy.
+
+```csharp
+var app = new UaApplicationBuilder()
+    ...
+    .AddMappedEndpoint("ProductionServer", new EndpointDescription {EndpointUrl = "opc.tcp://192.168.1.100:48010"})
+    .Build();
+
+[Subscription(endpointUrl: "ProductionServer", publishingInterval: 500, keepAliveCount: 20)]
+private class MyViewModel : SubscriptionBase
+{}
+```
+
+#### Option 2 (config file)
+Further, if you don't wish to recompile you can use a config file to do the same.
+
+```csharp
+using Microsoft.Extensions.Configuration;
+
+var config = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appSettings.json", true)
+    .Build();
+
+var app = new UaApplicationBuilder()
+    ...
+    .AddMappedEndpoints(config)
+    .Build();
+
+[Subscription(endpointUrl: "ProductionServer", publishingInterval: 500, keepAliveCount: 20)]
+private class MyViewModel : SubscriptionBase
+{}
+```
+
+appSettings.json
+
+```json
+{
+  "MappedEndpoints": [
+    {
+      "RequestedUrl": "ProductionServer",
+      "Endpoint": {
+        "EndpointUrl": "opc.tcp://localhost:48010",
+        "SecurityPolicyUri": "http://opcfoundation.org/UA/SecurityPolicy#None"
+      }
+    },
+    {
+      "RequestedUrl": "WarehouseServer",
+      "Endpoint": {
+        "EndpointUrl": "opc.tcp://localhost:49320",
+        "SecurityPolicyUri": "http://opcfoundation.org/UA/SecurityPolicy#None"
+      }
+    }
+  ]
+}
+```
+
+#### Option 3 (constructor parameter)
+If any of these fits your needs, you can also provide a SubscriptionAttribute to the constructor of your ViewModel:
+
+```csharp
+var vm = new MyViewModel(new SubscriptionAttribute(...));
+```
+
+Note that, in this case, any static attribute will be ignored and the one provided in the constructor will be used. So, also in this case, your viewmodel will not need to be anotated with the [Subscription] attribute.
+
+```csharp
+var sa = new SubscriptionAttribute("opc.tcp://localhost:49320")
+var vm = new MyViewModel(sa);
+
+[Subscription(endpointUrl: "ProductionServer", publishingInterval: 500, keepAliveCount: 20)] // This will be ignored
+private class MyViewModel : SubscriptionBase
+{}
+
+```
+
+
+[1]: robot6.jpg
