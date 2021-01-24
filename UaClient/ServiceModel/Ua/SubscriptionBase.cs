@@ -46,7 +46,7 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="SubscriptionBase"/> class.
         /// </summary>
         /// <param name="runtimeSubscriptionAttribute">The optional attribute created at runtime.</param>
-        public SubscriptionBase(SubscriptionAttribute runtimeSubscriptionAttribute = null)
+        public SubscriptionBase(SubscriptionAttribute? runtimeSubscriptionAttribute = null)
             : this(UaApplication.Current, runtimeSubscriptionAttribute)
         {
         }
