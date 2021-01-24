@@ -45,8 +45,9 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionBase"/> class.
         /// </summary>
-        public SubscriptionBase()
-            : this(UaApplication.Current)
+        /// <param name="runtimeSubscriptionAttribute">The optional attribute created at runtime.</param>
+        public SubscriptionBase(SubscriptionAttribute runtimeSubscriptionAttribute = null)
+            : this(UaApplication.Current, runtimeSubscriptionAttribute)
         {
         }
 
@@ -54,7 +55,8 @@ namespace Workstation.ServiceModel.Ua
         /// Initializes a new instance of the <see cref="SubscriptionBase"/> class.
         /// </summary>
         /// <param name="application">The UaApplication.</param>
-        public SubscriptionBase(UaApplication? application)
+        /// <param name="runtimeSubscriptionAttribute">The optional attribute created at runtime.</param>
+        public SubscriptionBase(UaApplication? application, SubscriptionAttribute? runtimeSubscriptionAttribute = null)
         {
             this.application = application ?? throw new ArgumentNullException(nameof(application));
             this.application.Completion.ContinueWith(t => this.stateMachineCts?.Cancel());
@@ -76,9 +78,10 @@ namespace Workstation.ServiceModel.Ua
                 this.actionBlock = new ActionBlock<PublishResponse>(pr => this.OnPublishResponse(pr), new ExecutionDataflowBlockOptions { SingleProducerConstrained = true });
             }
 
-            // read [Subscription] attribute.
             var typeInfo = this.GetType().GetTypeInfo();
-            var sa = typeInfo.GetCustomAttribute<SubscriptionAttribute>();
+            
+            // read [Subscription] attribute.
+            var sa = runtimeSubscriptionAttribute ?? typeInfo.GetCustomAttribute<SubscriptionAttribute>();
             if (sa != null)
             {
                 this.endpointUrl = sa.EndpointUrl;
