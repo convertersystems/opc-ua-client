@@ -130,7 +130,7 @@ public partial class App : Application
 
 Then any view model can be transformed into a OPC UA subscription.  
 ```csharp    
-[Subscription(endpointUrl: "opc.tcp://localhost:26543", publishingInterval: 500, keepAliveCount: 20)]
+[Subscription(endpointUrl: "opc.tcp://localhost:48010", publishingInterval: 500, keepAliveCount: 20)]
 public class MainViewModel : SubscriptionBase
 {
     /// <summary>
@@ -144,6 +144,55 @@ public class MainViewModel : SubscriptionBase
     }
 
     private ServerStatusDataType serverServerStatus;
+}
+```
+
+### Configure EndpointUrl at runtime (MVVM)
+
+You can use a configuration file to replace all instances of an EndpointUrl at runtime. Use this approach to specify different endpoints for development versus production.
+```csharp
+using Microsoft.Extensions.Configuration;
+
+var config = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appSettings.json", true)
+    .Build();
+
+var app = new UaApplicationBuilder()
+    ...
+    .AddMappedEndpoints(config)
+    .Build();
+
+[Subscription(endpointUrl: "MainPLC", publishingInterval: 500, keepAliveCount: 20)]
+public class MainViewModel : SubscriptionBase
+{
+    /// <summary>
+    /// Gets the value of ServerServerStatus.
+    /// </summary>
+    [MonitoredItem(nodeId: "i=2256")]
+    public ServerStatusDataType ServerServerStatus
+    {
+        get { return this.serverServerStatus; }
+        private set { this.SetValue(ref this.serverServerStatus, value); }
+    }
+
+    private ServerStatusDataType serverServerStatus;
+}
+```
+
+appSettings.json
+
+```json
+{
+  "MappedEndpoints": [
+    {
+      "RequestedUrl": "MainPLC",
+      "Endpoint": {
+        "EndpointUrl": "opc.tcp://192.168.1.100:48010",
+        "SecurityPolicyUri": "http://opcfoundation.org/UA/SecurityPolicy#None"
+      }
+    }
+  ]
 }
 ```
 [1]: robot6.jpg  

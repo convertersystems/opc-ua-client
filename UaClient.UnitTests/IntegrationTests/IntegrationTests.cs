@@ -9,12 +9,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
-using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -680,13 +677,6 @@ namespace Workstation.UaClient.IntegrationTests
                 },
             };
 
-            readRequest = new ReadRequest
-            {
-                NodesToRead = new[]
-               {
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("i=11494") },
-                },
-            };
             var sw = new Stopwatch();
             sw.Restart();
             for (int i = 0; i < 1; i++)
@@ -802,6 +792,57 @@ namespace Workstation.UaClient.IntegrationTests
 
             logger.LogInformation($"Closing session '{channel2.SessionId}'.");
             await channel2.CloseAsync();
+        }
+
+        [Fact]
+        public async Task StructureTest()
+        {
+            var channel = new UaTcpSessionChannel(
+                localDescription,
+                certificateStore,
+                new AnonymousIdentity(),
+                EndpointUrl,
+                loggerFactory: loggerFactory);
+
+            await channel.OpenAsync();
+
+            var readRequest = new ReadRequest
+            {
+                NodesToRead = new[]
+                {
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Structure") },
+                },
+            };
+
+            var readResponse = await channel.ReadAsync(readRequest);
+            foreach (var result in readResponse.Results)
+            {
+                StatusCode.IsGood(result.StatusCode)
+                    .Should().BeTrue();
+            }
+
+            // reading this node returns an array of ExtensionObjects 
+            var obj = readResponse.Results[0].Value;
+
+            // create new DataValue for writing.  Most servers reject writing values with timestamps.
+            var newValue = new DataValue(obj);
+
+            var writeRequest = new WriteRequest
+            {
+                NodesToWrite = new[]
+                {
+                new WriteValue { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Structure"), Value =  newValue},
+                },
+            };
+            var writeResponse = await channel.WriteAsync(writeRequest);
+            foreach (var result in writeResponse.Results)
+            {
+                StatusCode.IsGood(result)
+                    .Should().BeTrue();
+            }
+
+            logger.LogInformation($"Closing session '{channel.SessionId}'.");
+            await channel.CloseAsync();
         }
 
     }
