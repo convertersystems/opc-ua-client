@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml.Linq;
 
 namespace Workstation.ServiceModel.Ua
 {
@@ -43,8 +44,35 @@ namespace Workstation.ServiceModel.Ua
 
         private TypeLibrary()
         {
-            _typeByDataTypeId = new Dictionary<ExpandedNodeId, Type>();
-            _dataTypeIdByType = new Dictionary<Type, ExpandedNodeId>();
+            _typeByDataTypeId = new Dictionary<ExpandedNodeId, Type>()
+            {
+                [ExpandedNodeId.Parse(DataTypeIds.Boolean)] = typeof(bool),
+                [ExpandedNodeId.Parse(DataTypeIds.SByte)] = typeof(sbyte),
+                [ExpandedNodeId.Parse(DataTypeIds.Byte)] = typeof(byte),
+                [ExpandedNodeId.Parse(DataTypeIds.Int16)] = typeof(short),
+                [ExpandedNodeId.Parse(DataTypeIds.UInt16)] = typeof(ushort),
+                [ExpandedNodeId.Parse(DataTypeIds.Int32)] = typeof(int),
+                [ExpandedNodeId.Parse(DataTypeIds.UInt32)] = typeof(uint),
+                [ExpandedNodeId.Parse(DataTypeIds.Int64)] = typeof(long),
+                [ExpandedNodeId.Parse(DataTypeIds.UInt64)] = typeof(ulong),
+                [ExpandedNodeId.Parse(DataTypeIds.Float)] = typeof(float),
+                [ExpandedNodeId.Parse(DataTypeIds.Double)] = typeof(double),
+                [ExpandedNodeId.Parse(DataTypeIds.String)] = typeof(string),
+                [ExpandedNodeId.Parse(DataTypeIds.DateTime)] = typeof(DateTime),
+                [ExpandedNodeId.Parse(DataTypeIds.Guid)] = typeof(Guid),
+                [ExpandedNodeId.Parse(DataTypeIds.ByteString)] = typeof(byte[]),
+                [ExpandedNodeId.Parse(DataTypeIds.XmlElement)] = typeof(XElement),
+                [ExpandedNodeId.Parse(DataTypeIds.NodeId)] = typeof(NodeId),
+                [ExpandedNodeId.Parse(DataTypeIds.ExpandedNodeId)] = typeof(ExpandedNodeId),
+                [ExpandedNodeId.Parse(DataTypeIds.StatusCode)] = typeof(StatusCode),
+                [ExpandedNodeId.Parse(DataTypeIds.QualifiedName)] = typeof(QualifiedName),
+                [ExpandedNodeId.Parse(DataTypeIds.LocalizedText)] = typeof(LocalizedText),
+                [ExpandedNodeId.Parse(DataTypeIds.Structure)] = typeof(ExtensionObject),
+                [ExpandedNodeId.Parse(DataTypeIds.DataValue)] = typeof(DataValue),
+                [ExpandedNodeId.Parse(DataTypeIds.BaseDataType)] = typeof(Variant),
+                [ExpandedNodeId.Parse(DataTypeIds.DiagnosticInfo)] = typeof(DiagnosticInfo),
+            };
+            _dataTypeIdByType = _typeByDataTypeId.ToDictionary(x => x.Value, x => x.Key);
             _binaryEncodingIdByType = new Dictionary<Type, ExpandedNodeId>();
             _typeByBinaryEncodingId = new Dictionary<ExpandedNodeId, Type>();
             foreach (var assembly in from assembly in AppDomain.CurrentDomain.GetAssemblies()

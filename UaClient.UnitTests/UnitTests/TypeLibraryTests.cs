@@ -30,5 +30,13 @@ namespace Workstation.UaClient.UnitTests
                 .Should().Be(typeof(ReadRequest));
         }
 
+        [Fact]
+        public void FindTypeByDataTypeId()
+        {
+            TypeLibrary.TryGetTypeFromDataTypeId(ExpandedNodeId.Parse("i=1"), out Type type)
+                .Should().BeTrue();
+            type
+                .Should().Be(typeof(Boolean));
+        }
     }
 }
