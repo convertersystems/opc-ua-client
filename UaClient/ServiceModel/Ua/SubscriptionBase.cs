@@ -169,16 +169,18 @@ namespace Workstation.ServiceModel.Ua
                     }
                 }
 
-                this.monitoredItems.Add(new ValueMonitoredItem(
-                    target: this,
-                    property: propertyInfo,
-                    nodeId: ExpandedNodeId.Parse(mia.NodeId),
-                    indexRange: mia.IndexRange,
-                    attributeId: mia.AttributeId,
-                    samplingInterval: mia.SamplingInterval,
-                    filter: filter,
-                    queueSize: mia.QueueSize,
-                    discardOldest: mia.DiscardOldest));
+                this.monitoredItems.Add((MonitoredItemBase)Activator.CreateInstance(
+                    typeof(ValueMonitoredItem<>).MakeGenericType(propType),
+                    this,
+                    propertyInfo,
+                    ExpandedNodeId.Parse(mia.NodeId),
+                    mia.AttributeId,
+                    mia.IndexRange,
+                    MonitoringMode.Reporting,
+                    mia.SamplingInterval,
+                    filter,
+                    mia.QueueSize,
+                    mia.DiscardOldest));
 
             }
 

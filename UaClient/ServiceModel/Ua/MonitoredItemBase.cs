@@ -386,6 +386,98 @@ namespace Workstation.ServiceModel.Ua
     }
 
     /// <summary>
+    /// Subscribes to data changes of an attribute of a node.
+    /// Unwraps the published value and sets it in a property.
+    /// </summary>
+    public class ValueMonitoredItem<T> : MonitoredItemBase
+    {
+        private StatusCode statusCode;
+
+        public ValueMonitoredItem(object target, PropertyInfo property, ExpandedNodeId nodeId, uint attributeId = 13, string? indexRange = null, MonitoringMode monitoringMode = MonitoringMode.Reporting, int samplingInterval = -1, MonitoringFilter? filter = null, uint queueSize = 0, bool discardOldest = true)
+            : base(property.Name, nodeId, attributeId, indexRange, monitoringMode, samplingInterval, filter, queueSize, discardOldest)
+        {
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
+            Target = target;
+            Property = property;
+        }
+
+        /// <summary>
+        /// Gets the target object.
+        /// </summary>
+        public object Target { get; }
+
+        /// <summary>
+        /// Gets the property of the target to store the published value.
+        /// </summary>
+        public PropertyInfo Property { get; }
+
+        public override void Publish(DataValue dataValue)
+        {
+            var value = dataValue.GetValueOrDefault<T>();
+            Property.SetValue(Target, value);
+            SetDataErrorInfo(dataValue.StatusCode);
+        }
+
+        public override void Publish(Variant[] eventFields)
+        {
+        }
+
+        public override bool TryGetValue(out DataValue? value)
+        {
+            var pi = Property;
+            if (pi.CanRead)
+            {
+                value = new DataValue(Property.GetValue(Target));
+                return true;
+            }
+            value = default(DataValue);
+            return false;
+        }
+
+        public override void OnCreateResult(MonitoredItemCreateResult result)
+        {
+            ServerId = result.MonitoredItemId;
+            SetDataErrorInfo(result.StatusCode);
+        }
+
+        public override void OnWriteResult(StatusCode statusCode)
+        {
+            SetDataErrorInfo(statusCode);
+        }
+
+        private void SetDataErrorInfo(StatusCode statusCode)
+        {
+            if (this.statusCode == statusCode)
+            {
+                return;
+            }
+
+            this.statusCode = statusCode;
+            var targetAsDataErrorInfo = Target as ISetDataErrorInfo;
+            if (targetAsDataErrorInfo != null)
+            {
+                if (!StatusCode.IsGood(statusCode))
+                {
+                    targetAsDataErrorInfo.SetErrors(Property.Name, new string[] { StatusCodes.GetDefaultMessage(statusCode) });
+                }
+                else
+                {
+                    targetAsDataErrorInfo.SetErrors(Property.Name, null);
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Subscribes to events of an attribute of a node.
     /// Sets the published event in a property of type BaseEvent or subtype.
     /// </summary>

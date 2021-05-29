@@ -42,20 +42,50 @@ namespace Workstation.ServiceModel.Ua
         [return: MaybeNull]
         public static T GetValueOrDefault<T>(this DataValue dataValue)
         {
-            var value = dataValue.GetValue();
-            if (value != null)
+            var value = dataValue.Value;
+            switch (value)
             {
-                if (value is T)
-                {
-                    return (T)value;
-                }
-            }
+                case ExtensionObject obj:
+                    // handle object, custom type
+                    var v2 = obj.BodyType == BodyType.Encodable ? obj.Body : obj;
+                    if (v2 is T t1)
+                    {
+                        return t1;
+                    }
+                    return default!;
 
-            // While [MaybeNull] attribute signals to the caller
-            // that the return value can be null. It is ignored
-            // by the compiler inside of the method, hence we
-            // have to use the bang operator.
-            return default!;
+                case ExtensionObject[] objArray:
+                    // handle object[], custom type[]
+                    var v3 = objArray.Select(e => e.BodyType == BodyType.Encodable ? e.Body : e);
+                    var elementType = typeof(T).GetElementType();
+                    if (elementType == null)
+                    {
+                        return default!;
+                    }
+                    try
+                    {
+                        var v4 = typeof(Enumerable).GetMethod("Cast").MakeGenericMethod(elementType).Invoke(null, new object[] { v3 });
+                        var v5 = typeof(Enumerable).GetMethod("ToArray").MakeGenericMethod(elementType).Invoke(null, new object[] { v4 });
+                        if (v5 is T t2)
+                        {
+                            return t2;
+                        }
+                        return default!;
+                    }
+                    catch (Exception)
+                    {
+                        return default!;
+                    }
+
+                default:
+                    // handle built-in type
+                    if (value is T t)
+                    {
+                        return t;
+                    }
+                    return default!;
+
+            }
         }
 
         /// <summary>
@@ -68,16 +98,50 @@ namespace Workstation.ServiceModel.Ua
         [return: NotNullIfNotNull("defaultValue")]
         public static T GetValueOrDefault<T>(this DataValue dataValue, T defaultValue)
         {
-            var value = dataValue.GetValue();
-            if (value != null)
+            var value = dataValue.Value;
+            switch (value)
             {
-                if (value is T)
-                {
-                    return (T)value;
-                }
-            }
+                case ExtensionObject obj:
+                    // handle object, custom type
+                    var v2 = obj.BodyType == BodyType.Encodable ? obj.Body : obj;
+                    if (v2 is T t1)
+                    {
+                        return t1;
+                    }
+                    return defaultValue;
 
-            return defaultValue;
+                case ExtensionObject[] objArray:
+                    // handle object[], custom type[]
+                    var v3 = objArray.Select(e => e.BodyType == BodyType.Encodable ? e.Body : e);
+                    var elementType = typeof(T).GetElementType();
+                    if (elementType == null)
+                    {
+                        return defaultValue;
+                    }
+                    try
+                    {
+                        var v4 = typeof(Enumerable).GetMethod("Cast").MakeGenericMethod(elementType).Invoke(null, new object[] { v3 });
+                        var v5 = typeof(Enumerable).GetMethod("ToArray").MakeGenericMethod(elementType).Invoke(null, new object[] { v4 });
+                        if (v5 is T t2)
+                        {
+                            return t2;
+                        }
+                        return defaultValue;
+                    }
+                    catch (Exception)
+                    {
+                        return defaultValue;
+                    }
+
+                default:
+                    // handle built-in type
+                    if (value is T t)
+                    {
+                        return t;
+                    }
+                    return defaultValue;
+
+            }
         }
     }
 }

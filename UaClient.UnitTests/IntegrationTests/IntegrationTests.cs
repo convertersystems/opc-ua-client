@@ -582,6 +582,10 @@ namespace Workstation.UaClient.IntegrationTests
                 .Should().NotBeNull();
             vm.CurrentTimeQueue
                 .Should().NotBeEmpty();
+            vm.DemoStaticArraysVector
+                .Should().NotBeEmpty();
+            vm.VectorsAsObjects
+                .Should().NotBeEmpty();
         }
 
         [Subscription(endpointUrl: "opc.tcp://localhost:48010", publishingInterval: 500, keepAliveCount: 20)]
@@ -616,7 +620,32 @@ namespace Workstation.UaClient.IntegrationTests
             /// </summary>
             [MonitoredItem(nodeId: "i=2258")]
             public ObservableQueue<DataValue> CurrentTimeQueue { get; } = new ObservableQueue<DataValue>(capacity: 16, isFixedSize: true);
+ 
+            /// <summary>
+            /// Gets or sets the value of DemoStaticArraysVector.
+            /// </summary>
+            [MonitoredItem(nodeId: "ns=2;s=Demo.Static.Arrays.Vector")]
+            public CustomTypeLibrary.CustomVector[] DemoStaticArraysVector
+            {
+                get { return this._DemoStaticArraysVector; }
+                set { this.SetProperty(ref this._DemoStaticArraysVector, value); }
+            }
+
+            private CustomTypeLibrary.CustomVector[] _DemoStaticArraysVector;
+
+            /// <summary>
+            /// Gets or sets the value of DemoStaticArraysVector.
+            /// </summary>
+            [MonitoredItem(nodeId: "ns=2;s=Demo.Static.Arrays.Vector")]
+            public object[] VectorsAsObjects
+            {
+                get { return this._VectorsAsObjects; }
+                set { this.SetProperty(ref this._VectorsAsObjects, value); }
+            }
+
+            private object[] _VectorsAsObjects;
         }
+
 
         [Fact]
         public async Task StackTest()
