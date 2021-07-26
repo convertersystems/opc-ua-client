@@ -565,10 +565,21 @@ namespace Workstation.ServiceModel.Ua
                             if (items.Count > 0)
                             {
                                 var requests = items.Select(m => new MonitoredItemCreateRequest { ItemToMonitor = new ReadValueId { NodeId = ExpandedNodeId.ToNodeId(m.NodeId, this.InnerChannel.NamespaceUris), AttributeId = m.AttributeId, IndexRange = m.IndexRange }, MonitoringMode = m.MonitoringMode, RequestedParameters = new MonitoringParameters { ClientHandle = m.ClientId, DiscardOldest = m.DiscardOldest, QueueSize = m.QueueSize, SamplingInterval = m.SamplingInterval, Filter = m.Filter } }).ToArray();
+                                
+                                //split requests array to MaxMonitoredItemsPerCall chunks
+                                int maxmonitoreditemspercall = 100;
+                                MonitoredItemCreateRequest[] requests_chunk;
+                                int chunk_size;
+                                for (int i_chunk = 0; i_chunk < requests.Length; i_chunk += maxmonitoreditemspercall)
+                                {
+                                    chunk_size = Math.Min(maxmonitoreditemspercall, requests.Length - i_chunk);
+                                    requests_chunk = new MonitoredItemCreateRequest[chunk_size];
+                                    Array.Copy(requests, i_chunk, requests_chunk, 0, chunk_size);
+                                
                                 var itemsRequest = new CreateMonitoredItemsRequest
                                 {
                                     SubscriptionId = id,
-                                    ItemsToCreate = requests,
+                                    ItemsToCreate = requests_chunk,
                                 };
                                 var itemsResponse = await this.innerChannel.CreateMonitoredItemsAsync(itemsRequest);
 
@@ -592,6 +603,7 @@ namespace Workstation.ServiceModel.Ua
                                         }
                                     }
                                 }
+                            }
                             }
 
                             this.progress.Report(CommunicationState.Opened);
