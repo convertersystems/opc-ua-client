@@ -15,6 +15,7 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Pkix;
 using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Security.Certificates;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.X509.Extension;
 using Org.BouncyCastle.X509.Store;
@@ -277,6 +278,13 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(target));
             }
 
+            if (!target.IsValidNow)
+            {
+                logger?.LogError($"Error validatingRemoteCertificate. Certificate is expired or not yet valid.");
+                StoreInRejectedFolder(target);
+                return Task.FromResult(false);
+            }
+
             var trustedCerts = new Org.BouncyCastle.Utilities.Collections.HashSet();
             var trustedCertsInfo = new DirectoryInfo(Path.Combine(_pkiPath, "trusted"));
             if (!trustedCertsInfo.Exists)
@@ -314,7 +322,7 @@ namespace Workstation.ServiceModel.Ua
                     }
                 }
             }
-
+            
             if (IsSelfSigned(target))
             {
                 // Create the selector that specifies the starting certificate
