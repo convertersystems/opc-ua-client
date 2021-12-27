@@ -180,7 +180,7 @@ namespace Workstation.ServiceModel.Ua
                     mia.SamplingInterval,
                     filter,
                     mia.QueueSize,
-                    mia.DiscardOldest));
+                    mia.DiscardOldest)!);
 
             }
 

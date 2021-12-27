@@ -501,7 +501,7 @@ namespace Workstation.UaClient.IntegrationTests
                 .Should().BeTrue();
             logger.LogInformation($"HistoryRead response status code: {result.StatusCode}, HistoryData count: {((HistoryData)result.HistoryData).DataValues.Length}.");
 
-            if (false) // UaCPPserver does not appear to store event history.  
+#if false // UaCPPserver does not appear to store event history.  
             {
                 var historyReadRequest2 = new HistoryReadRequest
                 {
@@ -531,6 +531,8 @@ namespace Workstation.UaClient.IntegrationTests
                 // Use EventHelper to create AlarmConditions from the HistoryEventFieldList
                 var alarms = ((HistoryEvent)result2.HistoryData).Events.Select(e => EventHelper.Deserialize<AlarmCondition>(e.EventFields));
             }
+#endif
+
             logger.LogInformation($"Closing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
