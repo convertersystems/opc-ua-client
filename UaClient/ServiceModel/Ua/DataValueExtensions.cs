@@ -64,8 +64,8 @@ namespace Workstation.ServiceModel.Ua
                     }
                     try
                     {
-                        var v4 = typeof(Enumerable).GetMethod("Cast").MakeGenericMethod(elementType).Invoke(null, new object[] { v3 });
-                        var v5 = typeof(Enumerable).GetMethod("ToArray").MakeGenericMethod(elementType).Invoke(null, new object[] { v4 });
+                        var v4 = typeof(Enumerable).GetMethod("Cast")!.MakeGenericMethod(elementType).Invoke(null, new object?[] { v3 });
+                        var v5 = typeof(Enumerable).GetMethod("ToArray")!.MakeGenericMethod(elementType).Invoke(null, new object?[] { v4 });
                         if (v5 is T t2)
                         {
                             return t2;
@@ -120,8 +120,8 @@ namespace Workstation.ServiceModel.Ua
                     }
                     try
                     {
-                        var v4 = typeof(Enumerable).GetMethod("Cast").MakeGenericMethod(elementType).Invoke(null, new object[] { v3 });
-                        var v5 = typeof(Enumerable).GetMethod("ToArray").MakeGenericMethod(elementType).Invoke(null, new object[] { v4 });
+                        var v4 = typeof(Enumerable).GetMethod("Cast")!.MakeGenericMethod(elementType).Invoke(null, new object?[] { v3 });
+                        var v5 = typeof(Enumerable).GetMethod("ToArray")!.MakeGenericMethod(elementType).Invoke(null, new object?[] { v4 });
                         if (v5 is T t2)
                         {
                             return t2;

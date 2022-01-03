@@ -200,7 +200,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <inheritdoc/>
-        public PublishResponse ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target, out bool messageConsumed)
+        public PublishResponse? ConsumeMessage(DataflowMessageHeader messageHeader, ITargetBlock<PublishResponse> target, out bool messageConsumed)
         {
             return ((ISourceBlock<PublishResponse>)_publishResponses).ConsumeMessage(messageHeader, target, out messageConsumed);
         }
