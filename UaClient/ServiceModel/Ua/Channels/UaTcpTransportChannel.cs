@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,15 +18,13 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const uint DefaultBufferSize = 64 * 1024;
         public const uint DefaultMaxMessageSize = 16 * 1024 * 1024;
         public const uint DefaultMaxChunkCount = 4 * 1024;
-        private const int _minBufferSize = 8 * 1024;
-        private const int _connectTimeout = 5000;
-        private static readonly Task _completedTask = Task.FromResult(true);
+
+        // This line should be removed once we have a complete StackProfile
+        // implementation
+        private static readonly ITransportConnectionProvider _connectionProvider = new UaTcpConnectionProvider();
 
         private readonly ILogger? _logger;
-        private byte[]? _sendBuffer;
-        private byte[]? _receiveBuffer;
-        private Stream? _stream;
-        private TcpClient? _tcpClient;
+        private ITransportConnection? _connection;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UaTcpTransportChannel"/> class.
@@ -97,7 +94,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// Gets the inner TCP socket.
         /// </summary>
-        protected virtual Socket? Socket => _tcpClient?.Client;
+        [Obsolete]
+        protected virtual Socket? Socket => null;
 
         /// <summary>
         /// Asynchronously sends a sequence of bytes to the remote endpoint.
@@ -110,8 +108,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected virtual async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token = default)
         {
             ThrowIfClosedOrNotOpening();
-            var stream = _stream ?? throw new InvalidOperationException("The stream field is null!");
-            await stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
+            var connection = _connection ?? throw new InvalidOperationException("The connection field is null!");
+            await connection.SendAsync(buffer, offset, count, token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -125,165 +123,54 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected virtual async Task<int> ReceiveAsync(byte[] buffer, int offset, int count, CancellationToken token = default)
         {
             ThrowIfClosedOrNotOpening();
-            var stream = _stream ?? throw new InvalidOperationException("The stream field is null!");
-            int initialOffset = offset;
-            int maxCount = count;
-            int num = 0;
-            count = 8;
-            while (count > 0)
-            {
-                try
-                {
-                    num = await stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
-                }
-                catch (Exception)
-                {
-                    return 0;
-                }
+            var connection = _connection ?? throw new InvalidOperationException("The connection field is null!");
 
-                if (num == 0)
-                {
-                    return 0;
-                }
-
-                offset += num;
-                count -= num;
-            }
-
-            var len = BitConverter.ToUInt32(buffer, 4);
-            if (len > maxCount)
-            {
-                throw new ServiceResultException(StatusCodes.BadResponseTooLarge);
-            }
-
-            count = (int)len - 8;
-            while (count > 0)
-            {
-                try
-                {
-                    num = await stream.ReadAsync(buffer, offset, count, token).ConfigureAwait(false);
-                }
-                catch (Exception)
-                {
-                    return 0;
-                }
-
-                if (num == 0)
-                {
-                    return 0;
-                }
-
-                offset += num;
-                count -= num;
-            }
-
-            return offset - initialOffset;
+            return await connection.ReceiveAsync(buffer, offset, count, token).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         protected override async Task OnOpenAsync(CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            _sendBuffer = new byte[_minBufferSize];
-            _receiveBuffer = new byte[_minBufferSize];
 
-            _tcpClient = new TcpClient { NoDelay = true };
-            var uri = new UriBuilder(RemoteEndpoint.EndpointUrl!);
-            await _tcpClient.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(_connectTimeout).ConfigureAwait(false);
-            _stream = _tcpClient.GetStream();
+            _connection = await _connectionProvider.ConnectAsync(RemoteEndpoint.EndpointUrl!).ConfigureAwait(false);
 
-            // send 'hello'.
-            int count;
-            var encoder = new BinaryEncoder(new MemoryStream(_sendBuffer, 0, _minBufferSize, true, false));
-            try
+            var localOptions = new TransportConnectionOptions
             {
-                encoder.WriteUInt32(null, UaTcpMessageTypes.HELF);
-                encoder.WriteUInt32(null, 0u);
-                encoder.WriteUInt32(null, ProtocolVersion);
-                encoder.WriteUInt32(null, LocalReceiveBufferSize);
-                encoder.WriteUInt32(null, LocalSendBufferSize);
-                encoder.WriteUInt32(null, LocalMaxMessageSize);
-                encoder.WriteUInt32(null, LocalMaxChunkCount);
-                encoder.WriteString(null, uri.ToString());
-                count = encoder.Position;
-                encoder.Position = 4;
-                encoder.WriteUInt32(null, (uint)count);
-                encoder.Position = count;
+                ReceiveBufferSize = LocalReceiveBufferSize,
+                SendBufferSize = LocalSendBufferSize,
+                MaxMessageSize = LocalMaxMessageSize,
+                MaxChunkCount = LocalMaxChunkCount
+            };
 
-                await SendAsync(_sendBuffer, 0, count, token).ConfigureAwait(false);
-            }
-            finally
+            var remoteOptions = await _connection.OpenAsync(ProtocolVersion, localOptions, token).ConfigureAwait(false);
+
+            RemoteSendBufferSize = remoteOptions.SendBufferSize;
+            RemoteReceiveBufferSize = remoteOptions.ReceiveBufferSize;
+            RemoteMaxMessageSize = remoteOptions.MaxMessageSize;
+            RemoteMaxChunkCount = remoteOptions.MaxChunkCount;
+        }
+
+        /// <inheritdoc/>
+        protected override async Task OnCloseAsync(CancellationToken token)
+        {
+            var connection = _connection;
+
+            if (connection != null)
             {
-                encoder.Dispose();
-            }
-
-            // receive response
-            count = await ReceiveAsync(_receiveBuffer, 0, _minBufferSize, token).ConfigureAwait(false);
-            if (count == 0)
-            {
-                throw new ObjectDisposedException("socket");
-            }
-
-            // decode 'ack' or 'err'.
-            var decoder = new BinaryDecoder(new MemoryStream(_receiveBuffer, 0, count, false, false));
-            try
-            {
-                var type = decoder.ReadUInt32(null);
-                var len = decoder.ReadUInt32(null);
-                if (type == UaTcpMessageTypes.ACKF)
-                {
-                    var remoteProtocolVersion = decoder.ReadUInt32(null);
-                    if (remoteProtocolVersion < ProtocolVersion)
-                    {
-                        throw new ServiceResultException(StatusCodes.BadProtocolVersionUnsupported);
-                    }
-
-                    RemoteSendBufferSize = decoder.ReadUInt32(null);
-                    RemoteReceiveBufferSize = decoder.ReadUInt32(null);
-                    RemoteMaxMessageSize = decoder.ReadUInt32(null);
-                    RemoteMaxChunkCount = decoder.ReadUInt32(null);
-                    return;
-                }
-                else if (type == UaTcpMessageTypes.ERRF)
-                {
-                    var statusCode = decoder.ReadUInt32(null);
-                    var message = decoder.ReadString(null);
-                    if (message != null)
-                    {
-                        throw new ServiceResultException(statusCode, message);
-                    }
-
-                    throw new ServiceResultException(statusCode);
-                }
-
-                throw new InvalidOperationException("UaTcpTransportChannel.OnOpenAsync received unexpected message type.");
-            }
-            finally
-            {
-                decoder.Dispose();
+                await connection.DisposeAsync().ConfigureAwait(false);
             }
         }
 
         /// <inheritdoc/>
-        protected override Task OnCloseAsync(CancellationToken token)
+        protected override async Task OnAbortAsync(CancellationToken token)
         {
-#if NET45
-            this.tcpClient?.Close();
-#else
-            _tcpClient?.Dispose();
-#endif
-            return _completedTask;
-        }
+            var connection = _connection;
 
-        /// <inheritdoc/>
-        protected override Task OnAbortAsync(CancellationToken token)
-        {
-#if NET45
-            this.tcpClient?.Close();
-#else
-            _tcpClient?.Dispose();
-#endif
-            return _completedTask;
+            if (connection != null)
+            {
+                await connection.DisposeAsync().ConfigureAwait(false);
+            }
         }
     }
 }
