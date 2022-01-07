@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Security;
 using System.Collections.Generic;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.X509;
 
 namespace Workstation.ServiceModel.Ua.Channels
 {
@@ -47,6 +49,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const string _rsaOaepSha256KeyWrap = @"http://opcfoundation.org/UA/security/rsa-oaep-sha2-256";
         private const int _nonceLength = 32;
         private const uint _publishTimeoutHint = 10 * 60 * 1000; // 10 minutes
+
+        private static readonly SecureRandom _rng = new SecureRandom();
+        private readonly X509CertificateParser _certificateParser = new X509CertificateParser();
 
         private readonly ILoggerFactory? _loggerFactory;
         private readonly ILogger? _logger;
@@ -167,6 +172,21 @@ namespace Workstation.ServiceModel.Ua.Channels
             _stateMachineCts = new CancellationTokenSource();
             _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
+
+        /// <summary>
+        /// Gets the local certificate.
+        /// </summary>
+        protected byte[]? LocalCertificate { get; private set; }
+
+        /// <summary>
+        /// Gets the local private key.
+        /// </summary>
+        protected RsaKeyParameters? LocalPrivateKey { get; private set; }
+
+        /// <summary>
+        /// Gets the remote public key.
+        /// </summary>
+        protected RsaKeyParameters? RemotePublicKey { get; private set; }
 
         /// <summary>
         /// Gets the asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>
@@ -311,15 +331,25 @@ namespace Workstation.ServiceModel.Ua.Channels
             // requires from previous Session: SessionId, AuthenticationToken, RemoteNonce
             if (SessionId == null)
             {
-                var localNonce = GetNextNonce(_nonceLength);
-                var localCertificate = LocalCertificate;
+                var localNonce = GetSessionNonce();
+
+                if (CertificateStore != null)
+                {
+                    var tuple = await CertificateStore.GetLocalCertificateAsync(LocalDescription, _logger);
+                    LocalCertificate = tuple.Certificate?.GetEncoded();
+                    LocalPrivateKey = tuple.Key;
+                }
+            
+                var cert = _certificateParser.ReadCertificate(RemoteCertificate);
+                RemotePublicKey = cert?.GetPublicKey() as RsaKeyParameters;
+
                 var createSessionRequest = new CreateSessionRequest
                 {
                     ClientDescription = LocalDescription,
                     EndpointUrl = RemoteEndpoint.EndpointUrl,
                     SessionName = LocalDescription.ApplicationName,
                     ClientNonce = localNonce,
-                    ClientCertificate = localCertificate,
+                    ClientCertificate = LocalCertificate,
                     RequestedSessionTimeout = _options.SessionTimeout,
                     MaxResponseMessageSize = RemoteMaxMessageSize
                 };
@@ -342,7 +372,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Basic256:
                         verifier = SignerUtilities.GetSigner("SHA-1withRSA");
                         verifier.Init(false, RemotePublicKey);
-                        verifier.BlockUpdate(localCertificate, 0, localCertificate!.Length);
+                        verifier.BlockUpdate(LocalCertificate, 0, LocalCertificate!.Length);
                         verifier.BlockUpdate(localNonce, 0, localNonce!.Length);
                         verified = verifier.VerifySignature(createSessionResponse.ServerSignature!.Signature);
                         break;
@@ -351,7 +381,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Aes128_Sha256_RsaOaep:
                         verifier = SignerUtilities.GetSigner("SHA-256withRSA");
                         verifier.Init(false, RemotePublicKey);
-                        verifier.BlockUpdate(localCertificate, 0, localCertificate!.Length);
+                        verifier.BlockUpdate(LocalCertificate, 0, LocalCertificate!.Length);
                         verifier.BlockUpdate(localNonce, 0, localNonce!.Length);
                         verified = verifier.VerifySignature(createSessionResponse.ServerSignature!.Signature);
                         break;
@@ -359,7 +389,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     case SecurityPolicyUris.Aes256_Sha256_RsaPss:
                         verifier = SignerUtilities.GetSigner("SHA-256withRSAandMGF1");
                         verifier.Init(false, RemotePublicKey);
-                        verifier.BlockUpdate(localCertificate, 0, localCertificate!.Length);
+                        verifier.BlockUpdate(LocalCertificate, 0, LocalCertificate!.Length);
                         verifier.BlockUpdate(localNonce, 0, localNonce!.Length);
                         verified = verifier.VerifySignature(createSessionResponse.ServerSignature!.Signature);
                         break;
@@ -901,5 +931,15 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        /// <summary>
+        /// Get random nonce.
+        /// </summary>
+        /// <returns>A nonce.</returns>
+        private byte[] GetSessionNonce()
+        {
+            var nonce = new byte[_nonceLength];
+            _rng.NextBytes(nonce);
+            return nonce;
+        }
     }
 }
