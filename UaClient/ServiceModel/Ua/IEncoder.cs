@@ -6,7 +6,7 @@ using System.Xml.Linq;
 
 namespace Workstation.ServiceModel.Ua
 {
-    public interface IEncoder
+    public interface IEncoder : IDisposable
     {
         void PushNamespace(string namespaceUri);
 
@@ -67,6 +67,8 @@ namespace Workstation.ServiceModel.Ua
 
         void WriteEncodable<T>(string? fieldName, T? value)
             where T : class, IEncodable;
+
+        void WriteRequest(IServiceRequest request);
 
         void WriteEnumeration<T>(string? fieldName, T value)
             where T : struct, IConvertible;
