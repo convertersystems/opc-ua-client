@@ -557,7 +557,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     // asymmetric security header
                     encoder.WriteString(null, _securityPolicyUri);
-                    if (_securityMode != MessageSecurityMode.None)
+                    if (SecurityMode != MessageSecurityMode.None)
                     {
                         encoder.WriteByteString(null, _localCertificate);
                         byte[] thumbprint = new byte[_thumbprintDigest!.GetDigestSize()];

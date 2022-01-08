@@ -14,6 +14,8 @@ namespace Workstation.UaClient.UnitTests.Channels
 {
     public partial class UaSecureConversationTests
     {
+        private const int TokenId = 1000;
+
         public static IEnumerable<byte[]> Messages => new[]
         {
             ShortMessageContent,
@@ -123,6 +125,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, request);
             server.SecurityMode = mode;
             var result = await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, response);
+            client.TokenId = TokenId;
 
             result.requestHandle
                 .Should().Be(handle);
@@ -163,6 +166,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
             await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            client.TokenId = TokenId;
 
             handle++;
             var result = await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
@@ -207,6 +211,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
             await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            client.TokenId = TokenId;
 
             handle++;
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
@@ -253,6 +258,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
             await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            client.TokenId = TokenId;
 
             handle++;
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
@@ -303,6 +309,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
             await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            client.TokenId = TokenId;
 
             handle++;
             await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
@@ -344,7 +351,10 @@ namespace Workstation.UaClient.UnitTests.Channels
                 ? ThrowingStore
                 : Store;
 
-            return new UaSecureConversation(channelId, ServerDescription, new TransportConnectionOptions(), store, null);
+            return new UaSecureConversation(channelId, ServerDescription, new TransportConnectionOptions(), store, null)
+            {
+                TokenId = TokenId,
+            };
         }
 
         private async Task<(uint messageType, uint requestHandle, byte[] content)> SendAndReceiveAsync(IConversation sender, IConversation receiver, uint messageType, uint handle, byte[] content)
