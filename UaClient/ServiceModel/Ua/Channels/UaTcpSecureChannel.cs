@@ -35,6 +35,9 @@ namespace Workstation.ServiceModel.Ua.Channels
         // This line should be removed once we have a complete StackProfile
         // implementation
         private static readonly IConversationProvider _conversationProvider = new UaSecureConversationProvider();
+        // This line should be removed once we have a complete StackProfile
+        // implementation
+        private static readonly IEncodingProvider _encodingProvider = new BinaryEncodingProvider();
 
         private static readonly RecyclableMemoryStreamManager _streamManager = new RecyclableMemoryStreamManager();
 
@@ -335,7 +338,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = _streamManager.GetStream("SendOpenSecureChannelRequestAsync");
-            using (var bodyEncoder = new BinaryEncoder(bodyStream, this))
+            using (var bodyEncoder = _encodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
@@ -354,7 +357,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = _streamManager.GetStream("SendCloseSecureChannelRequestAsync");
-            using (var bodyEncoder = new BinaryEncoder(bodyStream, this))
+            using (var bodyEncoder = _encodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
@@ -373,7 +376,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
             var bodyStream = _streamManager.GetStream("SendServiceRequestAsync");
-            using (var bodyEncoder = new BinaryEncoder(bodyStream, this))
+            using (var bodyEncoder = _encodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
@@ -473,7 +476,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 ThrowIfClosedOrNotOpening();
 
                 var bodyStream = _streamManager.GetStream("ReceiveResponseAsync");
-                var bodyDecoder = new BinaryDecoder(bodyStream, this);
+                var bodyDecoder = _encodingProvider.CreateDecoder(bodyStream, this, keepStreamOpen: false);
                 try
                 {
                     var ret = await _conversation!.DecryptMessageAsync(bodyStream, ReceiveAsync, token).ConfigureAwait(false);
