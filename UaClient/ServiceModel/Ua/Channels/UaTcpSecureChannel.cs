@@ -32,13 +32,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const uint DefaultDiagnosticsHint = (uint)DiagnosticFlags.None;
         private const int _tokenRequestedLifetime = 60 * 60 * 1000; // 60 minutes
 
-        // This line should be removed once we have a complete StackProfile
-        // implementation
-        private static readonly IConversationProvider _conversationProvider = new UaSecureConversationProvider();
-        // This line should be removed once we have a complete StackProfile
-        // implementation
-        private static readonly IEncodingProvider _encodingProvider = new BinaryEncodingProvider();
-
         private static readonly RecyclableMemoryStreamManager _streamManager = new RecyclableMemoryStreamManager();
 
         private readonly CancellationTokenSource _channelCts;
@@ -191,7 +184,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 MaxChunkCount = RemoteMaxChunkCount
             };
 
-            _conversation = await _conversationProvider.CreateAsync(RemoteEndpoint, LocalDescription, options, CertificateStore, _logger).ConfigureAwait(false);
+            _conversation = await StackProfile.ConversationProvider.CreateAsync(RemoteEndpoint, LocalDescription, options, CertificateStore, _logger).ConfigureAwait(false);
 
             token.ThrowIfCancellationRequested();
 
@@ -338,7 +331,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = _streamManager.GetStream("SendOpenSecureChannelRequestAsync");
-            using (var bodyEncoder = _encodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
+            using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
@@ -357,7 +350,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
             var bodyStream = _streamManager.GetStream("SendCloseSecureChannelRequestAsync");
-            using (var bodyEncoder = _encodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
+            using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
@@ -376,7 +369,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
             var bodyStream = _streamManager.GetStream("SendServiceRequestAsync");
-            using (var bodyEncoder = _encodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
+            using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
                 bodyStream.Position = 0;
@@ -476,7 +469,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 ThrowIfClosedOrNotOpening();
 
                 var bodyStream = _streamManager.GetStream("ReceiveResponseAsync");
-                var bodyDecoder = _encodingProvider.CreateDecoder(bodyStream, this, keepStreamOpen: false);
+                var bodyDecoder = StackProfile.EncodingProvider.CreateDecoder(bodyStream, this, keepStreamOpen: false);
                 try
                 {
                     var ret = await _conversation!.DecryptMessageAsync(bodyStream, ReceiveAsync, token).ConfigureAwait(false);
