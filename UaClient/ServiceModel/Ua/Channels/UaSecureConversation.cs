@@ -21,7 +21,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// The <see cref="IConversation"/> interface implementation
     /// for the OPC UA Secure Conversation (UASC).
     /// </summary>
-    /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/6.7.1/">OPC UA specification Part 6: Mappings, 7.2</seealso>
+    /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/6.7.1/">OPC UA specification Part 6: Mappings, 6.7.1</seealso>
     public class UaSecureConversation : IConversation
     {
         private const int _sequenceHeaderSize = 8;
