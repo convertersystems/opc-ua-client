@@ -27,13 +27,13 @@ namespace Workstation.ServiceModel.Ua
         private readonly ILogger? logger;
         private readonly UaApplication application;
         private volatile bool isPublishing;
-        private volatile UaTcpSessionChannel? innerChannel;
+        private volatile ClientSessionChannel? innerChannel;
         private volatile uint subscriptionId;
         private readonly ErrorsContainer<string> errors;
         private PropertyChangedEventHandler? propertyChanged;
         private readonly string? endpointUrl;
-        private readonly double publishingInterval = UaTcpSessionChannel.DefaultPublishingInterval;
-        private readonly uint keepAliveCount = UaTcpSessionChannel.DefaultKeepaliveCount;
+        private readonly double publishingInterval = ClientSessionChannel.DefaultPublishingInterval;
+        private readonly uint keepAliveCount = ClientSessionChannel.DefaultKeepaliveCount;
         private readonly uint lifetimeCount;
         private readonly MonitoredItemBaseCollection monitoredItems = new MonitoredItemBaseCollection();
         private CommunicationState state = CommunicationState.Created;
@@ -287,7 +287,7 @@ namespace Workstation.ServiceModel.Ua
         /// <summary>
         /// Gets the inner channel.
         /// </summary>
-        protected UaTcpSessionChannel InnerChannel
+        protected ClientSessionChannel InnerChannel
         {
             get
             {
@@ -495,7 +495,7 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="channel">The session channel. </param>
         /// <param name="token">A cancellation token. </param>
         /// <returns>A task.</returns>
-        private async Task WhenChannelClosingAsync(UaTcpSessionChannel channel, CancellationToken token = default)
+        private async Task WhenChannelClosingAsync(ClientSessionChannel channel, CancellationToken token = default)
         {
             var tcs = new TaskCompletionSource<bool>();
             EventHandler handler = (o, e) =>

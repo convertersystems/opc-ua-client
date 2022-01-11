@@ -43,7 +43,7 @@ namespace Workstation.ServiceModel.Ua
         /// <paramref name="consume"/> delegate.
         /// </summary>
         /// <param name="bodyStream">The content to be encrypted.</param>
-        /// <param name="messageType">The message type, <see cref="UaTcpMessageTypes"/>.</param>
+        /// <param name="messageType">The message type, <see cref="MessageTypes"/>.</param>
         /// <param name="requestHandle">The request handle.</param>
         /// <param name="consume">The delegate to consume the encrypted chunks.</param>
         /// <param name="token">A cancellation token used to propagate notification that this operation should be canceled.</param>

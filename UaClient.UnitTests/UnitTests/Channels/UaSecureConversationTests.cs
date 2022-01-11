@@ -88,12 +88,12 @@ namespace Workstation.UaClient.UnitTests.Channels
             var client = await CreateClientConversationAsync(securityPolicyUri, mode);
             var server = CreateServerConversation(channelId, mode);
 
-            var result = await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, request);
+            var result = await SendAndReceiveAsync(client, server, MessageTypes.OPNF, handle, request);
 
             result.requestHandle
                 .Should().Be(handle);
             result.messageType
-                .Should().Be(UaTcpMessageTypes.OPNF);
+                .Should().Be(MessageTypes.OPNF);
             result.content
                 .Should().Equal(request);
         }
@@ -122,15 +122,15 @@ namespace Workstation.UaClient.UnitTests.Channels
             var client = await CreateClientConversationAsync(securityPolicyUri, mode);
             var server = CreateServerConversation(channelId, mode);
 
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, request);
+            await SendAndReceiveAsync(client, server, MessageTypes.OPNF, handle, request);
             server.SecurityMode = mode;
-            var result = await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, response);
+            var result = await SendAndReceiveAsync(server, client, MessageTypes.OPNF, handle, response);
             client.TokenId = TokenId;
 
             result.requestHandle
                 .Should().Be(handle);
             result.messageType
-                .Should().Be(UaTcpMessageTypes.OPNF);
+                .Should().Be(MessageTypes.OPNF);
             result.content
                 .Should().Equal(response);
 
@@ -163,18 +163,18 @@ namespace Workstation.UaClient.UnitTests.Channels
             var client = await CreateClientConversationAsync(securityPolicyUri, mode);
             var server = CreateServerConversation(channelId, mode);
 
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
+            await SendAndReceiveAsync(client, server, MessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
-            await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            await SendAndReceiveAsync(server, client, MessageTypes.OPNF, handle, openResponse);
             client.TokenId = TokenId;
 
             handle++;
-            var result = await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
+            var result = await SendAndReceiveAsync(client, server, MessageTypes.MSGA, handle, request);
 
             result.requestHandle
                 .Should().Be(handle);
             result.messageType
-                .Should().Be(UaTcpMessageTypes.MSGF);
+                .Should().Be(MessageTypes.MSGF);
             result.content
                 .Should().Equal(request);
 
@@ -208,19 +208,19 @@ namespace Workstation.UaClient.UnitTests.Channels
             var client = await CreateClientConversationAsync(securityPolicyUri, mode);
             var server = CreateServerConversation(channelId, mode);
 
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
+            await SendAndReceiveAsync(client, server, MessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
-            await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            await SendAndReceiveAsync(server, client, MessageTypes.OPNF, handle, openResponse);
             client.TokenId = TokenId;
 
             handle++;
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
-            var result = await SendAndReceiveAsync(server, client, UaTcpMessageTypes.MSGA, handle, response);
+            await SendAndReceiveAsync(client, server, MessageTypes.MSGA, handle, request);
+            var result = await SendAndReceiveAsync(server, client, MessageTypes.MSGA, handle, response);
 
             result.requestHandle
                 .Should().Be(handle);
             result.messageType
-                .Should().Be(UaTcpMessageTypes.MSGF);
+                .Should().Be(MessageTypes.MSGF);
             result.content
                 .Should().Equal(response);
 
@@ -255,22 +255,22 @@ namespace Workstation.UaClient.UnitTests.Channels
             var client = await CreateClientConversationAsync(securityPolicyUri, mode);
             var server = CreateServerConversation(channelId, mode);
 
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
+            await SendAndReceiveAsync(client, server, MessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
-            await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            await SendAndReceiveAsync(server, client, MessageTypes.OPNF, handle, openResponse);
             client.TokenId = TokenId;
 
             handle++;
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
-            await SendAndReceiveAsync(server, client, UaTcpMessageTypes.MSGA, handle, response);
+            await SendAndReceiveAsync(client, server, MessageTypes.MSGA, handle, request);
+            await SendAndReceiveAsync(server, client, MessageTypes.MSGA, handle, response);
 
             handle++;
-            var result = await SendAndReceiveAsync(client, server, UaTcpMessageTypes.CLOF, handle, closingRequest);
+            var result = await SendAndReceiveAsync(client, server, MessageTypes.CLOF, handle, closingRequest);
 
             result.requestHandle
                 .Should().Be(handle);
             result.messageType
-                .Should().Be(UaTcpMessageTypes.CLOF);
+                .Should().Be(MessageTypes.CLOF);
             result.content
                 .Should().Equal(closingRequest);
 
@@ -306,23 +306,23 @@ namespace Workstation.UaClient.UnitTests.Channels
             var client = await CreateClientConversationAsync(securityPolicyUri, mode);
             var server = CreateServerConversation(channelId, mode);
 
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.OPNF, handle, openRequest);
+            await SendAndReceiveAsync(client, server, MessageTypes.OPNF, handle, openRequest);
             server.SecurityMode = mode;
-            await SendAndReceiveAsync(server, client, UaTcpMessageTypes.OPNF, handle, openResponse);
+            await SendAndReceiveAsync(server, client, MessageTypes.OPNF, handle, openResponse);
             client.TokenId = TokenId;
 
             handle++;
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.MSGA, handle, request);
-            await SendAndReceiveAsync(server, client, UaTcpMessageTypes.MSGA, handle, response);
+            await SendAndReceiveAsync(client, server, MessageTypes.MSGA, handle, request);
+            await SendAndReceiveAsync(server, client, MessageTypes.MSGA, handle, response);
 
             handle++;
-            await SendAndReceiveAsync(client, server, UaTcpMessageTypes.CLOF, handle, closingRequest);
-            var result = await SendAndReceiveAsync(server, client, UaTcpMessageTypes.CLOF, handle, closingResponse);
+            await SendAndReceiveAsync(client, server, MessageTypes.CLOF, handle, closingRequest);
+            var result = await SendAndReceiveAsync(server, client, MessageTypes.CLOF, handle, closingResponse);
 
             result.requestHandle
                 .Should().Be(handle);
             result.messageType
-                .Should().Be(UaTcpMessageTypes.CLOF);
+                .Should().Be(MessageTypes.CLOF);
             result.content
                 .Should().Equal(closingResponse);
 

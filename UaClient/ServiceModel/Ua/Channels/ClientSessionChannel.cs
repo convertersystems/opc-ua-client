@@ -19,7 +19,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// A session-full, secure channel for communicating with OPC UA servers using the UA TCP transport profile.
     /// </summary>
-    public class UaTcpSessionChannel : UaTcpSecureChannel, ISourceBlock<PublishResponse>, IObservable<PublishResponse>
+    public class ClientSessionChannel : ClientSecureChannel, ISourceBlock<PublishResponse>, IObservable<PublishResponse>
     {
         /// <summary>
         /// The default session timeout.
@@ -57,39 +57,40 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly ILogger? _logger;
         private readonly BroadcastBlock<PublishResponse> _publishResponses;
         private readonly ActionBlock<PublishResponse> _actionBlock;
-        private readonly UaTcpSessionChannelOptions _options;
+        private readonly ClientSessionChannelOptions _options;
         private readonly CancellationTokenSource _stateMachineCts;
         private Task? _stateMachineTask;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// Initializes a new instance of the <see cref="ClientSessionChannel"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="userIdentity">The user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
-        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
+        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to <see cref="DiscoveryService.GetEndpointsAsync(GetEndpointsRequest, ILoggerFactory?, UaApplicationOptions?, StackProfile?)"/>.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        public UaTcpSessionChannel(
+        public ClientSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             IUserIdentity userIdentity,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null)
-            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
+            ClientSessionChannelOptions? options = null,
+            StackProfile? stackProfile = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, stackProfile)
         {
             UserIdentity = userIdentity;
-            _options = options ?? new UaTcpSessionChannelOptions();
+            _options = options ?? new ClientSessionChannelOptions();
             _loggerFactory = loggerFactory;
-            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _logger = loggerFactory?.CreateLogger<ClientSessionChannel>();
             _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
             _stateMachineCts = new CancellationTokenSource();
             _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// Initializes a new instance of the <see cref="ClientSessionChannel"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
@@ -98,27 +99,28 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        public UaTcpSessionChannel(
+        public ClientSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             IUserIdentity? userIdentity,
             string endpointUrl,
             string? securityPolicyUri = null,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null)
-            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
+            ClientSessionChannelOptions? options = null,
+            StackProfile? stackProfile = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, stackProfile)
         {
             UserIdentity = userIdentity;
-            _options = options ?? new UaTcpSessionChannelOptions();
+            _options = options ?? new ClientSessionChannelOptions();
             _loggerFactory = loggerFactory;
-            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _logger = loggerFactory?.CreateLogger<ClientSessionChannel>();
             _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
             _stateMachineCts = new CancellationTokenSource();
             _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// Initializes a new instance of the <see cref="ClientSessionChannel"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
@@ -126,26 +128,27 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        public UaTcpSessionChannel(
+        public ClientSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>>? userIdentityProvider,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null)
-            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options)
+            ClientSessionChannelOptions? options = null,
+            StackProfile? stackProfile = null)
+            : base(localDescription, certificateStore, remoteEndpoint, loggerFactory, options, stackProfile)
         {
             UserIdentityProvider = userIdentityProvider;
-            _options = options ?? new UaTcpSessionChannelOptions();
+            _options = options ?? new ClientSessionChannelOptions();
             _loggerFactory = loggerFactory;
-            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _logger = loggerFactory?.CreateLogger<ClientSessionChannel>();
             _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
             _stateMachineCts = new CancellationTokenSource();
             _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpSessionChannel"/> class.
+        /// Initializes a new instance of the <see cref="ClientSessionChannel"/> class.
         /// </summary>
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
@@ -154,20 +157,21 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="securityPolicyUri">Optionally, filter by SecurityPolicyUri.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
-        public UaTcpSessionChannel(
+        public ClientSessionChannel(
             ApplicationDescription localDescription,
             ICertificateStore certificateStore,
             Func<EndpointDescription, Task<IUserIdentity>> userIdentityProvider,
             string endpointUrl,
             string? securityPolicyUri = null,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSessionChannelOptions? options = null)
-            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options)
+            ClientSessionChannelOptions? options = null,
+            StackProfile? stackProfile = null)
+            : base(localDescription, certificateStore, new EndpointDescription { EndpointUrl = endpointUrl, SecurityPolicyUri = securityPolicyUri }, loggerFactory, options, stackProfile)
         {
             UserIdentityProvider = userIdentityProvider;
-            _options = options ?? new UaTcpSessionChannelOptions();
+            _options = options ?? new ClientSessionChannelOptions();
             _loggerFactory = loggerFactory;
-            _logger = loggerFactory?.CreateLogger<UaTcpSessionChannel>();
+            _logger = loggerFactory?.CreateLogger<ClientSessionChannel>();
             _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
             _stateMachineCts = new CancellationTokenSource();
             _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
@@ -272,7 +276,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         EndpointUrl = endpointUrl,
                         ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
                     };
-                    var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, _loggerFactory).ConfigureAwait(false);
+                    var getEndpointsResponse = await DiscoveryService.GetEndpointsAsync(getEndpointsRequest, _loggerFactory, stackProfile: StackProfile).ConfigureAwait(false);
                     if (getEndpointsResponse.Endpoints == null || getEndpointsResponse.Endpoints.Length == 0)
                     {
                         throw new InvalidOperationException($"'{endpointUrl}' returned no endpoints.");

@@ -380,7 +380,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc />
         public Task EncryptMessageAsync(Stream bodyStream, uint messageType, uint requestHandle, Func<byte[], int, int, CancellationToken, Task> consume, CancellationToken token)
         {
-            if (messageType == UaTcpMessageTypes.OPNF)
+            if (messageType == MessageTypes.OPNF)
             {
                 return EncryptOpenMessage(bodyStream, messageType, requestHandle, consume, token);
             }
@@ -725,9 +725,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                     Debug.Assert(count == messageLength, "Bytes received not equal to encoded Message length");
                     switch (messageType)
                     {
-                        case UaTcpMessageTypes.MSGF:
-                        case UaTcpMessageTypes.MSGC:
-                        case UaTcpMessageTypes.CLOF:
+                        case MessageTypes.MSGF:
+                        case MessageTypes.MSGC:
+                        case MessageTypes.CLOF:
                             // header
                             channelId = decoder.ReadUInt32(null);
                             if (channelId != ChannelId)
@@ -809,10 +809,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                             }
 
                             bodyStream.Write(_receiveBuffer!, plainHeaderSize + _sequenceHeaderSize, bodySize);
-                            isFinal = messageType == UaTcpMessageTypes.MSGF || messageType == UaTcpMessageTypes.CLOF;
+                            isFinal = messageType == MessageTypes.MSGF || messageType == MessageTypes.CLOF;
                             break;
 
-                        case UaTcpMessageTypes.OPNF:
+                        case MessageTypes.OPNF:
                             // header
                             channelId = decoder.ReadUInt32(null);
                             if (!IsServer)
@@ -890,11 +890,11 @@ namespace Workstation.ServiceModel.Ua.Channels
                             }
 
                             bodyStream.Write(_receiveBuffer!, plainHeaderSize + _sequenceHeaderSize, bodySize);
-                            isFinal = messageType == UaTcpMessageTypes.OPNF;
+                            isFinal = messageType == MessageTypes.OPNF;
                             break;
 
-                        case UaTcpMessageTypes.ERRF:
-                        case UaTcpMessageTypes.MSGA:
+                        case MessageTypes.ERRF:
+                        case MessageTypes.MSGA:
                             var statusCode = (StatusCode)decoder.ReadUInt32(null);
                             var message = decoder.ReadString(null);
                             if (message != null)
