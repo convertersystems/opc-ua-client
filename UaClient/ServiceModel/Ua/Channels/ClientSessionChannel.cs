@@ -17,7 +17,7 @@ using Org.BouncyCastle.X509;
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
-    /// A session-full, secure channel for communicating with OPC UA servers using the UA TCP transport profile.
+    /// A session-full, secure channel for communicating with OPC UA servers.
     /// </summary>
     public class ClientSessionChannel : ClientSecureChannel, ISourceBlock<PublishResponse>, IObservable<PublishResponse>
     {
@@ -125,7 +125,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="localDescription">The <see cref="ApplicationDescription"/> of the local application.</param>
         /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="userIdentityProvider">An asynchronous function that provides the user identity. Provide an <see cref="AnonymousIdentity"/>, <see cref="UserNameIdentity"/>, <see cref="IssuedIdentity"/> or <see cref="X509Identity"/>.</param>
-        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to UaTcpDiscoveryClient.GetEndpoints.</param>
+        /// <param name="remoteEndpoint">The <see cref="EndpointDescription"/> of the remote application. Obtained from a prior call to <see cref="DiscoveryService.GetEndpointsAsync(GetEndpointsRequest, ILoggerFactory?, UaApplicationOptions?, StackProfile?)" /> .</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The session channel options.</param>
         public ClientSessionChannel(
@@ -274,7 +274,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     var getEndpointsRequest = new GetEndpointsRequest
                     {
                         EndpointUrl = endpointUrl,
-                        ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
+                        ProfileUris = new[] { TransportProfileUris.UaTcpTransport } // We should rethink this line, once we support transport profiles.
                     };
                     var getEndpointsResponse = await DiscoveryService.GetEndpointsAsync(getEndpointsRequest, _loggerFactory, stackProfile: StackProfile).ConfigureAwait(false);
                     if (getEndpointsResponse.Endpoints == null || getEndpointsResponse.Endpoints.Length == 0)

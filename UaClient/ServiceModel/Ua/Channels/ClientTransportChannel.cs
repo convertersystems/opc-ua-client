@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
-    /// A channel for communicating with OPC UA servers using the UA TCP transport profile.
+    /// A channel for communicating with OPC UA servers.
     /// </summary>
     public class ClientTransportChannel : CommunicationObject
     {

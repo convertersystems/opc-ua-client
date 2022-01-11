@@ -203,7 +203,7 @@ namespace Workstation.ServiceModel.Ua
         /// <returns>A <see cref="ClientSessionChannel"/>.</returns>
         public async Task<ClientSessionChannel> GetChannelAsync(string endpointUrl, CancellationToken token = default)
         {
-            this.logger?.LogTrace($"Begin getting UaTcpSessionChannel for {endpointUrl}");
+            this.logger?.LogTrace($"Begin getting {nameof(ClientSessionChannel)} for {endpointUrl}");
             if (string.IsNullOrEmpty(endpointUrl))
             {
                 throw new ArgumentNullException(nameof(endpointUrl));
@@ -223,7 +223,7 @@ namespace Workstation.ServiceModel.Ua
         {
             try
             {
-                this.logger?.LogTrace($"Begin creating UaTcpSessionChannel for {endpointUrl}");
+                this.logger?.LogTrace($"Begin creating {nameof(ClientSessionChannel)} for {endpointUrl}");
                 await this.CheckSuspension(token).ConfigureAwait(false);
 
                 EndpointDescription endpoint;
@@ -247,7 +247,7 @@ namespace Workstation.ServiceModel.Ua
 
                 channel.Faulted += (s, e) =>
                 {
-                    this.logger?.LogTrace($"Error creating UaTcpSessionChannel for {endpointUrl}. OnFaulted");
+                    this.logger?.LogTrace($"Error creating {nameof(ClientSessionChannel)} for {endpointUrl}. OnFaulted");
                     var ch = (ClientSessionChannel)s!;
                     try
                     {
@@ -260,18 +260,18 @@ namespace Workstation.ServiceModel.Ua
 
                 channel.Closing += (s, e) =>
                 {
-                    this.logger?.LogTrace($"Removing UaTcpSessionChannel for {endpointUrl} from channelMap.");
+                    this.logger?.LogTrace($"Removing {nameof(ClientSessionChannel)} for {endpointUrl} from channelMap.");
                     this.channelMap.TryRemove(endpointUrl, out _);
                 };
 
                 await channel.OpenAsync(token).ConfigureAwait(false);
-                this.logger?.LogTrace($"Success creating UaTcpSessionChannel for {endpointUrl}.");
+                this.logger?.LogTrace($"Success creating {nameof(ClientSessionChannel)} for {endpointUrl}.");
                 return channel;
 
             }
             catch (Exception ex)
             {
-                this.logger?.LogTrace($"Error creating UaTcpSessionChannel for {endpointUrl}. {ex.Message}");
+                this.logger?.LogTrace($"Error creating {nameof(ClientSessionChannel)} for {endpointUrl}. {ex.Message}");
                 throw;
             }
         }

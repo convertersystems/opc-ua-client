@@ -17,7 +17,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
-    /// A secure channel for communicating with OPC UA servers using the UA TCP transport profile.
+    /// A secure channel for communicating with OPC UA servers.
     /// </summary>
     public class ClientSecureChannel : ClientTransportChannel, IRequestChannel, IEncodingContext
     {
