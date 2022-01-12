@@ -464,8 +464,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 ThrowIfClosedOrNotOpening();
 
                 var bodyStream = _streamManager.GetStream("ReceiveResponseAsync");
-                var bodyDecoder = StackProfile.EncodingProvider.CreateDecoder(bodyStream, this, keepStreamOpen: false);
-                try
+                using (var bodyDecoder = StackProfile.EncodingProvider.CreateDecoder(bodyStream, this, keepStreamOpen: false))
                 {
                     var ret = await _conversation!.DecryptMessageAsync(bodyStream, ReceiveAsync, token).ConfigureAwait(false);
                     if (ret == (0, 0))
@@ -475,7 +474,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     bodyStream.Seek(0L, SeekOrigin.Begin);
                     var response = (IServiceResponse)bodyDecoder.ReadResponse();
-                    
+
                     _logger?.LogTrace($"Received {response.GetType().Name}, Handle: {response.ResponseHeader!.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
 
                     // special inline processing for token renewal because we need to
@@ -499,10 +498,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                     }
 
                     return response;
-                }
-                finally
-                {
-                    bodyDecoder.Dispose();
                 }
             }
             finally

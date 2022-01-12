@@ -403,8 +403,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var stream = new MemoryStream(_sendBuffer, 0, (int)_options.ReceiveBufferSize, true, true);
-                var encoder = new BinaryEncoder(stream);
-                try
+                using (var encoder = new BinaryEncoder(stream))
                 {
                     // header
                     encoder.WriteUInt32(null, messageType);
@@ -527,10 +526,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // pass buffer to transport
                     await consume(_sendBuffer, 0, position, token).ConfigureAwait(false);
                 }
-                finally
-                {
-                    encoder.Dispose();
-                }
             }
         }
 
@@ -547,8 +542,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var stream = new MemoryStream(_sendBuffer, 0, (int)_options.ReceiveBufferSize, true, true);
-                var encoder = new BinaryEncoder(stream);
-                try
+                using (var encoder = new BinaryEncoder(stream))
                 {
                     // header
                     encoder.WriteUInt32(null, messageType);
@@ -681,10 +675,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // pass buffer to transport
                     await consume(_sendBuffer!, 0, encoder.Position, token).ConfigureAwait(false);
                 }
-                finally
-                {
-                    encoder.Dispose();
-                }
             }
         }
 
@@ -716,8 +706,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 var stream = new MemoryStream(_receiveBuffer, 0, count, true, true);
-                var decoder = new BinaryDecoder(stream);
-                try
+                using (var decoder = new BinaryDecoder(stream))
                 {
                     uint channelId;
                     messageType = decoder.ReadUInt32(null);
@@ -912,10 +901,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                     {
                         throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                     }
-                }
-                finally
-                {
-                    decoder.Dispose(); // also disposes stream.
                 }
             }
             while (!isFinal);
