@@ -292,13 +292,13 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 _logger?.LogTrace($"Sending {request.GetType().Name}, Handle: {header.RequestHandle}");
                 _pendingCompletions.TryAdd(header.RequestHandle, operation);
-                if (request is OpenSecureChannelRequest)
+                if (request is OpenSecureChannelRequest openRequest)
                 {
-                    await SendOpenSecureChannelRequestAsync((OpenSecureChannelRequest)request, token).ConfigureAwait(false);
+                    await SendOpenSecureChannelRequestAsync(openRequest, token).ConfigureAwait(false);
                 }
-                else if (request is CloseSecureChannelRequest)
+                else if (request is CloseSecureChannelRequest closeRequest)
                 {
-                    await SendCloseSecureChannelRequestAsync((CloseSecureChannelRequest)request, token).ConfigureAwait(false);
+                    await SendCloseSecureChannelRequestAsync(closeRequest, token).ConfigureAwait(false);
                     operation.TrySetResult(new CloseSecureChannelResponse { ResponseHeader = new ResponseHeader { RequestHandle = header.RequestHandle, Timestamp = DateTime.UtcNow } });
                 }
                 else
@@ -479,8 +479,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.
-                    var openSecureChannelResponse = response as OpenSecureChannelResponse;
-                    if (openSecureChannelResponse != null && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader!.ServiceResult))
+                    if (response is OpenSecureChannelResponse openSecureChannelResponse && StatusCode.IsGood(openSecureChannelResponse.ResponseHeader!.ServiceResult))
                     {
                         _tokenRenewalTime = DateTime.UtcNow.AddMilliseconds(0.8 * openSecureChannelResponse.SecurityToken!.RevisedLifetime);
 

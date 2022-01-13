@@ -83,8 +83,7 @@ namespace Workstation.UaClient.IntegrationTests
                 using (var keyStream = new StreamReader(userKeyInfo.OpenRead()))
                 {
                     var keyReader = new PemReader(keyStream);
-                    var keyPair = keyReader.ReadObject() as AsymmetricCipherKeyPair;
-                    if (keyPair != null)
+                    if (keyReader.ReadObject() is AsymmetricCipherKeyPair keyPair)
                     {
                         userKey = keyPair.Private as RsaKeyParameters;
                     }
