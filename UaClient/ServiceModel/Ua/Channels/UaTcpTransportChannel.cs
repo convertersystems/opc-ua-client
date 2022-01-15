@@ -19,10 +19,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         public const uint DefaultMaxMessageSize = 16 * 1024 * 1024;
         public const uint DefaultMaxChunkCount = 4 * 1024;
 
-        // This line should be removed once we have a complete StackProfile
-        // implementation
-        private static readonly ITransportConnectionProvider _connectionProvider = new UaTcpConnectionProvider();
-
         private readonly ILogger? _logger;
         private ITransportConnection? _connection;
 
@@ -45,6 +41,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             LocalMaxMessageSize = options?.LocalMaxMessageSize ?? DefaultMaxMessageSize;
             LocalMaxChunkCount = options?.LocalMaxChunkCount ?? DefaultMaxChunkCount;
         }
+
+        /// <summary>
+        /// Gets the stack profile.
+        /// </summary>
+        public StackProfile StackProfile { get; } = StackProfiles.TcpUascBinary;
 
         /// <summary>
         /// Gets the remote endpoint.
@@ -133,7 +134,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             token.ThrowIfCancellationRequested();
 
-            _connection = await _connectionProvider.ConnectAsync(RemoteEndpoint.EndpointUrl!).ConfigureAwait(false);
+            _connection = await StackProfile.TransportConnectionProvider.ConnectAsync(RemoteEndpoint.EndpointUrl!).ConfigureAwait(false);
 
             var localOptions = new TransportConnectionOptions
             {
