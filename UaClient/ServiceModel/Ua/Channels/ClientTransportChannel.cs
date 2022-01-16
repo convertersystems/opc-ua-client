@@ -96,12 +96,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         public uint RemoteMaxChunkCount { get; private set; }
 
         /// <summary>
-        /// Gets the inner TCP socket.
-        /// </summary>
-        [Obsolete]
-        protected virtual Socket? Socket => null;
-
-        /// <summary>
         /// Asynchronously sends a sequence of bytes to the remote endpoint.
         /// </summary>
         /// <param name="buffer">The buffer.</param>

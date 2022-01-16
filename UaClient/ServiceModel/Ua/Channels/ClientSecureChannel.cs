@@ -105,12 +105,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected byte[]? RemoteCertificate => RemoteEndpoint?.ServerCertificate;
 
         /// <summary>
-        /// Gets the local nonce.
-        /// </summary>
-        [Obsolete]
-        protected byte[]? LocalNonce => null;
-
-        /// <summary>
         /// Gets or sets the channel id.
         /// </summary>
         public uint ChannelId => _conversation?.ChannelId ?? 0;
