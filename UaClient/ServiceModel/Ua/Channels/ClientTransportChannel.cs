@@ -131,7 +131,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             token.ThrowIfCancellationRequested();
 
-            _connection = await StackProfile.TransportConnectionProvider.ConnectAsync(RemoteEndpoint.EndpointUrl!).ConfigureAwait(false);
+            _connection = await StackProfile.TransportConnectionProvider.ConnectAsync(RemoteEndpoint.EndpointUrl!, token).ConfigureAwait(false);
 
             var localOptions = new TransportConnectionOptions
             {

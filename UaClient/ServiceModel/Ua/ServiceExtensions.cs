@@ -135,59 +135,48 @@ namespace Workstation.ServiceModel.Ua
             return result.StatusCode;
         }
 
-        public static async Task WithCancellation(this Task task, CancellationToken cancellationToken)
+        public static Task WithCancellation(this Task task, CancellationToken cancellationToken)
+            => task.TimeoutAfter(-1, cancellationToken);
+
+
+        public static Task TimeoutAfter(this Task task, int millisecondsTimeout, CancellationToken token = default)
+            => task.TimeoutAfter(TimeSpan.FromMilliseconds(millisecondsTimeout), token);
+
+
+        public static async Task TimeoutAfter(this Task task, TimeSpan timeout, CancellationToken token = default)
         {
-            var tcs = new TaskCompletionSource<bool>();
-            using (cancellationToken.Register(s => ((TaskCompletionSource<bool>)s!).TrySetResult(true), tcs))
+            var t = await Task.WhenAny(task, Task.Delay(timeout, token)).ConfigureAwait(false);
+            if (task == t)
             {
-                if (task != await Task.WhenAny(task, tcs.Task).ConfigureAwait(false))
-                {
-                    throw new OperationCanceledException(cancellationToken);
-                }
-                await task; // already completed; propagate any exception
-            }
-        }
-
-
-        public static Task TimeoutAfter(this Task task, int millisecondsTimeout)
-            => task.TimeoutAfter(TimeSpan.FromMilliseconds(millisecondsTimeout));
-
-
-        public static async Task TimeoutAfter(this Task task, TimeSpan timeout)
-        {
-            var cts = new CancellationTokenSource();
-
-
-            if (task == await Task.WhenAny(task, Task.Delay(timeout, cts.Token)).ConfigureAwait(false))
-            {
-                cts.Cancel();
                 await task.ConfigureAwait(false);
             }
-            else
+            else if (!t.IsCanceled)
             {
                 throw new TimeoutException($"Task timed out after {timeout}");
             }
+
+            await t.ConfigureAwait(false);
         }
 
 
-        public static Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, int millisecondsTimeout)
-            => task.TimeoutAfter(TimeSpan.FromMilliseconds(millisecondsTimeout));
+        public static Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, int millisecondsTimeout, CancellationToken token)
+            => task.TimeoutAfter(TimeSpan.FromMilliseconds(millisecondsTimeout), token);
 
 
-        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
+        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout, CancellationToken token)
         {
-            var cts = new CancellationTokenSource();
-
-
-            if (task == await Task<TResult>.WhenAny(task, Task<TResult>.Delay(timeout, cts.Token)).ConfigureAwait(false))
+            var t = await Task.WhenAny(task, Task.Delay(timeout, token)).ConfigureAwait(false);
+            if (task != t)
             {
-                cts.Cancel();
-                return await task.ConfigureAwait(false);
+                if (!t.IsCanceled)
+                {
+                    throw new TimeoutException($"Task timed out after {timeout}");
+                }
+
+                throw t.Exception;
             }
-            else
-            {
-                throw new TimeoutException($"Task timed out after {timeout}");
-            }
+
+            return await task.ConfigureAwait(false);
         }
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Workstation.ServiceModel.Ua.Channels
@@ -17,7 +18,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private const int ConnectTimeout = 5000;
 
         /// <inheritdoc />
-        public async Task<ITransportConnection> ConnectAsync(string connectionString)
+        public async Task<ITransportConnection> ConnectAsync(string connectionString, CancellationToken token)
         {
             var uri = new Uri(connectionString);
             var client = new TcpClient
@@ -25,7 +26,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 NoDelay = true
             };
 
-            await client.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(ConnectTimeout).ConfigureAwait(false);
+            await client.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(ConnectTimeout, token).ConfigureAwait(false);
 
             // The stream will own the client and takes care on disposing/closing it
             return new UaClientConnection(client.GetStream(), uri);

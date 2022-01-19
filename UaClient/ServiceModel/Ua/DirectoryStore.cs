@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Asn1.X509;
@@ -60,7 +61,7 @@ namespace Workstation.ServiceModel.Ua
         public bool CreateLocalCertificateIfNotExist { get; }
 
         /// <inheritdoc/>
-        public async Task<(X509Certificate? Certificate, RsaKeyParameters? Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger? logger = null)
+        public async Task<(X509Certificate? Certificate, RsaKeyParameters? Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger? logger = null, CancellationToken token = default)
         {
             if (applicationDescription == null)
             {
@@ -266,7 +267,7 @@ namespace Workstation.ServiceModel.Ua
         }
 
         /// <inheritdoc/>
-        public Task<bool> ValidateRemoteCertificateAsync(X509Certificate target, ILogger? logger = null)
+        public Task<bool> ValidateRemoteCertificateAsync(X509Certificate target, ILogger? logger = null, CancellationToken token = default)
         {
             if (AcceptAllRemoteCertificates)
             {

@@ -9,6 +9,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Workstation.ServiceModel.Ua;
 
@@ -41,7 +42,7 @@ namespace Workstation.UaClient
             ClientCertificate = _clientCertificate.GetEncoded();
         }
 
-        public Task<(X509Certificate Certificate, RsaKeyParameters Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger)
+        public Task<(X509Certificate Certificate, RsaKeyParameters Key)> GetLocalCertificateAsync(ApplicationDescription applicationDescription, ILogger logger, CancellationToken token)
         {
             if (applicationDescription.ApplicationName == _serverDescription.ApplicationName)
             {
@@ -55,7 +56,7 @@ namespace Workstation.UaClient
             throw new InvalidOperationException();
         }
 
-        public Task<bool> ValidateRemoteCertificateAsync(X509Certificate certificate, ILogger logger)
+        public Task<bool> ValidateRemoteCertificateAsync(X509Certificate certificate, ILogger logger, CancellationToken token)
         {
             var cert = certificate.GetEncoded();
             var valid = cert.SequenceEqual(ServerCertificate)

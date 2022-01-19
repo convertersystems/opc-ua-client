@@ -339,7 +339,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 if (CertificateStore != null)
                 {
-                    var tuple = await CertificateStore.GetLocalCertificateAsync(LocalDescription, _logger);
+                    var tuple = await CertificateStore.GetLocalCertificateAsync(LocalDescription, _logger, token);
                     LocalCertificate = tuple.Certificate?.GetEncoded();
                     LocalPrivateKey = tuple.Key;
                 }

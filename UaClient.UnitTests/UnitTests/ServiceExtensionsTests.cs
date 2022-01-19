@@ -92,9 +92,8 @@ namespace Workstation.UaClient.UnitTests
             using (var tcs = new CancellationTokenSource())
             {
                 var fast = Task.Delay(1);
-                var task = fast.WithCancellation(tcs.Token);
 
-                await task.Invoking(t => t)
+                await fast.Invoking(t => t.WithCancellation(tcs.Token))
                     .Should().NotThrowAsync();
             }
         }
@@ -146,23 +145,51 @@ namespace Workstation.UaClient.UnitTests
         }
         
         [Fact]
+        public void WithTimeoutAfterCompletedCanceledImmediately()
+        {
+            var task = Task.CompletedTask;
+            var token = new CancellationToken(true);
+
+            task.TimeoutAfter(-1, token).IsCompleted
+                .Should().BeTrue();
+        }
+        
+        [Fact]
         public async Task WithTimeoutAfterFastTask()
         {
             var fast = Task.Delay(1);
-            var task = fast.TimeoutAfter(-1);
 
-            await task.Invoking(t => t)
+            await fast.Invoking(t => t.TimeoutAfter(-1))
                 .Should().NotThrowAsync();
+        }
+        
+        [Fact]
+        public async Task WithTimeoutAfterFastTaskCanceledImmediately()
+        {
+            var task = Task.Delay(1);
+            var token = new CancellationToken(true);
+
+            await task.Invoking(t => t.TimeoutAfter(-1, token))
+                .Should().ThrowAsync<OperationCanceledException>();
         }
 
         [Fact]
         public async Task WithTimeoutAfter()
         {
             var never = Never();
-            var task = never.TimeoutAfter(0);
 
-            await task.Invoking(t => t)
+            await never.Invoking(t => t.TimeoutAfter(0))
                 .Should().ThrowAsync<TimeoutException>();
+        }
+        
+        [Fact]
+        public async Task WithTimeoutAfterCanceled()
+        {
+            var never = Never();
+            var token = new CancellationToken(true);
+
+            await never.Invoking(t => t.TimeoutAfter(0, token))
+                .Should().ThrowAsync<TaskCanceledException>();
         }
         
         [Fact]
@@ -178,9 +205,8 @@ namespace Workstation.UaClient.UnitTests
         public async Task ValueWithTimeoutAfter()
         {
             var never = Never(10);
-            var task = never.TimeoutAfter(0);
 
-            await task.Invoking(t => t)
+            await never.Invoking(t => t.TimeoutAfter(0))
                 .Should().ThrowAsync<TimeoutException>();
         }
     }
