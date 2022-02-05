@@ -74,7 +74,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var encoder = new BinaryEncoder(new MemoryStream(sendBuffer, 0, MinBufferSize, true, false));
             try
             {
-                encoder.WriteUInt32(null, UaTcpMessageTypes.HELF);
+                encoder.WriteUInt32(null, MessageTypes.HELF);
                 encoder.WriteUInt32(null, 0u);
                 encoder.WriteUInt32(null, protocolVersion);
                 encoder.WriteUInt32(null, localOptions.ReceiveBufferSize);
@@ -107,7 +107,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 var type = decoder.ReadUInt32(null);
                 var len = decoder.ReadUInt32(null);
-                if (type == UaTcpMessageTypes.ACKF)
+                if (type == MessageTypes.ACKF)
                 {
                     var remoteProtocolVersion = decoder.ReadUInt32(null);
                     if (remoteProtocolVersion < protocolVersion)
@@ -125,7 +125,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                     return remoteOptions;
                 }
-                else if (type == UaTcpMessageTypes.ERRF)
+                else if (type == MessageTypes.ERRF)
                 {
                     var statusCode = decoder.ReadUInt32(null);
                     var message = decoder.ReadString(null);

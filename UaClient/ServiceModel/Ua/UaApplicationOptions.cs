@@ -12,90 +12,60 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// The UaApplication options.
     /// </summary>
-    public class UaApplicationOptions : UaTcpSessionChannelOptions
+    public class UaApplicationOptions : ClientSessionChannelOptions
     {
     }
 
     /// <summary>
-    /// The UaTcpSessionChannel options.
+    /// The <see cref="ClientSessionChannel"/> options.
     /// </summary>
-    public class UaTcpSessionChannelOptions : UaTcpSecureChannelOptions
+    public class ClientSessionChannelOptions : ClientSecureChannelOptions
     {
         /// <summary>
         /// Gets the requested number of milliseconds that a session may be unused before being closed by the server.
         /// </summary>
-        public double SessionTimeout { get; set; } = UaTcpSessionChannel.DefaultSessionTimeout;
+        public double SessionTimeout { get; set; } = ClientSessionChannel.DefaultSessionTimeout;
     }
 
     /// <summary>
-    /// The UaTcpSecureChannel options.
+    /// The <see cref="ClientSecureChannel"/> options.
     /// </summary>
-    public class UaTcpSecureChannelOptions : UaTcpTransportChannelOptions
+    public class ClientSecureChannelOptions : ClientTransportChannelOptions
     {
         /// <summary>
         /// Gets or sets the default number of milliseconds that may elapse before an operation is cancelled by the service.
         /// </summary>
-        public uint TimeoutHint { get; set; } = UaTcpSecureChannel.DefaultTimeoutHint;
+        public uint TimeoutHint { get; set; } = ClientSecureChannel.DefaultTimeoutHint;
 
         /// <summary>
         /// Gets or sets the default diagnostics flags to be requested by the service.
         /// </summary>
-        public uint DiagnosticsHint { get; set; } = UaTcpSecureChannel.DefaultDiagnosticsHint;
+        public uint DiagnosticsHint { get; set; } = ClientSecureChannel.DefaultDiagnosticsHint;
     }
 
     /// <summary>
-    /// The UaTcpTransportChannel options.
+    /// The <see cref="ClientTransportChannel"/> options.
     /// </summary>
-    public class UaTcpTransportChannelOptions
+    public class ClientTransportChannelOptions
     {
         /// <summary>
         /// Gets or sets the size of the receive buffer.
         /// </summary>
-        public uint LocalReceiveBufferSize { get; set; } = UaTcpTransportChannel.DefaultBufferSize;
+        public uint LocalReceiveBufferSize { get; set; } = ClientTransportChannel.DefaultBufferSize;
 
         /// <summary>
         /// Gets or sets the size of the send buffer.
         /// </summary>
-        public uint LocalSendBufferSize { get; set; } = UaTcpTransportChannel.DefaultBufferSize;
+        public uint LocalSendBufferSize { get; set; } = ClientTransportChannel.DefaultBufferSize;
 
         /// <summary>
         /// Gets or sets the maximum total size of a message.
         /// </summary>
-        public uint LocalMaxMessageSize { get; set; } = UaTcpTransportChannel.DefaultMaxMessageSize;
+        public uint LocalMaxMessageSize { get; set; } = ClientTransportChannel.DefaultMaxMessageSize;
 
         /// <summary>
         /// Gets or sets the maximum number of message chunks.
         /// </summary>
-        public uint LocalMaxChunkCount { get; set; } = UaTcpTransportChannel.DefaultMaxChunkCount;
-    }
-
-    /// <summary>
-    /// The transport connection options.
-    /// </summary>
-    public class TransportConnectionOptions
-    {
-        public const uint DefaultBufferSize = 64 * 1024;
-        public const uint DefaultMaxMessageSize = 16 * 1024 * 1024;
-        public const uint DefaultMaxChunkCount = 4 * 1024;
-
-        /// <summary>
-        /// Gets or sets the size of the receive buffer.
-        /// </summary>
-        public uint ReceiveBufferSize { get; set; } = DefaultBufferSize;
-
-        /// <summary>
-        /// Gets or sets the size of the send buffer.
-        /// </summary>
-        public uint SendBufferSize { get; set; } = DefaultBufferSize;
-
-        /// <summary>
-        /// Gets or sets the maximum total size of a message.
-        /// </summary>
-        public uint MaxMessageSize { get; set; } = DefaultMaxMessageSize;
-
-        /// <summary>
-        /// Gets or sets the maximum number of message chunks.
-        /// </summary>
-        public uint MaxChunkCount { get; set; } = DefaultMaxChunkCount;
+        public uint LocalMaxChunkCount { get; set; } = ClientTransportChannel.DefaultMaxChunkCount;
     }
 }

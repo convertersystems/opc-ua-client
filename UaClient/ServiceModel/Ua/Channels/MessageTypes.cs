@@ -3,7 +3,7 @@
 
 namespace Workstation.ServiceModel.Ua
 {
-    public static class UaTcpMessageTypes
+    public static class MessageTypes
     {
         public const uint HELF = 'H' | 'E' << 8 | 'L' << 16 | 'F' << 24;
         public const uint ACKF = 'A' | 'C' << 8 | 'K' << 16 | 'F' << 24;

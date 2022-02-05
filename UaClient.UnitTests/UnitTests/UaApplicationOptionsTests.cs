@@ -10,11 +10,11 @@ namespace Workstation.UaClient.UnitTests
     public class UaApplicationOptionsTests
     {
         [Fact]
-        public void UaTcpTransportChannelOptionsDefaults()
+        public void ClientTransportChannelOptionsDefaults()
         {
             var lowestBufferSize = 8192u;
 
-            var options = new UaTcpTransportChannelOptions();
+            var options = new ClientTransportChannelOptions();
 
             options.LocalReceiveBufferSize
                 .Should().BeGreaterOrEqualTo(lowestBufferSize);
@@ -23,11 +23,11 @@ namespace Workstation.UaClient.UnitTests
         }
 
         [Fact]
-        public void UaTcpSecureChannelOptionsDefaults()
+        public void ClientSecureChannelOptionsDefaults()
         {
             var shortestTimespan = TimeSpan.FromMilliseconds(100);
 
-            var options = new UaTcpSecureChannelOptions();
+            var options = new ClientSecureChannelOptions();
 
             TimeSpan.FromMilliseconds(options.TimeoutHint)
                 .Should().BeGreaterOrEqualTo(shortestTimespan);
@@ -37,11 +37,11 @@ namespace Workstation.UaClient.UnitTests
         }
 
         [Fact]
-        public void UaTcpSessionChannelOptionsDefaults()
+        public void ClientSessionChannelOptionsDefaults()
         {
             var shortestTimespan = TimeSpan.FromMilliseconds(100);
 
-            var options = new UaTcpSessionChannelOptions();
+            var options = new ClientSessionChannelOptions();
 
             TimeSpan.FromMilliseconds(options.SessionTimeout)
                 .Should().BeGreaterOrEqualTo(shortestTimespan);

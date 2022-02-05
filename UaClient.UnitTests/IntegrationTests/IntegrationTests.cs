@@ -111,7 +111,7 @@ namespace Workstation.UaClient.IntegrationTests
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             logger.LogInformation($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest, loggerFactory);
+            var getEndpointsResponse = await DiscoveryService.GetEndpointsAsync(getEndpointsRequest, loggerFactory);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
             foreach (var selectedEndpoint in getEndpointsResponse.Endpoints.Where(e => e.SecurityPolicyUri == SecurityPolicyUris.None))
@@ -133,7 +133,7 @@ namespace Workstation.UaClient.IntegrationTests
                             continue;
                     }
 
-                    var channel = new UaTcpSessionChannel(
+                    var channel = new ClientSessionChannel(
                         localDescription,
                         null,
                         selectedUserIdentity,
@@ -167,7 +167,7 @@ namespace Workstation.UaClient.IntegrationTests
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
             logger.LogInformation($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
-            var getEndpointsResponse = await UaTcpDiscoveryService.GetEndpointsAsync(getEndpointsRequest);
+            var getEndpointsResponse = await DiscoveryService.GetEndpointsAsync(getEndpointsRequest);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
             foreach (var selectedEndpoint in getEndpointsResponse.Endpoints
@@ -194,7 +194,7 @@ namespace Workstation.UaClient.IntegrationTests
                             continue;
                     }
 
-                    var channel = new UaTcpSessionChannel(
+                    var channel = new ClientSessionChannel(
                         localDescription,
                         certificateStore,
                         selectedUserIdentity,
@@ -221,7 +221,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task BrowseObjects()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),
@@ -265,7 +265,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task Read()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),
@@ -301,7 +301,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task Polling()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),
@@ -334,7 +334,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task TestSubscription()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),
@@ -418,7 +418,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task CustomVectorAdd()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),
@@ -465,7 +465,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task ReadHistorical()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),
@@ -652,7 +652,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task StackTest()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),
@@ -735,7 +735,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task TransferSubscription()
         {
-            var channel1 = new UaTcpSessionChannel(
+            var channel1 = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new UserNameIdentity("root", "secret"),
@@ -793,7 +793,7 @@ namespace Workstation.UaClient.IntegrationTests
 
             await Task.Delay(3000);
 
-            var channel2 = new UaTcpSessionChannel(
+            var channel2 = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new UserNameIdentity("root", "secret"),
@@ -828,7 +828,7 @@ namespace Workstation.UaClient.IntegrationTests
         [Fact]
         public async Task StructureTest()
         {
-            var channel = new UaTcpSessionChannel(
+            var channel = new ClientSessionChannel(
                 localDescription,
                 certificateStore,
                 new AnonymousIdentity(),

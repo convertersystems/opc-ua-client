@@ -10,9 +10,9 @@ using Microsoft.Extensions.Logging;
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
-    /// A channel for communicating with OPC UA servers using the UA TCP transport profile.
+    /// A channel for communicating with OPC UA servers.
     /// </summary>
-    public class UaTcpTransportChannel : CommunicationObject
+    public class ClientTransportChannel : CommunicationObject
     {
         public const uint ProtocolVersion = 0u;
         public const uint DefaultBufferSize = 64 * 1024;
@@ -23,19 +23,22 @@ namespace Workstation.ServiceModel.Ua.Channels
         private ITransportConnection? _connection;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpTransportChannel"/> class.
+        /// Initializes a new instance of the <see cref="ClientTransportChannel"/> class.
         /// </summary>
         /// <param name="remoteEndpoint">The remote endpoint.</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The transport channel options.</param>
-        public UaTcpTransportChannel(
+        public ClientTransportChannel(
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
-            UaTcpTransportChannelOptions? options = null)
+            ClientTransportChannelOptions? options = null,
+            StackProfile? stackProfile = null)
             : base(loggerFactory)
         {
             RemoteEndpoint = remoteEndpoint ?? throw new ArgumentNullException(nameof(remoteEndpoint));
-            _logger = loggerFactory?.CreateLogger<UaTcpTransportChannel>();
+            StackProfile = stackProfile ?? StackProfiles.GetStackProfile(remoteEndpoint);
+            _logger = loggerFactory?.CreateLogger<ClientTransportChannel>();
+
             LocalReceiveBufferSize = options?.LocalReceiveBufferSize ?? DefaultBufferSize;
             LocalSendBufferSize = options?.LocalSendBufferSize ?? DefaultBufferSize;
             LocalMaxMessageSize = options?.LocalMaxMessageSize ?? DefaultMaxMessageSize;
@@ -91,12 +94,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Gets the maximum number of message chunks that may be sent.
         /// </summary>
         public uint RemoteMaxChunkCount { get; private set; }
-
-        /// <summary>
-        /// Gets the inner TCP socket.
-        /// </summary>
-        [Obsolete]
-        protected virtual Socket? Socket => null;
 
         /// <summary>
         /// Asynchronously sends a sequence of bytes to the remote endpoint.

@@ -17,9 +17,9 @@ using Org.BouncyCastle.Crypto.Parameters;
 namespace Workstation.ServiceModel.Ua.Channels
 {
     /// <summary>
-    /// A secure channel for communicating with OPC UA servers using the UA TCP transport profile.
+    /// A secure channel for communicating with OPC UA servers.
     /// </summary>
-    public class UaTcpSecureChannel : UaTcpTransportChannel, IRequestChannel, IEncodingContext
+    public class ClientSecureChannel : ClientTransportChannel, IRequestChannel, IEncodingContext
     {
         /// <summary>
         /// The default timeout for requests.
@@ -48,27 +48,28 @@ namespace Workstation.ServiceModel.Ua.Channels
         private IConversation? _conversation;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UaTcpSecureChannel"/> class.
+        /// Initializes a new instance of the <see cref="ClientSecureChannel"/> class.
         /// </summary>
         /// <param name="localDescription">The local description.</param>
         /// <param name="certificateStore">The local certificate store.</param>
         /// <param name="remoteEndpoint">The remote endpoint</param>
         /// <param name="loggerFactory">The logger factory.</param>
         /// <param name="options">The secure channel options.</param>
-        public UaTcpSecureChannel(
+        public ClientSecureChannel(
             ApplicationDescription localDescription,
             ICertificateStore? certificateStore,
             EndpointDescription remoteEndpoint,
             ILoggerFactory? loggerFactory = null,
-            UaTcpSecureChannelOptions? options = null)
-            : base(remoteEndpoint, loggerFactory, options)
+            ClientSecureChannelOptions? options = null,
+            StackProfile? stackProfile = null)
+            : base(remoteEndpoint, loggerFactory, options, stackProfile)
         {
             LocalDescription = localDescription ?? throw new ArgumentNullException(nameof(localDescription));
             CertificateStore = certificateStore;
             TimeoutHint = options?.TimeoutHint ?? DefaultTimeoutHint;
             DiagnosticsHint = options?.DiagnosticsHint ?? DefaultDiagnosticsHint;
 
-            _logger = loggerFactory?.CreateLogger<UaTcpSecureChannel>();
+            _logger = loggerFactory?.CreateLogger<ClientSecureChannel>();
 
             AuthenticationToken = null;
             NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
@@ -102,12 +103,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// Gets the remote certificate.
         /// </summary>
         protected byte[]? RemoteCertificate => RemoteEndpoint?.ServerCertificate;
-
-        /// <summary>
-        /// Gets the local nonce.
-        /// </summary>
-        [Obsolete]
-        protected byte[]? LocalNonce => null;
 
         /// <summary>
         /// Gets or sets the channel id.
@@ -337,7 +332,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyStream.Position = 0;
 
                 var handle = request.RequestHeader!.RequestHandle;
-                await _conversation!.EncryptMessageAsync(bodyStream, UaTcpMessageTypes.OPNF, handle, SendAsync, token);
+                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.OPNF, handle, SendAsync, token);
             }
         }
 
@@ -356,7 +351,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyStream.Position = 0;
 
                 var handle = request.RequestHeader!.RequestHandle;
-                await _conversation!.EncryptMessageAsync(bodyStream, UaTcpMessageTypes.CLOF, handle, SendAsync, token);
+                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.CLOF, handle, SendAsync, token);
             }
         }
 
@@ -375,7 +370,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyStream.Position = 0;
 
                 var handle = request.RequestHeader!.RequestHandle;
-                await _conversation!.EncryptMessageAsync(bodyStream, UaTcpMessageTypes.MSGF, handle, SendAsync, token);
+                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.MSGF, handle, SendAsync, token);
             }
         }
 
