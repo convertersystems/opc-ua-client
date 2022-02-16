@@ -341,7 +341,7 @@ namespace Workstation.UaClient.UnitTests.Channels
                 SecurityMode = mode,
             };
 
-            await client.SetRemoteCertificateAsync(securityPolicyUri, store.ServerCertificate);
+            await client.SetRemoteCertificateAsync(securityPolicyUri, store.ServerCertificate, default);
             return client;
         }
 

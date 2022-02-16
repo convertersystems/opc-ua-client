@@ -179,7 +179,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 MaxChunkCount = RemoteMaxChunkCount
             };
 
-            _conversation = await StackProfile.ConversationProvider.CreateAsync(RemoteEndpoint, LocalDescription, options, CertificateStore, _logger).ConfigureAwait(false);
+            _conversation = await StackProfile.ConversationProvider.CreateAsync(RemoteEndpoint, LocalDescription, options, CertificateStore, _logger, token).ConfigureAwait(false);
 
             token.ThrowIfCancellationRequested();
 

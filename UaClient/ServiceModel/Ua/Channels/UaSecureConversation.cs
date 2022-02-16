@@ -172,7 +172,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <param name="securityPolicyUri">The security policy URI.</param>
         /// <param name="remoteCertificate">The remote certificate.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task SetRemoteCertificateAsync(string? securityPolicyUri, byte[]? remoteCertificate)
+        public async Task SetRemoteCertificateAsync(string? securityPolicyUri, byte[]? remoteCertificate, CancellationToken token)
         {
             _securityPolicyUri = securityPolicyUri;
             _remoteCertificate = remoteCertificate;
@@ -184,7 +184,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     if (_certificateStore != null)
                     {
-                        var result = await _certificateStore.ValidateRemoteCertificateAsync(cert, _logger);
+                        var result = await _certificateStore.ValidateRemoteCertificateAsync(cert, _logger, token);
                         if (!result)
                         {
                             throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Remote certificate is untrusted.");
@@ -217,7 +217,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (_localCertificate == null && _certificateStore != null)
                 {
-                    var tuple = await _certificateStore.GetLocalCertificateAsync(_localDescription, _logger);
+                    var tuple = await _certificateStore.GetLocalCertificateAsync(_localDescription, _logger, token);
                     _localCertificate = tuple.Certificate?.GetEncoded();
                     _localPrivateKey = tuple.Key;
                 }
@@ -827,7 +827,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                             if (IsServer)
                             {
-                                await SetRemoteCertificateAsync(securityPolicyUri, remoteCertificate).ConfigureAwait(false);
+                                await SetRemoteCertificateAsync(securityPolicyUri, remoteCertificate, token).ConfigureAwait(false);
                             }
 
                             plainHeaderSize = decoder.Position;

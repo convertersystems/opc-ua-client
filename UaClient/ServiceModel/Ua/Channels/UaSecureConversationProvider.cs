@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Extensions.Logging;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Workstation.ServiceModel.Ua.Channels
@@ -14,14 +15,14 @@ namespace Workstation.ServiceModel.Ua.Channels
     public class UaSecureConversationProvider : IConversationProvider
     {
         /// <inheritdoc />
-        public async Task<IConversation> CreateAsync(EndpointDescription remoteEndpoint, ApplicationDescription localDescription, TransportConnectionOptions options, ICertificateStore? certificateStore, ILogger? logger)
+        public async Task<IConversation> CreateAsync(EndpointDescription remoteEndpoint, ApplicationDescription localDescription, TransportConnectionOptions options, ICertificateStore? certificateStore, ILogger? logger, CancellationToken token)
         {
             var conversation = new UaSecureConversation(localDescription, options, certificateStore, logger)
             {
                 SecurityMode = remoteEndpoint.SecurityMode
             };
 
-            await conversation.SetRemoteCertificateAsync(remoteEndpoint.SecurityPolicyUri, remoteEndpoint.ServerCertificate).ConfigureAwait(false);
+            await conversation.SetRemoteCertificateAsync(remoteEndpoint.SecurityPolicyUri, remoteEndpoint.ServerCertificate, token).ConfigureAwait(false);
 
             return conversation;
         }

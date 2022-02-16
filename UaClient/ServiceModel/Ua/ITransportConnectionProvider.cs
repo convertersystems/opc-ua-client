@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Converter Systems LLC. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Workstation.ServiceModel.Ua
@@ -20,6 +21,6 @@ namespace Workstation.ServiceModel.Ua
         /// </remarks>
         /// <param name="connectionString">The connection string.</param>
         /// <returns>The transport connection.</returns>
-        Task<ITransportConnection> ConnectAsync(string connectionString);
+        Task<ITransportConnection> ConnectAsync(string connectionString, CancellationToken token);
     }
 }
