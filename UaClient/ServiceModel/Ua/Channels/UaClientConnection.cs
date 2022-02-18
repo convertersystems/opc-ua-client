@@ -71,8 +71,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             // send 'hello'.
             int count;
-            var encoder = new BinaryEncoder(new MemoryStream(sendBuffer, 0, MinBufferSize, true, false));
-            try
+            using (var encoder = new BinaryEncoder(new MemoryStream(sendBuffer, 0, MinBufferSize, true, false)))
             {
                 encoder.WriteUInt32(null, MessageTypes.HELF);
                 encoder.WriteUInt32(null, 0u);
@@ -89,10 +88,6 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 await SendAsync(sendBuffer, 0, count, token).ConfigureAwait(false);
             }
-            finally
-            {
-                encoder.Dispose();
-            }
 
             // receive response
             count = await ReceiveAsync(receiveBuffer, 0, MinBufferSize, token).ConfigureAwait(false);
@@ -102,8 +97,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
 
             // decode 'ack' or 'err'.
-            var decoder = new BinaryDecoder(new MemoryStream(receiveBuffer, 0, count, false, false));
-            try
+            using (var decoder = new BinaryDecoder(new MemoryStream(receiveBuffer, 0, count, false, false)))
             {
                 var type = decoder.ReadUInt32(null);
                 var len = decoder.ReadUInt32(null);
@@ -138,10 +132,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
 
                 throw new InvalidOperationException($"{nameof(UaClientConnection)}.{nameof(OpenAsync)} received unexpected message type.");
-            }
-            finally
-            {
-                decoder.Dispose();
             }
         }
 

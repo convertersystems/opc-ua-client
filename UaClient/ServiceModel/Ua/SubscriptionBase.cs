@@ -576,34 +576,34 @@ namespace Workstation.ServiceModel.Ua
                                     requests_chunk = new MonitoredItemCreateRequest[chunk_size];
                                     Array.Copy(requests, i_chunk, requests_chunk, 0, chunk_size);
                                 
-                                var itemsRequest = new CreateMonitoredItemsRequest
-                                {
-                                    SubscriptionId = id,
-                                    ItemsToCreate = requests_chunk,
-                                };
-                                var itemsResponse = await this.innerChannel.CreateMonitoredItemsAsync(itemsRequest);
-
-                                if (itemsResponse.Results is { } results)
-                                {
-                                    for (int i = 0; i < results.Length; i++)
+                                    var itemsRequest = new CreateMonitoredItemsRequest
                                     {
-                                        var item = items[i];
-                                        var result = results[i];
+                                        SubscriptionId = id,
+                                        ItemsToCreate = requests_chunk,
+                                    };
+                                    var itemsResponse = await this.innerChannel.CreateMonitoredItemsAsync(itemsRequest);
 
-                                        if (result is null)
+                                    if (itemsResponse.Results is { } results)
+                                    {
+                                        for (int i = 0; i < results.Length; i++)
                                         {
-                                            this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. The result is null.");
-                                            continue;
-                                        }
+                                            var item = items[i];
+                                            var result = results[i];
 
-                                        item.OnCreateResult(result);
-                                        if (StatusCode.IsBad(result.StatusCode))
-                                        {
-                                            this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                            if (result is null)
+                                            {
+                                                this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. The result is null.");
+                                                continue;
+                                            }
+
+                                            item.OnCreateResult(result);
+                                            if (StatusCode.IsBad(result.StatusCode))
+                                            {
+                                                this.logger?.LogError($"Error creating MonitoredItem for {item.NodeId}. {StatusCodes.GetDefaultMessage(result.StatusCode)}");
+                                            }
                                         }
                                     }
                                 }
-                            }
                             }
 
                             this.progress.Report(CommunicationState.Opened);

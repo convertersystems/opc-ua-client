@@ -46,10 +46,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public void Dispose()
         {
-            if (_writer != null)
-            {
-                _writer.Dispose();
-            }
+            _writer?.Dispose();
         }
 
         public void PushNamespace(string namespaceUri)

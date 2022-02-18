@@ -48,10 +48,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public void Dispose()
         {
-            if (_reader != null)
-            {
-                _reader.Dispose();
-            }
+            _reader?.Dispose();
         }
 
         public void PushNamespace(string namespaceUri)
