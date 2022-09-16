@@ -10,7 +10,7 @@ Supports .NET Core, Universal Windows Platform (UWP), Windows Presentation Frame
 
 ### Getting Started
 
-Install package ``Workstation.UaClient`` from [Nuget](https://www.nuget.org/packages/Workstation.UaClient/) to get the latest release for your hmi project.
+Install package ``Workstation.UaClient`` from [Nuget](https://www.nuget.org/packages/Workstation.UaClient/) to get the latest release for your HMI project.
 
 Here's an example of reading the variable ``ServerStatus`` from a public OPC UA server.
 
@@ -40,7 +40,7 @@ public class Program
             clientDescription,
             null, // no x509 certificates
             new AnonymousIdentity(), // no user identity
-            "opc.tcp://opcua.rocks:4840", // the public endpoint of a server at opcua.rocks.
+            "opc.tcp://opcua.demo-this.com:51210/UA/SampleServer", // the public endpoint
             SecurityPolicyUris.None); // no encryption
         try
         {
@@ -58,8 +58,8 @@ public class Program
                 NodesToRead = new[] {
                     // construct a ReadValueId from a NodeId and AttributeId.
                     new ReadValueId {
-                        // you can parse the nodeId from a string.
-                        // e.g. NodeId.Parse("ns=2;s=Demo.Static.Scalar.Double")
+                        // you can parse the NodeId from a string.
+                        // e.g. NodeId.Parse("ns=2;i=10226")
                         NodeId = NodeId.Parse(VariableIds.Server_ServerStatus),
                         // variable class nodes have a Value attribute.
                         AttributeId = AttributeIds.Value
@@ -83,21 +83,23 @@ public class Program
             Console.WriteLine($"\nClosing session '{channel.SessionId}'.");
             await channel.CloseAsync();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-		 	 await channel.AbortAsync();
+		 	await channel.AbortAsync();
             Console.WriteLine(ex.Message);
         }
     }
 }
 
 // Server status:
-//   ProductName: open62541 OPC UA Server
-//   SoftwareVersion: 1.0.0-rc5-52-g04067153-dirty
-//   ManufacturerName: open62541
+//   ProductName: OPC UA SDK Samples
+//   SoftwareVersion: 1.2
+//   ManufacturerName: OPC Foundation
 //   State: Running
 
 ```
+
+An example of subscribing for a variable by use of [System.Reactive](https://www.nuget.org/packages/System.Reactive/) can be found in our [sample repository](https://github.com/convertersystems/opc-ua-samples/tree/master/ConsoleApp/Program.cs#L122).
 
 ### Model, View, ViewModel (MVVM)
 
