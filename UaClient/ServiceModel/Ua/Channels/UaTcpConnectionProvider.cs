@@ -15,7 +15,10 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <seealso href="https://reference.opcfoundation.org/v104/Core/docs/Part6/7.2/">OPC UA specification Part 6: Mappings, 7.2</seealso>
     public class UaTcpConnectionProvider : ITransportConnectionProvider
     {
-        private const int ConnectTimeout = 5000;
+        /// <summary>
+        /// Connection timeout defaults to 5.0s
+        /// </summary>
+        public static int ConnectTimeout = 5000;
 
         /// <inheritdoc />
         public async Task<ITransportConnection> ConnectAsync(string connectionString, CancellationToken token)
