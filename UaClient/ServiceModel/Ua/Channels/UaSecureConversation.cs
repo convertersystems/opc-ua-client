@@ -179,7 +179,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
             if (remoteCertificate != null)
             {
-                var cert = _certificateParser.ReadCertificate(remoteCertificate);
+                var cert = (remoteCertificate?.Length ?? 0) > 0 ? _certificateParser.ReadCertificate(remoteCertificate) : null;
                 if (cert != null)
                 {
                     if (_certificateStore != null)

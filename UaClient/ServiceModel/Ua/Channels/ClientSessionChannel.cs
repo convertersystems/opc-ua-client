@@ -39,7 +39,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <summary>
         /// The default subscription lifetime count.
         /// </summary>
-        public const uint DefaultLifetimeCount = DefaultKeepaliveCount* 3;
+        public const uint DefaultLifetimeCount = DefaultKeepaliveCount * 3;
 
         private const string _rsaSha1Signature = @"http://www.w3.org/2000/09/xmldsig#rsa-sha1";
         private const string _rsaSha256Signature = @"http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
@@ -343,8 +343,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                     LocalCertificate = tuple.Certificate?.GetEncoded();
                     LocalPrivateKey = tuple.Key;
                 }
-            
-                var cert = _certificateParser.ReadCertificate(RemoteCertificate);
+
+                var certBytes = RemoteCertificate;
+                var cert = (certBytes?.Length ?? 0) > 0 ? _certificateParser.ReadCertificate(RemoteCertificate) : null;
                 RemotePublicKey = cert?.GetPublicKey() as RsaKeyParameters;
 
                 var createSessionRequest = new CreateSessionRequest
@@ -828,8 +829,8 @@ namespace Workstation.ServiceModel.Ua.Channels
                             ReturnDiagnostics = _options.DiagnosticsHint
                         },
                         SubscriptionAcknowledgements = publishResponse.NotificationMessage?.NotificationData != null
-                        ? new[] 
-                        { 
+                        ? new[]
+                        {
                             new SubscriptionAcknowledgement
                             {
                                 SequenceNumber = publishResponse.NotificationMessage.SequenceNumber,
@@ -887,21 +888,21 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// a create session response when the security policy for the server is None and none of 
         /// the user token policies requires encryption.
         /// </remarks>
-        private void ThrowOnInvalidSessionServerCertificate(byte[]? sessionCertificate) 
+        private void ThrowOnInvalidSessionServerCertificate(byte[]? sessionCertificate)
         {
             var compareCertificates = false;
 
-            if (!string.Equals(this.RemoteEndpoint.SecurityPolicyUri, SecurityPolicyUris.None)) 
+            if (!string.Equals(this.RemoteEndpoint.SecurityPolicyUri, SecurityPolicyUris.None))
             {
                 // Verification required if the security policy for the endpoint is not None.
                 compareCertificates = true;
             }
-            else if (this.RemoteEndpoint.UserIdentityTokens != null) 
+            else if (this.RemoteEndpoint.UserIdentityTokens != null)
             {
                 // Check if any of the user token policies require encryption.
-                foreach (var policy in this.RemoteEndpoint.UserIdentityTokens) 
-                { 
-                    if (policy == null) 
+                foreach (var policy in this.RemoteEndpoint.UserIdentityTokens)
+                {
+                    if (policy == null)
                     {
                         continue;
                     }
@@ -912,7 +913,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         ? this.RemoteEndpoint.SecurityPolicyUri
                         : policy.SecurityPolicyUri;
 
-                    if (!string.Equals(securityPolicyUri, SecurityPolicyUris.None)) 
+                    if (!string.Equals(securityPolicyUri, SecurityPolicyUris.None))
                     {
                         // User token policy requires encryption, so we need to verify the 
                         // session certificate.
@@ -922,14 +923,14 @@ namespace Workstation.ServiceModel.Ua.Channels
                 }
             }
 
-            if (compareCertificates) 
+            if (compareCertificates)
             {
                 var isValid = this.RemoteEndpoint.ServerCertificate == null || sessionCertificate == null
                     ? this.RemoteEndpoint.ServerCertificate == null && sessionCertificate == null // Valid if both certificates are null
                     : this.RemoteEndpoint.ServerCertificate.SequenceEqual(sessionCertificate); // Valid if both certificates are equal
 
-                if (!isValid) 
-                { 
+                if (!isValid)
+                {
                     throw new ServiceResultException(StatusCodes.BadCertificateInvalid, "Server did not return the same certificate used to create the channel.");
                 }
             }
