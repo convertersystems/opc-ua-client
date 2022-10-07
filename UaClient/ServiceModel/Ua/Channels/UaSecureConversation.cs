@@ -744,7 +744,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                     }
                                 }
 
-                                _logger?.LogTrace($"Installed new security token {tokenId}.");
+                                _logger?.LogTrace("Installed new security token {tokenId}.", tokenId);
                             }
 
                             var plainHeaderSize = decoder.Position;

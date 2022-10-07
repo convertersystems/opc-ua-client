@@ -270,7 +270,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 var securityPolicyUri = RemoteEndpoint.SecurityPolicyUri;
                 try
                 {
-                    _logger?.LogInformation($"Discovering endpoints of '{endpointUrl}'.");
+                    _logger?.LogInformation("Discovering endpoints of '{endpointUrl}'.", endpointUrl);
                     var getEndpointsRequest = new GetEndpointsRequest
                     {
                         EndpointUrl = endpointUrl,
@@ -301,11 +301,11 @@ namespace Workstation.ServiceModel.Ua.Channels
                     RemoteEndpoint.TransportProfileUri = selectedEndpoint.TransportProfileUri;
                     RemoteEndpoint.SecurityLevel = selectedEndpoint.SecurityLevel;
 
-                    _logger?.LogTrace($"Success discovering endpoints of '{endpointUrl}'.");
+                    _logger?.LogTrace("Success discovering endpoints of '{endpointUrl}'.", endpointUrl);
                 }
                 catch (Exception ex)
                 {
-                    _logger?.LogError($"Error discovering endpoints of '{endpointUrl}'. {ex.Message}");
+                    _logger?.LogError(ex, "Error discovering endpoints of '{endpointUrl}'.", endpointUrl);
                     throw;
                 }
             }
@@ -322,10 +322,10 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc/>
         protected override async Task OnOpenAsync(CancellationToken token = default)
         {
-            _logger?.LogInformation($"Opening session channel with endpoint '{RemoteEndpoint.EndpointUrl}'.");
-            _logger?.LogInformation($"SecurityPolicy: '{RemoteEndpoint.SecurityPolicyUri}'.");
-            _logger?.LogInformation($"SecurityMode: '{RemoteEndpoint.SecurityMode}'.");
-            _logger?.LogInformation($"UserIdentity: '{UserIdentity}'.");
+            _logger?.LogInformation("Opening session channel with endpoint '{RemoteEndpoint.EndpointUrl}'.", RemoteEndpoint.EndpointUrl);
+            _logger?.LogInformation("SecurityPolicy: '{RemoteEndpoint.SecurityPolicyUri}'.", RemoteEndpoint.SecurityPolicyUri);
+            _logger?.LogInformation("SecurityMode: '{RemoteEndpoint.SecurityMode}'.", RemoteEndpoint.SecurityMode);
+            _logger?.LogInformation("UserIdentity: '{UserIdentity}'.", UserIdentity);
 
             await base.OnOpenAsync(token).ConfigureAwait(false);
 
@@ -847,7 +847,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         return;
                     }
 
-                    _logger?.LogError($"Error publishing subscription. {ex.Message}");
+                    _logger?.LogError(ex, "Error publishing subscription. {publishRequest}", publishRequest);
                     Fault(ex);
                     return;
                 }

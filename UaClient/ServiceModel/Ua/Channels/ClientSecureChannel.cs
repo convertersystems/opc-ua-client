@@ -170,7 +170,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         protected override async Task OnOpenAsync(CancellationToken token = default)
         {
             await base.OnOpenAsync(token).ConfigureAwait(false);
-            
+
             var options = new TransportConnectionOptions
             {
                 ReceiveBufferSize = RemoteReceiveBufferSize,
@@ -213,7 +213,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Error closing secure channel. {ex.Message}");
+                _logger?.LogError(ex, "Error closing secure channel.");
             }
 
             await base.OnCloseAsync(token).ConfigureAwait(false);
@@ -241,7 +241,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Error sending request. {ex.Message}");
+                _logger?.LogError(ex, "Error sending request {RequestType}, Handle: {RequestHandle}."
+                    , operation.Request.GetType().Name
+                    , operation.Request.RequestHeader?.RequestHandle
+                );
                 await FaultAsync(ex).ConfigureAwait(false);
             }
         }
@@ -280,7 +283,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                         ClientNonce = _conversation!.GetNextNonce(),
                         RequestedLifetime = _tokenRequestedLifetime
                     };
-                    _logger?.LogTrace($"Sending {openSecureChannelRequest.GetType().Name}, Handle: {openSecureChannelRequest.RequestHeader.RequestHandle}");
+                    _logger?.LogTrace("Sending {RequestType}, Handle: {RequestHandle}"
+                        , openSecureChannelRequest.GetType().Name
+                        , openSecureChannelRequest.RequestHeader.RequestHandle
+                    );
                     _pendingCompletions.TryAdd(openSecureChannelRequest.RequestHeader.RequestHandle, new ServiceOperation(openSecureChannelRequest));
                     await SendOpenSecureChannelRequestAsync(openSecureChannelRequest, token).ConfigureAwait(false);
                 }
@@ -290,7 +296,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                 header.RequestHandle = GetNextHandle();
                 header.AuthenticationToken = AuthenticationToken;
 
-                _logger?.LogTrace($"Sending {request.GetType().Name}, Handle: {header.RequestHandle}");
+                _logger?.LogTrace("Sending {RequestType}, Handle: {RequestHandle}"
+                    , request.GetType().Name
+                    , header.RequestHandle
+                );
                 _pendingCompletions.TryAdd(header.RequestHandle, operation);
                 if (request is OpenSecureChannelRequest openRequest)
                 {
@@ -308,7 +317,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Error sending {request.GetType().Name}, Handle: {request.RequestHeader!.RequestHandle}. {ex.Message}");
+                _logger?.LogError(ex, "Error sending {RequestType}, Handle: {RequestHandle}."
+                    , request.GetType().Name
+                    , request.RequestHeader!.RequestHandle
+                    );
                 throw;
             }
             finally
@@ -375,6 +387,14 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <summary>
+        /// Finds the first pending operation of type T
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        private ServiceOperation? FindPendingRequest<T>()
+            => _pendingCompletions.OrderBy(k => k.Key).Select(k => k.Value).FirstOrDefault(o => o.Request is T);
+
+        /// <summary>
         /// Start a task to receive service responses from transport channel.
         /// </summary>
         /// <param name="token">A cancellation token</param>
@@ -417,16 +437,17 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // TODO: remove when open62541 server corrected.
                     if (header.RequestHandle == 0)
                     {
-                        ServiceOperation? tcs2 = null;
-                        if (response is OpenSecureChannelResponse)
+                        ServiceOperation? tcs2 = response switch
                         {
-                            tcs2 = _pendingCompletions.OrderBy(k => k.Key).Select(k => k.Value).FirstOrDefault(o => o.Request is OpenSecureChannelRequest);
-                        }
-                        else if (response is CloseSecureChannelResponse)
-                        {
-                            tcs2 = _pendingCompletions.OrderBy(k => k.Key).Select(k => k.Value).FirstOrDefault(o => o.Request is CloseSecureChannelRequest);
-                        }
-
+                            CreateSessionResponse _ => FindPendingRequest<CreateSessionRequest>(),
+                            OpenSecureChannelResponse _ => FindPendingRequest<OpenSecureChannelRequest>(),
+                            CloseSecureChannelResponse _ => FindPendingRequest<CloseSecureChannelRequest>(),
+                            _ => null,
+                        };
+                        _logger?.LogWarning("Nonconform server response, unmatched response {ResponseType} with request handler {RequestHandle} returned and matched to {RequestType} {RequestHandle}",
+                            response.GetType().Name, header.RequestHandle,
+                            tcs?.Request?.GetType()?.Name, tcs?.Request?.RequestHeader?.RequestHandle
+                        );
                         if (tcs2 != null)
                         {
                             _pendingCompletions.TryRemove(tcs2.Request.RequestHeader!.RequestHandle, out _);
@@ -445,7 +466,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             catch (Exception ex)
             {
-                _logger?.LogError($"Error receiving response. {ex.Message}");
+                _logger?.LogError(ex, $"Error receiving response.");
                 await FaultAsync(ex).ConfigureAwait(false);
             }
         }
@@ -475,7 +496,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                     bodyStream.Seek(0L, SeekOrigin.Begin);
                     var response = (IServiceResponse)bodyDecoder.ReadResponse();
 
-                    _logger?.LogTrace($"Received {response.GetType().Name}, Handle: {response.ResponseHeader!.RequestHandle} Result: {response.ResponseHeader.ServiceResult}");
+                    _logger?.LogTrace("Received {ResponseType}, Handle: {RequestHandle} Result: {ServiceResult}",
+                        response.GetType().Name, response.ResponseHeader!.RequestHandle, response.ResponseHeader.ServiceResult
+                    );
 
                     // special inline processing for token renewal because we need to
                     // hold both the sending and receiving semaphores to update the security keys.

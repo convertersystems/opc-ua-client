@@ -162,7 +162,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                         {
                             if (flag2)
                             {
-                                _logger?.LogError($"Error closing channel.");
+                                _logger?.LogError("Error closing channel.");
                                 await AbortAsync(token).ConfigureAwait(false);
                             }
                         }
@@ -299,7 +299,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 _semaphore.Release();
             }
 
-            _logger?.LogTrace($"Channel closed.");
+            _logger?.LogTrace("Channel closed.");
             EventHandler? closed = Closed;
             if (closed != null)
             {
@@ -330,7 +330,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 _semaphore.Release();
             }
 
-            _logger?.LogTrace($"Channel closing.");
+            _logger?.LogTrace("Channel closing.");
             EventHandler? closing = Closing;
             if (closing != null)
             {
@@ -360,7 +360,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 _semaphore.Release();
             }
 
-            _logger?.LogTrace($"Channel faulted.");
+            _logger?.LogTrace("Channel faulted.");
             EventHandler? faulted = Faulted;
             if (faulted != null)
             {
@@ -398,7 +398,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 _semaphore.Release();
             }
 
-            _logger?.LogTrace($"Channel opened.");
+            _logger?.LogTrace("Channel opened.");
             EventHandler? opened = Opened;
             if (opened != null)
             {
@@ -423,7 +423,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 _semaphore.Release();
             }
 
-            _logger?.LogTrace($"Channel opening.");
+            _logger?.LogTrace("Channel opening.");
             EventHandler? opening = Opening;
             if (opening != null)
             {
