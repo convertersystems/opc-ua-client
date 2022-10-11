@@ -387,14 +387,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         }
 
         /// <summary>
-        /// Finds the first pending operation of type T
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        private ServiceOperation? FindPendingRequest<T>()
-            => _pendingCompletions.OrderBy(k => k.Key).Select(k => k.Value).FirstOrDefault(o => o.Request is T);
-
-        /// <summary>
         /// Start a task to receive service responses from transport channel.
         /// </summary>
         /// <param name="token">A cancellation token</param>
@@ -437,20 +429,23 @@ namespace Workstation.ServiceModel.Ua.Channels
                     // TODO: remove when open62541 server corrected.
                     if (header.RequestHandle == 0)
                     {
-                        ServiceOperation? tcs2 = response switch
-                        {
-                            CreateSessionResponse _ => FindPendingRequest<CreateSessionRequest>(),
-                            OpenSecureChannelResponse _ => FindPendingRequest<OpenSecureChannelRequest>(),
-                            CloseSecureChannelResponse _ => FindPendingRequest<CloseSecureChannelRequest>(),
-                            _ => null,
-                        };
-                        _logger?.LogWarning("Nonconform server response, unmatched response {ResponseType} with request handler {RequestHandle} returned and matched to {RequestType} {RequestHandle}",
-                            response.GetType().Name, header.RequestHandle,
-                            tcs?.Request?.GetType()?.Name, tcs?.Request?.RequestHeader?.RequestHandle
-                        );
+                        // if the returned request handle, find a handle of a matching type, by replacing
+                        // "Response" with "Request"
+                        var requestTypeName = response.GetType().Name[..^("Response".Length)] + "Request";
+                        // check if we find a matching request
+                        var tcs2 = _pendingCompletions
+                            .Where(o => o.Value.Request.GetType().Name == requestTypeName)
+                            .OrderBy(k => k.Key)
+                            .Select(k => k.Value)
+                            .FirstOrDefault()
+                        ;
                         if (tcs2 != null)
                         {
-                            _pendingCompletions.TryRemove(tcs2.Request.RequestHeader!.RequestHandle, out _);
+                            var requestHandle = tcs2.Request.RequestHeader!.RequestHandle;
+                            _logger?.LogTrace("Nonconform server response, unmatched response {ResponseType} with request handler {RequestHandle} returned and matched to {RequestType} {RequestHandle}",
+                                response.GetType().Name, header.RequestHandle, tcs2.Request.GetType().Name, requestHandle
+                            );
+                            _pendingCompletions.TryRemove(requestHandle, out _);
                             if (StatusCode.IsBad(header.ServiceResult))
                             {
                                 var ex = new ServiceResultException(new ServiceResult(header.ServiceResult, header.ServiceDiagnostics, header.StringTable));
@@ -460,6 +455,13 @@ namespace Workstation.ServiceModel.Ua.Channels
                             {
                                 tcs2.TrySetResult(response);
                             }
+                        }
+                        else
+                        {
+                            // no match, add warning as the request is unhandled
+                            _logger?.LogWarning("Nonconform server response, unmatched response {ResponseType} with request handler {RequestHandle} returned and could not be matched to a request!",
+                                response.GetType().Name, header.RequestHandle
+                            );
                         }
                     }
                 }
