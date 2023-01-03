@@ -35,8 +35,8 @@ public class Program
             ApplicationType = ApplicationType.Client
         };
 
-        // create a 'UaTcpSessionChannel', a client-side channel that opens a 'session' with the server.
-        var channel = new UaTcpSessionChannel(
+        // create a 'ClientTransportChannel', a client-side channel that opens a 'session' with the server.
+        var channel = new ClientTransportChannel(
             clientDescription,
             null, // no x509 certificates
             new AnonymousIdentity(), // no user identity
