@@ -81,7 +81,7 @@ namespace Workstation.ServiceModel.Ua
                 var clause = new SimpleAttributeOperand
                 {
                     TypeDefinitionId = NodeId.Parse(efa.TypeDefinitionId!),
-                    BrowsePath = !String.IsNullOrWhiteSpace(efa.BrowsePath) ? efa.BrowsePath!.Split('/').Select(s => QualifiedName.Parse(s)).ToArray() : new QualifiedName[0],
+                    BrowsePath = !String.IsNullOrWhiteSpace(efa.BrowsePath) ? efa.BrowsePath!.Split('/').Select(s => QualifiedName.Parse(s)).ToArray() : Array.Empty<QualifiedName>(),
                     AttributeId = efa.AttributeId,
                     IndexRange = efa.IndexRange
                 };

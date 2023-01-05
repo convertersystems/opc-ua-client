@@ -9,9 +9,8 @@ using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Security;
-using System.Collections.Generic;
 using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 
 namespace Workstation.ServiceModel.Ua.Channels
@@ -619,7 +618,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     throw new ServiceResultException(StatusCodes.BadIdentityTokenRejected);
                 }
 
-                byte[] passwordBytes = userNameIdentity.Password != null ? System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password) : new byte[0];
+                byte[] passwordBytes = userNameIdentity.Password != null ? System.Text.Encoding.UTF8.GetBytes(userNameIdentity.Password) : Array.Empty<byte>();
                 int plainTextLength = passwordBytes.Length + RemoteNonce!.Length;
                 IBufferedCipher encryptor;
                 byte[] cipherText;
@@ -809,7 +808,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             var publishRequest = new PublishRequest
             {
                 RequestHeader = new RequestHeader { TimeoutHint = _publishTimeoutHint, ReturnDiagnostics = _options.DiagnosticsHint },
-                SubscriptionAcknowledgements = new SubscriptionAcknowledgement[0]
+                SubscriptionAcknowledgements = Array.Empty<SubscriptionAcknowledgement>()
             };
             while (!token.IsCancellationRequested)
             {
@@ -836,7 +835,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                                 SubscriptionId = publishResponse.SubscriptionId
                             }
                         }
-                        : new SubscriptionAcknowledgement[0]
+                        : Array.Empty<SubscriptionAcknowledgement>()
                     };
                 }
                 catch (Exception ex)
