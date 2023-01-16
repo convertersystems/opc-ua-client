@@ -19,19 +19,18 @@ namespace Workstation.UaClient.UnitTests.Channels
     {
         private abstract class TypeMappingEquivalency<TSubject, TExpectation> : IEquivalencyStep
         {
-            public bool CanHandle(IEquivalencyValidationContext context,
-                IEquivalencyAssertionOptions config)
-                => context.Subject is TSubject && context.Expectation is TExpectation;
 
-            public bool Handle(IEquivalencyValidationContext context, IEquivalencyValidator
-                parent, IEquivalencyAssertionOptions config)
+           public EquivalencyResult Handle(Comparands comparands, IEquivalencyValidationContext context, IEquivalencyValidator nestedValidator)
             {
-                var subject = (TSubject)context.Subject;
-                var expectation = (TExpectation)context.Expectation;
-
-                Test(subject, expectation, context.Because, context.BecauseArgs);
-
-                return true;
+                if (comparands.Subject is TSubject subject)
+                {
+                    if (comparands.Expectation is TExpectation expectation)
+                    {
+                        Test(subject, expectation, context.Reason.FormattedMessage, context.Reason.Arguments);
+                        return EquivalencyResult.AssertionCompleted;
+                    }
+                }
+                return EquivalencyResult.ContinueWithNext;
             }
 
             protected abstract void Test(TSubject subject, TExpectation expectation, string because, object[] becauseArgs);

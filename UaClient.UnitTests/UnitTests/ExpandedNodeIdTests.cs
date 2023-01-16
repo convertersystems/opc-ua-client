@@ -308,8 +308,8 @@ namespace Workstation.UaClient.UnitTests
         [Theory]
         public void NotParsable(string s)
         {
-            s.Invoking(t => ExpandedNodeId.Parse(t))
-                .Should().Throw<ServiceResultException>()
+            Action act = () => ExpandedNodeId.Parse(s);
+            act.Should().Throw<ServiceResultException>()
                 .Which.HResult
                 .Should().Be(unchecked((int)StatusCodes.BadNodeIdInvalid));
         }
@@ -366,8 +366,8 @@ namespace Workstation.UaClient.UnitTests
             var nodeId = default(ExpandedNodeId);
             var nsUris = new string[] { };
 
-            nodeId.Invoking(n => ExpandedNodeId.ToNodeId(n, nsUris))
-                .Should().Throw<ArgumentNullException>();
+            Action act = () => ExpandedNodeId.ToNodeId(nodeId, nsUris);
+            act.Should().Throw<ArgumentNullException>();
         }
     }
 }

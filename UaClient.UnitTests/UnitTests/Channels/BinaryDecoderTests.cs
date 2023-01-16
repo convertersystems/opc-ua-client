@@ -49,8 +49,8 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             Stream stream = null;
 
-            stream.Invoking(s => new BinaryDecoder(s))
-                .Should().Throw<ArgumentNullException>();
+            Action act = () => new BinaryDecoder(stream);
+            act.Should().Throw<ArgumentNullException>();
         }
 
         [InlineData(true)]

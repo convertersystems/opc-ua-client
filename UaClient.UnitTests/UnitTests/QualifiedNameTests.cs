@@ -93,7 +93,7 @@ namespace Workstation.UaClient.UnitTests
                     .Should().NotBe(b);
                 a
                     .Should().NotBe(5);
-                
+
                 // Test Equal(QualifiedName)
                 a.Equals(b)
                     .Should().BeFalse();
@@ -112,7 +112,7 @@ namespace Workstation.UaClient.UnitTests
                     .Should().NotBe(b.GetHashCode());
             }
         }
-        
+
         public static IEnumerable<object[]> EqualityNullData =>
             QualifiedNames.Select(id => new[] { id() });
 
@@ -154,8 +154,8 @@ namespace Workstation.UaClient.UnitTests
         [Theory]
         public void NotParsable(string text)
         {
-            text.Invoking(t => QualifiedName.Parse(t))
-                .Should().Throw<ArgumentException>();
+            Action act = () => QualifiedName.Parse(text);
+            act.Should().Throw<ArgumentException>();
         }
     }
 }

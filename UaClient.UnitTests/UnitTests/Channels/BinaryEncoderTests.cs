@@ -33,8 +33,8 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             Stream stream = null;
 
-            stream.Invoking(s => new BinaryEncoder(s))
-                .Should().Throw<ArgumentNullException>();
+            Action act = () => new BinaryEncoder(stream);
+            act.Should().Throw<ArgumentNullException>();
         }
 
         [InlineData(true)]

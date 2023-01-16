@@ -39,8 +39,8 @@ namespace Workstation.UaClient.UnitTests
         {
             Action<string> action = null;
 
-            action.Invoking(a => new ErrorsContainer<int>(a))
-                .Should().Throw<ArgumentNullException>();
+            Action act = () => new ErrorsContainer<int>(action);
+            act.Should().Throw<ArgumentNullException>();
         }
 
         [MemberData(nameof(TestProperties))]

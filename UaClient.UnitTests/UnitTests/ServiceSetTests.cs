@@ -45,7 +45,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.ReadAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.WriteAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.HistoryReadAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -123,7 +123,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.HistoryUpdateAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -152,7 +152,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.CallAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.CreateMonitoredItemsAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -207,7 +207,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.ModifyMonitoredItemsAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -233,7 +233,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.SetMonitoringModeAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -259,7 +259,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.SetTriggeringAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -285,7 +285,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.DeleteMonitoredItemsAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -314,7 +314,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.AddNodesAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -340,7 +340,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.AddReferencesAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -366,7 +366,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.DeleteNodesAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -392,7 +392,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.DeleteReferencesAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -421,7 +421,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.QueryFirstAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -447,7 +447,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.QueryNextAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -476,7 +476,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.CreateSubscriptionAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -502,7 +502,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.ModifySubscriptionAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -528,7 +528,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.SetPublishingModeAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -554,7 +554,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.TransferSubscriptionsAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -580,7 +580,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.DeleteSubscriptionsAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -609,7 +609,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.BrowseAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -635,7 +635,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.BrowseNextAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -661,7 +661,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.TranslateBrowsePathsToNodeIdsAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -687,7 +687,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.RegisterNodesAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -713,7 +713,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.UnregisterNodesAsync(null))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -815,7 +815,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.AcknowledgeAsync(null, "Comment"))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
 
         [Fact]
@@ -862,7 +862,7 @@ namespace Workstation.UaClient.UnitTests
             var channel = new TestRequestChannel(response);
 
             channel.Invoking(c => c.ConfirmAsync(null, "Comment"))
-                .Should().Throw<ArgumentNullException>();
+                .Should().ThrowAsync<ArgumentNullException>();
         }
     }
 }

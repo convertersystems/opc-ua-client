@@ -44,8 +44,8 @@ namespace Workstation.UaClient.UnitTests
         {
             var input = default(object[]);
 
-            input.Invoking(i => i.ToVariantArray())
-                .Should().Throw<ArgumentNullException>();
+            Action act = () => input.ToVariantArray();
+            act.Should().Throw<ArgumentNullException>();
         }
         
         [Fact]
@@ -73,8 +73,8 @@ namespace Workstation.UaClient.UnitTests
         {
             var input = default(Variant[]);
 
-            input.Invoking(i => i.ToObjectArray())
-                .Should().Throw<ArgumentNullException>();
+            Action act = () => input.ToObjectArray();
+            act.Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
