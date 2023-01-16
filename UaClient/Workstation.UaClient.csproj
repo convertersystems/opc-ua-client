@@ -24,10 +24,15 @@
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	  <LangVersion>latest</LangVersion>
 	  <Nullable>enable</Nullable>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="ServiceModel\Ua\Schema\NodeIdsEdited.csv" />
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="..\LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
