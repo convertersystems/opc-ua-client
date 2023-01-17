@@ -5,6 +5,7 @@ using System;
 
 namespace Workstation.ServiceModel.Ua
 {
+    [Serializable]
     public sealed class ServiceResultException : Exception
     {
         public ServiceResultException(ServiceResult result)
