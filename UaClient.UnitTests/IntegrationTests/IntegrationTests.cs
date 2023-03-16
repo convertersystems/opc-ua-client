@@ -8,8 +8,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -177,9 +177,9 @@ namespace Workstation.UaClient.IntegrationTests
                     IUserIdentity selectedUserIdentity;
                     switch (selectedTokenPolicy.TokenType)
                     {
-                        case UserTokenType.Certificate:
-                            selectedUserIdentity = x509Identity;
-                            break;
+                        //case UserTokenType.Certificate:
+                        //    selectedUserIdentity = x509Identity;
+                        //    break;
 
                         case UserTokenType.UserName:
                             selectedUserIdentity = new UserNameIdentity("root", "secret");
@@ -378,7 +378,7 @@ namespace Workstation.UaClient.IntegrationTests
 
             void onPublish(PublishResponse pr)
             {
-                numOfResponses++;
+                 numOfResponses++;
 
                 // loop thru all the data change notifications and log them.
                 var dcns = pr.NotificationMessage.NotificationData.OfType<DataChangeNotification>();
@@ -391,14 +391,9 @@ namespace Workstation.UaClient.IntegrationTests
                 }
             }
 
-            void onPublishError(Exception ex)
-            {
-                logger.LogInformation("Exception in publish response handler: {0}", ex.GetBaseException().Message);
-            }
 
-            var token = channel
-                .Where(pr => pr.SubscriptionId == id)
-                .Subscribe(onPublish, onPublishError);
+            var dest = new ActionBlock<PublishResponse>(onPublish);
+            var token = channel.LinkTo(dest, pr => pr.SubscriptionId == id);
 
             await Task.Delay(5000);
 
@@ -760,6 +755,8 @@ namespace Workstation.UaClient.IntegrationTests
 
             void onPublish(PublishResponse pr)
             {
+                if (pr.SubscriptionId != id) { return; }
+
                 // loop thru all the data change notifications and log them.
                 var dcns = pr.NotificationMessage.NotificationData.OfType<DataChangeNotification>();
                 foreach (var dcn in dcns)
@@ -776,9 +773,7 @@ namespace Workstation.UaClient.IntegrationTests
                 logger.LogInformation("Exception in publish response handler: {0}", ex.GetBaseException().Message);
             }
 
-            var token = channel1
-                .Where(pr => pr.SubscriptionId == id)
-                .Subscribe(onPublish, onPublishError);
+            var token = channel1.Subscribe(onPublish, onPublishError);
 
             var itemsRequest = new CreateMonitoredItemsRequest
             {
@@ -800,9 +795,7 @@ namespace Workstation.UaClient.IntegrationTests
 
             await channel2.OpenAsync();
 
-            var token2 = channel2
-                .Where(pr => pr.SubscriptionId == id)
-                .Subscribe(onPublish, onPublishError);
+            var token2 = channel2.Subscribe(onPublish, onPublishError);
 
             var transferRequest = new TransferSubscriptionsRequest
             {

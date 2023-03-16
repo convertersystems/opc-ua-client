@@ -83,7 +83,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             _options = options ?? new ClientSessionChannelOptions();
             _loggerFactory = loggerFactory;
             _logger = loggerFactory?.CreateLogger<ClientSessionChannel>();
-            _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
+            _actionBlock = new ActionBlock<PublishResponse>(OnPublishResponse);
             _stateMachineCts = new CancellationTokenSource();
             _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
         }
