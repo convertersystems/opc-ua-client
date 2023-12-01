@@ -148,7 +148,13 @@ namespace Workstation.ServiceModel.Ua.Channels
             // TimestampHeader takes care that the RequestHeader property will not be null
             using (var timeoutCts = new CancellationTokenSource((int)request.RequestHeader!.TimeoutHint))
             using (var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, _channelCts.Token, token))
-            using (var registration = linkedCts.Token.Register(o => ((ServiceOperation)o!).TrySetException(new ServiceResultException(StatusCodes.BadRequestTimeout)), operation, false))
+            using (var registration = linkedCts.Token.Register(o =>
+                {
+                   var statusCode = StatusCodes.BadRequestTimeout;
+                   if (PeakFirstPendingException() is ServiceResultException result)
+                       statusCode = result.StatusCode;
+                   ((ServiceOperation)o!).TrySetException(new ServiceResultException(statusCode));
+                }, operation, false))
             {
                 if (_pendingRequests.Post(operation))
                 {
