@@ -140,7 +140,7 @@ public class MainViewModel : SubscriptionBase
     public ServerStatusDataType ServerServerStatus
     {
         get { return this.serverServerStatus; }
-        private set { this.SetValue(ref this.serverServerStatus, value); }
+        private set { this.SetProperty(ref this.serverServerStatus, value); }
     }
 
     private ServerStatusDataType serverServerStatus;
@@ -173,7 +173,7 @@ public class MainViewModel : SubscriptionBase
     public ServerStatusDataType ServerServerStatus
     {
         get { return this.serverServerStatus; }
-        private set { this.SetValue(ref this.serverServerStatus, value); }
+        private set { this.SetProperty(ref this.serverServerStatus, value); }
     }
 
     private ServerStatusDataType serverServerStatus;
