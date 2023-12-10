@@ -436,6 +436,16 @@ namespace Workstation.ServiceModel.Ua.Channels
             _exceptions.Value.Enqueue(exception);
         }
 
+        protected Exception? PeakFirstPendingException()
+        {
+            if (_exceptions.Value.TryPeek(out var ex))
+            {
+                return ex;
+            }
+
+            return null;
+        }
+
         protected Exception? GetPendingException()
         {
             if (_exceptions.Value.TryDequeue(out var ex))
