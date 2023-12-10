@@ -5,6 +5,9 @@ using System;
 
 namespace Workstation.ServiceModel.Ua
 {
+#if NETSTANDARD
+    [Serializable]
+#endif
     public sealed class ServiceResultException : Exception
     {
         public ServiceResultException(ServiceResult result)
