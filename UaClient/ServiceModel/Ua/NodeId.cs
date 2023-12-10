@@ -53,11 +53,6 @@ namespace Workstation.ServiceModel.Ua
         /// <param name="namespaceIndex">the index of the namespace in the NamespaceArray. An index of 0 corresponds to "http://opcfoundation.org/UA/".</param>
         public NodeId(Guid identifier, ushort namespaceIndex = 0)
         {
-            if (identifier == null)
-            {
-                throw new ArgumentNullException(nameof(identifier));
-            }
-
             NamespaceIndex = namespaceIndex;
             Identifier = identifier;
             IdType = IdType.Guid;

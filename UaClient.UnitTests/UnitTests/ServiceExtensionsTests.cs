@@ -157,7 +157,7 @@ namespace Workstation.UaClient.UnitTests
         [Fact]
         public async Task WithTimeoutAfterFastTask()
         {
-            var fast = Task.Delay(1);
+            var fast = Task.Delay(10);
 
             await fast.Invoking(t => t.TimeoutAfter(-1))
                 .Should().NotThrowAsync();
@@ -166,7 +166,7 @@ namespace Workstation.UaClient.UnitTests
         [Fact]
         public async Task WithTimeoutAfterFastTaskCanceledImmediately()
         {
-            var task = Task.Delay(1);
+            var task = Task.Delay(10);
             var token = new CancellationToken(true);
 
             await task.Invoking(t => t.TimeoutAfter(-1, token))

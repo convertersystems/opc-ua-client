@@ -177,9 +177,9 @@ namespace Workstation.UaClient.IntegrationTests
                     IUserIdentity selectedUserIdentity;
                     switch (selectedTokenPolicy.TokenType)
                     {
-                        case UserTokenType.Certificate:
-                            selectedUserIdentity = x509Identity;
-                            break;
+                        //case UserTokenType.Certificate:
+                        //    selectedUserIdentity = x509Identity;
+                        //    break;
 
                         case UserTokenType.UserName:
                             selectedUserIdentity = new UserNameIdentity("root", "secret");

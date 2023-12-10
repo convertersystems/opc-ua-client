@@ -232,14 +232,11 @@ namespace Workstation.ServiceModel.Ua
             logger?.LogTrace($"Created certificate with subject alt name '{applicationUri}'.");
 
             var keyInfo = new FileInfo(Path.Combine(_pkiPath, "own", "private", $"{crt.SerialNumber}.key"));
-            if (!keyInfo.Directory.Exists)
-            {
-                Directory.CreateDirectory(keyInfo.DirectoryName);
-            }
-            else if (keyInfo.Exists)
+            if (keyInfo.Exists)
             {
                 keyInfo.Delete();
             }
+            Directory.CreateDirectory(Path.Combine(_pkiPath, "own", "private"));
 
             using (var keystream = new StreamWriter(keyInfo.OpenWrite()))
             {
@@ -248,14 +245,11 @@ namespace Workstation.ServiceModel.Ua
             }
 
             var crtInfo = new FileInfo(Path.Combine(_pkiPath, "own", "certs", $"{crt.SerialNumber}.crt"));
-            if (!crtInfo.Directory.Exists)
-            {
-                Directory.CreateDirectory(crtInfo.DirectoryName);
-            }
-            else if (crtInfo.Exists)
+            if (crtInfo.Exists)
             {
                 crtInfo.Delete();
             }
+            Directory.CreateDirectory(Path.Combine(_pkiPath, "own", "certs"));
 
             using (var crtstream = new StreamWriter(crtInfo.OpenWrite()))
             {
@@ -419,14 +413,12 @@ namespace Workstation.ServiceModel.Ua
         private void StoreInRejectedFolder(X509Certificate crt)
         {
             var crtInfo = new FileInfo(Path.Combine(_pkiPath, "rejected", $"{crt.SerialNumber}.crt"));
-            if (!crtInfo.Directory.Exists)
-            {
-                Directory.CreateDirectory(crtInfo.DirectoryName);
-            }
-            else if (crtInfo.Exists)
+            if (crtInfo.Exists)
             {
                 crtInfo.Delete();
             }
+
+            Directory.CreateDirectory(Path.Combine(_pkiPath, "rejected"));
 
             using (var crtstream = new StreamWriter(crtInfo.OpenWrite()))
             {

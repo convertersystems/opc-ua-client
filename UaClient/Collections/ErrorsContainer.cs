@@ -50,7 +50,7 @@ namespace Workstation.Collections
         /// </summary>
         /// <param name="propertyName">The name of the property.</param>
         /// <returns>The validation errors of type <typeparamref name="T"/> for the property.</returns>
-        public IEnumerable<T> GetErrors(string propertyName)
+        public IEnumerable<T> GetErrors(string? propertyName)
         {
             var localPropertyName = propertyName ?? string.Empty;
             List<T>? currentValidationResults = null;

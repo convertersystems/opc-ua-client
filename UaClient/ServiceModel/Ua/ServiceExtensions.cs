@@ -173,7 +173,7 @@ namespace Workstation.ServiceModel.Ua
                     throw new TimeoutException($"Task timed out after {timeout}");
                 }
 
-                throw t.Exception;
+                throw t.Exception!;
             }
 
             return await task.ConfigureAwait(false);
