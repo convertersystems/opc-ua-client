@@ -2,7 +2,7 @@
 
 # opc-ua-client
 
-[![Actions Status](https://github.com/convertersystems/opc-ua-client/workflows/Unit%20Tests/badge.svg)](https://github.com/convertersystems/opc-ua-client/actions)
+[![Actions Status](https://github.com/convertersystems/opc-ua-client/actions/workflows/dotnet.yml/badge.svg)](https://github.com/convertersystems/opc-ua-client/actions)
 
 Communicate using OPC Unified Architecture and Visual Studio. With this library, your app can browse, read, write and subscribe to the live data published by the OPC UA servers on your network.
 
@@ -40,7 +40,7 @@ public class Program
             clientDescription,
             null, // no x509 certificates
             new AnonymousIdentity(), // no user identity
-            "opc.tcp://opcua.rocks:4840", // the public endpoint of a server at opcua.rocks.
+            "opc.tcp://opcua.umati.app:4840", // the public endpoint of the umati sample server.
             SecurityPolicyUris.None); // no encryption
         try
         {
@@ -93,10 +93,9 @@ public class Program
 
 // Server status:
 //   ProductName: open62541 OPC UA Server
-//   SoftwareVersion: 1.0.0-rc5-52-g04067153-dirty
+//   SoftwareVersion: 1.4.0-rc1
 //   ManufacturerName: open62541
 //   State: Running
-
 ```
 
 ### Model, View, ViewModel (MVVM)

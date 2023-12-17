@@ -293,6 +293,76 @@ namespace Workstation.UaClient.IntegrationTests
         }
 
         /// <summary>
+        /// Connects to server and reads the current ServerState. 
+        /// </summary>
+        [Fact]
+        public async Task ReadMe()
+        {
+            // describe this client application.
+            var clientDescription = new ApplicationDescription
+            {
+                ApplicationName = "Workstation.UaClient.FeatureTests",
+                ApplicationUri = $"urn:{System.Net.Dns.GetHostName()}:Workstation.UaClient.FeatureTests",
+                ApplicationType = ApplicationType.Client
+            };
+
+            // create a 'ClientSessionChannel', a client-side channel that opens a 'session' with the server.
+            var channel = new ClientSessionChannel(
+                clientDescription,
+                null, // no x509 certificates
+                new AnonymousIdentity(), // no user identity
+                "opc.tcp://opcua.umati.app:4840", // the public endpoint of the umati sample server.
+                SecurityPolicyUris.None); // no encryption
+            try
+            {
+                // try opening a session and reading a few nodes.
+                await channel.OpenAsync();
+
+                logger.LogInformation($"Opened session with endpoint '{channel.RemoteEndpoint.EndpointUrl}'.");
+                logger.LogInformation($"SecurityPolicy: '{channel.RemoteEndpoint.SecurityPolicyUri}'.");
+                logger.LogInformation($"SecurityMode: '{channel.RemoteEndpoint.SecurityMode}'.");
+                logger.LogInformation($"UserIdentityToken: '{channel.UserIdentity}'.");
+
+                // build a ReadRequest. See 'OPC UA Spec Part 4' paragraph 5.10.2
+                var readRequest = new ReadRequest
+                {
+                    // set the NodesToRead to an array of ReadValueIds.
+                    NodesToRead = new[] {
+                    // construct a ReadValueId from a NodeId and AttributeId.
+                    new ReadValueId {
+                        // you can parse the nodeId from a string.
+                        // e.g. NodeId.Parse("ns=2;s=Demo.Static.Scalar.Double")
+                        NodeId = NodeId.Parse(VariableIds.Server_ServerStatus),
+                        // variable class nodes have a Value attribute.
+                        AttributeId = AttributeIds.Value
+                    }
+                }
+                };
+                // send the ReadRequest to the server.
+                var readResult = await channel.ReadAsync(readRequest);
+
+                // DataValue is a class containing value, timestamps and status code.
+                // the 'Results' array returns DataValues, one for every ReadValueId.
+                var serverStatus = readResult.Results[0].GetValueOrDefault<ServerStatusDataType>();
+
+                logger.LogInformation("\nServer status:");
+                logger.LogInformation("  ProductName: {0}", serverStatus.BuildInfo.ProductName);
+                logger.LogInformation("  SoftwareVersion: {0}", serverStatus.BuildInfo.SoftwareVersion);
+                logger.LogInformation("  ManufacturerName: {0}", serverStatus.BuildInfo.ManufacturerName);
+                logger.LogInformation("  State: {0}", serverStatus.State);
+                logger.LogInformation("  CurrentTime: {0}", serverStatus.CurrentTime);
+
+                logger.LogInformation($"\nClosing session '{channel.SessionId}'.");
+                await channel.CloseAsync();
+            }
+            catch (Exception ex)
+            {
+                await channel.AbortAsync();
+                logger.LogInformation(ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Tests polling the current time.
         /// Only run this test with a running opc test server.
         /// </summary>
