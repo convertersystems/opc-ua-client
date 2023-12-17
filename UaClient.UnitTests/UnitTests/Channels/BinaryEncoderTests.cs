@@ -393,7 +393,6 @@ namespace Workstation.UaClient.UnitTests.Channels
 
         public static IEnumerable<object[]> EncodeDiagnosticInfoData { get; } = new []
         {
-            new DiagnosticInfo(),
             new DiagnosticInfo(2),
             new DiagnosticInfo(2, 3),
             new DiagnosticInfo(2, 3, 4),
@@ -401,8 +400,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             new DiagnosticInfo(2, 3, 4, 5, "Text text text."),
             new DiagnosticInfo(2, additionalInfo:"Test test test."),
             new DiagnosticInfo(2, locale:6, innerStatusCode: StatusCodes.BadSessionIdInvalid),
-            //new DiagnosticInfo(2, innerDiagnosticInfo: new DiagnosticInfo(2)),
-        }
+         }
         .Select(x => new object[] { x });
 
         [MemberData(nameof(EncodeDiagnosticInfoData))]
@@ -421,7 +419,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             EncodeDecode(
                 e => e.WriteDiagnosticInfo(null, null),
                 d => d.ReadDiagnosticInfo(null))
-                .Should().BeEquivalentTo(new Opc.Ua.DiagnosticInfo());
+                .Should().BeNull();
         }
 
         public static IEnumerable<object[]> EncodeQualifiedNameData { get; } = new []

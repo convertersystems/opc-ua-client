@@ -109,7 +109,7 @@ namespace Workstation.UaClient.IntegrationTests
                 EndpointUrl = EndpointUrl,
                 ProfileUris = new[] { TransportProfileUris.UaTcpTransport }
             };
-            logger.LogInformation($"Discovering endpoints of '{getEndpointsRequest.EndpointUrl}'.");
+            logger.LogInformation($"Discovering endpoints of '{EndpointUrl}'.", getEndpointsRequest.EndpointUrl);
             var getEndpointsResponse = await DiscoveryService.GetEndpointsAsync(getEndpointsRequest, loggerFactory);
 
             // for each endpoint and user identity type, try creating a session and reading a few nodes.
@@ -232,7 +232,7 @@ namespace Workstation.UaClient.IntegrationTests
 
             var rds = new List<ReferenceDescription>();
             var browseRequest = new BrowseRequest { NodesToBrowse = new[] { new BrowseDescription { NodeId = ExpandedNodeId.ToNodeId(ExpandedNodeId.Parse(ObjectIds.ObjectsFolder), channel.NamespaceUris), ReferenceTypeId = NodeId.Parse(ReferenceTypeIds.HierarchicalReferences), ResultMask = (uint)BrowseResultMask.TargetInfo, NodeClassMask = (uint)NodeClass.Unspecified, BrowseDirection = BrowseDirection.Forward, IncludeSubtypes = true } }, RequestedMaxReferencesPerNode = 1000 };
-            var browseResponse = await channel.BrowseAsync(browseRequest).ConfigureAwait(false);
+            var browseResponse = await channel.BrowseAsync(browseRequest);
             rds.AddRange(browseResponse.Results.Where(result => result.References != null).SelectMany(result => result.References));
             var continuationPoints = browseResponse.Results.Select(br => br.ContinuationPoint).Where(cp => cp != null).ToArray();
             while (continuationPoints.Length > 0)
@@ -755,7 +755,7 @@ namespace Workstation.UaClient.IntegrationTests
                 RequestedLifetimeCount = 30 * 3,
                 PublishingEnabled = true,
             };
-            var subscriptionResponse = await channel1.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
+            var subscriptionResponse = await channel1.CreateSubscriptionAsync(subscriptionRequest);
             var id = subscriptionResponse.SubscriptionId;
 
             void onPublish(PublishResponse pr)
@@ -766,14 +766,14 @@ namespace Workstation.UaClient.IntegrationTests
                 {
                     foreach (var min in dcn.MonitoredItems)
                     {
-                        logger.LogInformation($"sub: {pr.SubscriptionId}; handle: {min.ClientHandle}; value: {min.Value}");
+                        logger.LogInformation("sub: {SubscriptionId}; handle: {ClientHandle}; value: {Value}", pr.SubscriptionId, min.ClientHandle, min.Value);
                     }
                 }
             }
 
             void onPublishError(Exception ex)
             {
-                logger.LogInformation("Exception in publish response handler: {0}", ex.GetBaseException().Message);
+                logger.LogInformation("Exception in publish response handler: {Message}", ex.GetBaseException().Message);
             }
 
             var token = channel1

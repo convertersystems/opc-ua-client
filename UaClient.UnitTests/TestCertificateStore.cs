@@ -157,7 +157,7 @@ namespace Workstation.UaClient
             cg.AddExtension(
                 X509Extensions.ExtendedKeyUsage,
                 true,
-                new ExtendedKeyUsage(KeyPurposeID.IdKPClientAuth, KeyPurposeID.IdKPServerAuth));
+                new ExtendedKeyUsage(KeyPurposeID.id_kp_clientAuth, KeyPurposeID.id_kp_serverAuth));
 
             var crt = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, _rng));
 
