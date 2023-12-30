@@ -317,6 +317,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
         }
 
+        private RecyclableMemoryStream GetRecyclableMemoryStreams(string tag)
+        {
+            return new RecyclableMemoryStream(_streamManager, tag);
+        }
+
         /// <summary>
         /// Send open secure channel service request on transport channel.
         /// </summary>
@@ -325,7 +330,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = _streamManager.GetStream("SendOpenSecureChannelRequestAsync");
+            var bodyStream = GetRecyclableMemoryStreams("SendOpenSecureChannelRequestAsync");
             using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
@@ -344,7 +349,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = _streamManager.GetStream("SendCloseSecureChannelRequestAsync");
+            var bodyStream = GetRecyclableMemoryStreams("SendCloseSecureChannelRequestAsync");
             using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
@@ -363,7 +368,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
-            var bodyStream = _streamManager.GetStream("SendServiceRequestAsync");
+            var bodyStream = GetRecyclableMemoryStreams("SendServiceRequestAsync");
             using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
@@ -463,7 +468,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 token.ThrowIfCancellationRequested();
                 ThrowIfClosedOrNotOpening();
 
-                var bodyStream = _streamManager.GetStream("ReceiveResponseAsync");
+                var bodyStream = GetRecyclableMemoryStreams("ReceiveResponseAsync");
                 using (var bodyDecoder = StackProfile.EncodingProvider.CreateDecoder(bodyStream, this, keepStreamOpen: false))
                 {
                     var ret = await _conversation!.DecryptMessageAsync(bodyStream, ReceiveAsync, token).ConfigureAwait(false);
