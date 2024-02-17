@@ -65,6 +65,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_Compact_SUT data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_Compact_SUT")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_Compact_SUT")]
     public class PID_Compact_SUT : SimaticSystemStructures
     {
         /// <summary>
@@ -113,6 +114,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_Compact_TIR data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_Compact_TIR")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_Compact_TIR")]
     public class PID_Compact_TIR : SimaticSystemStructures
     {
         /// <summary>
@@ -168,6 +170,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_CompactConfig data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_CompactConfig")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_CompactConfig")]
     public class PID_CompactConfig : SimaticSystemStructures
     {
         /// <summary>
@@ -281,11 +284,12 @@ namespace SimaticTypeLibrary
             decoder.PopNamespace();
         }
     }
-    
+
     /// <summary>
     /// Class for the PID_CompactControl data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_CompactControl")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_CompactControl")]
     public class PID_CompactControl : SimaticSystemStructures
     {
         /// <summary>
@@ -327,6 +331,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_CompactControlParams data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_CompactControlParams")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_CompactControlParams")]
     public class PID_CompactControlParams : SimaticSystemStructures
     {
         /// <summary>
@@ -403,6 +408,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_CompactRetain data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_CompactRetain")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_CompactRetain")]
     public class PID_CompactRetain : SimaticSystemStructures
     {
         /// <summary>
@@ -437,6 +443,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_CompactSelfTune data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_CompactSelfTune")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_CompactSelfTune")]
     public class PID_CompactSelfTune : SimaticSystemStructures
     {
         /// <summary>
@@ -478,6 +485,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_CycleTime data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_CycleTime")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_CycleTime")]
     public class PID_CycleTime : SimaticSystemStructures
     {
         /// <summary>
@@ -533,6 +541,7 @@ namespace SimaticTypeLibrary
     /// Class for the PID_Scaling data type.
     /// </summary>
     [Workstation.ServiceModel.Ua.DataTypeId("nsu=http://www.siemens.com/simatic-s7-opcua;s=DT_PID_Scaling")]
+    [Workstation.ServiceModel.Ua.BinaryEncodingId("nsu=http://www.siemens.com/simatic-s7-opcua;s=TE_PID_Scaling")]
     public class PID_Scaling : SimaticSystemStructures
     {
         /// <summary>

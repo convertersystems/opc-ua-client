@@ -113,12 +113,12 @@ namespace Workstation.UaClient.IntegrationTests
                     .Should().BeTrue();
             }
 
-            // reading this node returns an array of ExtensionObjects 
+            // reading this node returns an DTL value.
             var v1 = readResponse.Results[0].GetValueOrDefault<SimaticTypeLibrary.DTL>();
 
             logger.LogInformation($"  {v1}");
 
-            // create new DataValue for writing.  Most servers reject writing values with timestamps.
+            // create new DataValue for writing. 
 
             var now = DateAndTime.Now;
             var v2 = new SimaticTypeLibrary.DTL();
@@ -128,7 +128,7 @@ namespace Workstation.UaClient.IntegrationTests
             v2.HOUR = (byte)now.Hour;
             v2.MINUTE = (byte)now.Minute;
             v2.SECOND = (byte)now.Second;
-            v2.NANOSECOND = (byte)now.Nanosecond;
+            v2.NANOSECOND = (uint)now.Nanosecond;
 
             var newValue = new DataValue(v2);
 
