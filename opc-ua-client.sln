@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29020.237
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Workstation.UaClient.UnitTests", "UaClient.UnitTests\Workstation.UaClient.UnitTests.csproj", "{8994DA00-5CE1-461F-963C-43F7CFC6864E}"
 EndProject
@@ -15,7 +15,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Workstation.UaClient", "UaClient\Workstation.UaClient.csproj", "{04B8D717-4F15-4486-86E5-E33D8B8BF57D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomTypeLibrary", "CustomTypeLibrary\CustomTypeLibrary.csproj", "{4908D255-ECC4-4846-B0A5-7799DE4524E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CustomTypeLibrary", "CustomTypeLibrary\CustomTypeLibrary.csproj", "{4908D255-ECC4-4846-B0A5-7799DE4524E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimaticTypeLibrary", "SimaticTypeLibrary\SimaticTypeLibrary.csproj", "{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,22 @@ Global
 		{4908D255-ECC4-4846-B0A5-7799DE4524E6}.Release|x64.Build.0 = Release|Any CPU
 		{4908D255-ECC4-4846-B0A5-7799DE4524E6}.Release|x86.ActiveCfg = Release|Any CPU
 		{4908D255-ECC4-4846-B0A5-7799DE4524E6}.Release|x86.Build.0 = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|ARM.Build.0 = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|x64.Build.0 = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Debug|x86.Build.0 = Debug|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|ARM.ActiveCfg = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|ARM.Build.0 = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|x64.ActiveCfg = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|x64.Build.0 = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|x86.ActiveCfg = Release|Any CPU
+		{BF1AAB6D-2B00-44E5-96E1-D89575412CEF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

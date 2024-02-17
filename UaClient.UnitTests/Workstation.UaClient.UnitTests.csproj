@@ -41,6 +41,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CustomTypeLibrary\CustomTypeLibrary.csproj" />
+    <ProjectReference Include="..\SimaticTypeLibrary\SimaticTypeLibrary.csproj" />
     <ProjectReference Include="..\UaClient\Workstation.UaClient.csproj" />
   </ItemGroup>
 
