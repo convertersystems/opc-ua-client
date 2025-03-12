@@ -94,23 +94,30 @@ namespace Workstation.ServiceModel.Ua
         {
             foreach (var type in assembly.GetExportedTypes())
             {
-                var attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
-                if (attr != null)
+                try 
                 {
-                    if (!_binaryEncodingIdByType.ContainsKey(type) && !_typeByBinaryEncodingId.ContainsKey(attr.NodeId))
+                    var attr = type.GetCustomAttribute<BinaryEncodingIdAttribute>(false);
+                    if (attr != null)
                     {
-                        _binaryEncodingIdByType.Add(type, attr.NodeId);
-                        _typeByBinaryEncodingId.Add(attr.NodeId, type);
+                        if (!_binaryEncodingIdByType.ContainsKey(type) && !_typeByBinaryEncodingId.ContainsKey(attr.NodeId))
+                        {
+                            _binaryEncodingIdByType.Add(type, attr.NodeId);
+                            _typeByBinaryEncodingId.Add(attr.NodeId, type);
+                        }
+                    }
+                    var attr2 = type.GetCustomAttribute<DataTypeIdAttribute>(false);
+                    if (attr2 != null)
+                    {
+                        if (!_dataTypeIdByType.ContainsKey(type) && !_typeByDataTypeId.ContainsKey(attr2.NodeId))
+                        {
+                            _dataTypeIdByType.Add(type, attr2.NodeId);
+                            _typeByDataTypeId.Add(attr2.NodeId, type);
+                        }
                     }
                 }
-                var attr2 = type.GetCustomAttribute<DataTypeIdAttribute>(false);
-                if (attr2 != null)
+                catch
                 {
-                    if (!_dataTypeIdByType.ContainsKey(type) && !_typeByDataTypeId.ContainsKey(attr2.NodeId))
-                    {
-                        _dataTypeIdByType.Add(type, attr2.NodeId);
-                        _typeByDataTypeId.Add(attr2.NodeId, type);
-                    }
+                    continue;
                 }
             }
         }
