@@ -12,17 +12,28 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A service for discovery of remote OPC UA servers and their endpoints.
     /// </summary>
-    public class DiscoveryService : ICommunicationObject
+    public class DiscoveryService : ICommunicationObject , IDisposable
     {
         private readonly ClientSecureChannel innerChannel;
         private readonly SemaphoreSlim semaphore;
         private readonly ILogger? logger;
+        private bool disposed = false;
 
         private DiscoveryService(EndpointDescription remoteEndpoint, ILoggerFactory? loggerFactory = null, ClientSecureChannelOptions? options = null, StackProfile? stackProfile = null)
         {
             this.innerChannel = new ClientSecureChannel(new ApplicationDescription { ApplicationName = nameof(DiscoveryService) }, null, remoteEndpoint, loggerFactory, options, stackProfile);
             this.semaphore = new SemaphoreSlim(1);
             this.logger = loggerFactory?.CreateLogger<DiscoveryService>();
+        }
+
+        public void Dispose()
+        {
+            if (!disposed)
+            {
+                semaphore?.Release();
+                innerChannel.Dispose();
+                disposed = true;
+            }
         }
 
         /// <summary>
@@ -48,7 +59,7 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var client = new DiscoveryService(
+            using var client = new DiscoveryService(
                 new EndpointDescription
                 {
                     EndpointUrl = request.EndpointUrl,
@@ -87,7 +98,7 @@ namespace Workstation.ServiceModel.Ua
                 throw new ArgumentNullException(nameof(request));
             }
 
-            var client = new DiscoveryService(
+            using var client = new DiscoveryService(
                 new EndpointDescription
                 {
                     EndpointUrl = request.EndpointUrl,
@@ -109,6 +120,12 @@ namespace Workstation.ServiceModel.Ua
                 await client.AbortAsync().ConfigureAwait(false);
                 throw;
             }
+            finally
+            {
+                await client.CloseAsync().ConfigureAwait(false);
+                
+            }
+            client.Dispose();
         }
 
         /// <summary>

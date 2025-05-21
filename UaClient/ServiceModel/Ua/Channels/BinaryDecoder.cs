@@ -40,6 +40,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             _reader = new BinaryReader(_stream, _encoding, keepStreamOpen);
         }
 
+        ~BinaryDecoder()
+        {
+            Dispose();
+        }
+
         public int Position
         {
             get { return (int)_stream.Position; }
@@ -49,6 +54,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public void Dispose()
         {
             _reader?.Dispose();
+            _stream?.Dispose();
         }
 
         public void PushNamespace(string namespaceUri)

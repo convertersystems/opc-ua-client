@@ -19,7 +19,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// A secure channel for communicating with OPC UA servers.
     /// </summary>
-    public class ClientSecureChannel : ClientTransportChannel, IRequestChannel, IEncodingContext
+    public class ClientSecureChannel : ClientTransportChannel, IRequestChannel, IEncodingContext, IDisposable
     {
         /// <summary>
         /// The default timeout for requests.
@@ -36,9 +36,9 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private readonly CancellationTokenSource _channelCts;
         private readonly ILogger? _logger;
-        private readonly SemaphoreSlim _sendingSemaphore = new SemaphoreSlim(1, 1);
-        private readonly SemaphoreSlim _receivingSemaphore = new SemaphoreSlim(1, 1);
-        private readonly ActionBlock<ServiceOperation> _pendingRequests;
+        private SemaphoreSlim _sendingSemaphore = new SemaphoreSlim(1, 1);
+        private SemaphoreSlim _receivingSemaphore = new SemaphoreSlim(1, 1);
+        private ActionBlock<ServiceOperation> _pendingRequests;
         private readonly ConcurrentDictionary<uint, ServiceOperation> _pendingCompletions;
 
         private int _handle;
@@ -46,6 +46,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private DateTime _tokenRenewalTime = DateTime.MaxValue;
         private IConversation? _conversation;
+        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientSecureChannel"/> class.
@@ -77,6 +78,35 @@ namespace Workstation.ServiceModel.Ua.Channels
             _channelCts = new CancellationTokenSource();
             _pendingRequests = new ActionBlock<ServiceOperation>(t => SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = _channelCts.Token });
             _pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
+        }
+
+        protected override async void Dispose(bool disposing)
+        {
+            if (!disposed && disposing)
+            {
+                _channelCts.Cancel(true);
+                var keys = _pendingCompletions.Keys.ToArray();
+                foreach (var k in keys)
+                {
+                    _pendingCompletions[k] = null;
+                }
+                _pendingCompletions.Clear();
+                _pendingRequests?.Complete();
+                _sendingSemaphore?.Dispose();
+                _receivingSemaphore?.Dispose();
+                _channelCts.Dispose();
+
+                if (_conversation != null && _conversation is UaClientConnection)
+                {
+                    await ((UaClientConnection)_conversation).DisposeAsync();
+                    _conversation = null;
+                }
+
+                _pendingRequests = null;
+                disposed = true;
+            }
+
+            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -325,7 +355,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendOpenSecureChannelRequestAsync(OpenSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = _streamManager.GetStream("SendOpenSecureChannelRequestAsync");
+            using var bodyStream = _streamManager.GetStream("SendOpenSecureChannelRequestAsync");
             using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
@@ -344,7 +374,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendCloseSecureChannelRequestAsync(CloseSecureChannelRequest request, CancellationToken token)
         {
-            var bodyStream = _streamManager.GetStream("SendCloseSecureChannelRequestAsync");
+            using var bodyStream = _streamManager.GetStream("SendCloseSecureChannelRequestAsync");
             using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
@@ -363,7 +393,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task SendServiceRequestAsync(IServiceRequest request, CancellationToken token)
         {
-            var bodyStream = _streamManager.GetStream("SendServiceRequestAsync");
+            using var bodyStream = _streamManager.GetStream("SendServiceRequestAsync");
             using (var bodyEncoder = StackProfile.EncodingProvider.CreateEncoder(bodyStream, this, keepStreamOpen: false))
             {
                 bodyEncoder.WriteRequest(request);
@@ -385,7 +415,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 while (!token.IsCancellationRequested)
                 {
-                    var response = await ReceiveResponseAsync().ConfigureAwait(false);
+                    var response = await ReceiveResponseAsync(token).ConfigureAwait(false);
                     if (response == null)
                     {
                         // Null response indicates socket closed. This is expected when closing secure channel.
@@ -463,7 +493,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 token.ThrowIfCancellationRequested();
                 ThrowIfClosedOrNotOpening();
 
-                var bodyStream = _streamManager.GetStream("ReceiveResponseAsync");
+                using var bodyStream = _streamManager.GetStream("ReceiveResponseAsync");
                 using (var bodyDecoder = StackProfile.EncodingProvider.CreateDecoder(bodyStream, this, keepStreamOpen: false))
                 {
                     var ret = await _conversation!.DecryptMessageAsync(bodyStream, ReceiveAsync, token).ConfigureAwait(false);
@@ -501,7 +531,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             }
             finally
             {
-                _receivingSemaphore.Release();
+                _receivingSemaphore?.Release();
             }
         }
 

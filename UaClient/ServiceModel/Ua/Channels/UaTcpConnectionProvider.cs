@@ -20,16 +20,24 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc />
         public async Task<ITransportConnection> ConnectAsync(string connectionString, CancellationToken token)
         {
-            var uri = new Uri(connectionString);
             var client = new TcpClient
             {
                 NoDelay = true
             };
+            try
+            {
+                var uri = new Uri(connectionString);
 
-            await client.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(ConnectTimeout, token).ConfigureAwait(false);
+                await client.ConnectAsync(uri.Host, uri.Port).TimeoutAfter(ConnectTimeout, token).ConfigureAwait(false);
 
-            // The stream will own the client and takes care on disposing/closing it
-            return new UaClientConnection(client.GetStream(), uri);
+                // The stream will own the client and takes care on disposing/closing it
+                return new UaClientConnection(client.GetStream(), uri);
+            }
+            catch (Exception ex)
+            { 
+                client.Dispose();
+                throw ex;
+            }
         }
     }
 }
