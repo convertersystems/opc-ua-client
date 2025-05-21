@@ -30,7 +30,7 @@ namespace Workstation.ServiceModel.Ua
         {
             if (!disposed)
             {
-                semaphore?.Release();
+                semaphore?.Dispose();
                 innerChannel.Dispose();
                 disposed = true;
             }
