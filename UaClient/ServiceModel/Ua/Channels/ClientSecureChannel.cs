@@ -36,8 +36,8 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private readonly CancellationTokenSource _channelCts;
         private readonly ILogger? _logger;
-        private SemaphoreSlim _sendingSemaphore = new SemaphoreSlim(1, 1);
-        private SemaphoreSlim _receivingSemaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _sendingSemaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _receivingSemaphore = new SemaphoreSlim(1, 1);
         private ActionBlock<ServiceOperation> _pendingRequests;
         private readonly ConcurrentDictionary<uint, ServiceOperation> _pendingCompletions;
 

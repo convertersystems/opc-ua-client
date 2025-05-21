@@ -24,8 +24,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         private bool _raisedClosing;
         private bool _raisedFaulted;
         private bool disposed = false;
-        private SemaphoreSlim _semaphore;
-        private Lazy<ConcurrentQueue<Exception>> _exceptions;
+        private readonly SemaphoreSlim _semaphore;
+        private readonly Lazy<ConcurrentQueue<Exception>> _exceptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommunicationObject"/> class.
