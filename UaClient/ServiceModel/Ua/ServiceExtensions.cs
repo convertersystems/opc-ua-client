@@ -166,14 +166,14 @@ namespace Workstation.ServiceModel.Ua
         public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout, CancellationToken token)
         {
             var t = await Task.WhenAny(task, Task.Delay(timeout, token)).ConfigureAwait(false);
-            if (task != t)
+            if (task != t) 
             {
-                if (!t.IsCanceled)
+                if (t.IsCanceled) 
                 {
-                    throw new TimeoutException($"Task timed out after {timeout}");
+                    throw new TaskCanceledException(t);
                 }
 
-                throw t.Exception!;
+                throw new TimeoutException($"Task timed out after {timeout}");
             }
 
             return await task.ConfigureAwait(false);
