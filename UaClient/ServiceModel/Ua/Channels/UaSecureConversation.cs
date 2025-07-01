@@ -184,7 +184,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     if (_certificateStore != null)
                     {
-                        var result = await _certificateStore.ValidateRemoteCertificateAsync(cert, _logger, token);
+                        var result = await _certificateStore.ValidateRemoteCertificateAsync(cert, _logger, token).ConfigureAwait(false);
                         if (!result)
                         {
                             throw new ServiceResultException(StatusCodes.BadSecurityChecksFailed, "Remote certificate is untrusted.");
@@ -217,7 +217,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             {
                 if (_localCertificate == null && _certificateStore != null)
                 {
-                    var tuple = await _certificateStore.GetLocalCertificateAsync(_localDescription, _logger, token);
+                    var tuple = await _certificateStore.GetLocalCertificateAsync(_localDescription, _logger, token).ConfigureAwait(false);
                     _localCertificate = tuple.Certificate?.GetEncoded();
                     _localPrivateKey = tuple.Key;
                 }

@@ -183,7 +183,7 @@ namespace Workstation.ServiceModel.Ua
                 RsaKeyPairGenerator kg = new RsaKeyPairGenerator();
                 kg.Init(new KeyGenerationParameters(_rng, 2048));
                 return kg.GenerateKeyPair();
-            });
+            }).ConfigureAwait(false);
 
             key = kp.Private as RsaPrivateCrtKeyParameters;
 

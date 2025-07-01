@@ -49,7 +49,7 @@ namespace Workstation.ServiceModel.Ua
                         InputArguments = new Variant[] { subscriptionId }
                     }
                 }
-            });
+            }).ConfigureAwait(false);
 
             var result = response.Results?[0];
 
@@ -86,7 +86,7 @@ namespace Workstation.ServiceModel.Ua
                         InputArguments = new Variant[] { condition.EventId, comment } // ?? new LocalizedText(string.Empty) }
                     }
                 }
-            });
+            }).ConfigureAwait(false);
             
             var result = response.Results?[0];
 
@@ -123,7 +123,7 @@ namespace Workstation.ServiceModel.Ua
                         InputArguments = new Variant[] { condition.EventId, comment } // ?? new LocalizedText(string.Empty) }
                     }
                 }
-            });
+            }).ConfigureAwait(false);
 
             var result = response.Results?[0];
 
