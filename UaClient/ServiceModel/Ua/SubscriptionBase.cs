@@ -88,7 +88,7 @@ namespace Workstation.ServiceModel.Ua
             }
 
             // read [MonitoredItem] attributes.
-            foreach (var propertyInfo in typeInfo.DeclaredProperties)
+            foreach (var propertyInfo in typeInfo.GetProperties().Where(p => p.GetCustomAttribute<MonitoredItemAttribute>() != null))
             {
                 var mia = propertyInfo.GetCustomAttribute<MonitoredItemAttribute>();
                 if (mia == null || string.IsNullOrEmpty(mia.NodeId))
