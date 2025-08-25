@@ -209,5 +209,15 @@ namespace Workstation.UaClient.UnitTests
             await never.Invoking(t => t.TimeoutAfter(0))
                 .Should().ThrowAsync<TimeoutException>();
         }
+
+        [Fact]
+        public async Task ValueWithTimeoutAfterCanceled() 
+        {
+            var never = Never(10);
+            var token = new CancellationToken(true);
+
+            await never.Invoking(t => t.TimeoutAfter(0, token))
+                .Should().ThrowAsync<TaskCanceledException>();
+        }
     }
 }
