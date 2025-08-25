@@ -27,13 +27,7 @@ namespace Workstation.UaClient.IntegrationTests
 {
     public class IntegrationTests
     {
-        // private const string EndpointUrl = "opc.tcp://localhost:16664"; // open62541
-        // private const string EndpointUrl = "opc.tcp://bculz-PC:53530/OPCUA/SimulationServer"; // the endpoint of the Prosys UA Simulation Server
-        // private const string EndpointUrl = "opc.tcp://localhost:51210/UA/SampleServer"; // the endpoint of the OPCF SampleServer
         private const string EndpointUrl = "opc.tcp://localhost:48010"; // the endpoint of the UaCPPServer.
-        // private const string EndpointUrl = "opc.tcp://localhost:26543"; // the endpoint of the Workstation.RobotServer.
-        // private const string EndpointUrl = "opc.tcp://192.168.0.11:4840"; // the endpoint of the Siemens 1500 PLC.
-
         private readonly ILoggerFactory loggerFactory;
         private readonly ILogger<IntegrationTests> logger;
         private readonly ApplicationDescription localDescription;
@@ -331,7 +325,7 @@ namespace Workstation.UaClient.IntegrationTests
                     // construct a ReadValueId from a NodeId and AttributeId.
                     new ReadValueId {
                         // you can parse the nodeId from a string.
-                        // e.g. NodeId.Parse("ns=2;s=Demo.Static.Scalar.Double")
+                        // e.g. NodeId.Parse("ns=3;s=Demo.Static.Scalar.Double")
                         NodeId = NodeId.Parse(VariableIds.Server_ServerStatus),
                         // variable class nodes have a Value attribute.
                         AttributeId = AttributeIds.Value
@@ -505,8 +499,8 @@ namespace Workstation.UaClient.IntegrationTests
                 MethodsToCall = new[] {
                     new CallMethodRequest
                     {
-                        ObjectId = NodeId.Parse("ns=2;s=Demo.Method"),
-                        MethodId = NodeId.Parse("ns=2;s=Demo.Method.VectorAdd"),
+                        ObjectId = NodeId.Parse("ns=3;s=Demo.Method"),
+                        MethodId = NodeId.Parse("ns=3;s=Demo.Method.VectorAdd"),
                         InputArguments = new [] { new ExtensionObject(v1), new ExtensionObject(v2) }.ToVariantArray()
                     }
                 }
@@ -560,7 +554,7 @@ namespace Workstation.UaClient.IntegrationTests
                 {
                     new HistoryReadValueId
                     {
-                        NodeId = NodeId.Parse("ns=2;s=Demo.History.DoubleWithHistory")
+                        NodeId = NodeId.Parse("ns=3;s=Demo.History.DoubleWithHistory")
                     }
                 },
             };
@@ -587,7 +581,7 @@ namespace Workstation.UaClient.IntegrationTests
                     {
                     new HistoryReadValueId
                     {
-                        NodeId = NodeId.Parse("ns=2;s=Demo.History.DoubleWithHistory")
+                        NodeId = NodeId.Parse("ns=3;s=Demo.History.DoubleWithHistory")
                     }
                 },
                 };
@@ -695,7 +689,7 @@ namespace Workstation.UaClient.IntegrationTests
             /// <summary>
             /// Gets or sets the value of DemoStaticArraysVector.
             /// </summary>
-            [MonitoredItem(nodeId: "ns=2;s=Demo.Static.Arrays.Vector")]
+            [MonitoredItem(nodeId: "ns=3;s=Demo.Static.Arrays.Vector")]
             public CustomTypeLibrary.CustomVector[] DemoStaticArraysVector
             {
                 get { return this._DemoStaticArraysVector; }
@@ -707,7 +701,7 @@ namespace Workstation.UaClient.IntegrationTests
             /// <summary>
             /// Gets or sets the value of DemoStaticArraysVector.
             /// </summary>
-            [MonitoredItem(nodeId: "ns=2;s=Demo.Static.Arrays.Vector")]
+            [MonitoredItem(nodeId: "ns=3;s=Demo.Static.Arrays.Vector")]
             public object[] VectorsAsObjects
             {
                 get { return this._VectorsAsObjects; }
@@ -738,42 +732,42 @@ namespace Workstation.UaClient.IntegrationTests
             {
                 NodesToRead = new[]
                 {
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Boolean") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.SByte") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Int16") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Int32") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Int64") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Byte") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.UInt16") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.UInt32") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.UInt64") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Float") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Double") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.String") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.DateTime") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.Guid") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.ByteString") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.XmlElement") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.LocalizedText") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Scalar.QualifiedName") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Boolean") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.SByte") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Int16") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Int32") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Int64") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Byte") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.UInt16") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.UInt32") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.UInt64") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Float") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Double") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.String") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.DateTime") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Guid") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.ByteString") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.XmlElement") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.LocalizedText") },
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.QualifiedName") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Boolean") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.SByte") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Int16") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Int32") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Int64") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Byte") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.UInt16") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.UInt32") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.UInt64") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Float") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Double") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.String") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.DateTime") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.Guid") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.ByteString") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.XmlElement") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.LocalizedText") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Scalar.QualifiedName") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Boolean") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.SByte") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Int16") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Int32") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Int64") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Byte") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.UInt16") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.UInt32") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.UInt64") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Float") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Double") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.String") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.DateTime") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Guid") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.ByteString") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.XmlElement") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.LocalizedText") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.QualifiedName") },
                 },
             };
 
@@ -910,7 +904,7 @@ namespace Workstation.UaClient.IntegrationTests
             {
                 NodesToRead = new[]
                 {
-                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Structure") },
+                new ReadValueId { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Structure") },
                 },
             };
 
@@ -931,7 +925,7 @@ namespace Workstation.UaClient.IntegrationTests
             {
                 NodesToWrite = new[]
                 {
-                new WriteValue { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=2;s=Demo.Static.Arrays.Structure"), Value =  newValue},
+                new WriteValue { AttributeId = AttributeIds.Value, NodeId = NodeId.Parse("ns=3;s=Demo.Static.Arrays.Structure"), Value =  newValue},
                 },
             };
             var writeResponse = await channel.WriteAsync(writeRequest);
