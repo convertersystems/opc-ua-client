@@ -12,7 +12,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// Provides a common base implementation for the basic state machine common to all communication-oriented objects in the system.
     /// </summary>
-    public abstract class CommunicationObject : ICommunicationObject
+    public abstract class CommunicationObject : ICommunicationObject, IDisposable
     {
         private readonly ILogger? _logger;
         private bool _aborted;
@@ -23,6 +23,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         private bool _raisedClosed;
         private bool _raisedClosing;
         private bool _raisedFaulted;
+        private bool disposed = false;
         private readonly SemaphoreSlim _semaphore;
         private readonly Lazy<ConcurrentQueue<Exception>> _exceptions;
 
@@ -35,6 +36,25 @@ namespace Workstation.ServiceModel.Ua.Channels
             _logger = loggerFactory?.CreateLogger(GetType());
             _semaphore = new SemaphoreSlim(1);
             _exceptions = new Lazy<ConcurrentQueue<Exception>>();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if(!disposed && disposing)
+            {
+                _semaphore.Dispose();
+
+                while (_exceptions.Value.TryDequeue(out _)) { }
+                _exceptions = null; // Optional, if you want full release
+
+                disposed = true;
+            }
         }
 
         public event EventHandler? Closed;
@@ -433,7 +453,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         protected void AddPendingException(Exception exception)
         {
-            _exceptions.Value.Enqueue(exception);
+            _exceptions?.Value.Enqueue(exception);
         }
 
         protected Exception? PeakFirstPendingException()

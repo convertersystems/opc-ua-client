@@ -38,6 +38,11 @@ namespace Workstation.ServiceModel.Ua.Channels
             _writer = new BinaryWriter(_stream, _encoding, keepStreamOpen);
         }
 
+        ~BinaryEncoder()
+        {
+            Dispose();
+        }
+
         public int Position
         {
             get { return (int)_stream.Position; }
@@ -47,6 +52,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         public void Dispose()
         {
             _writer?.Dispose();
+            _stream?.Dispose();
         }
 
         public void PushNamespace(string namespaceUri)

@@ -21,6 +21,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         private readonly ILogger? _logger;
         private ITransportConnection? _connection;
+        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientTransportChannel"/> class.
@@ -43,6 +44,20 @@ namespace Workstation.ServiceModel.Ua.Channels
             LocalSendBufferSize = options?.LocalSendBufferSize ?? DefaultBufferSize;
             LocalMaxMessageSize = options?.LocalMaxMessageSize ?? DefaultMaxMessageSize;
             LocalMaxChunkCount = options?.LocalMaxChunkCount ?? DefaultMaxChunkCount;
+        }
+
+        protected override async void Dispose(bool disposing)
+        {
+            if (!disposed && disposing)
+            {
+                if (_connection != null && _connection is UaClientConnection)
+                {
+                    await ((UaClientConnection)_connection).DisposeAsync();
+                    _connection = null;
+                }
+
+            }
+            base.Dispose(disposing);
         }
 
         /// <summary>

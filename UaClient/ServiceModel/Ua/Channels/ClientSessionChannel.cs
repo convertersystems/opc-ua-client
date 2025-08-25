@@ -18,7 +18,7 @@ namespace Workstation.ServiceModel.Ua.Channels
     /// <summary>
     /// A session-full, secure channel for communicating with OPC UA servers.
     /// </summary>
-    public class ClientSessionChannel : ClientSecureChannel, ISourceBlock<PublishResponse>, IObservable<PublishResponse>
+    public class ClientSessionChannel : ClientSecureChannel, ISourceBlock<PublishResponse>, IObservable<PublishResponse>, IDisposable
     {
         /// <summary>
         /// The default session timeout.
@@ -55,10 +55,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         private readonly ILoggerFactory? _loggerFactory;
         private readonly ILogger? _logger;
         private readonly BroadcastBlock<PublishResponse> _publishResponses;
-        private readonly ActionBlock<PublishResponse> _actionBlock;
+        private ActionBlock<PublishResponse> _actionBlock;
         private readonly ClientSessionChannelOptions _options;
         private readonly CancellationTokenSource _stateMachineCts;
         private Task? _stateMachineTask;
+        private bool disposed = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ClientSessionChannel"/> class.
@@ -174,6 +175,26 @@ namespace Workstation.ServiceModel.Ua.Channels
             _actionBlock = new ActionBlock<PublishResponse>(pr => OnPublishResponse(pr));
             _stateMachineCts = new CancellationTokenSource();
             _publishResponses = new BroadcastBlock<PublishResponse>(null, new DataflowBlockOptions { CancellationToken = _stateMachineCts.Token });
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if(!disposed && disposing)
+            {
+                UserIdentity = null;
+                _stateMachineCts?.Cancel();
+                _stateMachineTask?.Wait();
+                _stateMachineTask?.Dispose();
+                _stateMachineCts?.Dispose();
+                _loggerFactory?.Dispose();
+                _actionBlock?.Complete();
+                _actionBlock?.Completion.Wait();
+                _publishResponses?.Complete();
+                _actionBlock = null;
+                UserIdentity = null;
+            }
+
+            base.Dispose(disposing);
         }
 
         /// <summary>
@@ -769,7 +790,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             // link up the dataflow blocks
             var id = subscriptionResponse.SubscriptionId;
             var linkToken = this.LinkTo(_actionBlock, pr => pr.SubscriptionId == id);
-
+            linkToken.Dispose();
             // start publishing.
             _stateMachineTask = Task.Run(() => StateMachineAsync(_stateMachineCts.Token));
         }

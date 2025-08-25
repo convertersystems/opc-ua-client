@@ -402,7 +402,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }
 
-                var stream = new MemoryStream(_sendBuffer, 0, (int)_options.ReceiveBufferSize, true, true);
+                using var stream = new MemoryStream(_sendBuffer, 0, (int)_options.ReceiveBufferSize, true, true);
                 using (var encoder = new BinaryEncoder(stream))
                 {
                     // header
@@ -541,7 +541,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     throw new ServiceResultException(StatusCodes.BadEncodingLimitsExceeded);
                 }
 
-                var stream = new MemoryStream(_sendBuffer, 0, (int)_options.ReceiveBufferSize, true, true);
+                using var stream = new MemoryStream(_sendBuffer, 0, (int)_options.ReceiveBufferSize, true, true);
                 using (var encoder = new BinaryEncoder(stream))
                 {
                     // header
@@ -705,7 +705,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     return (0, 0);
                 }
 
-                var stream = new MemoryStream(_receiveBuffer, 0, count, true, true);
+                using var stream = new MemoryStream(_receiveBuffer, 0, count, true, true);
                 using (var decoder = new BinaryDecoder(stream))
                 {
                     uint channelId;
