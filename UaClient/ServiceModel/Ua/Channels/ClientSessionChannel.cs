@@ -333,10 +333,10 @@ namespace Workstation.ServiceModel.Ua.Channels
             // Ask for user identity. May show dialog.
             if (UserIdentityProvider != null)
             {
-                UserIdentity = await UserIdentityProvider(RemoteEndpoint);
+                UserIdentity = await UserIdentityProvider(RemoteEndpoint).ConfigureAwait(false);
             }
 
-            await base.OnOpeningAsync(token);
+            await base.OnOpeningAsync(token).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -359,7 +359,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 if (CertificateStore != null)
                 {
-                    var tuple = await CertificateStore.GetLocalCertificateAsync(LocalDescription, _logger, token);
+                    var tuple = await CertificateStore.GetLocalCertificateAsync(LocalDescription, _logger, token).ConfigureAwait(false);
                     LocalCertificate = tuple.Certificate?.GetEncoded();
                     LocalPrivateKey = tuple.Key;
                 }

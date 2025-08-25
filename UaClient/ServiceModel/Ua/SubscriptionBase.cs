@@ -239,7 +239,7 @@ namespace Workstation.ServiceModel.Ua
                 return StatusCodes.BadServerNotConnected;
             }
 
-            return await this.InnerChannel.ConditionRefreshAsync(this.SubscriptionId);
+            return await this.InnerChannel.ConditionRefreshAsync(this.SubscriptionId).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Workstation.ServiceModel.Ua
                 return StatusCodes.BadServerNotConnected;
             }
 
-            return await this.InnerChannel.AcknowledgeAsync(condition, comment);
+            return await this.InnerChannel.AcknowledgeAsync(condition, comment).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -281,7 +281,7 @@ namespace Workstation.ServiceModel.Ua
                 return StatusCodes.BadServerNotConnected;
             }
 
-            return await this.InnerChannel.ConfirmAsync(condition, comment);
+            return await this.InnerChannel.ConfirmAsync(condition, comment).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -509,7 +509,7 @@ namespace Workstation.ServiceModel.Ua
                     channel.Closing += handler;
                     if (channel.State == CommunicationState.Opened)
                     {
-                        await tcs.Task;
+                        await tcs.Task.ConfigureAwait(false);
                     }
                 }
                 finally
@@ -528,7 +528,7 @@ namespace Workstation.ServiceModel.Ua
         {
             while (!token.IsCancellationRequested)
             {
-                await this.whenSubscribed.Task;
+                await this.whenSubscribed.Task.ConfigureAwait(false);
 
                 this.progress.Report(CommunicationState.Opening);
 
@@ -540,7 +540,7 @@ namespace Workstation.ServiceModel.Ua
                     }
 
                     // get a channel.
-                    this.innerChannel = await this.application.GetChannelAsync(this.endpointUrl, token);
+                    this.innerChannel = await this.application.GetChannelAsync(this.endpointUrl, token).ConfigureAwait(false);
 
                     try
                     {
@@ -581,7 +581,7 @@ namespace Workstation.ServiceModel.Ua
                                         SubscriptionId = id,
                                         ItemsToCreate = requests_chunk,
                                     };
-                                    var itemsResponse = await this.innerChannel.CreateMonitoredItemsAsync(itemsRequest);
+                                    var itemsResponse = await this.innerChannel.CreateMonitoredItemsAsync(itemsRequest).ConfigureAwait(false);
 
                                     if (itemsResponse.Results is { } results)
                                     {
@@ -613,7 +613,7 @@ namespace Workstation.ServiceModel.Ua
                             {
                                 await Task.WhenAny(
                                     this.WhenChannelClosingAsync(this.innerChannel, token),
-                                    this.whenUnsubscribed.Task);
+                                    this.whenUnsubscribed.Task).ConfigureAwait(false);
                             }
                             catch
                             {
@@ -642,12 +642,12 @@ namespace Workstation.ServiceModel.Ua
                                 {
                                     SubscriptionIds = new uint[] { id }
                                 };
-                                await this.innerChannel.DeleteSubscriptionsAsync(deleteRequest);
+                                await this.innerChannel.DeleteSubscriptionsAsync(deleteRequest).ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {
                                 this.logger?.LogError($"Error deleting subscription. {ex.Message}");
-                                await Task.Delay(2000);
+                                await Task.Delay(2000).ConfigureAwait(false);
                             }
                         }
 
@@ -657,14 +657,14 @@ namespace Workstation.ServiceModel.Ua
                     {
                         this.logger?.LogError($"Error creating subscription. {ex.Message}");
                         this.progress.Report(CommunicationState.Faulted);
-                        await Task.Delay(2000);
+                        await Task.Delay(2000).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
                 {
                     this.logger?.LogTrace($"Error getting channel. {ex.Message}");
                     this.progress.Report(CommunicationState.Faulted);
-                    await Task.Delay(2000);
+                    await Task.Delay(2000).ConfigureAwait(false);
                 }
             }
         }

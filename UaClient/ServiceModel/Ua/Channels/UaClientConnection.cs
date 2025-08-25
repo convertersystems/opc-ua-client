@@ -44,7 +44,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 #pragma warning restore CS1998
         {
 #if NETCOREAPP3_0_OR_GREATER
-            await Stream.DisposeAsync();
+            await Stream.DisposeAsync().ConfigureAwait(false);
 #else
             Stream.Dispose();
 #endif
@@ -138,7 +138,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc />
         public async Task SendAsync(byte[] buffer, int offset, int count, CancellationToken token)
         {
-            await Stream.WriteAsync(buffer, offset, count, token);
+            await Stream.WriteAsync(buffer, offset, count, token).ConfigureAwait(false);
         }
 
         /// <inheritdoc />

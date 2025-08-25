@@ -362,7 +362,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyStream.Position = 0;
 
                 var handle = request.RequestHeader!.RequestHandle;
-                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.OPNF, handle, SendAsync, token);
+                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.OPNF, handle, SendAsync, token).ConfigureAwait(false);
             }
         }
 
@@ -381,7 +381,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyStream.Position = 0;
 
                 var handle = request.RequestHeader!.RequestHandle;
-                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.CLOF, handle, SendAsync, token);
+                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.CLOF, handle, SendAsync, token).ConfigureAwait(false);
             }
         }
 
@@ -400,7 +400,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 bodyStream.Position = 0;
 
                 var handle = request.RequestHeader!.RequestHandle;
-                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.MSGF, handle, SendAsync, token);
+                await _conversation!.EncryptMessageAsync(bodyStream, MessageTypes.MSGF, handle, SendAsync, token).ConfigureAwait(false);
             }
         }
 
