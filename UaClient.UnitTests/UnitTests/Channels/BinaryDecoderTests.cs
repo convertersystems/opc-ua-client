@@ -27,7 +27,7 @@ namespace Workstation.UaClient.UnitTests.Channels
         private static T EncodeDecode<T>(Action<Opc.Ua.BinaryEncoder> encode, Func<BinaryDecoder, T> decode)
         {
             using (var stream = new MemoryStream())
-            using (var encoder = new Opc.Ua.BinaryEncoder(stream, new Opc.Ua.ServiceMessageContext { }))
+            using (var encoder = new Opc.Ua.BinaryEncoder(stream, new Opc.Ua.ServiceMessageContext { }, false))
             using (var decoder = new BinaryDecoder(stream))
             {
 
@@ -443,13 +443,13 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             new Opc.Ua.LocalizedText("Text", ""),
             new Opc.Ua.LocalizedText("Text", "de"),
-            new Opc.Ua.LocalizedText("Text", null),
+            new Opc.Ua.LocalizedText("Text", (string)null),
             new Opc.Ua.LocalizedText("", ""),
             new Opc.Ua.LocalizedText("", "de"),
-            new Opc.Ua.LocalizedText("", null),
+            new Opc.Ua.LocalizedText("", (string)null),
             new Opc.Ua.LocalizedText(null, ""),
             new Opc.Ua.LocalizedText(null, "de"),
-            new Opc.Ua.LocalizedText(null, null)
+            new Opc.Ua.LocalizedText(null, (string)null)
         }
         .Select(x => new object[] { x });
 
@@ -501,8 +501,8 @@ namespace Workstation.UaClient.UnitTests.Channels
             new DateTime[] { DateTime.UtcNow },
             new Opc.Ua.Uuid[] { Opc.Ua.Uuid.Empty, new Opc.Ua.Uuid() },
             new byte[][] { new byte[] { }, new byte[] { 1, 2, 3} },
-            new Opc.Ua.NodeId[] { new Opc.Ua.NodeId(5), new Opc.Ua.NodeId("b")},
-            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(4), new Opc.Ua.ExpandedNodeId("ee")},
+            new Opc.Ua.NodeId[] { new Opc.Ua.NodeId(5, 2), new Opc.Ua.NodeId("b", 2)},
+            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(4, 2), new Opc.Ua.ExpandedNodeId("ee", 2)},
             new Opc.Ua.QualifiedName[] { Opc.Ua.QualifiedName.Parse("0:A"), Opc.Ua.QualifiedName.Parse("1:t") },
             new Opc.Ua.LocalizedText[] {new Opc.Ua.LocalizedText("Yes", "en-US"), new Opc.Ua.LocalizedText("Ja", "de-DE")},
             new [] { XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />") },
@@ -523,8 +523,8 @@ namespace Workstation.UaClient.UnitTests.Channels
             new string[,] { { "a", null},{ "b", "" } },
             new DateTime[,] { { DateTime.MinValue } },
             new Opc.Ua.Uuid[,] { { Opc.Ua.Uuid.Empty, new Opc.Ua.Uuid() } },
-            new Opc.Ua.NodeId[,] { { new Opc.Ua.NodeId(5) }, {new Opc.Ua.NodeId("b")} },
-            new Opc.Ua.ExpandedNodeId[,] { { new Opc.Ua.ExpandedNodeId(4) }, { new Opc.Ua.ExpandedNodeId("ee") } },
+            new Opc.Ua.NodeId[,] { { new Opc.Ua.NodeId(5, 2) }, {new Opc.Ua.NodeId("b", 2)} },
+            new Opc.Ua.ExpandedNodeId[,] { { new Opc.Ua.ExpandedNodeId(4, 2) }, { new Opc.Ua.ExpandedNodeId("ee", 2) } },
             new Opc.Ua.QualifiedName[,,,,,,,] { { { { { { { { new Opc.Ua.QualifiedName("A") } } } } } } } },
             new Opc.Ua.LocalizedText[,] { { new Opc.Ua.LocalizedText("Yes", "en-US"), new Opc.Ua.LocalizedText("Ja", "de-DE") }, { new Opc.Ua.LocalizedText("No", "en-US"), new Opc.Ua.LocalizedText("Nein", "de-DE") } },
             new [,] { { XmlElementParse(@"<Item AttributeA=""A"" AttributeB=""B"" />") } },
@@ -895,8 +895,8 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             null,
             new Opc.Ua.ExpandedNodeId[] {},
-            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(4) },
-            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(234), new Opc.Ua.ExpandedNodeId("Text"), new Opc.Ua.ExpandedNodeId(Guid.Parse("a8e248bc-4de5-4d5a-ae67-c065cbe452f3")) },
+            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(4, 2) },
+            new Opc.Ua.ExpandedNodeId[] { new Opc.Ua.ExpandedNodeId(234, 2), new Opc.Ua.ExpandedNodeId("Text",2), new Opc.Ua.ExpandedNodeId(Guid.Parse("a8e248bc-4de5-4d5a-ae67-c065cbe452f3"),2) },
             new Opc.Ua.ExpandedNodeId[] { Opc.Ua.ExpandedNodeId.Parse("ns=1;i=234"), Opc.Ua.ExpandedNodeId.Parse("ns=2;s=bla"), Opc.Ua.ExpandedNodeId.Parse("svr=2;nsu=http://PLCopen.org/OpcUa/IEC61131-3;ns=3;b=Base64+Test=") },
         }
         .Select(x => new object[] { x });
@@ -953,8 +953,8 @@ namespace Workstation.UaClient.UnitTests.Channels
         {
             null,
             new Opc.Ua.LocalizedText[] {},
-            new [] { new Opc.Ua.LocalizedText("Text", null)},
-            new [] { new Opc.Ua.LocalizedText("", ""), new Opc.Ua.LocalizedText("", "de") , new Opc.Ua.LocalizedText("", null)},
+            new [] { new Opc.Ua.LocalizedText("Text", (string)null)},
+            new [] { new Opc.Ua.LocalizedText("", ""), new Opc.Ua.LocalizedText("", "de") , new Opc.Ua.LocalizedText("", (string)null)},
         }
         .Select(x => new object[] { x });
 

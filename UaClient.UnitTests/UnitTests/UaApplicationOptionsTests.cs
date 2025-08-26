@@ -17,9 +17,9 @@ namespace Workstation.UaClient.UnitTests
             var options = new ClientTransportChannelOptions();
 
             options.LocalReceiveBufferSize
-                .Should().BeGreaterOrEqualTo(lowestBufferSize);
+                .Should().BeGreaterThanOrEqualTo(lowestBufferSize);
             options.LocalSendBufferSize
-                .Should().BeGreaterOrEqualTo(lowestBufferSize);
+                .Should().BeGreaterThanOrEqualTo(lowestBufferSize);
         }
 
         [Fact]
@@ -30,7 +30,7 @@ namespace Workstation.UaClient.UnitTests
             var options = new ClientSecureChannelOptions();
 
             TimeSpan.FromMilliseconds(options.TimeoutHint)
-                .Should().BeGreaterOrEqualTo(shortestTimespan);
+                .Should().BeGreaterThanOrEqualTo(shortestTimespan);
 
             options.DiagnosticsHint
                 .Should().Be(0);
@@ -44,7 +44,7 @@ namespace Workstation.UaClient.UnitTests
             var options = new ClientSessionChannelOptions();
 
             TimeSpan.FromMilliseconds(options.SessionTimeout)
-                .Should().BeGreaterOrEqualTo(shortestTimespan);
+                .Should().BeGreaterThanOrEqualTo(shortestTimespan);
         }
     }
 }

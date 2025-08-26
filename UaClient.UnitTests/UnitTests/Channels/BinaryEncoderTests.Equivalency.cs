@@ -20,14 +20,14 @@ namespace Workstation.UaClient.UnitTests.Channels
         private abstract class TypeMappingEquivalency<TSubject, TExpectation> : IEquivalencyStep
         {
 
-           public EquivalencyResult Handle(Comparands comparands, IEquivalencyValidationContext context, IEquivalencyValidator nestedValidator)
+            public EquivalencyResult Handle(Comparands comparands, IEquivalencyValidationContext context, IValidateChildNodeEquivalency valueChildNodes)
             {
                 if (comparands.Subject is TSubject subject)
                 {
                     if (comparands.Expectation is TExpectation expectation)
                     {
                         Test(subject, expectation, context.Reason.FormattedMessage, context.Reason.Arguments);
-                        return EquivalencyResult.AssertionCompleted;
+                        return EquivalencyResult.EquivalencyProven;
                     }
                 }
                 return EquivalencyResult.ContinueWithNext;
@@ -166,34 +166,34 @@ namespace Workstation.UaClient.UnitTests.Channels
         static BinaryEncoderTests()
         {
             // Qualified name
-            AssertionOptions.AssertEquivalencyUsing(options => options.ComparingByMembers<QualifiedName>());
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.ComparingByMembers<QualifiedName>());
 
             // Localizable text
-            AssertionOptions.AssertEquivalencyUsing(options => options.ComparingByMembers<LocalizedText>());
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.ComparingByMembers<LocalizedText>());
 
             // StatusCode
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new StatusCodeEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new StatusCodeEquivalency()));
 
             // Variant
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new VariantEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new VariantEquivalency()));
 
             // NodeId
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new NodeIdEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new NodeIdEquivalency()));
             
             // ExpandedNodeId
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new ExpandedNodeIdEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new ExpandedNodeIdEquivalency()));
 
             // DiagnosticInfo
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new DiagnosticInfoEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new DiagnosticInfoEquivalency()));
 
             // DataValue
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new DataValueEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new DataValueEquivalency()));
 
             // Xml
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new XmlEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new XmlEquivalency()));
             
             // Matrix/Multidim array
-            AssertionOptions.AssertEquivalencyUsing(options => options.Using(new MatrixEquivalency()));
+            AssertionConfiguration.Current.Equivalency.Modify(options => options.Using(new MatrixEquivalency()));
         }
     }
 }

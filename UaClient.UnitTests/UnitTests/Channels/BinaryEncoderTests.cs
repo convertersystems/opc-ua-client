@@ -393,7 +393,6 @@ namespace Workstation.UaClient.UnitTests.Channels
 
         public static IEnumerable<object[]> EncodeDiagnosticInfoData { get; } = new []
         {
-            new DiagnosticInfo(),
             new DiagnosticInfo(2),
             new DiagnosticInfo(2, 3),
             new DiagnosticInfo(2, 3, 4),
@@ -421,7 +420,7 @@ namespace Workstation.UaClient.UnitTests.Channels
             EncodeDecode(
                 e => e.WriteDiagnosticInfo(null, null),
                 d => d.ReadDiagnosticInfo(null))
-                .Should().BeEquivalentTo(new Opc.Ua.DiagnosticInfo());
+                .Should().BeNull();
         }
 
         public static IEnumerable<object[]> EncodeQualifiedNameData { get; } = new []

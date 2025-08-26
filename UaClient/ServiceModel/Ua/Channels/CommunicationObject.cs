@@ -51,7 +51,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 _semaphore.Dispose();
 
                 while (_exceptions.Value.TryDequeue(out _)) { }
-                _exceptions = null; // Optional, if you want full release
 
                 disposed = true;
             }
