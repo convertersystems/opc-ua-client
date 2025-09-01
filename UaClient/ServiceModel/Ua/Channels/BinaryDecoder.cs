@@ -820,7 +820,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
 
-                    if (TypeLibrary.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out var type))
+                    if (_context.TypeLibrary.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out var type))
                     {
                         _ = ReadInt32(null);
                         var encodable = (IEncodable)Activator.CreateInstance(type)!;
@@ -863,7 +863,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                 {
                     ExpandedNodeId binaryEncodingId = NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris);
 
-                    if (!TypeLibrary.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out var type))
+                    if (!_context.TypeLibrary.TryGetTypeFromBinaryEncodingId(binaryEncodingId, out var type))
                     {
                         throw new ServiceResultException(StatusCodes.BadDecodingError);
                     }
@@ -909,19 +909,19 @@ namespace Workstation.ServiceModel.Ua.Channels
             try
             {
                 IServiceResponse value;
-                NodeId nodeId = ReadNodeId(null);
+                NodeId binaryEncodingId = ReadNodeId(null);
                 // fast path
-                if (nodeId == _publishResponseNodeId)
+                if (binaryEncodingId == _publishResponseNodeId)
                 {
                     value = new PublishResponse();
                 }
-                else if (nodeId == _readResponseNodeId)
+                else if (binaryEncodingId == _readResponseNodeId)
                 {
                     value = new ReadResponse();
                 }
                 else
                 {
-                    if (!TypeLibrary.TryGetTypeFromBinaryEncodingId(NodeId.ToExpandedNodeId(nodeId, _context.NamespaceUris), out var type))
+                    if (!_context.TypeLibrary.TryGetTypeFromBinaryEncodingId(NodeId.ToExpandedNodeId(binaryEncodingId, _context.NamespaceUris), out var type))
                     {
                         throw new ServiceResultException(StatusCodes.BadEncodingError);
                     }

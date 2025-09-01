@@ -11,6 +11,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         int MaxStringLength { get; }
         int MaxArrayLength { get; }
         int MaxByteStringLength { get; }
+        TypeLibrary TypeLibrary { get; }
     }
 
     public class DefaultEncodingContext : IEncodingContext
@@ -25,6 +26,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
         public int MaxByteStringLength => 65535;
 
+        public TypeLibrary TypeLibrary => new TypeLibrary();
     }
 
 }

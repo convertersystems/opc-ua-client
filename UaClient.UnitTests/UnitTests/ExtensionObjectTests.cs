@@ -23,7 +23,7 @@ namespace Workstation.UaClient.UnitTests
             obj.BodyType
                 .Should().Be(BodyType.None);
             obj.TypeId
-                .Should().BeNull();
+                .Should().Be(ExpandedNodeId.Null);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Workstation.UaClient.UnitTests
             obj.BodyType
                 .Should().Be(BodyType.None);
             obj.TypeId
-                .Should().BeNull();
+                .Should().Be(ExpandedNodeId.Null);
         }
 
         [Fact]
@@ -81,7 +81,7 @@ namespace Workstation.UaClient.UnitTests
             obj.BodyType
                 .Should().Be(BodyType.None);
             obj.TypeId
-                .Should().BeNull();
+                .Should().Be(ExpandedNodeId.Null);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace Workstation.UaClient.UnitTests
             obj.BodyType
                 .Should().Be(BodyType.Encodable);
             obj.TypeId
-                .Should().Be(ExpandedNodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary));
+                .Should().Be(ExpandedNodeId.Null);
         }
 
         private class DataTypeWithoutEncodingId : Structure
@@ -130,12 +130,14 @@ namespace Workstation.UaClient.UnitTests
         public void CreateFromEncodableWithoutAnyTypeId()
         {
             var body = new DataTypeWithoutEncodingId();
+            var obj = new ExtensionObject(body);
 
-            body
-                .Invoking(b => new ExtensionObject(b))
-                .Should().Throw<ServiceResultException>()
-                .Which.StatusCode
-                .Should().Be((StatusCode)StatusCodes.BadDataEncodingUnsupported);
+            obj.Body
+                .Should().BeSameAs(body);
+            obj.BodyType
+                .Should().Be(BodyType.Encodable);
+            obj.TypeId
+                .Should().Be(ExpandedNodeId.Null);
         }
     }
 }

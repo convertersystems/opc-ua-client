@@ -17,11 +17,12 @@ namespace Workstation.ServiceModel.Ua
 
     public sealed class ExtensionObject
     {
-        public ExtensionObject(byte[]? body, ExpandedNodeId? typeId)
+        public ExtensionObject(byte[]? body, ExpandedNodeId typeId)
         {
             if (body == null)
             {
                 BodyType = BodyType.None;
+                TypeId = ExpandedNodeId.Null;
                 return;
             }
 
@@ -30,11 +31,12 @@ namespace Workstation.ServiceModel.Ua
             TypeId = typeId;
         }
 
-        public ExtensionObject(XElement? body, ExpandedNodeId? typeId)
+        public ExtensionObject(XElement? body, ExpandedNodeId typeId)
         {
             if (body == null)
             {
                 BodyType = BodyType.None;
+                TypeId = ExpandedNodeId.Null;
                 return;
             }
 
@@ -43,11 +45,12 @@ namespace Workstation.ServiceModel.Ua
             TypeId = typeId;
         }
 
-        public ExtensionObject(IEncodable? body, ExpandedNodeId? typeId)
+        public ExtensionObject(IEncodable? body, ExpandedNodeId typeId)
         {
             if (body == null)
             {
                 BodyType = BodyType.None;
+                TypeId = ExpandedNodeId.Null;
                 return;
             }
 
@@ -61,22 +64,18 @@ namespace Workstation.ServiceModel.Ua
             if (body == null)
             {
                 BodyType = BodyType.None;
+                TypeId = ExpandedNodeId.Null;
                 return;
             }
 
             Body = body;
             BodyType = BodyType.Encodable;
-            if (!TypeLibrary.TryGetBinaryEncodingIdFromType(body.GetType(), out var binaryEncodingId))
-            {
-                throw new ServiceResultException(StatusCodes.BadDataEncodingUnsupported);
-            }
-            TypeId = binaryEncodingId;
-
+            TypeId = ExpandedNodeId.Null;
         }
 
         public object? Body { get; }
 
-        public ExpandedNodeId? TypeId { get; }
+        public ExpandedNodeId TypeId { get; }
 
         public BodyType BodyType { get; }
     }

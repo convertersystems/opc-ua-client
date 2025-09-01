@@ -75,6 +75,7 @@ namespace Workstation.ServiceModel.Ua.Channels
             AuthenticationToken = null;
             NamespaceUris = new List<string> { "http://opcfoundation.org/UA/" };
             ServerUris = new List<string>();
+            TypeLibrary = new TypeLibrary();
             _channelCts = new CancellationTokenSource();
             _pendingRequests = new ActionBlock<ServiceOperation>(t => SendRequestActionAsync(t), new ExecutionDataflowBlockOptions { CancellationToken = _channelCts.Token });
             _pendingCompletions = new ConcurrentDictionary<uint, ServiceOperation>();
@@ -164,6 +165,8 @@ namespace Workstation.ServiceModel.Ua.Channels
         public int MaxArrayLength => 65535;
 
         public int MaxByteStringLength => 65535;
+
+        public TypeLibrary TypeLibrary { get; protected set; }
 
         /// <summary>
         /// Sends a <see cref="T:Workstation.ServiceModel.Ua.IServiceRequest"/> to the server.

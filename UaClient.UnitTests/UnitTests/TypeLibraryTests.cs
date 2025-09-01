@@ -15,7 +15,7 @@ namespace Workstation.UaClient.UnitTests
         [Fact]
         public void FindBinaryEncodingIdByType()
         {
-           TypeLibrary.TryGetBinaryEncodingIdFromType(typeof(ReadRequest), out ExpandedNodeId nodeid)
+           new TypeLibrary().TryGetBinaryEncodingIdFromType(typeof(ReadRequest), out ExpandedNodeId nodeid)
                 .Should().BeTrue();
             nodeid
                 .Should().Be(ExpandedNodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary));
@@ -24,19 +24,11 @@ namespace Workstation.UaClient.UnitTests
         [Fact]
         public void FindTypeByBinaryEncodingId()
         {
-            TypeLibrary.TryGetTypeFromBinaryEncodingId(ExpandedNodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary), out Type type)
+            new TypeLibrary().TryGetTypeFromBinaryEncodingId(ExpandedNodeId.Parse(ObjectIds.ReadRequest_Encoding_DefaultBinary), out Type type)
                 .Should().BeTrue();
             type
                 .Should().Be(typeof(ReadRequest));
         }
 
-        [Fact]
-        public void FindTypeByDataTypeId()
-        {
-            TypeLibrary.TryGetTypeFromDataTypeId(ExpandedNodeId.Parse("i=1"), out Type type)
-                .Should().BeTrue();
-            type
-                .Should().Be(typeof(Boolean));
-        }
     }
 }

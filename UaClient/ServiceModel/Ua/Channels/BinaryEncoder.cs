@@ -997,13 +997,9 @@ namespace Workstation.ServiceModel.Ua.Channels
                     return;
                 }
 
-                // If the body type is not none, than the type id
-                // is guaranteed to be not null
-                var typeId = value.TypeId!;
-
                 if (value.BodyType == BodyType.ByteString)
                 {
-                    WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
+                    WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, _context.NamespaceUris));
                     WriteByte(null, 0x01);
                     WriteByteString(null, (byte[]?)value.Body);
                     return;
@@ -1011,7 +1007,7 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 if (value.BodyType == BodyType.XmlElement)
                 {
-                    WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
+                    WriteNodeId(null, ExpandedNodeId.ToNodeId(value.TypeId, _context.NamespaceUris));
                     WriteByte(null, 0x02);
                     WriteXElement(null, (XElement?)value.Body);
                     return;
@@ -1019,6 +1015,14 @@ namespace Workstation.ServiceModel.Ua.Channels
 
                 if (value.BodyType == BodyType.Encodable)
                 {
+                    var typeId = value.TypeId;
+                    if (typeId == ExpandedNodeId.Null)
+                    {
+                        if (!_context.TypeLibrary.TryGetBinaryEncodingIdFromType(value.Body!.GetType(), out typeId))
+                        {
+                            throw new ServiceResultException(StatusCodes.BadEncodingError);
+                        }
+                    }
                     WriteNodeId(null, ExpandedNodeId.ToNodeId(typeId, _context.NamespaceUris));
                     WriteByte(null, 0x01); // BodyType Encodable is encoded as ByteString.
                     var pos0 = _writer.BaseStream.Position;
@@ -1056,8 +1060,7 @@ namespace Workstation.ServiceModel.Ua.Channels
                     return;
                 }
 
-                var type = value.GetType();
-                if (!TypeLibrary.TryGetBinaryEncodingIdFromType(type, out var binaryEncodingId))
+                if (!_context.TypeLibrary.TryGetBinaryEncodingIdFromType(value!.GetType(), out var binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }
@@ -1106,11 +1109,11 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             try
             {
-                if (!TypeLibrary.TryGetBinaryEncodingIdFromType(value.GetType(), out var id))
+                if (!_context.TypeLibrary.TryGetBinaryEncodingIdFromType(value.GetType(), out var binaryEncodingId))
                 {
                     throw new ServiceResultException(StatusCodes.BadEncodingError);
                 }
-                WriteNodeId(null, ExpandedNodeId.ToNodeId(id, _context.NamespaceUris));
+                WriteNodeId(null, ExpandedNodeId.ToNodeId(binaryEncodingId, _context.NamespaceUris));
                 value.Encode(this);
             }
             catch
