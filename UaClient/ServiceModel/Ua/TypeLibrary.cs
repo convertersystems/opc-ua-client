@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -33,13 +34,13 @@ namespace Workstation.ServiceModel.Ua
     /// </summary>
     public class TypeLibrary
     {
-        readonly Dictionary<Type, ExpandedNodeId> _binaryEncodingIdByType;
-        readonly Dictionary<ExpandedNodeId, Type> _typeByBinaryEncodingId;
+        readonly ConcurrentDictionary<Type, ExpandedNodeId> _binaryEncodingIdByType;
+        readonly ConcurrentDictionary<ExpandedNodeId, Type> _typeByBinaryEncodingId;
 
         public TypeLibrary()
         {
-            _binaryEncodingIdByType = new Dictionary<Type, ExpandedNodeId>(512);
-            _typeByBinaryEncodingId = new Dictionary<ExpandedNodeId, Type>(512);
+            _binaryEncodingIdByType = new ConcurrentDictionary<Type, ExpandedNodeId>(1,512);
+            _typeByBinaryEncodingId = new ConcurrentDictionary<ExpandedNodeId, Type>(1,512);
             foreach (var assembly in from assembly in AppDomain.CurrentDomain.GetAssemblies()
                                      where assembly.IsDefined(typeof(TypeLibraryAttribute), false)
                                      select assembly)
@@ -66,8 +67,8 @@ namespace Workstation.ServiceModel.Ua
                     {
                         if (!_binaryEncodingIdByType.ContainsKey(type) && !_typeByBinaryEncodingId.ContainsKey(attr.NodeId))
                         {
-                            _binaryEncodingIdByType.Add(type, attr.NodeId);
-                            _typeByBinaryEncodingId.Add(attr.NodeId, type);
+                            _binaryEncodingIdByType.TryAdd(type, attr.NodeId);
+                            _typeByBinaryEncodingId.TryAdd(attr.NodeId, type);
                         }
                     }
                 }
