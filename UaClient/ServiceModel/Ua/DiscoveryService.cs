@@ -12,7 +12,7 @@ namespace Workstation.ServiceModel.Ua
     /// <summary>
     /// A service for discovery of remote OPC UA servers and their endpoints.
     /// </summary>
-    public class DiscoveryService : ICommunicationObject , IDisposable
+    public class DiscoveryService : ICommunicationObject, IDisposable
     {
         private readonly ClientSecureChannel innerChannel;
         private readonly SemaphoreSlim semaphore;
@@ -123,9 +123,8 @@ namespace Workstation.ServiceModel.Ua
             finally
             {
                 await client.CloseAsync().ConfigureAwait(false);
-                
+                client.Dispose();
             }
-            client.Dispose();
         }
 
         /// <summary>

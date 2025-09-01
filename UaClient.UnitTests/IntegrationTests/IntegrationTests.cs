@@ -226,7 +226,7 @@ namespace Workstation.UaClient.IntegrationTests
 
             var rds = new List<ReferenceDescription>();
             var browseRequest = new BrowseRequest { NodesToBrowse = new[] { new BrowseDescription { NodeId = ExpandedNodeId.ToNodeId(ExpandedNodeId.Parse(ObjectIds.ObjectsFolder), channel.NamespaceUris), ReferenceTypeId = NodeId.Parse(ReferenceTypeIds.HierarchicalReferences), ResultMask = (uint)BrowseResultMask.TargetInfo, NodeClassMask = (uint)NodeClass.Unspecified, BrowseDirection = BrowseDirection.Forward, IncludeSubtypes = true } }, RequestedMaxReferencesPerNode = 1000 };
-            var browseResponse = await channel.BrowseAsync(browseRequest).ConfigureAwait(false);
+            var browseResponse = await channel.BrowseAsync(browseRequest).ConfigureAwait(true);
             rds.AddRange(browseResponse.Results.Where(result => result.References != null).SelectMany(result => result.References));
             var continuationPoints = browseResponse.Results.Select(br => br.ContinuationPoint).Where(cp => cp != null).ToArray();
             while (continuationPoints.Length > 0)
@@ -819,7 +819,7 @@ namespace Workstation.UaClient.IntegrationTests
                 RequestedLifetimeCount = 30 * 3,
                 PublishingEnabled = true,
             };
-            var subscriptionResponse = await channel1.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(false);
+            var subscriptionResponse = await channel1.CreateSubscriptionAsync(subscriptionRequest).ConfigureAwait(true);
             var id = subscriptionResponse.SubscriptionId;
 
             void onPublish(PublishResponse pr)

@@ -7,6 +7,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
+using Org.BouncyCastle.X509.Extension;
 using System;
 using System.Linq;
 using System.Threading;
@@ -137,12 +138,12 @@ namespace Workstation.UaClient
             cg.AddExtension(
                 X509Extensions.SubjectKeyIdentifier.Id,
                 false,
-                new SubjectKeyIdentifier(SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(kp.Public)));
+                X509ExtensionUtilities.CreateSubjectKeyIdentifier(kp.Public));
 
             cg.AddExtension(
                 X509Extensions.AuthorityKeyIdentifier.Id,
                 false,
-                new AuthorityKeyIdentifier(SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(kp.Public), new GeneralNames(new GeneralName(subjectDN)), subjectSN));
+                X509ExtensionUtilities.CreateAuthorityKeyIdentifier(kp.Public, new GeneralNames(new GeneralName(subjectDN)), subjectSN));
 
             cg.AddExtension(
                 X509Extensions.SubjectAlternativeName,
@@ -157,7 +158,7 @@ namespace Workstation.UaClient
             cg.AddExtension(
                 X509Extensions.ExtendedKeyUsage,
                 true,
-                new ExtendedKeyUsage(KeyPurposeID.IdKPClientAuth, KeyPurposeID.IdKPServerAuth));
+                new ExtendedKeyUsage(KeyPurposeID.id_kp_clientAuth, KeyPurposeID.id_kp_serverAuth));
 
             var crt = cg.Generate(new Asn1SignatureFactory("SHA256WITHRSA", key, _rng));
 

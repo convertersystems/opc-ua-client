@@ -181,7 +181,6 @@ namespace Workstation.ServiceModel.Ua.Channels
         {
             if(!disposed && disposing)
             {
-                UserIdentity = null;
                 _stateMachineCts?.Cancel();
                 _stateMachineTask?.Wait();
                 _stateMachineTask?.Dispose();
@@ -190,7 +189,6 @@ namespace Workstation.ServiceModel.Ua.Channels
                 _actionBlock?.Complete();
                 _actionBlock?.Completion.Wait();
                 _publishResponses?.Complete();
-                _actionBlock = null;
                 UserIdentity = null;
             }
 
@@ -805,7 +803,7 @@ namespace Workstation.ServiceModel.Ua.Channels
         /// <inheritdoc/>
         protected override async Task OnCloseAsync(CancellationToken token = default)
         {
-            await this.CloseSessionAsync(new CloseSessionRequest { DeleteSubscriptions = true }).ConfigureAwait(false);
+            await this.CloseSessionAsync(new CloseSessionRequest { DeleteSubscriptions = true }, token).ConfigureAwait(false);
             await Task.Delay(1000).ConfigureAwait(false);
             await base.OnCloseAsync(token).ConfigureAwait(false);
         }

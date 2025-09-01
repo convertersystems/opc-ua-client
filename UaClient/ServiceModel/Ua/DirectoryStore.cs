@@ -207,12 +207,12 @@ namespace Workstation.ServiceModel.Ua
             cg.AddExtension(
                 X509Extensions.SubjectKeyIdentifier.Id,
                 false,
-                new SubjectKeyIdentifier(SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(kp.Public)));
+                X509ExtensionUtilities.CreateSubjectKeyIdentifier(kp.Public));
 
             cg.AddExtension(
                 X509Extensions.AuthorityKeyIdentifier.Id,
                 false,
-                new AuthorityKeyIdentifier(SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(kp.Public), new GeneralNames(new GeneralName(subjectDN)), subjectSN));
+                X509ExtensionUtilities.CreateAuthorityKeyIdentifier(kp.Public, new GeneralNames(new GeneralName(subjectDN)), subjectSN));
 
             cg.AddExtension(
                 X509Extensions.SubjectAlternativeName,

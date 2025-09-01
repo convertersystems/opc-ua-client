@@ -33,10 +33,10 @@ namespace Workstation.ServiceModel.Ua.Channels
                 // The stream will own the client and takes care on disposing/closing it
                 return new UaClientConnection(client.GetStream(), uri);
             }
-            catch (Exception ex)
+            catch (Exception)
             { 
                 client.Dispose();
-                throw ex;
+                throw;
             }
         }
     }
